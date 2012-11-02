@@ -1,7 +1,5 @@
 <?php
 
-jimport( 'joomla.application.component.model' );
-
 /*
 	Class: ModelHelper
 		Helper for models
@@ -50,7 +48,7 @@ class ZlModelHelper extends AppHelper {
 		
 		// add model, if not exists
 		if (!isset($this->_models[$name])) {
-			$this->_models[$name] = JModel::getInstance($name, $prefix);
+			$this->_models[$name] = ZLModel::getInstance($name, $prefix);
 		}
 
 		return $this->_models[$name];
@@ -78,7 +76,7 @@ class ZlModelHelper extends AppHelper {
 		$class = $prefix.$name;
 		$this->app->loader->register($class, 'models:'.strtolower($name).'.php');
 
-		return JModel::getInstance($name, $prefix);
+		return ZLModel::getInstance($name, $prefix);
 	}
 	
 	/*

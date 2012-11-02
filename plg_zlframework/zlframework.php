@@ -15,8 +15,8 @@ jimport('joomla.filesystem.file');
 
 class plgSystemZlframework extends JPlugin {
 	
+	public $joomla;
 	public $app;
-	public $zoo;
 
 	/**
 	 * onAfterInitialise handler
@@ -43,88 +43,86 @@ class plgSystemZlframework extends JPlugin {
 		}
 		
 		// Get the Joomla and ZOO App instance
-		$this->app = JFactory::getApplication();
-		$this->zoo = App::getInstance('zoo');
+		$this->joomla = JFactory::getApplication();
+		$this->app = App::getInstance('zoo');
 		
 		// load default and current language
-		$this->zoo->system->language->load('plg_system_zlframework', JPATH_ADMINISTRATOR, 'en-GB', true);
-		$this->zoo->system->language->load('plg_system_zlframework', JPATH_ADMINISTRATOR, null, true);
+		$this->app->system->language->load('plg_system_zlframework', JPATH_ADMINISTRATOR, 'en-GB', true);
+		$this->app->system->language->load('plg_system_zlframework', JPATH_ADMINISTRATOR, null, true);
 		
 		// register plugin path
-		$plg_path = $this->zoo->joomla->isVersion('1.5') ? 'plugins/system/zlframework/' : 'plugins/system/zlframework/zlframework/';
-		if ( $path = $this->zoo->path->path( 'root:'.$plg_path ) ) {
-			$this->zoo->path->register($path, 'zlfw');
+		if ( $path = $this->app->path->path( 'root:plugins/system/zlframework/zlframework' ) ) {
+			$this->app->path->register($path, 'zlfw');
 		}
 		
 		// register elements fields
-		if ( $path = $this->zoo->path->path( 'zlfw:zlfield' ) ) {
-			$this->zoo->path->register($path, 'zlfield'); // used since ZLFW 2.5.8
-			$this->zoo->path->register($path.'/fields/elements', 'zlfields'); // temporal until all ZL Extensions adapted
-			$this->zoo->path->register($path.'/fields/elements', 'fields'); // necessary since ZOO 2.5.13
+		if ( $path = $this->app->path->path( 'zlfw:zlfield' ) ) {
+			$this->app->path->register($path, 'zlfield'); // used since ZLFW 2.5.8
+			$this->app->path->register($path.'/fields/elements', 'zlfields'); // temporal until all ZL Extensions adapted
+			$this->app->path->register($path.'/fields/elements', 'fields'); // necessary since ZOO 2.5.13
 		}
 		
 		// register elements - order is important!
-		if ( $path = $this->zoo->path->path( 'zlfw:elements' ) ) {
-			$this->zoo->path->register($path, 'elements'); // register elements path
+		if ( $path = $this->app->path->path( 'zlfw:elements' ) ) {
+			$this->app->path->register($path, 'elements'); // register elements path
 		
-			$this->zoo->loader->register('ElementPro', 'elements:pro/pro.php');
-			$this->zoo->loader->register('ElementRepeatablepro', 'elements:repeatablepro/repeatablepro.php');
-			$this->zoo->loader->register('ElementFilespro', 'elements:filespro/filespro.php');
+			$this->app->loader->register('ElementPro', 'elements:pro/pro.php');
+			$this->app->loader->register('ElementRepeatablepro', 'elements:repeatablepro/repeatablepro.php');
+			$this->app->loader->register('ElementFilespro', 'elements:filespro/filespro.php');
 		}
 
 		if ( $path = JPATH_ROOT.'/media/zoo/custom_elements' ) {
-			$this->zoo->path->register($path, 'elements'); // register custom elements path
+			$this->app->path->register($path, 'elements'); // register custom elements path
 		}
 		
 		// register helpers
-		if ( $path = $this->zoo->path->path( 'zlfw:helpers' ) ) {
-			$this->zoo->path->register($path, 'helpers');
-			$this->zoo->loader->register('ZlfwHelper', 'helpers:zlfwhelper.php');
-			$this->zoo->loader->register('ZLDependencyHelper', 'helpers:zldependency.php');
-			$this->zoo->loader->register('ZlStringHelper', 'helpers:zlstring.php');
-			$this->zoo->loader->register('ZlFilesystemHelper', 'helpers:zlfilesystem.php');
-			$this->zoo->loader->register('ZlPathHelper', 'helpers:zlpath.php');
-			$this->zoo->loader->register('ZlModelHelper', 'helpers:model.php');
-			$this->zoo->loader->register('ZLXmlHelper', 'helpers:zlxmlhelper.php');
+		if ( $path = $this->app->path->path( 'zlfw:helpers' ) ) {
+			$this->app->path->register($path, 'helpers');
+			$this->app->loader->register('ZlfwHelper', 'helpers:zlfwhelper.php');
+			$this->app->loader->register('ZLDependencyHelper', 'helpers:zldependency.php');
+			$this->app->loader->register('ZlStringHelper', 'helpers:zlstring.php');
+			$this->app->loader->register('ZlFilesystemHelper', 'helpers:zlfilesystem.php');
+			$this->app->loader->register('ZlPathHelper', 'helpers:zlpath.php');
+			$this->app->loader->register('ZlModelHelper', 'helpers:model.php');
+			$this->app->loader->register('ZLXmlHelper', 'helpers:zlxmlhelper.php');
 		}
 		
 		// check and perform installation tasks
 		if(!$this->checkInstallation()) return; // must go after language, elements path and helpers
 
-		// let know other plugins is all OK to load
+		// let's define the check was succesfull to speed up other plugins loading
 		define('ZLFW_DEPENDENCIES_CHECK_OK', true);
 
 		// register zlfield helper
-		if ($this->zoo->path->path('zlfield:')) $this->zoo->loader->register('ZlfieldHelper', 'zlfield:zlfield.php');
+		if ($this->app->path->path('zlfield:')) $this->app->loader->register('ZlfieldHelper', 'zlfield:zlfield.php');
 		
 		// register controllers
-		if ( $path = $this->zoo->path->path( 'zlfw:controllers' ) ) {
-			$this->zoo->path->register( $path, 'controllers' );
+		if ( $path = $this->app->path->path( 'zlfw:controllers' ) ) {
+			$this->app->path->register( $path, 'controllers' );
 		}
 
 		// register models
-		if ( $path = $this->zoo->path->path( 'zlfw:models' ) ) {
-			$this->zoo->path->register( $path, 'models' );
-			$this->zoo->loader->register('ZlQuery', 'models:query.php');
-			$this->zoo->loader->register('ZLModel', 'models:zl.php');
+		if ( $path = $this->app->path->path( 'zlfw:models' ) ) {
+			$this->app->path->register( $path, 'models' );
+			$this->app->loader->register('ZlQuery', 'models:query.php');
+			$this->app->loader->register('ZLModel', 'models:zl.php');
 		}
 		
 		// register events
-		$this->zoo->event->register('TypeEvent');
-		$this->zoo->event->dispatcher->connect('type:coreconfig', array($this, 'coreConfig'));
-		$this->zoo->event->dispatcher->connect('application:sefparseroute', array($this, 'sefParseRoute'));
+		$this->app->event->register('TypeEvent');
+		$this->app->event->dispatcher->connect('type:coreconfig', array($this, 'coreConfig'));
+		$this->app->event->dispatcher->connect('application:sefparseroute', array($this, 'sefParseRoute'));
 		
 		// perform admin tasks
-		if ($this->app->isAdmin()) {
-			$this->zoo->document->addStylesheet('zlfw:assets/css/zl_ui.css');
+		if ($this->joomla->isAdmin()) {
+			$this->app->document->addStylesheet('zlfw:assets/css/zl_ui.css');
 		}
 
 		// init ZOOmailing if installed
-		$plg_path = $this->zoo->joomla->isVersion('1.5') ? 'plugins/acymailing/zoomailing/' : 'plugins/acymailing/zoomailing/zoomailing/';
-		if ( $path = $this->zoo->path->path( 'root:'.$plg_path ) ) {
+		if ( $path = $this->app->path->path( 'root:plugins/acymailing/zoomailing/zoomailing' ) ) {
 			
 			// register path and include
-			$this->zoo->path->register($path, 'zoomailing');
+			$this->app->path->register($path, 'zoomailing');
 			require_once($path.'/init.php');
 		}		
 	}
@@ -144,12 +142,12 @@ class plgSystemZlframework extends JPlugin {
 	 */
 	public function checkInstallation()
 	{
-		if($this->app->isAdmin())
+		if($this->joomla->isAdmin())
 		{
-			$option = $this->zoo->request->getVar('option');
-			if($option == 'com_zoo' || $option == 'com_plugins'){ // limit the check
-				// checks if ZOO and ZL Extensions are up to date
-				if(!$this->zoo->zldependency->check("zlfw:dependencies.config")){
+			// checks if ZOO and ZL Extensions are up to date only on ZOO and Plugin views
+			$option = $this->app->request->getVar('option');
+			if($option == 'com_zoo' || $option == 'com_plugins'){
+				if(!$this->app->zldependency->check("zlfw:dependencies.config")){
 					return;
 				}
 			}
@@ -158,13 +156,12 @@ class plgSystemZlframework extends JPlugin {
 		return true;
 	}
 
-	public function sefParseRoute($event) {
-
-		$zoo = App::getInstance('zoo');
-		$groups = $zoo->application->groups();
+	public function sefParseRoute($event)
+	{
+		$groups = $this->app->application->groups();
 		
 		foreach($groups as $group => $app) {
-			if($router = $zoo->path->path("applications:$group/router.php")){
+			if($router = $this->app->path->path("applications:$group/router.php")){
 				require_once $router;
 				$class = 'ZLRouter'.ucfirst($group);
 				$routerClass = new $class;

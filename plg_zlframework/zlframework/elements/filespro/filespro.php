@@ -188,8 +188,10 @@ abstract class ElementFilesPro extends ElementRepeatablePro {
 		}
 		else 
 		{
+			
 			// get source or use default
-			$source = $source ? $source : $this->config->find('files._default_source', $this->config->find('files._default_file', ''));
+			$source = $source ? $source : $this->getDefaultSource();
+	
 			if(!empty($source))
 			{
 				$sourcepath = $this->app->path->path("root:$source");
@@ -209,6 +211,30 @@ abstract class ElementFilesPro extends ElementRepeatablePro {
 		}
 		
 		return $files;
+	}
+
+	/*
+		Function: getDefaultSource
+			Retrieve default source if source
+			is not present in item edit
+
+		Returns:
+			String - Path to file(s)
+	*/
+	protected function getDefaultSource() {
+
+		$default_source = $this->config->find('files._default_source', $this->config->find('files._default_file', ''));
+
+		// Replace any path variables
+		$pattern = array(
+			'/\[authorname\]/'
+		);
+		$replace = array(
+			$user = JFactory::getUser($this->getItem()->created_by)->username,$this->getItem()->name
+		);
+		
+		return preg_replace($pattern, $replace, $default_source); 
+
 	}
 
 /* -------------------------------------------------------------------------------------------------------------------------------------------------------- EDIT */

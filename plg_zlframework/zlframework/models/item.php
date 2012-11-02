@@ -80,7 +80,7 @@ class ZLModelItem extends ZLModel
         // custom order
         if ($this->getState('order_by') && isset($this->orderby))
         {
-            $query->order($this->_db->getEscaped( $this->orderby ));
+            $query->order( $this->orderby );
         }
     }
 
@@ -171,18 +171,11 @@ class ZLModelItem extends ZLModel
         $query->where('(' . implode(' OR ', $where) . ')');
     }
 
-    /*
-        Function: _getItemOrder
-            Returns ORDER query from an array of item order options
-
-        E
-    */
     /**
-     * _getItemOrder
+     * _getItemOrder - Returns ORDER query from an array of item order options
      *
-     * @param array $order Array of order params. Ex. follows
-     *
-     * array(0 => '_itemcreated', 1 => '_reversed', 2 => '_random')
+     * @param array $order Array of order params
+     * Example:array(0 => '_itemcreated', 1 => '_reversed', 2 => '_random')
      */
     protected function _getItemOrder($order)
     {

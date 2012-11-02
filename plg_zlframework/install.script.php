@@ -55,12 +55,15 @@ class plgSystemZlframeworkInstallerScript
 	{
 		// init vars
 		$db = JFactory::getDBO();
-		
-		// check dependencies if not uninstalling
-		if($type != 'uninstall' && !$this->checkRequirements($parent)){
-			Jerror::raiseWarning(null, $this->_error);
-			return false;
-		}
+
+		// load ZLFW sys language file EXAMPLE
+		// JFactory::getLanguage()->load('plg_system_zlframework.sys', JPATH_ADMINISTRATOR, 'en-GB', true);
+
+		// check dependencies if not uninstalling EXAMPLE
+		// if($type != 'uninstall' && !$this->checkRequirements($parent)){
+		// 	Jerror::raiseWarning(null, $this->_error);
+		// 	return false;
+		// }
 	}
 
 	/**
@@ -106,12 +109,12 @@ class plgSystemZlframeworkInstallerScript
 		// init vars
 		$release = $parent->get( "manifest" )->version;
 
-		if($type == 'install'){
-			echo JText::sprintf('ZL_EXTENSIONS_SYS_INSTALL', $this->_ext_name, $release);
+		if(strtolower($type) == 'install'){
+			echo JText::sprintf('PLG_ZLFRAMEWORK_SYS_INSTALL', $this->_ext_name, $release);
 		}
 
-		if($type == 'update'){
-			echo JText::sprintf('ZL_EXTENSIONS_SYS_UPDATE', $this->_ext_name, $release);
+		if(strtolower($type) == 'update'){
+			echo JText::sprintf('PLG_ZLFRAMEWORK_SYS_UPDATE', $this->_ext_name, $release);
 		}
 
 		// remove obsolete
@@ -152,38 +155,31 @@ class plgSystemZlframeworkInstallerScript
 
 	/**
 	 * check extensions requirements
-	 * @version 1.7
 	 *
 	 * @return  boolean  True on success
 	 */
-	protected function checkRequirements($parent)
+	protected function checkRequirementsEXAMPLE($parent)
 	{
-		// get joomla release
-		$joomla_release = new JVersion();
-		$joomla_release = $joomla_release->getShortVersion();
-
-		// manifest file minimum joomla version
-		$min_joomla_release = $parent->get( "manifest" )->attributes()->version;
-
 		/*
-		 * abort if the current Joomla! release is older
+		 * make sure Akeeba Subscription exist, is enabled
 		 */
-		if( version_compare( (string)$joomla_release, (string)$min_joomla_release, '<' ) ) {
-			$this->_error = JText::sprintf('ZL_EXTENSIONS_SYS_EXTENSION_OUTDATED', $this->_ext_name, 'Joomla!', $joomla_release, $min_joomla_release);
+		if (!JFile::exists(JPATH_ADMINISTRATOR.'/components/com_akeebasubs/aaa_akeebasubs.xml')
+			|| !JComponentHelper::getComponent('com_akeebasubs', true)->enabled) {
+			$this->_error = "ZOOaksubs relies on <a href=\"https://www.akeebabackup.com\" target=\"_blank\">Akeeba Subscriptions</a>, be sure is installed and enabled before retrying the installation.";
 			return false;
 		}
 
-		/*
-		 * make sure ZOO is up to date
-		 */
-		$zoo_manifest = simplexml_load_file(JPATH_ADMINISTRATOR.'/components/com_zoo/zoo.xml');
-		$min_zoo_release = $parent->get( "manifest" )->attributes()->zooversion;
+		// and up to date
+		$akeeba_manifest = simplexml_load_file(JPATH_ADMINISTRATOR.'/components/com_akeebasubs/aaa_akeebasubs.xml');
+		$min_release = 2;
 
-		if( version_compare((string)$zoo_manifest->version, (string)$min_zoo_release, '<') ) {
-			$this->_error = JText::sprintf('ZL_EXTENSIONS_SYS_EXTENSION_OUTDATED', $this->_ext_name, 'ZOO', $zoo_manifest->version, $min_zoo_release);
+		if( version_compare((string)$akeeba_manifest->version, (string)$min_release, '<') ) {
+			$this->_error = "Akeeba Subscription v{$min_release} or higher required, please update it and retry the installation.";
+
 			return false;
 		}
 
 		return true;
 	}
+
 }

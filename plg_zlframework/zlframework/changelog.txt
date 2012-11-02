@@ -1,7 +1,14 @@
 Changelog
 ------------
 
-3.0 (not released)
+3.0.2 (not released)
+ ^ ZL Field improvements
+
+3.0.1
+ ^ ZL Field minor bugs fixed
+ ^ Joomla 3 JModel compatibility
+
+3.0
  ^ ZOO & Joomla 3 compatibility
  ^ ZL Field improvements
  + Improved backend and frontend perfomance

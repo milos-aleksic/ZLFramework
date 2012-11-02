@@ -39,10 +39,8 @@ class ZlframeworkController extends AppController {
 		$type	 				= $this->app->request->get('type', 'string', '');
 		$element_id	 			= $this->app->request->get('element_id', 'string', '');
 		$element_type 			= $this->app->request->get('element_type', 'string', '');
-		$parent_task 			= $this->app->request->get('parent_task', 'string', '');
+		$enviroment 			= $this->app->request->get('enviroment', 'string', '');
 		$node 					= $this->app->request->get('node', 'array', '');
-
-		$isAssignment 			= $parent_task == 'assignelements' || $parent_task == 'assignsubmission';
 		$params					= $this->app->data->create(array());
 
 		// create application object

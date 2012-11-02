@@ -11,7 +11,18 @@ defined('_JEXEC') or die('Restricted access');
 
 jimport( 'joomla.application.component.model' );
 
-class ZLModel extends JModel
+/**
+ *  j3.0 workaround
+ */
+if(!class_exists('ZLWorksAroundJoomlaToGetAModel')) {
+    if(interface_exists('JModel')) {
+        abstract class ZLWorksAroundJoomlaToGetAModel extends JModelLegacy {}
+    } else {
+        class ZLWorksAroundJoomlaToGetAModel extends JModel {}
+    }
+}
+
+class ZLModel extends ZLWorksAroundJoomlaToGetAModel
 {
 	protected $app = null;
 	

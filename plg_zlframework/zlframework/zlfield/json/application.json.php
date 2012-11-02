@@ -89,7 +89,6 @@ defined('_JEXEC') or die('Restricted access');
 						"type":"types",
 						"label":"'.$params->find('types.label').'",
 						"help":"'.$params->find('types.help').'",
-						"help":"PLG_ZLFRAMEWORK_APP_TYPES_DESC",
 						"specific":{
 							'.($params->find('types.multi') ? '"multi":"1",' : '').'
 							"value_map":{

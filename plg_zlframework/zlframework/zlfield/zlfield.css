@@ -42,11 +42,20 @@ div.zlfield > img {
  --- Parameters fields ----------------------------------------------------------------------------------- */
 
 /* module specific */
-ul.adminformlist div.zlfield.zlfield-main {
+ul.adminformlist li.zlfield-module > label {
+    display: none
+}
+
+ul.adminformlist li.zlfield-module .zlfield-main div.row.layout-default .zl-label {
+    width: 135px
+}
+
+ul.adminformlist li.zlfield-module .zlfield-main {
     padding: 10px 17px 30px;
     margin: 10px 5px 0;
     border: 1px solid #CCCCCC;
     border-radius: 3px;
+    min-width: 0;
 }
 
 /* elements specific */

@@ -664,6 +664,31 @@ class ZlfieldHelper extends AppHelper {
 		return preg_replace($pattern, $replace, $string);
 	}
 
+	/**
+	 * getTheEnviroment
+	 *
+	 * @return @string item-edit, type-config, type-position
+	 *
+	 * @since 3.0
+	 */
+	public function getTheEnviroment()
+	{
+		switch ($this->req->getVar('task')) {
+			case 'editelements':
+				return 'type-edit';
+				break;
+
+			case 'assignelements':
+			case 'assignsubmission':
+				return 'type-position';
+				break;
+
+			case 'edit':
+				return 'item-edit';
+				break;
+		}
+	}
+
 	/*
 		Function: loadAssets - Load the necesary assets
 	*/

@@ -25,7 +25,6 @@
 				return true;
 			});
 
-
 			$(document).ready(function()
 			{
 				// set element actions when added to a type
@@ -60,6 +59,14 @@
 			    $('.col-left ul.ui-sortable > li.element').each(function(){
 			        $(this).parent().trigger('sortstop', { item: $(this) });
 			    });
+
+			    // call the actions on the Item Edit Form
+ 				$('.item-edit .creation-form .zlfield-main').each(function(){
+			        $this.actions($(this));
+			    });
+
+				// init modules
+				$this.initModules();
 			});
 		},
 
@@ -68,6 +75,21 @@
 		 */
 		initZLfield: function($element) {
 			$element.parent().trigger('sortstop', { item: $element, insist: true });
+		},
+
+		/* 
+		 * initModules - init ZL Field on Modules
+		 */
+		initModules: function() {
+			var $this = this;
+
+			$('form#module-form ul.adminformlist .zlfield-main').each(function(){
+				// add Class for specific styling
+				$(this).parent('li').addClass('zlfield-module');
+
+				// call actions
+	        	$this.actions($(this));
+			})
 		},
 
 		/* 
@@ -398,7 +420,7 @@
 							json_path: $zlfield.json_path,
 							element_id: $zlfield.element_id,
 							element_type: $zlfield.element_type,
-							parent_task: $zlfield.parent_task,
+							enviroment: $zlfield.enviroment,
 							node: $zlfield.node
 						},
 						success : function(data) {
