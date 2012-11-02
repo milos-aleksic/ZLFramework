@@ -1,0 +1,42 @@
+<field name="application" type="zlfield" label="PLG_ZLFRAMEWORK_ITEMS" addctrl="application" toggle="starthidden">
+	<loadfield type="application">
+		<apps label="PLG_ZLFRAMEWORK_APPS" help="PLG_ZLFRAMEWORK_APP_APPS_DESC" multi="true" />
+		<types label="PLG_ZLFRAMEWORK_TYPES" help="PLG_ZLFRAMEWORK_APP_TYPES_DESC" multi="true" />
+		<itemorder enabled="true" />
+	</loadfield>
+</field>
+<field name="layout" type="zlfield" label="Layout" addctrl="layout" toggle="true/starthidden">
+	<setfield id="_renderer_layout" type="layout" label="Renderer Layout" help="DESC">
+		<specific path="modules:mod_zooitempro/renderer/item" regex="^([^_][_A-Za-z0-9]*)\.php$" />
+	</setfield>
+	<loadfield type="layout" >
+		<layout label="PLG_ZLFRAMEWORK_MAIN_LAYOUT" help="PLG_ZLFRAMEWORK_MAIN_LAYOUT_DESC" path="modules:mod_zooitempro/tmpl/render" />
+	</loadfield>
+</field>
+<field name="general" type="zlfield" label="General" toggle="starthidden">
+	<setfield id="media_position" type="select" label="Media Position">
+		<specific>
+			<options>
+				<option value="left">Left</option>
+				<option value="right">Right</option>
+			</options>
+		</specific>
+	</setfield>
+	<setfield id="_logic" type="radio" label="PLG_ZOOFILTER_LOGIC" help="PLG_ZOOFILTER_LOGIC_DESC" default="AND">
+		<specific>
+			<options>
+				<option value="AND">PLG_ZLFRAMEWORK_AND</option>
+				<option value="OR">PLG_ZLFRAMEWORK_OR</option>
+			</options>
+		</specific>
+	</setfield>
+	<setfield id="moduleclass_sfx" type="text" label="Module Class Suffix" />
+</field>
+<field name="media_position" type="zldummy" />
+
+
+<param name="specific" type="zlfield" label="Specific" addctrl="specific">
+	<loadfield type="loadjson">
+		<load path="elements:textpro/params/config.php" />
+	</loadfield>
+</param>

@@ -1,0 +1,195 @@
+/* Copyright (C) JOOlanders SL http://www.gnu.org/licenses/gpl-2.0.html GNU/GPLv2 only */
+
+
+/* Common
+----------------------------------------------------------------------------------------------------*/
+.zlux-loader-horiz {
+    background: url(img/loader-horiz.gif) no-repeat scroll 0 0 transparent;
+    width: 60px;
+    height: 6px;
+    display: inline-block;
+}
+
+.zlux-loader {
+    background: url(img/loader.gif) no-repeat scroll 0 0 transparent;
+    width: 16px;
+    height: 16px;
+    display: inline-block;
+}
+
+.zlux-loader-raw {
+    background-image: url(img/loader.gif) !important;
+}
+
+.zlux-loader-horiz-raw {
+    background-image: url(img/loader-horiz.gif) !important;
+}
+
+/* ZL Bootstrap
+----------------------------------------------------------------------------------------------------*/
+div.zl-bootstrap .btn:focus {
+    outline: 0;
+}
+div.zl-bootstrap .btn i {
+    margin-right: 6px;
+}
+div.zl-bootstrap .btn .caret {
+    margin-left: 6px;
+}
+
+body .zl-bootstrap .btn-working i {
+    background: url(img/loader-btn.gif) no-repeat scroll 0 0 transparent;
+}
+
+
+/* ZLUX Dialog
+----------------------------------------------------------------------------------------------------*/
+.ui-dialog.zlux-dialog {
+  border: 1px solid #999;
+  border: 1px solid rgba(0, 0, 0, 0.3);
+  overflow: hidden;
+  *border: 1px solid #999;
+  -webkit-border-radius: 6px;
+     -moz-border-radius: 6px;
+          border-radius: 6px;
+  -webkit-box-shadow: 0 3px 7px rgba(0, 0, 0, 0.3);
+     -moz-box-shadow: 0 3px 7px rgba(0, 0, 0, 0.3);
+          box-shadow: 0 3px 7px rgba(0, 0, 0, 0.3);
+  -webkit-background-clip: padding-box;
+     -moz-background-clip: padding-box;
+          background-clip: padding-box;
+}
+
+.ui-dialog.zlux-dialog .ui-dialog-titlebar {
+    background: none;
+    border: none;
+    padding: 9px 15px;
+    border-bottom: 1px solid #eee;
+    margin-bottom: 0.2em;
+}
+
+.ui-dialog.zlux-dialog .ui-dialog-titlebar .ui-dialog-title {
+    font-size: 24px;
+    margin: 0;
+    line-height: 30px;
+}
+
+.ui-dialog.zlux-dialog .ui-dialog-content {
+    padding: 0;
+}
+
+.ui-dialog.zlux-dialog .ui-dialog-content .zlux-loader-horiz {
+    margin: 50px auto 0;
+    display: block;
+}
+
+
+/* ZLUX Finder
+----------------------------------------------------------------------------------------------------*/
+.zlux-finder {
+    overflow: auto;
+
+    // dialog integration
+    .ui-dialog-content {
+        max-height: 200px;
+        overflow: auto;
+
+        ul.items {
+
+            font-size: 11px;
+            margin: 0;
+            padding: 0;
+        
+            li.item {
+                line-height: 18px;
+                list-style: none outside none;
+                margin: 0;
+                padding: 0 0 0 20px;
+                white-space: nowrap;
+
+                .selected > .btns a {
+                    background-color: #EDEDED;
+                    color: #21759B;
+                    font-weight: bold;
+                }
+            }
+            a {
+                border: 1px solid transparent;
+                border-radius: 3px;
+                color: #333333;
+                display: block;
+                padding: 0 0 0 2px;
+                text-decoration: none;
+                text-align: left;
+            }
+            li.item a:hover,
+            .btns:hover a,
+            .selected a:hover {
+                background-color: #DDDDDD;
+            }
+            
+
+
+            li.item .btns {
+                position: relative;
+                background-color: white;
+            }
+            li.item .btns:hover > span.tools { 
+                visibility: visible 
+            }
+            .action > a {
+                border: 1px dotted silver;
+            }
+            span.tools {
+                position: absolute;
+                right: 4px;
+                top: 2px;
+                visibility: hidden;
+            }
+
+            /* icons */
+            li.item {
+                background: url(../bootstrap/img/glyphicons-halflings.png) no-repeat scroll -1000px -1000px transparent;
+
+                &.app {
+                    background-position: 0 0;
+                }
+
+                &.type.open {
+                    background-position: 0 0;
+                }
+
+                &.type {
+                    background-position: 0 0;
+                }
+
+                &.folder {
+                    background-position: -383px -118px;
+                }
+
+                &.folder.open {
+                    background-position: -382px -118px;
+                }
+
+                &.file {
+                    background-position: -23px -21px;
+                }
+
+                &.loading {
+                    background-position: 0 0;
+                }
+            }
+        }
+    }
+
+    // preview
+    .file-preview {
+        padding: 10px;
+        text-align: center;
+
+        img {
+            width: 403px;
+            float: none;
+        }
+    }
+}

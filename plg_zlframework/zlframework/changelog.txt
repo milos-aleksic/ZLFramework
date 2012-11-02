@@ -1,0 +1,127 @@
+Changelog
+------------
+
+3.0 (not released)
+ ^ ZOO & Joomla 3 compatibility
+ ^ ZL Field improvements
+ + Improved backend and frontend perfomance
+ + Element Params Ajax interface
+ - Removed j1.5 compatibility
+
+2.6.6
+ + Temporal Bootstrap Library
+ ^ SEF functions improvements
+
+2.6.5
+ ^ ZL Field new features and improvements
+ # Fixed warning if FilesPro Elements default file were missing
+ ^ Files Pro Default File change to Default Source, allowing folders
+
+2.6.4
+ # ZL Field Config fix on Submissions
+
+2.6.3
+ # Model offset/startlimit fix for ZOOfilter issue pagination and others 
+
+2.6.2
+ + Repeatable Elements Instance limit option
+ # Static Content Access field recovered
+
+2.6.1
+ # Widgetkit Layouts Separate By feature fixed
+
+2.6
+ # Static Content qTip layout recovered
+
+2.5.12
+ # Static Content element name fix
+
+2.5.11
+ + Element Separator custom By option
+ ^ jquery.tinymce.js updated
+ # Submission spotlight show/hide button fixed
+
+2.5.10
+ ^ Separator By will no longer bi filtered
+ # Type Editing bug because of missing qTip field
+
+2.5.9
+ ^ WidgetKit 1.1 Slideshow layout adaption
+
+2.5.8
+ # WidgetKit Lightbox Params load fixed
+ + Model Helper
+ ^ Dependency Helper improved
+ ^ ZL Params improved, renamed to ZLField
+
+2.5.7
+ # Fixed Edit Type issue
+
+2.5.6
+ + Files Pro: new path variables
+ + ZL Params: State Feature
+ ^ ZL Params: perfomance improved
+ + ZL Params: Select Extend feature
+ + Added None option to Separator Field
+ ^ WK Layouts updated to v1.0.5
+ ^ qTip library updated
+
+2.5.5
+ + zlpath helper: resources function
+ # ZL Params itemLayoutList getPath issue fixed
+ # FilesPro: files from folders offset/limit issues fixed
+ ^ Plupload updated to 1.5.4
+ + WidgetKit Lightbox options updated
+
+2.5.4
+ # FilesPro manager delete feature fixed
+ # FilesPro advanced submission layout fixed
+ # FilesPro dynamic folder creation fixed
+
+2.5.3
+ + FilesPro external files support
+ ^ FilesPro AWS S3 Integration update
+ ^ FilesPro backend perfomance improved
+ + Sublayouts can accept custom params
+ ^ Plupload updated to 1.5.2
+
+2.5.2
+ # Dependency notice moved to backend only
+ # Fix for version check
+
+2.5.1
+ # qTip Button fixed when Empty Title
+ # Static Content Item/iFrame options fixed
+ ^ RepeatablePro retrieve rendered data perfomance improved
+ ^ ZOO 2.5.13 compatibility
+
+2.5  RC1 - Stable
+ + String Helper
+ + Work on new features for Static Content
+ ^ WK Gallery templates updated for WK 1.0 Stable
+ + Static Content iFrame option
+ # ZL Application field issue from 2.4 upgrade
+ + Default file Feature for FilesPro Elements family
+ # Separator class improvements
+ ^ qTip ajax rendering improvements
+ + Hidden Input on ZLParams
+ + Work on ZL Params enhancements
+ # Several minor issues 
+ + More options on Static Content
+ # Issue with WK 1.0
+ + qTip Trigger by Item Name
+ + ZLHelper Get Apps Objects
+ # ZLApplication not saving on first config
+ # Application layout Elements Constraint
+ # Issue with Class Element not being registred
+
+2.5 RC1
+ Initial Release
+
+* -> Security Fix
+# -> Bug Fix
+$ -> Language fix or change
++ -> Addition
+^ -> Change
+- -> Removed
+! -> Note

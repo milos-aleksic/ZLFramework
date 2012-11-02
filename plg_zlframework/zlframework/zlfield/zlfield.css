@@ -1,0 +1,435 @@
+/* Copyright (C) ZOOlanders.com - http://www.gnu.org/licenses/gpl-2.0.html GNU/GPLv2 only */
+
+/*
+ --- Parameters fields ----------------------------------------------------------------------------------- */
+
+div.zlfield div, div.zlfield span, 
+div.zlfield form, div.zlfield fieldset, div.zlfield legend, div.zlfield label, div.zlfield textarea, div.zlfield input, div.zlfield select
+{
+ margin: 0;
+ padding: 0;
+ font-size: 12px;
+ line-height: 14px;
+
+}
+
+div.zlfield textarea, div.zlfield input, div.zlfield select {
+ font: 10px Arial,Helvetica,sans-serif
+}
+
+div.zlfield > table
+{
+ border-collapse: collapse;
+ border-spacing: 0;
+}
+
+div.zlfield > th, div.zlfield > td
+{
+ text-align: left;
+ vertical-align: top;
+}
+
+div.zlfield > th, div.zlfield > td, div.zlfield > caption {
+ font-weight:normal;
+}
+
+div.zlfield > img { 
+ border: 0;
+}
+
+
+/*
+ --- Parameters fields ----------------------------------------------------------------------------------- */
+
+/* module specific */
+ul.adminformlist div.zlfield.zlfield-main {
+    padding: 10px 17px 30px;
+    margin: 10px 5px 0;
+    border: 1px solid #CCCCCC;
+    border-radius: 3px;
+}
+
+/* elements specific */
+ul.parameter-form li.parameter:first-child div.label { /* a workaround for basic fields effect */
+    border-bottom: none;
+}
+ul.parameter-form li.parameter .zlinfo span {
+    float: right;
+    font-weight: bold;
+}
+
+ul.parameter-form li.parameter div.zlfield div.section-title {
+    padding-left: 19px;
+}
+ul.parameter-form li.parameter div.zlfield div.row {
+    padding-left: 23px;
+}
+
+
+/* base */
+div.zlfield.zlfield-main {
+    padding-top: 10px;
+    min-width: 500px;
+    min-height: 30px;
+}
+div.zlfield div.row {
+    overflow: hidden;
+}
+div.zlfield {
+    margin-bottom: 10px;
+    overflow: hidden;
+}
+
+div.zlfield ul {
+    padding-left: 10px
+}
+div.zlfield label {
+    margin: 0 12px 0 0;
+}
+
+
+/* qtip */
+.ui-tooltip-zlparam {
+    border: 2px solid #D2D2D2 !important;
+    border-radius: 3px;
+}
+.ui-tooltip-zlparam .default-value {
+    text-align: right;
+    margin-top: 25px;
+}
+.ui-tooltip-zlparam .ui-tooltip-content {
+    padding: 12px 13px 8px;
+}
+
+
+/* titles */
+div.zlfield .section-title,
+div.zlfield .bigsection-title {
+    clear: none;
+    color: #666666;
+    display: block;
+    font-weight: lighter;
+    margin: 8px 0 6px;
+    text-align: left;
+    text-indent: 10px;
+}
+div.zlfield .bigsection-title {
+    font-size: 12px;
+    font-weight: bold;
+    margin: 18px 0 15px;
+    text-indent: 0;
+    border-bottom: 1px solid #ccc;
+}
+
+
+/* select tool */
+div.zlfield .zl-select-expand {
+    margin-top: 4px;
+}
+
+
+/*
+ --- Load ZL Field ----------------------------------------------------------------------------------- */
+ div.zlfield div.load-field-btn {
+    text-align: right;
+    color: #999;
+    margin-bottom: 5px;
+}
+div.zlfield div.load-field-btn {
+    text-align: center;
+    border-radius: 7px;
+    cursor: pointer;
+}
+div.zlfield div.load-field-btn span {
+    color: #666666;
+    font-size: 15px;
+    display: inline-block;
+    padding-bottom: 5px;
+
+    background: url(../assets/images/edit.png) no-repeat scroll 24px 4px transparent;
+    line-height: 21px;
+    padding: 2px 26px;
+    text-indent: 17px;
+}
+div.zlfield div.load-field-btn:hover {
+    background-color: #F3F3F3;
+}
+
+/* ZLUX Integration */
+div.zlfield div.load-field-btn span.zlux-loader-raw {
+    background-position: 19px 5px;
+}
+
+
+/*
+ --- Toggle ----------------------------------------------------------------------------------- */
+div.zlfield div.zltoggle-btn {
+    text-align: right;
+    color: #999;
+    margin-bottom: 5px;
+}
+
+/* tg-open */
+div.zlfield div.zltoggle-btn div.tg-open {
+    text-align: center;
+    border-radius: 7px;
+    cursor: pointer;
+}
+div.zlfield div.zltoggle-btn div.tg-open span {
+    color: #666666;
+    font-size: 15px;
+    display: inline-block;
+    padding-bottom: 5px;
+
+    background: url(../assets/images/edit.png) no-repeat scroll 24px 4px transparent;
+    line-height: 21px;
+    padding: 2px 26px;
+    text-indent: 17px;
+
+}
+div.zlfield div.zltoggle-btn div.tg-open:hover {
+    background-color: #F3F3F3;
+}
+div.zlfield div.zltoggle-btn.open div.tg-open {
+    display: none;
+}
+
+/* tg-close */
+div.zlfield div.zltoggle-btn span.tg-close {
+    cursor: pointer;
+    display: none;
+}
+div.zlfield div.zltoggle-btn.open span.tg-close {
+    display: block;
+}
+
+
+/*
+ --- Wrappers ----------------------------------------------------------------------------------- */
+
+div.zlfield div.wrapper {
+    min-height: 30px;
+    overflow: hidden;
+}
+
+/* fieldset wrapper */
+div.zlfield fieldset.wrapper {
+    min-height: 30px;
+    margin: 10px 5px 0;
+    padding: 17px;
+}
+div.zlfield fieldset.wrapper div.section-title,
+div.zlfield fieldset.wrapper div.row {
+    padding-left: 0 !important; 
+}
+
+div.zlfield fieldset.wrapper > .layout-separator:first-child,
+div.zlfield fieldset.wrapper > .bigsection-title:first-child {
+    margin-top: 0;
+}
+
+/*
+ --- Item Edit view ----------------------------------------------------------------------------------- */
+
+.creation-form .zl-field input,
+.creation-form .zl-field label,
+.creation-form .zl-field textarea,
+.creation-form .zl-field select,
+.creation-form .zl-field button {
+    float: left;
+    width: auto;
+}
+
+.creation-form div.zlfield .zl-label {
+    margin-left: 0;
+    width: 192px;
+}
+
+
+
+/*
+ --- Default row layout ----------------------------------------------------------------------------------- */
+
+ /* row */
+div.zlfield div.row.layout-default,
+div.zlfield div.row.layout-default:first-child {
+    padding-bottom: 10px;
+}
+
+div.zlfield div.row.layout-default[data-type="hidden"] {
+    display: none
+}
+
+div.zlfield div.row.layout-default[data-type="info"] .zl-field {
+    float: none;
+}
+div.zlfield div.row.layout-default[data-type="info"] .zl-label + .zl-field {
+    float: left;
+}
+div.zlfield div.row.layout-default .zl-field .info {
+    font-size: 90%;
+    padding: 4px 3px 3px;
+    margin: 0 auto;
+    /*width: 170px;*/
+    text-align: center;
+    width: 100%;
+}
+
+div.zlfield div.row.layout-default[data-type="radio"] .zl-field,
+div.zlfield div.row.layout-default[data-type="checkbox"] .zl-field { 
+    padding: 3px 
+}
+div.zlfield div.row.layout-default .zl-loader {
+    margin: 3px 0 0 7px
+}
+
+
+/* field
+-------------------------------------------------*/
+div.zlfield div.row.layout-default .zl-field { 
+    float: left;
+}
+div.zlfield div.row.layout-default .zl-field span.content { 
+    
+}
+div.zlfield div.row.layout-default input {
+    margin: 0;
+}
+div.zlfield div.row.layout-default input[type="text"],
+div.zlfield div.row.layout-default input[type="password"],
+div.zlfield div.row.layout-default select,
+div.zlfield div.row.layout-default textarea {
+    border: 1px solid #D2D2D2;
+    border-radius: 4px;
+    margin: 0;
+    padding: 3px;
+    min-width: 0;
+    width: 159px;
+}
+div.zlfield div.row.layout-default textarea,
+div.zlfield div.row.layout-default input[type="text"],
+div.zlfield div.row.layout-default input[type="password"] {
+    /*width: 159px;*/
+    /*padding: 3px 7px;*/
+}
+div.zlfield div.row.layout-default select{
+    padding-left: 1px;
+    width: 167px;
+}
+    div.zlfield select option {
+     padding: 0 4px;
+    }
+div.zlfield div.row.layout-default textarea {
+    min-height: 60px;
+}
+div.zlfield div.row.layout-default textarea{
+    width: 159px;
+    max-width: 159px;
+    min-width: 159px
+}
+div.zlfield div.row.layout-default input[type="checkbox"],
+div.zlfield div.row.layout-default input[type="radio"] {
+    margin-right: 4px;
+}
+
+/* state */
+div.zlfield div.row.layout-default .zl-state {
+    float: left;
+    padding: 2px 0;
+}
+
+/* label
+-------------------------------------------------*/
+div.zlfield div.row.layout-default .zl-label span.active {
+    padding-right: 4px;
+    position: relative;
+    top: -1px;
+    visibility: hidden;
+}
+div.zlfield div.row.layout-default:hover .zl-label span.active {
+    visibility: visible;
+}
+div.zlfield div.row.layout-default .zl-label span.text {
+    vertical-align: middle;
+    padding-top: 1px;
+}
+
+div.zlfield div.row.layout-default .zl-label {
+    border-bottom: 1px dotted transparent;
+    
+    color: #666666;
+    float: left;
+    font-weight: bold;
+    margin: 0 18px;
+    width: 180px;
+    padding: 3px;
+}
+div.zlfield div.row.layout-default .zl-disabled .zl-label {
+     color: #999
+}
+
+/* when state make no margin */
+div.zlfield div.row.layout-default .zl-state + .zl-label {
+    margin-left: 0;
+}
+/* when no help make bigger margin */
+div.zlfield div.row.layout-default .zl-label + .zl-field {
+    margin-left: 24px;
+}
+div.zlfield div.row.layout-default .zl-label + .zl-field * {
+    clear: none;
+    float: left;
+    min-width: 0;
+}
+
+/* help
+-------------------------------------------------*/
+div.zlfield div.row.layout-default .zl-help {
+    float: right;
+}
+
+/* qTip trigger */
+div.zlfield div.row.layout-default .qTipHelp {
+    cursor: help;
+    display: inline-block;
+    padding: 5px 9px 0;
+    visibility: hidden;
+}
+div.zlfield div.row.layout-default:hover .qTipHelp {
+    visibility: visible;
+}
+
+
+div.zlfield div.row.layout-default .qtip-content {
+    display: none
+}
+
+
+
+/*
+ --- Separator row layout ----------------------------------------------------------------------------------- */
+
+/* row */
+div.zlfield div.row.layout-separator {
+    border-bottom: 1px solid #CCCCCC;
+    margin: 18px 0 15px;
+}
+
+/* label */
+div.zlfield div.row.layout-separator .zl-label {
+    color: #666666;
+    font-weight: bold;
+    text-align: left;
+    text-indent: 0;
+}
+
+/* field */
+div.zlfield div.row.layout-separator .zl-field {
+    float: right;
+}
+    /*checkbox*/
+    div.zlfield div.row.layout-separator[data-type="checkbox"] .zl-field input {
+        float: right;
+        margin: 0 1px 1px 3px;
+    }
+    

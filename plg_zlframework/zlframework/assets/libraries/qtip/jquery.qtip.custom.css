@@ -1,0 +1,37 @@
+
+/* qTip Custom styles
+-------------------------------------------------------------------------------------------- */
+.qtip-loader {
+	background: url(../../images/loader-site.gif) no-repeat scroll 0 0 transparent;
+	width: 24px;
+	height: 24px;
+	margin: 0 auto;
+}
+
+/*
+.ui-tooltip-custom .ui-tooltip-titlebar
+.ui-tooltip-custom .ui-tooltip-content{
+}
+*/
+
+.ui-tooltip-custom .ui-tooltip-content{
+	height: 100%;
+}
+
+.ui-tooltip-custom.ui-tooltip-modal {
+	max-width: 800px;
+	max-height: none;
+}
+
+.ui-tooltip-custom.fixed-width {
+	max-width: none;
+}
+
+.ui-tooltip.qtip.ui-tooltip-custom.qtip-loading {
+	width: auto !important;
+	height: auto !important;
+	min-width: 0 !important;
+}
+
+/* iframe fix */
+.ui-tooltip-iframe  iframe.qtip-iframe { border: 0 none }

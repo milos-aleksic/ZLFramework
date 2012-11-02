@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<element type="file" group="Core" hidden="true">
+	<name>Files Pro</name>
+	<author>ZOOlanders</author>
+	<creationDate>August 2011</creationDate>
+	<copyright>Copyright (C) JOOlanders, SL</copyright>
+	<authorEmail>info@zoolanders.com</authorEmail>
+	<authorUrl>http://www.zoolanders.com</authorUrl>
+	<version>2.5.0</version>
+	<description>File Pro Core System</description>
+	<params>
+	</params>
+</element>

@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<extension type="plugin" group="system" method="upgrade" version="2.5.6" zooversion="2.6.4">
+	<name>ZL Framework</name>
+	<author>ZOOlanders</author>
+	<creationDate>December 2011</creationDate>
+	<copyright>Copyright (C) 2011 JOOlanders, SL</copyright>
+	<license>http://www.gnu.org/licenses/gpl-2.0.html GNU/GPLv2 only</license>
+	<authorEmail>info@zoolanders.com</authorEmail>
+	<authorUrl>http://www.zoolanders.com</authorUrl>
+	<version>3.0</version>
+	<description>PLG_ZLFRAMEWORK_SYS_DESCRIPTION</description>
+	<scriptfile>install.script.php</scriptfile>
+	<files>
+		<filename plugin="zlframework">zlframework.php</filename>
+		<filename>install.script.php</filename>
+		<filename>index.html</filename>
+		<folder>zlframework</folder>		
+	</files>
+	<languages folder="language">
+		<language tag="en-GB">en-GB/en-GB.plg_system_zlframework.ini</language>
+		<language tag="en-GB">en-GB/en-GB.plg_system_zlframework.sys.ini</language>
+    </languages>
+</extension>

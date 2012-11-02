@@ -1,0 +1,100 @@
+
+/* SubRepeatable Elements */
+
+
+/* Buttons */
+div.repeat-elements-pro span.btn-delete,
+div.repeat-elements-pro span.btn-sort,
+div.repeat-elements-pro span.btn-open {
+    display: inline-block;
+    height: 16px;
+    width: 16px;
+	cursor: pointer;
+	margin: 0 3px;
+}
+div.repeat-elements-pro span.btn-delete { background: url(../images/delete.png) no-repeat scroll 0 0 transparent }
+div.repeat-elements-pro span.btn-sort { background: url(../images/sort.png) no-repeat scroll 0 0 transparent; cursor: move }
+div.repeat-elements-pro span.btn-open { background: url(../images/plus.png) no-repeat scroll 0 0 transparent }
+div.repeat-elements-pro span.btn-open.opened { background: url(../images/minus.png) no-repeat scroll 0 0 transparent }
+
+
+div.repeat-elements-pro div.add { margin: 8px 0 0 0; overflow: hidden }
+div.repeat-elements-pro div.add.main { margin-top: 16px }
+div.repeat-elements-pro div.add span.zl-loader { margin: 4px 7px 0 }
+
+/**/
+
+
+div.repeat-elements-pro li.repeatable-element {
+	display: inline-block;
+	margin-bottom: 5px;
+}
+
+div.repeat-elements-pro li.repeatable-element { padding: 0 } /* Fix Joomla! extra padding */
+
+div.repeat-elements-pro ul.sub-repeatable-list {
+    list-style-type: none;
+    margin: 0;
+    overflow: hidden;
+    position: relative;
+	min-width: 366px;
+}
+
+div.repeat-elements-pro li.sub-repeatable-element {
+    margin-bottom: 6px;
+    min-height: 20px;
+    overflow: hidden;
+}
+
+div.repeat-elements-pro li.repeatable-element.sub.dragging { border: 1px dashed; width: 394px !important; border-radius: 4px;}
+div.repeat-elements-pro li.repeatable-element.sub.ghost { overflow: visible; margin: 0; }
+div.sub-repeat-elements { margin: 10px 0 }
+
+
+/* resume */
+div.repeat-elements-pro .resume-row {
+	background-color: #E6E6E6;
+    background-repeat: no-repeat;
+	background-image: -webkit-gradient(linear, 0 0, 0 100%, from(#ffffff), color-stop(25%, #ffffff), to(#e6e6e6));
+	background-image: -webkit-linear-gradient(#ffffff, #ffffff 25%, #e6e6e6);
+	background-image: -moz-linear-gradient(center top, #FFFFFF, #FFFFFF 25%, #E6E6E6);
+	background-image: -ms-linear-gradient(#ffffff, #ffffff 25%, #e6e6e6);
+	background-image: -o-linear-gradient(#ffffff, #ffffff 25%, #e6e6e6);
+	background-image: linear-gradient(#ffffff, #ffffff 25%, #e6e6e6);
+    border-radius: 4px;
+    border: 1px solid silver;
+    color: #333333;
+    display: inline-block;
+    font-size: 13px;
+    line-height: normal;
+    position: relative;
+}
+div.repeat-elements-pro .resume-row:hover {
+    background-position: 0 -3px;
+}
+div.repeat-elements-pro .resume-row { width: 414px }
+div.repeat-elements-pro .sub-repeat-elements .resume-row {
+	width: 395px;
+	background-image: none;
+	background-color: #F7F7F7;
+}
+div.repeat-elements-pro .sub-repeat-elements .resume-row:hover {
+	background-color: #F3F3F3;
+}
+
+div.repeat-elements-pro .resume-row span.tools{
+	visibility: hidden;
+    position: absolute;
+    right: 7px;
+    top: 5px;
+}
+div.repeat-elements-pro li.repeatable-element:hover .resume-row.main span.tools,
+div.repeat-elements-pro li.repeatable-element.sub:hover span.tools {visibility: visible}
+
+/* content */
+
+div.repeat-elements-pro .content-row {
+	display: none; padding: 10px;
+}
+
+

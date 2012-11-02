@@ -1,0 +1,306 @@
+/* Copyright (C) JOOlanders SL http://www.gnu.org/licenses/gpl-2.0.html GNU/GPLv2 only */
+
+/* Common
+----------------------------------------------------------------------------------------------------*/
+.zl-loader{
+    background: url(../images/loader.gif) no-repeat scroll 0 0 transparent;
+    width: 16px;
+    height: 16px;
+    display: inline-block;
+}
+
+.zl-loaderhoriz {
+    background: url(../images/loader-horiz.gif) no-repeat scroll 0 0 transparent;
+    width: 60px;
+    height: 6px;
+    display: inline-block;
+}
+
+.zl-hidden { display: none }
+
+/* Add min width to edit area */
+.creation-form { min-width: 622px }
+
+/* Fix */
+.creation-form  .zl div.repeatable-content {
+    float: left;
+}
+
+/* Plugins
+----------------------------------------------------------------------------------------------------*/
+
+/* limiterBox */
+#limiterBox{
+    font-size: 10px;
+    margin: 1px 3px;
+}
+
+/* Buttons
+----------------------------------------------------------------------------------------------------*/
+
+/* small buttons */
+.zl-btn-small {
+    display: inline-block;
+    width: 16px;
+    height: 17px;
+    margin: 0 3px;
+    cursor: pointer;
+}
+
+    .zl-btn-small.app { background: url(../images/application.png) no-repeat scroll 0 0 transparent }
+    .zl-btn-small.type { background: url(../images/folder.png) no-repeat scroll 0 0 transparent }
+    .zl-btn-small.plupload { background: url(../images/up.png) no-repeat scroll 0 0 transparent }
+    .zl-btn-small.add { background: url(../images/add.png) no-repeat scroll 0 0 transparent }
+    .zl-btn-small.delete { background: url(../images/delete.png) no-repeat scroll 0 0 transparent }
+    .zl-btn-small.edit { background: url(../images/page_white_edit.png) no-repeat scroll 0 0 transparent }
+    .zl-btn-small.sort { background: url(../images/sort.png) no-repeat scroll 0 0 transparent }
+    .zl-btn-small.refresh { background: url(../images/refresh.png) no-repeat scroll 0 0 transparent }
+
+    /* interaction */
+    .zl-btn-small.action:hover {
+        background-position: 0 1px;
+        cursor: pointer;
+    }
+    .zl-btn-small.sort.action:hover {
+        cursor: move;
+    }
+
+    /* new */
+    .zl-btn-small.zl-btn-app { background: url(../images/application.png) no-repeat scroll 0 0 transparent }
+    .zl-btn-small.zl-btn-type { background: url(../images/folder.png) no-repeat scroll 0 0 transparent }
+    .zl-btn-small.zl-btn-plupload { background: url(../images/up.png) no-repeat scroll 0 0 transparent }
+    .zl-btn-small.zl-btn-add { background: url(../images/add.png) no-repeat scroll 0 0 transparent }
+    .zl-btn-small.zl-btn-delete { background: url(../images/delete.png) no-repeat scroll 0 0 transparent }
+    .zl-btn-small.zl-btn-edit { background: url(../images/page_white_edit.png) no-repeat scroll 0 0 transparent }
+    .zl-btn-small.zl-btn-sort { background: url(../images/sort.png) no-repeat scroll 0 0 transparent }
+    .zl-btn-small.zl-btn-refresh { background: url(../images/refresh.png) no-repeat scroll 0 0 transparent }
+    .zl-btn-small.zl-btn-expand { background: url(../images/expand.png) no-repeat scroll 0 0 transparent }
+
+/* big buttons */
+.zl-btn-help{
+    background: url(../images/help.png) no-repeat scroll 0 0 transparent;
+    width: 16px;
+    height: 16px;
+    position: absolute;
+    right: 0;
+    top: 6px;
+    cursor: pointer;
+}
+.zl-label .qtip-content{display: none;}
+
+/* Add button */
+div.repeat-elements.zl p.add {
+    margin: 0;
+}
+.creation-form .element .zl-btn {
+    background: url(../images/plus.png) no-repeat scroll 5px 50% transparent;
+    border: 1px solid #CCCCCC;
+    color: #000000;
+    cursor: pointer;
+    display: inline-block;
+    font-size: 11px;
+    line-height: 21px;
+    padding: 1px 8px 1px 7px;
+    text-indent: 21px;
+    border-radius: 4px;
+    width: auto;
+    height: auto
+}
+.creation-form .element .zl-btn:hover {
+    background-color: #F3F3F3;
+    text-decoration: none;
+}
+
+/* Options buttons padding fix */
+.creation-form .element .zl .more-options .trigger > div {
+    padding: 2px 7px;
+}
+
+/* Input Cancel button */
+.zl span.input-cancel,
+.creation-form span.input-cancel {
+    background: url(../images/cancel.png) no-repeat scroll 0 0 transparent;
+    cursor: pointer;
+    display: inline-block;
+    height: 10px;
+    margin: 0 13px 0 -21px;
+    vertical-align: middle;
+    width: 10px;
+}
+
+/* ZL Dialog */
+span.zl-btn-dialog {
+    background: url("../images/page_white.png") no-repeat scroll 5px 0 transparent;
+    cursor: pointer;
+    display: inline-block;
+    height: 16px;
+    vertical-align: middle;
+    width: 20px;
+}
+
+/* disabled effect */
+.creation-form .element .zl-btn.disabled {
+    background-color: #F4F4F4;
+    cursor: default;
+    opacity: 0.7;
+}
+
+/* Element Edit Tools
+----------------------------------------------------------------------------------------------------*/
+.creation-form .element span.load,
+.creation-form .element span.resize {
+    display: inline-block;
+    height: 20px;
+    margin-top: 5px;
+    width: 20px;
+    vertical-align: top;
+}
+
+.creation-form .element span.load {
+    background: url(../images/edit.png) no-repeat scroll 5px 4px transparent;
+    cursor: pointer;
+    width: 21px;
+}
+
+.creation-form .element span.resize {
+    background: url(../images/resize.png) no-repeat scroll 5px 4px transparent;
+    cursor: pointer;
+    margin-left: 2px;
+    width: 18px;
+}
+
+
+/* Open Dialog
+----------------------------------------------------------------------------------------------------*/
+.creation-form span.files {
+    background: url(../images/page_white.png) no-repeat scroll 5px 0 transparent;
+}
+.creation-form span.files{
+    cursor: pointer;
+    display: inline-block;
+    height: 16px;
+    vertical-align: middle;
+    width: 20px;
+}
+
+
+/* Finder Pro
+----------------------------------------------------------------------------------------------------*/
+.finderpro {
+    max-height: 300px;
+    overflow: auto;
+}
+.finderpro ul {
+    font-size: 11px;
+    margin: 0;
+    padding: 0;
+}
+.finderpro ul li {
+    line-height: 18px;
+    list-style: none outside none;
+    margin: 0;
+    padding: 0 0 0 20px;
+    white-space: nowrap;
+}
+.finderpro ul a {
+    border: 1px solid transparent;
+    border-radius: 3px;
+    color: #333333;
+    display: block;
+    padding: 0 0 0 2px;
+    text-decoration: none;
+    text-align: left;
+}
+.finderpro ul li a:hover,
+.finderpro ul div.btns:hover a,
+.finderpro ul .selected > a:hover {
+    background: none repeat scroll 0 0 #DDDDDD;
+}
+.finderpro ul .selected > a {
+    background: none repeat scroll 0 0 #EDEDED;
+    color: #21759B;
+    font-weight: bold;
+}
+
+.finderpro ul li.app {background: url(../images/application.png) no-repeat scroll 0 0 transparent}
+
+.finderpro ul li.type.open {background: url(../images/folder_open.png) no-repeat scroll 0 0 transparent}
+.finderpro ul li.type {background: url(../images/folder.png) no-repeat scroll 0 0 transparent}
+
+.finderpro ul li.folder {background: url(../images/folder.png) no-repeat scroll 0 0 transparent;}
+.finderpro ul li.folder.open {background: url(../images/folder_open.png) no-repeat scroll 0 0 transparent;}
+
+.finderpro ul li.file {background: url(../images/page_white.png) no-repeat scroll 0 0 transparent;}
+
+.finderpro ul li.loading {background: url(../images/loader.gif) no-repeat scroll 0 0 transparent !important;}
+
+
+/* Elements
+----------------------------------------------------------------------------------------------------*/
+
+/* Date Pro Element */
+.creation-form .element-datepro img.zoo-calendar{
+    cursor: pointer;
+    float: none;
+    margin: 0
+}
+
+/* Item Improve Element */
+#toolbar-box.topbar {
+    height: 40px;
+    left: 0;
+    overflow: visible;
+    position: fixed;
+    right: 0;
+    top: 0;
+    z-index: 10000;
+    
+    padding: 0 !important;
+}
+
+#toolbar-box.topbar .m{
+    border: none;
+    border-bottom: 1px solid #CCCCCC;
+    border-radius: 0;
+}
+
+/* Price Element */
+.creation-form .element-price div.row > input {font-size: 15px}
+
+/* Rows */
+.creation-form .element div.row50 {
+    float: left;
+    margin-right: 6px;
+}
+.creation-form .element div.row50 > input,
+.creation-form .element div.row50 > select {
+    width: 197px;
+    margin: 0;
+}
+
+
+/* Submission
+----------------------------------------------------------------------------------------------------*/
+.creation-form .element .zl .more-options .trigger .link.button:before,
+.creation-form .element .zl .more-options .trigger .lightbox.button:before,
+.creation-form .element .zl .more-options .trigger .spotlight.button:before,
+.creation-form .element .zl .more-options .trigger .file.button:before,
+.creation-form .element .zl .more-options .trigger .url.button:before {
+    content: "|";
+    display: inline-block;
+    margin: 0 5px;
+}
+
+.creation-form .element .zl .more-options.show-spotlight .options.spotlight {
+    display: block;
+}
+
+
+/* ZL Dialog
+----------------------------------------------------------------------------------------------------*/
+.ui-dialog.zldialog .ui-dialog-content {
+    padding: 0;
+}
+.ui-dialog.zldialog .ui-dialog-titlebar {
+    margin-bottom: 0.2em;
+}

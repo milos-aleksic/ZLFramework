@@ -1,0 +1,19 @@
+/* Copyright (C) JOOlanders SL http://www.gnu.org/licenses/gpl-2.0.html GNU/GPLv2 only */
+
+/* Common
+----------------------------------------------------------------------------------------------------*/
+.zl-loader{
+    background: url(../images/loader.gif) no-repeat scroll 0 0 transparent;
+    width: 16px;
+    height: 16px;
+    display: inline-block;
+}
+
+.zl-loaderhoriz {
+    background: url(../images/loader-horiz.gif) no-repeat scroll 0 0 transparent;
+    width: 60px;
+    height: 6px;
+    display: inline-block;
+}
+
+.zl-hidden { display: none }

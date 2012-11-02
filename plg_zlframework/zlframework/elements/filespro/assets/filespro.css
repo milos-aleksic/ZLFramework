@@ -1,0 +1,213 @@
+/* Copyright (C) ZOOlanders.com - http://www.gnu.org/licenses/gpl-2.0.html GNU/GPLv2 only */
+
+/*
+ * FilesPro
+ */
+
+.finderpro ul li div.btns {
+	position: relative;
+}
+.finderpro ul li div.btns:hover > span.tools { 
+	visibility: visible 
+}
+.finderpro ul .action > a {
+	border: 1px dotted silver;
+}
+.ui-dialog span.tools {
+    position: absolute;
+    right: 4px;
+    top: 2px;
+	visibility: hidden;
+}
+
+
+/* root-folder */
+.ui-dialog .root-folder.tools {
+	cursor: default;
+    right: 37.5px;
+    top: 6px;
+    visibility: visible;
+}
+
+/* qTip */
+.ui-tooltip-filespro .ui-tooltip-content button{
+	float: left;
+    margin: 11px 3px 3px;
+}
+.ui-tooltip-filespro .ui-tooltip-content p{
+	margin: 3px 0 9px;
+    text-align: center;
+}
+.ui-tooltip-filespro button,
+.ui-tooltip-filespro input{
+	border-radius: 3px
+}
+.ui-tooltip-filespro input{
+	margin: 0 23px;
+    text-align: center;
+    width: 155px;
+}
+.ui-tooltip-filespro{
+	min-width: 225px;
+	max-width: 225px;
+}
+.ui-tooltip-filespro .ui-tooltip-content {
+	padding: 7px 10px;
+}
+
+/* plupload */
+.ui-tooltip-filespro.plupload{
+	min-width: 500px;
+	max-width: 500px;
+	max-height: 250px;
+}
+.ui-tooltip-filespro .plupload_scroll,
+.ui-tooltip-filespro .plupload_droptext {
+	max-height: 99px;
+    min-height: 99px;
+}
+.ui-tooltip-filespro.plupload td.plupload_droptext {
+	line-height: 95px;
+}
+.ui-tooltip-filespro.plupload .ui-widget-content {
+	border: none
+}
+.ui-tooltip-filespro.plupload .ui-tooltip-content {
+	padding: 2px;
+
+}
+.ui-tooltip-filespro .plupload_buttons{
+	margin-bottom: 10px
+}
+	.ui-tooltip-filespro .plupload_button {
+		border-radius: 4px;
+	}
+	.ui-tooltip-filespro .ui-widget {
+		font-size: 10px;
+	}
+	.ui-tooltip-filespro .ui-button-text {
+		padding-left: 2.5em
+	}
+}
+
+/*
+ * Files Pro
+ */
+
+.creation-form .filespro.single .repeatable-content { margin-bottom: 15px;}
+
+.creation-form .filespro p.add,
+.creation-form .filespro p.upload {
+	display: inline
+}
+
+.creation-form .filespro div.row > input.file {
+    padding-right: 30px;
+	width: 378px;
+}
+
+/*@ details*/
+.creation-form div.file-details{ overflow: hidden; margin-top: 13px; }
+.creation-form div.file-details div.file-preview {
+    overflow: hidden;
+	height: 95px;
+    width: 130px;
+	float: left;
+	text-align: center;
+}
+
+.creation-form .element-imagepro div.file-details div.file-preview.file img {border: 1px solid silver;}
+.creation-form  div.file-details div.file-preview img {
+    max-height: 90%;
+    max-width: 90%;
+	float: none;
+	margin: 0	
+}
+.creation-form  div.element-imagepro div.file-details div.file-preview img {margin: 7px 0 0 0}
+
+.creation-form div.file-details div span{ margin-left: 6px }
+.creation-form div.file-details div.file-name { margin: 2px 0 20px !important; font-style: italic;}
+.creation-form div.file-details div.file-name span{ margin: 0 }
+
+.creation-form div.fp-missing {
+    font-size: 12px;
+    font-weight: bold;
+    margin-bottom: 10px;
+    padding: 3px;
+    text-align: center;
+	display: none;
+}
+
+.creation-form .filespro .file-type {
+	background: url(images/file_type_standard.png) no-repeat scroll 0 0 transparent;
+	display: inline-block;
+	font-size: 15px;
+	height: 91px;
+	width: 81px;
+	line-height: 111px;
+	/*padding-right: 35px;*/
+	margin: 0;
+	text-align: left;
+	text-indent: 13px;
+	color: white;
+}
+   
+
+/* .creation-form div.file-details div.file-preview:hover{
+	cursor:pointer;
+} */
+
+.creation-form div.file-details div.file-info {
+	margin: 16px 0 0 10px;
+	float: left;
+}
+
+.creation-form div.file-details div.file-info div {
+    margin: 3px 0;
+	width: 224px
+}
+.creation-form div.file-details div.file-info span {
+	font-weight: normal;
+}
+
+/* horizontal ajax */
+.creation-form div.file-details .zl-loaderhoriz {
+	display: block-inline;
+	width: 60px;
+	height: 9px;
+	background: url(../../../assets/images/loader-horiz.gif) 0 0 no-repeat;
+}
+
+/* Files extension previews */
+.creation-form .filespro-type {
+	display: block;
+	background: url(../../elements/downloadpro/assets/images/download_type_default.png) 27px 0 no-repeat;
+}
+
+.creation-form .filespro-type-zip { background-image: url(../../downloadpro/assets/images/download_type_zip.png); }
+.creation-form .filespro-type-tar { background-image: url(../../downloadpro/assets/images/download_type_tar.png); }
+.creation-form .filespro-type-rar { background-image: url(../../downloadpro/assets/images/download_type_rar.png); }
+.creation-form .filespro-type-bz2 { background-image: url(../../downloadpro/assets/images/download_type_bz2.png); }
+.creation-form .filespro-type-gz { background-image: url(../../downloadpro/assets/images/download_type_gz.png); }
+.creation-form .filespro-type-targz { background-image: url(../../downloadpro/assets/images/download_type_tgz.png); }
+.creation-form .filespro-type-doc { background-image: url(../../downloadpro/assets/images/download_type_doc.png); }
+.creation-form .filespro-type-jp2,
+.creation-form .filespro-type-jpg,
+.creation-form .filespro-type-jpe,
+.creation-form .filespro-type-jpeg { background-image: url(../../downloadpro/assets/images/download_type_jpeg.png); }
+.creation-form .filespro-type-mov { background-image: url(../../downloadpro/assets/images/download_type_mov.png); }
+.creation-form .filespro-type-mp3 { background-image: url(../../downloadpro/assets/images/download_type_mp3.png); }
+.creation-form .filespro-type-mp2,
+.creation-form .filespro-type-mpe,
+.creation-form .filespro-type-mpeg,
+.creation-form .filespro-type-mpg { background-image: url(../../downloadpro/assets/images/download_type_mpeg.png); }
+.creation-form .filespro-type-pdf { background-image: url(../../downloadpro/assets/images/download_type_pdf.png); }
+.creation-form .filespro-type-png { background-image: url(../../downloadpro/assets/images/download_type_png.png); }
+.creation-form .filespro-type-ppt { background-image: url(../../downloadpro/assets/images/download_type_ppt.png); }
+.creation-form .filespro-type-psd { background-image: url(../../downloadpro/assets/images/download_type_psd.png); }
+.creation-form .filespro-type-rtf { background-image: url(../../downloadpro/assets/images/download_type_rtf.png); }
+.creation-form .filespro-type-tif,
+.creation-form .filespro-type-tiff { background-image: url(../../downloadpro/assets/images/download_type_tiff.png); }
+.creation-form .filespro-type-wav { background-image: url(../../downloadpro/assets/images/download_type_wav.png); }
+.creation-form .filespro-type-wmv { background-image: url(../../downloadpro/assets/images/download_type_wmv.png); }
+.creation-form .filespro-type-xls { background-image: url(../../downloadpro/assets/images/download_type_xls.png); }

@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<element type="staticcontent" group="Core" hidden="true">
+	<name>Static Content</name>
+	<author>ZOOlanders</author>
+	<creationDate>Juny 2011</creationDate>
+	<copyright>Copyright (C) JOOlanders, SL</copyright>
+	<authorEmail>info@zoolanders.com</authorEmail>
+	<authorUrl>http://www.zoolanders.com</authorUrl>
+	<license>http://www.gnu.org/licenses/gpl-2.0.html GNU/GPLv2 only</license>
+	<version>2.5</version>
+	<description>Static Content defined on each position</description>
+	<params>
+		<param name="basic" type="zlfield">
+			<setfield id="name" type="hidden">
+				<specific value="Static Content" />
+			</setfield>
+			<loadfield type="access">
+				<access label="Access Level" help="DETAILACCESS" />
+			</loadfield>
+		</param>
+	</params>
+	<params group="render">
+		<param name="layout" type="zlfield" label="Layout" addctrl="layout" toggle="true">
+			<loadfield type="layout">
+				<layout label="PLG_ZLFRAMEWORK_MAIN_LAYOUT" help="PLG_ZLFRAMEWORK_MAIN_LAYOUT_DESC" path="elements:staticcontent/tmpl/render" default="default.php">
+					<options>
+						<option value="qtip.php">qTip</option>
+					</options>
+				</layout>
+			</loadfield>
+		</param>
+		<param name="separator" type="zlfield" label="Separator" addctrl="separator" toggle="starthidden">
+			<loadfield type="separator" />
+		</param>
+	</params>
+</element>
