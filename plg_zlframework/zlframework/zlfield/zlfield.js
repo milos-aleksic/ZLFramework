@@ -6,18 +6,18 @@
  * http://www.gnu.org/licenses/gpl-2.0.html GNU/GPLv2 only
  * ========================================================== */
 (function ($) {
-    var Plugin = function(){};
-    Plugin.prototype = $.extend(Plugin.prototype, {
-        name: 'ZLfield',
-        options: {
-        	url: '',
+	var Plugin = function(){};
+	Plugin.prototype = $.extend(Plugin.prototype, {
+		name: 'ZLfield',
+		options: {
+			url: '',
 			type: ''
-        },
-        initialize: function(body, options) {
-            this.options = $.extend({}, this.options, options);
-            var $this = this;
+		},
+		initialize: function(body, options) {
+			this.options = $.extend({}, this.options, options);
+			var $this = this;
 
-            // on save/apply no initialized inputs are removed
+			// on save/apply no initialized inputs are removed
 			$('#toolbar-apply, #toolbar-save').click(function(){
 				$('.zlfield input').each(function(){
 					$(this).val() || $(this).remove();
@@ -34,7 +34,7 @@
 				});
 
 				// set element actions on sorting or added to a position
-				$('.col-left ul.ui-sortable').on('sortstop', function(event, ui)
+				$('ul.ui-sortable').on('sortstop', function(event, ui)
 				{
 					// Placeholders - Control name must be updated dinamically on each reorder or assignment
 					var b = RegExp(/(elements\[[a-z0-9_-]+\])|(positions\[[a-z0-9_-]+\]\[[0-9]+\])/);
@@ -55,40 +55,34 @@
 					$this.actions(ui.item);
 				});
 
-				// trigger manually on first page load the actions trough the order event
-			    $('.col-left ul.ui-sortable > li.element').each(function(){
-			        $(this).parent().trigger('sortstop', { item: $(this) });
-			    });
-
-			    // call the actions on the Item Edit Form
- 				$('.item-edit .creation-form .zlfield-main').each(function(){
-			        $this.actions($(this));
-			    });
-
-				// init modules
-				$this.initModules();
+				// init actions
+				$this.initActions();
 			});
-		},
-
-		/* 
-		 * initZLfield - init ZL Field actions on specific element
-		 */
-		initZLfield: function($element) {
-			$element.parent().trigger('sortstop', { item: $element, insist: true });
 		},
 
 		/* 
 		 * initModules - init ZL Field on Modules
 		 */
-		initModules: function() {
+		initActions: function() {
 			var $this = this;
 
+			// init on Position view
+			$('.col-left ul.ui-sortable > li.element').each(function(){
+				$(this).parent().trigger('sortstop', { item: $(this) });
+			});
+
+			// init on Item Edit view
+			$('.item-edit .creation-form .zlfield-main').each(function(){
+				$this.actions($(this));
+			});
+
+			// init on Module view
 			$('form#module-form ul.adminformlist .zlfield-main').each(function(){
 				// add Class for specific styling
 				$(this).parent('li').addClass('zlfield-module');
 
 				// call actions
-	        	$this.actions($(this));
+				$this.actions($(this));
 			})
 		},
 
@@ -400,14 +394,14 @@
 				 * Load Field
 				 */
 				$dom.find('.load-field-btn').on('click', function(event){
-	            	event.preventDefault();
+					event.preventDefault();
 
-	            	var $button = $(this),
-	            		$wrapper = $button.parent('.zlfield-main'),
-	            		$zlfield = $wrapper.data('ajaxargs');
+					var $button = $(this),
+						$wrapper = $button.parent('.zlfield-main'),
+						$zlfield = $wrapper.data('ajaxargs');
 
-	            	// add loading indicator
-	            	$button.find('span').addClass('zlux-loader-raw');
+					// add loading indicator
+					$button.find('span').addClass('zlux-loader-raw');
 
 					$.ajax({
 						url : $this.options.url,
@@ -438,28 +432,28 @@
 							});
 						}
 					});
-	            }); // Load Field
+				}); // Load Field
 
 			$dom.data('zlfield-actions-init', !0)}
 		}
 	});
-	/* Copyright (C) YOOtheme GmbH http://www.gnu.org/licenses/gpl-2.0.html GNU/GPLv2 only */
-    $.fn[Plugin.prototype.name] = function() {
-        var args   = arguments;
-        var method = args[0] ? args[0] : null;
-        return this.each(function() {
-            var element = $(this);
-            if (Plugin.prototype[method] && element.data(Plugin.prototype.name) && method != 'initialize') {
-                element.data(Plugin.prototype.name)[method].apply(element.data(Plugin.prototype.name), Array.prototype.slice.call(args, 1));
-            } else if (!method || $.isPlainObject(method)) {
-                var plugin = new Plugin();
-                if (Plugin.prototype['initialize']) {
-                    plugin.initialize.apply(plugin, $.merge([element], args));
-                }
-                element.data(Plugin.prototype.name, plugin);
-            } else {
-                $.error('Method ' +  method + ' does not exist on jQuery.' + Plugin.name);
-            }
-        });
-    };
+	// Don't touch
+	$.fn[Plugin.prototype.name] = function() {
+		var args   = arguments;
+		var method = args[0] ? args[0] : null;
+		return this.each(function() {
+			var element = $(this);
+			if (Plugin.prototype[method] && element.data(Plugin.prototype.name) && method != 'initialize') {
+				element.data(Plugin.prototype.name)[method].apply(element.data(Plugin.prototype.name), Array.prototype.slice.call(args, 1));
+			} else if (!method || $.isPlainObject(method)) {
+				var plugin = new Plugin();
+				if (Plugin.prototype['initialize']) {
+					plugin.initialize.apply(plugin, $.merge([element], args));
+				}
+				element.data(Plugin.prototype.name, plugin);
+			} else {
+				$.error('Method ' +  method + ' does not exist on jQuery.' + Plugin.name);
+			}
+		});
+	};
 })(jQuery);
