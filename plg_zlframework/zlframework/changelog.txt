@@ -4,6 +4,7 @@ Changelog
 3.0.3
  # Fixed Plupload issue with Bootstrap & Joomla 3
  # Fixed ZL Field Actions on Submission Assignment
+ # ZL Field layout.json Default value fixed & code cleaned
 
 3.0.2
  ^ ZL Field improvements

@@ -9,13 +9,13 @@
 	<version>2.5.0</version>
 	<description>Repeatable Pro Core System</description>
 	<params>
-		<param name="@info" type="zlinfo" label="Basic" />
+		<param name="@info" type="zlinfo" />
 		<param name="name" type="hidden" />
 		<param name="description" type="hidden" />
 		<param name="access" type="hidden" />
 		<param name="repeatable" type="hidden" />
 
-		<param name="basic" type="zlfield" toggle="true" togglelabel="Basic">
+		<param name="basic" type="zlfield">
 			<setfield id="name" type="text" label="Name" help="Name used in item editor" />
 			<setfield id="description" type="textarea" label="Description" help="DESCRIPTION_TOOLTIP_ITEM_EDITOR" />
 			<loadfield type="access">
