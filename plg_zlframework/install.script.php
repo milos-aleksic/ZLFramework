@@ -12,6 +12,7 @@ jimport('joomla.filesystem.folder');
 class plgSystemZlframeworkInstallerScript
 {
 	protected $_error;
+	protected $_src;
 	protected $_ext = 'zlframework';
 	protected $_ext_name = 'ZL Framework';
 	protected $_lng_prefix = 'PLG_ZLFRAMEWORK_SYS';
@@ -55,6 +56,9 @@ class plgSystemZlframeworkInstallerScript
 	{
 		// init vars
 		$db = JFactory::getDBO();
+
+		// save install temp path
+		$this->_src = $parent->getParent()->getPath('source'); // tmp folder
 
 		// load ZLFW sys language file EXAMPLE
 		// JFactory::getLanguage()->load('plg_system_zlframework.sys', JPATH_ADMINISTRATOR, 'en-GB', true);

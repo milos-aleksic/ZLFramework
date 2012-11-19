@@ -819,7 +819,7 @@ class ZlfieldHelper extends AppHelper {
 		Function: text - Returns text input html string
 	*/
 	public function text($id, $name, $value, $spec, $attrs){
-		$attrs .= $spec->get('placeholder') ? ' placeholder="'.$spec->get('placeholder').'"' : '';
+		$attrs .= $spec->get('placeholder') ? ' placeholder="'.JText::_($spec->get('placeholder')).'"' : '';
 		return $this->app->html->_('control.text', $name, (string)$value, 'size="60" maxlength="255"'.$attrs);
 	}
 
