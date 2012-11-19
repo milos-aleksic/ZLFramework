@@ -34,6 +34,9 @@ class ZlfieldHelper extends AppHelper {
 		// set request shortcut
 		$this->req = $this->app->request;
 
+		// get the inviroment
+		$this->enviroment == $this->req->getString('enviroment') ? $this->req->getString('enviroment') : $this->getTheEnviroment();
+
 		// get task
 		$this->task = $this->req->getVar('parent_task') ? $this->req->getVar('parent_task') : $this->req->getVar('task');
 
@@ -63,7 +66,7 @@ class ZlfieldHelper extends AppHelper {
 		// set the params mode - edit, config, positions, module, plugin
 		$this->mode = $this->req->getString('zlfieldmode');
 		if(empty($this->mode)){
-			if($this->task == 'assignelements' || $this->task == 'assignsubmission')
+			if($this->task == 'assignelements' || $this->task == 'assignsubmission' || $this->enviroment == 'type-positions')
 				$this->mode = 'positions';
 			else if($this->task == 'editelements' || $this->task == 'addelement')
 				$this->mode = 'config';
@@ -73,6 +76,9 @@ class ZlfieldHelper extends AppHelper {
 				$this->mode = 'module';
 			else if($this->controller == 'configuration')
 				$this->mode = 'appconfig'; // App Config
+
+			else // default
+				$this->mode = 'positions';
 		}
 		
 		// get params
