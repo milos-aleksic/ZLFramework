@@ -18,6 +18,7 @@ class ZlfieldHelper extends AppHelper {
 	protected $layout;
 	protected $path;
 	protected $params;
+	protected $enviroment;
 	protected $config;
 
 	public function __construct($default = array())
