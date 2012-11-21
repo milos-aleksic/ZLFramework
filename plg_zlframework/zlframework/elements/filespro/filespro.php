@@ -694,14 +694,24 @@ abstract class ElementFilesPro extends ElementRepeatablePro {
 		$chunk = JRequest::getVar("chunk", 0);
 		$chunks = JRequest::getVar("chunks", 0);
 		$fileName = JRequest::getVar("name", '');
+
+		// Load libraries
+		jimport('joomla.filesystem.file');
+		jimport('joomla.language.language');
+		$lang = JFactory::getLanguage();
+		$lang->transliterate(); // workaround to load the JLanguageTransliterate class
+
+		// Translate UTF-8 to ASCII
+		$fileName = JLanguageTransliterate::utf8_latin_to_ascii($fileName);
 		
 		// Clean the fileName for security reasons
-		$fileName = preg_replace('/[^\w\._]+/', '', $fileName);
-		
+		$fileName = JFile::makeSafe($fileName);
+
 		// Make sure the fileName is unique but only if chunking is disabled
 		if ($chunks < 2 && JFile::exists($targetDir . '/' . $fileName)) {
-			$fileName_b = strtolower(JFile::getExt($fileName));
-			$fileName_a = JFile::stripExt($fileName);
+			$ext = strrpos($fileName, '.');
+			$fileName_a = substr($fileName, 0, $ext);
+			$fileName_b = substr($fileName, $ext);
 		
 			$count = 1;
 			while (JFile::exists($targetDir . '/' . $fileName_a . '_' . $count . '.' . $fileName_b))
