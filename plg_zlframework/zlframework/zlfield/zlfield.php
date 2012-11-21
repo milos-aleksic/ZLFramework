@@ -77,9 +77,6 @@ class ZlfieldHelper extends AppHelper {
 				$this->mode = 'module';
 			else if($this->controller == 'configuration')
 				$this->mode = 'appconfig'; // App Config
-
-			else // default
-				$this->mode = 'positions';
 		}
 		
 		// get params
