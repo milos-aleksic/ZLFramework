@@ -671,7 +671,7 @@ class ZlfieldHelper extends AppHelper {
 	/**
 	 * getTheEnviroment
 	 *
-	 * @return @string item-edit, type-config, type-position
+	 * @return @string item-edit, type-config, type-positions
 	 *
 	 * @since 3.0
 	 */
@@ -684,7 +684,7 @@ class ZlfieldHelper extends AppHelper {
 
 			case 'assignelements':
 			case 'assignsubmission':
-				return 'type-position';
+				return 'type-positions';
 				break;
 
 			case 'edit':
