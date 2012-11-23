@@ -110,12 +110,24 @@ abstract class ElementFilesPro extends ElementRepeatablePro {
 	*/
 	protected function _hasValue($params = array())
 	{
-		if ($this->config->find('files._s3', 0)){
-			$file = $this->get('file') ? $this->_S3()->getObjectInfo($this->config->find('files._s3bucket'), $this->get('file')) : false;
+		// get default source
+		$default = $this->getDefaultSource();
+			
+		// get source
+		$source = $this->get('file', $default);
+
+		// basic check
+		if (empty($source)) return false;
+
+		// check if source is valid
+		if ($this->config->find('files._s3', 0)) {
+			$bucket = $this->config->find('files._s3bucket');
+			$source = $this->_S3() ? $this->_S3()->getObjectInfo($bucket, $source) : false;
+			return !empty($source);
 		} else {
-			$file = $this->get('file', $this->config->find('files._default_source', $this->config->find('files._default_file', false)));
+			$source = $this->app->path->path('root:'.$source);
+			return !empty($source) && is_readable($source);
 		}
-		return !empty($file);
 	}
 
 	/*
@@ -215,26 +227,28 @@ abstract class ElementFilesPro extends ElementRepeatablePro {
 
 	/*
 		Function: getDefaultSource
-			Retrieve default source if source
-			is not present in item edit
+			Retrieve default source if empty value
 
 		Returns:
 			String - Path to file(s)
 	*/
-	protected function getDefaultSource() {
-
+	protected function getDefaultSource()
+	{
+		// get default, fallback to default_file as the param name was changed
 		$default_source = $this->config->find('files._default_source', $this->config->find('files._default_file', ''));
+
+		// get item author user object
+		$user = $this->app->user->get($this->getItem()->created_by);
 
 		// Replace any path variables
 		$pattern = array(
 			'/\[authorname\]/'
 		);
 		$replace = array(
-			$user = JFactory::getUser($this->getItem()->created_by)->username,$this->getItem()->name
+			$user = $user ? $user : ''
 		);
 		
 		return preg_replace($pattern, $replace, $default_source); 
-
 	}
 
 /* -------------------------------------------------------------------------------------------------------------------------------------------------------- EDIT */
