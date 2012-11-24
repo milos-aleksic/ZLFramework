@@ -18,6 +18,7 @@ abstract class ElementFilesPro extends ElementRepeatablePro {
 	protected $_extensions = '';
 	protected $_s3;
 	protected $_jfile_path;
+	protected $_files;
 
 
 	/* this file INDEX - render, edit, file manager, submissions */
@@ -99,8 +100,7 @@ abstract class ElementFilesPro extends ElementRepeatablePro {
 
 	/*
 		Function: _hasValue
-			Checks if the repeatables element's file is set.
-			It checks default path if no value.
+			Checks if the repeatables element's file is set
 
 	   Parameters:
 			$params - render parameter
@@ -110,24 +110,8 @@ abstract class ElementFilesPro extends ElementRepeatablePro {
 	*/
 	protected function _hasValue($params = array())
 	{
-		// get default source
-		$default = $this->getDefaultSource();
-			
-		// get source
-		$source = $this->get('file', $default);
-
-		// basic check
-		if (empty($source)) return false;
-
-		// check if source is valid
-		if ($this->config->find('files._s3', 0)) {
-			$bucket = $this->config->find('files._s3bucket');
-			$source = $this->_S3() ? $this->_S3()->getObjectInfo($bucket, $source) : false;
-			return !empty($source);
-		} else {
-			$source = $this->app->path->path('root:'.$source);
-			return !empty($source) && is_readable($source);
-		}
+		$files = $this->getFiles($this->get('file'));
+		return !empty($files);
 	}
 
 	/*
@@ -164,8 +148,8 @@ abstract class ElementFilesPro extends ElementRepeatablePro {
 	}
 
 	/*
-		Function: getFileObject
-			Create and return the individual File object
+		Function: getURL
+			Get external files url
 
 		Returns:
 			Array
@@ -192,37 +176,43 @@ abstract class ElementFilesPro extends ElementRepeatablePro {
 	*/
 	protected function getFiles($source = null)
 	{
-		$files = array();
-	
-		if($this->config->find('files._s3', 0) || strpos($source, 'http') === 0) // S3 or external source
+		if (!empty($source) && $this->_files == null)
 		{
-			$files[] = $source;			
-		}
-		else 
-		{
-			
-			// get source or use default
-			$source = $source ? $source : $this->getDefaultSource();
-	
-			if(!empty($source))
+			$this->_files = array();
+		
+			if($this->config->find('files._s3', 0) && $this->_S3()) // S3
 			{
-				$sourcepath = $this->app->path->path("root:$source");
-				if($sourcepath && is_dir($sourcepath)){
-					// if directory get all files from it
-					foreach ($this->app->path->files("root:$source", false, '/^.*('.$this->getLegalExtensions().')$/i') as $filename) {
-						$file = $this->app->path->path("root:$source/$filename");
-						if ($file && is_file($file) && is_readable($file)) {
-							$files[] = "$source/$filename";
+				$this->_files[] = $source;
+			}
+			else if (strpos($source, 'http') === 0) // external source
+			{
+				$this->_files[] = $source;
+			}
+			else 
+			{
+				// get source or use default
+				$source = $source ? $source : $this->getDefaultSource();
+		
+				if(!empty($source))
+				{
+					$sourcepath = $this->app->path->path("root:$source");
+					if($sourcepath && is_dir($sourcepath)){
+						// if directory get all files from it
+						foreach ($this->app->path->files("root:$source", false, '/^.*('.$this->getLegalExtensions().')$/i') as $filename) {
+							$file = $this->app->path->path("root:$source/$filename");
+							if ($file && is_file($file) && is_readable($file)) {
+								$this->_files[] = "$source/$filename";
+							}
 						}
+					} else if($sourcepath && is_file($sourcepath) && is_readable($sourcepath)) {
+						// if file procede as usual
+						$this->_files[] = $source;
 					}
-				} else if($sourcepath && is_file($sourcepath) && is_readable($sourcepath)) {
-					// if file procede as usual
-					$files[] = $source;
 				}
 			}
 		}
 		
-		return $files;
+		return $this->_files;
 	}
 
 	/*
