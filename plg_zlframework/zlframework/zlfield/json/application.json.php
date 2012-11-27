@@ -23,7 +23,7 @@ defined('_JEXEC') or die('Restricted access');
 				"apps":"_chosenapps",
 				"types":"_chosentypes"
 			}
-			'.($params->find('elements.constraint') ? ',"constraint":'.json_encode($params->find('elements.constraint')) : '').'
+			'.($params->find('elements.constraint') ? ',"elements":'.json_encode($params->find('elements.constraint')) : '').'
 		}
 	}' : '';
 

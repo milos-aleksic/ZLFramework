@@ -107,7 +107,12 @@
 }
 
 /*@ details*/
-.creation-form div.file-details{ overflow: hidden; margin-top: 13px; }
+.creation-form div.file-details{ 
+	overflow: hidden; 
+}
+.creation-form div.file-details .fp-found {
+	margin-top: 13px;
+}
 .creation-form div.file-details div.file-preview {
     overflow: hidden;
 	height: 95px;

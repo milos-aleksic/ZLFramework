@@ -192,7 +192,9 @@
 			"type":"elements",
 			"specific": {
 				'./* it inherits all specific options from select plus have it's own */'
-				"constraint":"elementType" './* retrieve only elements of this ElementType */'
+				"elements":"elementType1 elementType2", './* Element Type filter, separete by space */'
+				"apps":"appGroup1 appGroup2 appId", './* App filter, separete by space */'
+				"types":"type1 type2" './* Type filter, separete by space */'
 			}
 		},
 

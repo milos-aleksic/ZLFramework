@@ -1034,16 +1034,27 @@ class ZlfieldHelper extends AppHelper {
 	public function elements($id, $name, $value, $spec, $attrs)
 	{
 		// init vars
-		$pv	 	 = $this->data->create( $this->trslValues($spec->get('parents_val'), $spec->get('value_map')) );
-		$group   = $spec->get('group', ''); // filter Types with app groups
-		$apps    = (array)$spec->get('apps', $pv->get('apps', array())); // get static or relied app value
-		$ft	     = (array)$spec->get('types', $pv->get('types', array())); // filterTypes
-		
-		$constraints = explode(',', $spec->get('constraint', ''));
-		$elements = array();
-		foreach($constraints as $const){
-			$elements = array_merge($elements, $this->elementsList($apps, $const, $ft));
+		$pv = $this->data->create( $this->trslValues($spec->get('parents_val'), $spec->get('value_map')) );
+
+		// apps
+		$apps = (array)$pv->get('apps'); // from parent value
+		$apps = array_merge($apps, explode(' ', $spec->get('apps', '')));
+		// convert apps id to group
+		foreach ($apps as &$app) if(is_numeric($app)) {
+			$app = $this->appTable->get($app)->getGroup();
 		}
+		// clean duplicates
+		$apps = array_unique($apps);
+
+		// types
+		$types = (array)$pv->get('types'); // from parent value
+		$types = array_merge($types, explode(' ', $spec->get('types', '')));
+
+		// elements
+		$element_type = explode(' ', $spec->get('elements', ''));
+		
+		// get elements list
+		$elements = $this->elementsList($apps, $element_type, $types);
 		
 		if(empty($elements)){
 			// set text
@@ -1212,25 +1223,28 @@ class ZlfieldHelper extends AppHelper {
 		return $layouts;
 	}
 	
-	
-	/*
-		Function: elementsList - Returns element list
-	*/
 	/*
 		Function: elementsList - Returns element list
 	*/
 	protected $_elements_list = array();
-	public function elementsList($apps = null, $constraint = null, $filter_types = null)
+	public function elementsList($groups_filter = array(), $elements_filter = array(), $filter_types = array())
 	{
-		$hash = md5(serialize( array($apps, $constraint, $filter_types) ));
+		$groups_filter 		= array_filter((array)($groups_filter));
+		$elements_filter 	= array_filter((array)($elements_filter));
+		$filter_types 		= array_filter((array)($filter_types));
+
+		$hash = md5(serialize( array($groups_filter, $elements_filter, $filter_types) ));
 		if (!array_key_exists($hash, $this->_elements_list))
 		{
-			$apps = $this->app->zlfw->getApplications($apps, true); // if empty will return All apps
+			// get apps
+			$apps = $this->app->table->application->all(array('order' => 'name'));
 			
-			// prepare types avoiding duplicates
+			// prepare types and filter app group
 			$types = array();
 			foreach ($apps as $app){
-				$types = array_merge($types, $app->getTypes());
+				if (empty($groups_filter) || in_array($app->getGroup(), $groups_filter)) {
+					$types = array_merge($types, $app->getTypes());
+				}
 			}
 			
 			// filter types
@@ -1253,8 +1267,8 @@ class ZlfieldHelper extends AppHelper {
 			// create options
 			$options = array();			
 			foreach ($elements as $element) {
-				// include only desired element
-				if (empty($constraint) || $element->getElementType() == $constraint) {
+				// include only desired element type
+				if (empty($elements_filter) || in_array($element->getElementType(), $elements_filter)) {
 					$options[$element->getType()->name.' > '.$element->config->get('name')] = $element->identifier;
 				}
 			}

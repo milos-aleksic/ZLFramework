@@ -104,32 +104,36 @@ class ZlfwHelper extends AppHelper
 	 $group - filter by App group
 
 	 */
-	public function getApplications($apps, $all = false, $group = null)
+	public function getApplications($apps, $all = false, $groups = array())
 	{
+		// init vars
 		$table = $this->app->table->application;
-		settype($apps, 'array');
-
 		$result = array();
-		foreach ($apps as $app)
+
+		$apps 		= array_filter((array)($apps));
+		$groups 	= array_filter((array)($groups));
+
+		// get apps
+		foreach ($apps as $app) {
 			if ($app && $app = $table->get($app))
 			{
-				if (empty($group) || $app->getGroup() == $group)
-				{
-					// filter by App group
+				// filter by App group
+				if (empty($groups) || in_array($app->getGroup(), $groups)) {	
 					$result[] = $app;
 				}
 			}
+		}
 
 		// if empty get All
-		if ($all && empty($result))
+		if (empty($result) && $all) {
 			foreach ($table->all(array('order' => 'name')) as $app)
 			{
-				if (empty($group) || $app->getGroup() == $group)
-				{
-					// filter by App group
+				// filter by App group
+				if (empty($groups) || in_array($app->getGroup(), $groups)) {	
 					$result[] = $app;
 				}
 			}
+		}
 
 		return $result;
 	}
@@ -262,7 +266,6 @@ class ZlfwHelper extends AppHelper
 	 */
 	public function renderModulePosition($position = null)
 	{
-
 		// get modules
 		$modules = $this->app->module->load();
 		$result = array();
@@ -292,10 +295,8 @@ class ZlfwHelper extends AppHelper
 	 */
 	public function resizeImage($file, $width, $height, $avoid_cropping = null, $unique = null)
 	{
-
 		if (is_file($file))
 		{
-
 			// init vars
 			$width = (int)$width;
 			$height = (int)$height;
@@ -461,7 +462,6 @@ class ZlfwHelper extends AppHelper
 	 */
 	public function pluploadTranslation()
 	{
-
 		if (!defined('PLG_ZLFRAMEWORK_PLUPLOAD_SCRIPT_DECLARATION'))
 		{
 			define('PLG_ZLFRAMEWORK_PLUPLOAD_SCRIPT_DECLARATION', true);
