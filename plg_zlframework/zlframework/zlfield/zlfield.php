@@ -36,7 +36,10 @@ class ZlfieldHelper extends AppHelper {
 		$this->req = $this->app->request;
 
 		// get the inviroment
-		$this->enviroment == $this->req->getString('enviroment') ? $this->req->getString('enviroment') : $this->getTheEnviroment();
+		$this->enviroment = strlen($this->req->getString('enviroment')) ? $this->req->getString('enviroment') : $this->getTheEnviroment();
+
+		// if no enviroment for ZL field, cancel
+		if (!$this->enviroment) return;
 
 		// get task
 		$this->task = $this->req->getVar('parent_task') ? $this->req->getVar('parent_task') : $this->req->getVar('task');
@@ -677,6 +680,7 @@ class ZlfieldHelper extends AppHelper {
 	 */
 	public function getTheEnviroment()
 	{
+		$option = $this->req->getVar('option');
 		switch ($this->req->getVar('task')) {
 			case 'editelements':
 				return 'type-edit';
@@ -688,7 +692,7 @@ class ZlfieldHelper extends AppHelper {
 				break;
 
 			case 'edit':
-				return 'item-edit';
+				if ($option == 'com_zoo') return 'item-edit';
 				break;
 		}
 	}
@@ -1048,7 +1052,7 @@ class ZlfieldHelper extends AppHelper {
 
 		// types
 		$types = (array)$pv->get('types'); // from parent value
-		$types = array_merge($types, explode(' ', $spec->get('types', '')));
+		$types = array_merge($types, explode(' ', (string)$spec->get('types', '')));
 
 		// elements
 		$element_type = explode(' ', $spec->get('elements', ''));
