@@ -448,7 +448,13 @@ class ZlfieldHelper extends AppHelper {
 					}
 
 					// get value
-					$value = $value ? $value : $this->_getParam($id, $fld->get('default'), $final_ctrl, $fld->get('old_id', false));
+					$value = strlen($value) ? $value : $this->_getParam($id, $fld->get('default'), $final_ctrl, $fld->get('old_id', false));
+
+					// dump($this->_getParam($id, $fld->get('default'), $final_ctrl, $fld->get('old_id', false)));
+
+					// dump($fld);
+					// dump(strlen($value));
+					// dump($value);
 
 					// get value from config instead
 					if($fld->get('data_from_config'))
@@ -534,6 +540,9 @@ class ZlfieldHelper extends AppHelper {
 			} else {
 				$value = $param;
 			}
+
+			// use default if any
+			$value = !isset($value) && isset($default) ? $default : $value; 
 		}
 		else if(is_array($id))
 		{
@@ -681,19 +690,30 @@ class ZlfieldHelper extends AppHelper {
 	public function getTheEnviroment()
 	{
 		$option = $this->req->getVar('option');
+		$controller = $this->req->getVar('controller');
 		switch ($this->req->getVar('task')) {
 			case 'editelements':
-				return 'type-edit';
+				if ($option == 'com_zoo') return 'type-edit';
 				break;
 
 			case 'assignelements':
 			case 'assignsubmission':
-				return 'type-positions';
+				if ($option == 'com_zoo') return 'type-positions';
 				break;
 
 			case 'edit':
 				if ($option == 'com_zoo') return 'item-edit';
 				break;
+
+			case 'addelement':
+				if ($option == 'com_zoo') return 'type-edit';
+				break;
+
+			default:
+				if ($option == 'com_advancedmodules' || $option == 'com_modules')
+					return 'module-positions';
+
+				else if ($option == 'com_zoo' && $controller == 'configuration') return 'app-config';
 		}
 	}
 
@@ -711,10 +731,10 @@ class ZlfieldHelper extends AppHelper {
 
 		// load libraries
 		$this->app->zlfw->loadLibrary('qtip');
-		$this->app->zlfw->loadLibrary('zlux');
+		// $this->app->zlfw->loadLibrary('zlux'); // in progress
 
 		// init scripts
-		$javascript = "jQuery(function($){ $('body').ZLfield({ url: '{$url}', type: '{$this->type}' }) });";
+		$javascript = "jQuery(function($){ $('body').ZLfield({ url: '{$url}', type: '{$this->type}', enviroment: '{$this->enviroment}' }) });";
 		$this->app->document->addScriptDeclaration($javascript);
 	}
 

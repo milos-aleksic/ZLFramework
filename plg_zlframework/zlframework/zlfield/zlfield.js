@@ -11,7 +11,8 @@
 		name: 'ZLfield',
 		options: {
 			url: '',
-			type: ''
+			type: '',
+			enviroment: ''
 		},
 		initialize: function(body, options) {
 			this.options = $.extend({}, this.options, options);
@@ -81,6 +82,12 @@
 				// add Class for specific styling
 				$(this).parent('li').addClass('zlfield-module');
 
+				// call actions
+				$this.actions($(this));
+			})
+
+			// init on App Config view
+			$this.options.enviroment == 'app-config' && $('.col-right .zlfield-main').each(function(){
 				// call actions
 				$this.actions($(this));
 			})
@@ -364,7 +371,7 @@
 
 						// peform ajax request
 						ac.append($('<span class="activity zl-loader">'));
-						$.getJSON(b.url, {task: 'loadfield', json:json, ctrl:ctrl, psv:psv, pid:pid, node:null, args:args, ajaxcall:true}, function(data){
+						$.getJSON(b.url, {task: 'loadfield', json:json, ctrl:ctrl, psv:psv, pid:pid, node:null, args:args, ajaxcall:true, enviroment:$this.options.enviroment}, function(data){
 							ac.find('.activity').remove();
 
 							// set data
