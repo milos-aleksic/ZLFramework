@@ -65,20 +65,21 @@
 		 * initModules - init ZL Field on Modules
 		 */
 		initActions: function() {
-			var $this = this;
+			var $this = this,
+				env = $this.options.enviroment;
 
 			// init on Position view
-			$('.col-left ul.ui-sortable > li.element').each(function(){
+			env == 'type-positions' && $('.col-left ul.ui-sortable > li.element').each(function(){
 				$(this).parent().trigger('sortstop', { item: $(this) });
 			});
 
 			// init on Item Edit view
-			$('.item-edit .creation-form .zlfield-main').each(function(){
+			env == 'item-edit' && $('.item-edit .creation-form .zlfield-main').each(function(){
 				$this.actions($(this));
 			});
 
 			// init on Module view
-			$('form#module-form ul.adminformlist .zlfield-main').each(function(){
+			env == 'module' && $('form#module-form ul.adminformlist .zlfield-main').each(function(){
 				// add Class for specific styling
 				$(this).parent('li').addClass('zlfield-module');
 
@@ -87,7 +88,7 @@
 			})
 
 			// init on App Config view
-			$this.options.enviroment == 'app-config' && $('.col-right .zlfield-main').each(function(){
+			env == 'app-config' && $('.col-right .zlfield-main').each(function(){
 				// call actions
 				$this.actions($(this));
 			})

@@ -450,12 +450,6 @@ class ZlfieldHelper extends AppHelper {
 					// get value
 					$value = strlen($value) ? $value : $this->_getParam($id, $fld->get('default'), $final_ctrl, $fld->get('old_id', false));
 
-					// dump($this->_getParam($id, $fld->get('default'), $final_ctrl, $fld->get('old_id', false)));
-
-					// dump($fld);
-					// dump(strlen($value));
-					// dump($value);
-
 					// get value from config instead
 					if($fld->get('data_from_config'))
 					{
@@ -530,7 +524,7 @@ class ZlfieldHelper extends AppHelper {
 
 		// dump($path, $id);
 		$value = null;
-		if ($this->controller == 'configuration') // if App Config Params
+		if ($this->enviroment == 'app-config') // if App Config Params
 		{
 			$path = "global.$path";
 			$param = $this->params->get($path);
@@ -540,9 +534,6 @@ class ZlfieldHelper extends AppHelper {
 			} else {
 				$value = $param;
 			}
-
-			// use default if any
-			$value = !isset($value) && isset($default) ? $default : $value; 
 		}
 		else if(is_array($id))
 		{
@@ -558,9 +549,15 @@ class ZlfieldHelper extends AppHelper {
 			if(empty($value) && $old_id){
 				$value = $this->params->find("$path.$old_id"); // try with old id
 			}
-			$value = !isset($value) && isset($default) ? $default : $value; // use default if any
 		}
-		return $value;
+
+		// set default if value empty
+		if (!isset($value) && isset($default)) {
+			$value = $default;
+		}
+
+		// return result
+		return $value; 
 	}
 
 	/*
@@ -711,7 +708,7 @@ class ZlfieldHelper extends AppHelper {
 
 			default:
 				if ($option == 'com_advancedmodules' || $option == 'com_modules')
-					return 'module-positions';
+					return 'module';
 
 				else if ($option == 'com_zoo' && $controller == 'configuration') return 'app-config';
 		}
