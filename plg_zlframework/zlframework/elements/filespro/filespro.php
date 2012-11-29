@@ -71,15 +71,19 @@ abstract class ElementFilesPro extends ElementRepeatablePro {
 	*/
 	protected function _S3()
 	{
-		if ($this->_s3 == null) {
+		if ($this->_s3 == null)
+		{
 			//include the S3 class
 			if (!class_exists('S3')) require_once($this->app->path->path('elements:filespro/assets/s3/S3.php'));
-			$s3 = new S3(trim($this->config->find('files._awsaccesskey')), trim($this->config->find('files._awssecretkey'))); // instantiate the class
+
+			$awsaccesskey = trim($this->app->zlfw->decrypt($this->config->find('files._awsaccesskey')));
+			$awssecretkey = trim($this->app->zlfw->decrypt($this->config->find('files._awssecretkey')));
+			$s3 = new S3($awsaccesskey, $awssecretkey); // instantiate the class
 
 			if(@$s3->listBuckets() && (@$constraint = $s3->getBucketLocation(trim($this->config->find('files._s3bucket')))) !== false)
 			{
 				$location = array('US' => 's3.amazonaws.com', 'us-west-1' => 's3-us-west-1.amazonaws.com', 'us-west-2' => 's3-us-west-2.amazonaws.com', 'eu-west-1' => 's3-eu-west-1.amazonaws.com', 'EU' => 's3-eu-west-1.amazonaws.com', 'ap-southeast-1' => 's3-ap-southeast-1.amazonaws.com', 'ap-northeast-1' => 's3-ap-northeast-1.amazonaws.com', 'sa-east-1' => 's3-sa-east-1.amazonaws.com');
-				$this->_s3 = new S3(trim($this->config->find('files._awsaccesskey')), trim($this->config->find('files._awssecretkey')), false, $location[$constraint]);
+				$this->_s3 = new S3($awsaccesskey, $awssecretkey, false, $location[$constraint]);
 			}
 		}
 		return $this->_s3;
@@ -176,7 +180,7 @@ abstract class ElementFilesPro extends ElementRepeatablePro {
 	*/
 	protected function getFiles($source = null)
 	{
-		if (!empty($source) && $this->_files == null)
+		if ($this->_files == null)
 		{
 			$this->_files = array();
 		

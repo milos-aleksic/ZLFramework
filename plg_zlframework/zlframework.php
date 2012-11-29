@@ -112,6 +112,7 @@ class plgSystemZlframework extends JPlugin {
 		$this->app->event->register('TypeEvent');
 		$this->app->event->dispatcher->connect('type:coreconfig', array($this, 'coreConfig'));
 		$this->app->event->dispatcher->connect('application:sefparseroute', array($this, 'sefParseRoute'));
+		$this->app->event->dispatcher->connect('type:beforesave', array($this, 'typeBeforesave'));
 		
 		// perform admin tasks
 		if ($this->joomla->isAdmin()) {
@@ -125,6 +126,33 @@ class plgSystemZlframework extends JPlugin {
 			$this->app->path->register($path, 'zoomailing');
 			require_once($path.'/init.php');
 		}		
+	}
+
+	/**
+	 * Actions for typeBeforesave event 
+	 */
+	public function typeBeforesave($event, $arguments = array())
+	{
+		$type = $event->getSubject();
+		$elements = $type->config->get('elements');
+
+		// search for unencrypted passwords
+		array_walk_recursive($elements, 'plgSystemZlframework::_find_and_encrypt');
+
+		// save result
+		$type->config->set('elements', $elements);
+	}
+
+	protected static function _find_and_encrypt(&$item, $key)
+	{
+		if (preg_match('/\.zl-unencrypted-pass/', $item))
+		{
+			$zoo = App::getInstance('zoo');
+			$secret = $zoo->system->config->get('secret');
+			$cryptKey = new JCryptKey('simple', $secret, $secret);
+			$crypt = new JCrypt(null, $cryptKey);
+			$item = $crypt->encrypt( preg_replace('/\.zl-unencrypted-pass/', '', $item) );
+		}
 	}
 
 	/**

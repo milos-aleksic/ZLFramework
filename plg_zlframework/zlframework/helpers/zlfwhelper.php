@@ -7,23 +7,25 @@
  */
 
 /*
- Class: ZL Helper
- The general ZOOlander helper Class for zoo
+ Class: ZLFW Helper
+ The general ZL Framework helper Class for zoo
  */
 class ZlfwHelper extends AppHelper
 {
 
+	/**
+	 * Retrieve an plugin object
+	 *
+	 * @param  string $name The plugin name
+	 * @param  string $type The plugin type
+	 *
+	 * @return Object The requested plugin
+	 */
 	public function getPlugin($name, $type = 'system')
 	{
 		$db = JFactory::getDBO();
-		if (!$this->app->joomla->isVersion('1.5'))
-		{
-			$query = 'SELECT * FROM #__extensions WHERE element LIKE ' . $db->Quote($name) . ' AND folder LIKE ' . $db->Quote($type) . ' LIMIT 1';
-		}
-		else
-		{
-			$query = 'SELECT * FROM #__plugins WHERE element LIKE ' . $db->Quote($name) . ' AND folder LIKE ' . $db->Quote($type) . ' LIMIT 1';
-		}
+		$query = 'SELECT * FROM #__extensions WHERE element LIKE ' . $db->Quote($name) . ' AND folder LIKE ' . $db->Quote($type) . ' LIMIT 1';
+		
 		$db->setQuery($query);
 		return $db->loadObject();
 	}
@@ -38,21 +40,9 @@ class ZlfwHelper extends AppHelper
 		if ($fw->ordering >= $p->ordering)
 		{
 			$db = JFactory::getDBO();
-			if (!$this->app->joomla->isVersion('1.5'))
-			{
-				// J1.6+
-				$query = 'UPDATE #__extensions SET ordering = ' . ((int)($fw->ordering) + 1) . ' WHERE extension_id = ' . (int)$p->extension_id;
-				if($paks){
-					$queryaks = 'UPDATE #__extensions SET ordering = ' . ((int)($p->ordering) + 100) . ' WHERE extension_id = ' . (int)$paks->extension_id;
-				}
-			}
-			else
-			{
-				// J1.5
-				$query = 'UPDATE #__plugins SET ordering = ' . ((int)($fw->ordering) + 1) . ' WHERE id = ' . (int)$p->id;
-				if($paks){
-					$queryaks = 'UPDATE #__plugins SET ordering = ' . ((int)($p->ordering) + 100) . ' WHERE id = ' . (int)$paks->id;
-				}
+			$query = 'UPDATE #__extensions SET ordering = ' . ((int)($fw->ordering) + 1) . ' WHERE extension_id = ' . (int)$p->extension_id;
+			if($paks){
+				$queryaks = 'UPDATE #__extensions SET ordering = ' . ((int)($p->ordering) + 100) . ' WHERE extension_id = ' . (int)$paks->extension_id;
 			}
 			
 			if($paks){
@@ -65,7 +55,6 @@ class ZlfwHelper extends AppHelper
 		}
 
 		return true;
-
 	}
 
 	/*
@@ -284,6 +273,22 @@ class ZlfwHelper extends AppHelper
 		}
 
 		return null;
+	}
+
+	/**
+	 * Decrypt string
+	 *
+	 * @param  string $string The string to decrypt
+	 *
+	 * @return string The decrypted string
+	 */
+	public function decrypt($string)
+	{
+		$secret = $this->app->system->config->get('secret');
+		$cryptKey = new JCryptKey('simple', $secret, $secret);
+		$crypt = new JCrypt(null, $cryptKey);
+		
+		return $crypt->decrypt( $string );
 	}
 
 	/*

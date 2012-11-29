@@ -729,6 +729,7 @@ class ZlfieldHelper extends AppHelper {
 		// load libraries
 		$this->app->zlfw->loadLibrary('qtip');
 		// $this->app->zlfw->loadLibrary('zlux'); // in progress
+		$this->app->document->addStylesheet('zlfw:assets/libraries/zlux/zlux.css');
 
 		// init scripts
 		$javascript = "jQuery(function($){ $('body').ZLfield({ url: '{$url}', type: '{$this->type}', enviroment: '{$this->enviroment}' }) });";
@@ -866,6 +867,7 @@ class ZlfieldHelper extends AppHelper {
 		Function: password - Returns password input html string
 	*/
 	public function password($id, $name, $value, $spec, $attrs){
+		$value = $this->app->zlfw->decrypt($value);
 		return '<input type="password" '.$attrs.' name="'.$name.'" value="'.$value.'">';
 	}
 	

@@ -5,6 +5,8 @@ Changelog
  # Fixed Plupload issue with Bootstrap & Joomla 3
  # Fixed ZL Field Actions on Submission Assignment
  # ZL Field layout.json Default value fixed & code cleaned
+ # ZL Field application.json Default App fixed
+ ^ ZL Field Password field value is now encrypted
  ^ Files Pro uploaded files names are now transliterated
 
 3.0.2

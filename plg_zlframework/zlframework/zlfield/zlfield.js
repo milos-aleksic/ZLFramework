@@ -69,7 +69,8 @@
 				env = $this.options.enviroment;
 
 			// init on Position view
-			env == 'type-positions' && $('.col-left ul.ui-sortable > li.element').each(function(){
+			(env == 'type-positions' || env == 'type-edit') && 
+			$('.col-left ul.ui-sortable > li.element').each(function(){
 				$(this).parent().trigger('sortstop', { item: $(this) });
 			});
 
@@ -158,6 +159,16 @@
 						style: 'ui-tooltip-light ui-tooltip-zlparam'
 					});
 				}); // Fields Select Expand END
+
+
+				/* 
+				 * Password Field
+				 */
+				$('#toolbar-apply, #toolbar-save').on('mousedown', function(){
+					$dom.find('.row[data-type=password] .zl-field input').each(function(){
+						$(this).val($(this).val()+'.zl-unencrypted-pass');
+					});
+				})
 
 
 				/* 

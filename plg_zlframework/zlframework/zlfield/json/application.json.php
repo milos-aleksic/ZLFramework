@@ -46,7 +46,9 @@ defined('_JEXEC') or die('Restricted access');
 
 	// remove empty values
 	$childs = array_filter($childs);
-	
+
+	// get default App
+	$default_app = array_shift( $this->app->table->application->all(array('order' => 'name')) );
 
 	// return json string
 	return
@@ -61,6 +63,7 @@ defined('_JEXEC') or die('Restricted access');
 			"type": "apps",
 			"label": "'.$params->find('apps.label').'",
 			"help": "'.$params->find('apps.help').'",
+			"default":"'.$default_app->id.'",
 			"specific":{
 				'.($params->find('apps.multi') ? '"multi":"1"' : '').'
 			},
