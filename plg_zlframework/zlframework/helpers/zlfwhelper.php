@@ -276,20 +276,44 @@ class ZlfwHelper extends AppHelper
 	}
 
 	/**
-	 * Decrypt string
+	 * Text encryption/decryption
 	 *
-	 * @param  string $string The string to decrypt
+	 * @param  string $text The text to encrypt
+	 * @param  string $action Posible values are 'encrypt' or 'decrypt'
 	 *
-	 * @return string The decrypted string
+	 * @return string The encrypted/decrypted text
+	 *
+	 * @since 3.0.3
 	 */
-	public function decrypt($string)
+	public function crypt($text, $action)
 	{
 		$secret = $this->app->system->config->get('secret');
-		$cryptKey = new JCryptKey('simple', $secret, $secret);
-		$crypt = new JCrypt(null, $cryptKey);
+		$key 	= new JCryptKey('simple', $secret, $secret);
+		$crypt 	= new JCrypt(null, $key);
 		
-		return $crypt->decrypt( $string );
+		return $crypt->$action( $text );
 	}
+
+	/**
+	 * Password field decryption
+	 *
+	 * @param  string $pass The encrypted password to decrypt
+	 *
+	 * @return string The decrypted password
+	 *
+	 * @since 3.0.3
+	 */
+	public function decryptPassword($pass)
+	{
+		$matches = array();
+		if (preg_match('/zl-encrypted\[(.*)\]/', $pass, $matches)) {
+			return $this->crypt($matches[1], 'decrypt');
+		}
+		
+		// if no valid pass to decrypt, return orig pass
+		return $pass;
+	}
+	
 
 	/*
 	 Function: resizeImage

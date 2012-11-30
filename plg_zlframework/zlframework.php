@@ -112,7 +112,7 @@ class plgSystemZlframework extends JPlugin {
 		$this->app->event->register('TypeEvent');
 		$this->app->event->dispatcher->connect('type:coreconfig', array($this, 'coreConfig'));
 		$this->app->event->dispatcher->connect('application:sefparseroute', array($this, 'sefParseRoute'));
-		$this->app->event->dispatcher->connect('type:beforesave', array($this, 'typeBeforesave'));
+		$this->app->event->dispatcher->connect('type:beforesave', array($this, 'typeBeforeSave'));
 		
 		// perform admin tasks
 		if ($this->joomla->isAdmin()) {
@@ -129,14 +129,14 @@ class plgSystemZlframework extends JPlugin {
 	}
 
 	/**
-	 * Actions for typeBeforesave event 
+	 * Actions for type:beforesave event
 	 */
-	public function typeBeforesave($event, $arguments = array())
+	public function typeBeforeSave($event, $arguments = array())
 	{
 		$type = $event->getSubject();
 		$elements = $type->config->get('elements');
 
-		// search for unencrypted passwords
+		// search for decrypted passwords and encrypt
 		array_walk_recursive($elements, 'plgSystemZlframework::_find_and_encrypt');
 
 		// save result
@@ -145,13 +145,9 @@ class plgSystemZlframework extends JPlugin {
 
 	protected static function _find_and_encrypt(&$item, $key)
 	{
-		if (preg_match('/\.zl-unencrypted-pass/', $item))
-		{
-			$zoo = App::getInstance('zoo');
-			$secret = $zoo->system->config->get('secret');
-			$cryptKey = new JCryptKey('simple', $secret, $secret);
-			$crypt = new JCrypt(null, $cryptKey);
-			$item = $crypt->encrypt( preg_replace('/\.zl-unencrypted-pass/', '', $item) );
+		$matches = array();
+		if (preg_match('/zl-decrypted\[(.*)\]/', $item, $matches)) {
+			$item = 'zl-encrypted['.App::getInstance('zoo')->zlfw->crypt($matches[1], 'encrypt').']';
 		}
 	}
 

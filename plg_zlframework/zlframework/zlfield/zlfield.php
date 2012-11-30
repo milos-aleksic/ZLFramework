@@ -867,7 +867,7 @@ class ZlfieldHelper extends AppHelper {
 		Function: password - Returns password input html string
 	*/
 	public function password($id, $name, $value, $spec, $attrs){
-		$value = $this->app->zlfw->decrypt($value);
+		$value = $this->app->zlfw->decryptPassword($value);
 		return '<input type="password" '.$attrs.' name="'.$name.'" value="'.$value.'">';
 	}
 	

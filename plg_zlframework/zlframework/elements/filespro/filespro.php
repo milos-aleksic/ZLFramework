@@ -76,8 +76,8 @@ abstract class ElementFilesPro extends ElementRepeatablePro {
 			//include the S3 class
 			if (!class_exists('S3')) require_once($this->app->path->path('elements:filespro/assets/s3/S3.php'));
 
-			$awsaccesskey = trim($this->app->zlfw->decrypt($this->config->find('files._awsaccesskey')));
-			$awssecretkey = trim($this->app->zlfw->decrypt($this->config->find('files._awssecretkey')));
+			$awsaccesskey = trim($this->app->zlfw->decryptPassword($this->config->find('files._awsaccesskey')));
+			$awssecretkey = trim($this->app->zlfw->decryptPassword($this->config->find('files._awssecretkey')));
 			$s3 = new S3($awsaccesskey, $awssecretkey); // instantiate the class
 
 			if(@$s3->listBuckets() && (@$constraint = $s3->getBucketLocation(trim($this->config->find('files._s3bucket')))) !== false)

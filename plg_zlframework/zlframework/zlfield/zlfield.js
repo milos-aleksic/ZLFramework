@@ -166,7 +166,7 @@
 				 */
 				$('#toolbar-apply, #toolbar-save').on('mousedown', function(){
 					$dom.find('.row[data-type=password] .zl-field input').each(function(){
-						$(this).val($(this).val()+'.zl-unencrypted-pass');
+						$(this).val('zl-decrypted['+$(this).val()+']');
 					});
 				})
 
