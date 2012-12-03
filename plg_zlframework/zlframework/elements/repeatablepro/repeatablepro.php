@@ -167,8 +167,14 @@ abstract class ElementRepeatablePro extends ElementRepeatable {
 	*/
 	public function getRenderedValues($params=array(), $mode=false, $opts=array()) 
 	{
-		$hash = md5( serialize(array($opts, $params, $params->get('layout'), $params->get('specific'), $params->get('separator'))) );
-		if (!array_key_exists ($hash, $this->_rendered_values))
+		// set the params as hash and neutralize the common variables
+		$hash_param = $params;
+		$hash_param->set('style', '');
+		$hash_param->set('first', '');
+		$hash_param->set('last', '');
+		
+		$hash = md5(serialize(array($opts, $hash_param)));
+		if (!array_key_exists($hash, $this->_rendered_values))
 		{
 			// of limit 0, abort
 			if ($params->find('filter._limit') == '0') return null;

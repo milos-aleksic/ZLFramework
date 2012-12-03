@@ -18,7 +18,7 @@ abstract class ElementFilesPro extends ElementRepeatablePro {
 	protected $_extensions = '';
 	protected $_s3;
 	protected $_jfile_path;
-	protected $_files;
+	protected $_files = array();
 
 
 	/* this file INDEX - render, edit, file manager, submissions */
@@ -64,10 +64,10 @@ abstract class ElementFilesPro extends ElementRepeatablePro {
 	
 	/*
 	   Function: initS3
-	       Init the S3 class
+		   Init the S3 class
 
 	   Returns:
-	       Class - S3 php class
+		   Class - S3 php class
 	*/
 	protected function _S3()
 	{
@@ -180,17 +180,13 @@ abstract class ElementFilesPro extends ElementRepeatablePro {
 	*/
 	protected function getFiles($source = null)
 	{
-		if ($this->_files == null)
+		if (!array_key_exists ($source, $this->_files))
 		{
-			$this->_files = array();
-		
 			if($this->config->find('files._s3', 0) && $this->_S3()) // S3
 			{
-				$this->_files[] = $source;
 			}
 			else if (strpos($source, 'http') === 0) // external source
 			{
-				$this->_files[] = $source;
 			}
 			else 
 			{
@@ -199,24 +195,29 @@ abstract class ElementFilesPro extends ElementRepeatablePro {
 		
 				if(!empty($source))
 				{
+					$files = array();
 					$sourcepath = $this->app->path->path("root:$source");
 					if($sourcepath && is_dir($sourcepath)){
 						// if directory get all files from it
 						foreach ($this->app->path->files("root:$source", false, '/^.*('.$this->getLegalExtensions().')$/i') as $filename) {
 							$file = $this->app->path->path("root:$source/$filename");
 							if ($file && is_file($file) && is_readable($file)) {
-								$this->_files[] = "$source/$filename";
+								$files = "$source/$filename";
 							}
 						}
+						// save all files as source
+						$source = $files;
+
 					} else if($sourcepath && is_file($sourcepath) && is_readable($sourcepath)) {
 						// if file procede as usual
-						$this->_files[] = $source;
 					}
 				}
 			}
+
+			$this->_files[$source] = $source ? (array)$source : null;
 		}
 		
-		return $this->_files;
+		return $this->_files[$source];
 	}
 
 	/*
@@ -460,22 +461,22 @@ abstract class ElementFilesPro extends ElementRepeatablePro {
 
 	/*
 	   Function: getExtension
-	       Get the file extension string.
+		   Get the file extension string.
 
 	   Returns:
-	       String - file extension
+		   String - file extension
 	*/
-	public function getExtension($file = null) {
+	public function getExtension($file = null, $checkMime = true) {
 		$file = empty($file) ? $this->get('file') : $file;
-		return strtolower($this->app->zlfilesystem->getExtension($file));
+		return strtolower($this->app->zlfilesystem->getExtension($file, $checkMime));
 	}
 	
 	/*
 	   Function: getLegalExtensions
-	       Get the legal extensions string
+		   Get the legal extensions string
 
 	   Returns:
-	       String - element legal extensions
+		   String - element legal extensions
 	*/
 	public function getLegalExtensions($separator = '|') {
 		$extensions = $this->config->find('files._extensions', $this->_extensions);
@@ -594,7 +595,7 @@ abstract class ElementFilesPro extends ElementRepeatablePro {
 	
 	
 	/*
-     * Return the full directory path
+	 * Return the full directory path
 	 *
 	 * Original Credits:
 	 * @package   	JCE
@@ -603,7 +604,7 @@ abstract class ElementFilesPro extends ElementRepeatablePro {
 	 * 
 	 * Adapted to ZOO (ZOOlanders.com)
 	 * Copyright 2011, ZOOlanders.com
-     */
+	 */
 	public function getDirectory($allowroot = false)
 	{
 		$user = JFactory::getUser();
@@ -791,7 +792,7 @@ abstract class ElementFilesPro extends ElementRepeatablePro {
 			Renders the element in submission.
 
 		Parameters:
-            $params - AppData submission parameters
+			$params - AppData submission parameters
 
 		Returns:
 			String - html
@@ -820,8 +821,8 @@ abstract class ElementFilesPro extends ElementRepeatablePro {
 			Validates the submitted element
 
 		Parameters:
-            $value  - AppData value
-            $params - AppData submission parameters
+			$value  - AppData value
+			$params - AppData submission parameters
 
 		Returns:
 			Array - cleaned value
@@ -835,7 +836,7 @@ abstract class ElementFilesPro extends ElementRepeatablePro {
 		}
 		
 		// Reorganize the files to make them easier to manage (tricky)
- 		$userfiles = array();
+		$userfiles = array();
 		foreach($value->get('userfile', array()) as $key => $vals) foreach($vals as $i => $val){
 			$userfiles[$i][$key] = $val;
 		}
@@ -889,9 +890,9 @@ abstract class ElementFilesPro extends ElementRepeatablePro {
 		Returns:
 			void
 	*/
-    public function submissionBeforeSave($event)
+	public function submissionBeforeSave($event)
 	{
-        $userfiles = array();
+		$userfiles = array();
 		// merge userfiles element data with post data
 		foreach ($_FILES as $key => $userfile) {
 			if (strpos($key, 'elements_'.$this->identifier) === 0) {
@@ -906,27 +907,44 @@ abstract class ElementFilesPro extends ElementRepeatablePro {
 		// now for the real upload
 		foreach($userfiles as $userfile)
 		{
-	        // get the uploaded file information
-	        if ($userfile && $userfile['error'] == 0 && is_array($userfile)) {
-	            // get file name
-	            $ext = strtolower($this->app->zlfilesystem->getExtension($userfile['name']));
-	            $base_path = JPATH_ROOT . '/' . $this->getDirectory() . '/';
-	            $file = $tmp = $base_path . $userfile['name'];
-	            $filename = basename($file, '.'.$ext);
+			// get the uploaded file information
+			if ($userfile && $userfile['error'] == 0 && is_array($userfile)) {
+				// get file name
+				$ext = strtolower($this->app->zlfilesystem->getExtension($userfile['name']));
+				$base_path = JPATH_ROOT . '/' . $this->getDirectory() . '/';
+				$file = $tmp = $base_path . $userfile['name'];
+				$filename = basename($file, '.'.$ext);
 	
-	            $i = 1;
-	            while (JFile::exists($tmp)) {
-	                $tmp = $base_path . $filename . '-' . $i++ . '.' . $ext;
-	            }
-	            $file = $this->app->path->relative($tmp);
+				$i = 1;
+				while (JFile::exists($tmp)) {
+					$tmp = $base_path . $filename . '-' . $i++ . '.' . $ext;
+				}
+				$file = $this->app->path->relative($tmp);
 				
-	            if (!JFile::upload($userfile['tmp_name'], $file)) {
-	                throw new AppException('Unable to upload file.');
-	            }
+				if (!JFile::upload($userfile['tmp_name'], $file)) {
+					throw new AppException('Unable to upload file.');
+				}
 	
-	            $files[] = $file;
-	        }
+				$files[] = $file;
+			}
 		}
-    }
+	}
 	
+}
+
+/*
+	Class: ZLSplFileInfo
+		The ZLSplFileInfo extends SplFileInfo class which offers a high-level object oriented interface to information for an individual file.
+		http://au1.php.net/manual/en/class.splfileinfo.php
+*/
+class ZLSplFileInfo extends SplFileInfo
+{
+	public function getExtension($file='')
+	{
+		if (version_compare(PHP_VERSION, '5.3.6', '>=')) {
+			return parent::getExtension();
+		} else {
+			return pathinfo($this->getPathname(), PATHINFO_EXTENSION);
+		}
+	}
 }

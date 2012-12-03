@@ -3,6 +3,7 @@ Changelog
 
 3.0.4
  # Fixed ZL Field bug on new App Instance creation
+ # Fixed FilesPro source files bug
 
 3.0.3
  # Fixed Plupload issue with Bootstrap & Joomla 3
