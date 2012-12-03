@@ -20,6 +20,7 @@ class ZlfieldHelper extends AppHelper {
 	protected $params;
 	protected $enviroment;
 	protected $config;
+	protected $mode;
 
 	public function __construct($default = array())
 	{
@@ -78,8 +79,9 @@ class ZlfieldHelper extends AppHelper {
 				$this->mode = 'edit';
 			else if(($this->option == 'com_modules' || $this->option == 'com_advancedmodules') && $this->view == 'module')
 				$this->mode = 'module';
-			else if($this->controller == 'configuration')
-				$this->mode = 'appconfig'; // App Config
+			else if($this->enviroment == 'app-config') {
+				$this->mode = 'appconfig';
+			}
 		}
 		
 		// get params
@@ -688,7 +690,8 @@ class ZlfieldHelper extends AppHelper {
 	{
 		$option = $this->req->getVar('option');
 		$controller = $this->req->getVar('controller');
-		switch ($this->req->getVar('task')) {
+		$task = $this->req->getVar('task');
+		switch ($task) {
 			case 'editelements':
 				if ($option == 'com_zoo') return 'type-edit';
 				break;
@@ -710,7 +713,11 @@ class ZlfieldHelper extends AppHelper {
 				if ($option == 'com_advancedmodules' || $option == 'com_modules')
 					return 'module';
 
-				else if ($option == 'com_zoo' && $controller == 'configuration') return 'app-config';
+				else if ($option == 'com_zoo' && $controller == 'configuration')
+					return 'app-config';
+
+				else if ($option == 'com_zoo' && $controller == 'new' && $task == 'add' && strlen($this->req->getVar('group')));
+					return 'app-config';
 		}
 	}
 
