@@ -37,7 +37,7 @@
 	<div id="slideshow-<?php echo $widget_id; ?>" class="wk-slideshow">
 		<div class="slides-container">
 			<ul class="slides">
-				<?php $i = 0; foreach ($items as $key => $item) : ?>
+				<?php $i = 0; foreach ($items as $key => &$item) : ?>
 				<?php 
 					/* Lazy Loading */
 					$item["content"] = ($i==$settings['index']) ? $item["content"] : $widgetkit['image']->prepareLazyload($item["content"]);

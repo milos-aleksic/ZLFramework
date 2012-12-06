@@ -53,7 +53,7 @@
 		<div class="sets">
 			<?php $i = 0; foreach ($sets as $set => $items) : ?>
 				<ul class="set">
-					<?php foreach ($items as $item) : ?>
+					<?php foreach ($items as &$item) : ?>
 					<?php 
 						/* Lazy Loading */
 						$item["content"] = ($i==$settings['index']) ? $item["content"] : $widgetkit['image']->prepareLazyload($item["content"]);

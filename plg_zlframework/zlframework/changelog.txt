@@ -1,6 +1,9 @@
 Changelog
 ------------
 
+3.0.5
+ # Fixed bug in widgetkit layouts
+
 3.0.4
  # Fixed ZL Field bug on new App Instance creation
  # Fixed FilesPro source files bug

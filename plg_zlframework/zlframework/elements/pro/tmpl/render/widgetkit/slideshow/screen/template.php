@@ -34,7 +34,7 @@
 	<div>
 		<ul class="slides">
 
-			<?php $i = 0; foreach ($items as $key => $item) : ?>
+			<?php $i = 0; foreach ($items as $key => &$item) : ?>
 			<?php
 				$navigation[] = '<li><span></span></li>';
 				$captions[]   = '<li>'.(isset($item['caption']) ? $item['caption']:"").'</li>';
