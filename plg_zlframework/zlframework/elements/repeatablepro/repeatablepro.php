@@ -167,13 +167,16 @@ abstract class ElementRepeatablePro extends ElementRepeatable {
 	*/
 	public function getRenderedValues($params=array(), $mode=false, $opts=array()) 
 	{
-		// set the params as hash and neutralize the common variables
-		$hash_param = $params;
-		$hash_param->set('style', '');
-		$hash_param->set('first', '');
-		$hash_param->set('last', '');
-		
-		$hash = md5(serialize(array($opts, $hash_param)));
+		// create a unique hash for this element position
+		$hash = md5(serialize(array(
+			$opts,
+			$this->getType()->getApplication()->getGroup(),
+			$this->getType()->id,
+			$params->get('element').$params->get('_layout'),
+			$params->get('_position').$params->get('_index')
+		)));
+
+		// check for value, if not exist render it
 		if (!array_key_exists($hash, $this->_rendered_values))
 		{
 			// of limit 0, abort
