@@ -3,10 +3,11 @@ Changelog
 
 3.0.5
  # Fixed bug in widgetkit layouts
+ # Fixed FilesPro directory source bug
 
 3.0.4
  # Fixed ZL Field bug on new App Instance creation
- # Fixed FilesPro source files bug
+ # Fixed FilesPro getFiles bug
 
 3.0.3
  # Fixed Plupload issue with Bootstrap & Joomla 3

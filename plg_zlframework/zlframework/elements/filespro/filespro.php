@@ -18,8 +18,6 @@ abstract class ElementFilesPro extends ElementRepeatablePro {
 	protected $_extensions = '';
 	protected $_s3;
 	protected $_jfile_path;
-	protected $_files = array();
-
 
 	/* this file INDEX - render, edit, file manager, submissions */
 
@@ -180,44 +178,51 @@ abstract class ElementFilesPro extends ElementRepeatablePro {
 	*/
 	protected function getFiles($source = null)
 	{
-		if (!array_key_exists ($source, $this->_files))
+		// get source or use default
+		$source = $source ? $source : $this->getDefaultSource();
+
+		$files = array();
+		if(!empty($source))
 		{
-			if($this->config->find('files._s3', 0) && $this->_S3()) // S3
+			// S3 integration
+			if($this->config->find('files._s3', 0) && $this->_S3())
 			{
+				// TODO check if is readable
+				$files[] = $source;
 			}
-			else if (strpos($source, 'http') === 0) // external source
+
+			// external source
+			else if (strpos($source, 'http') === 0)
 			{
+				// TODO check if is readable
+				$files[] = $source;
 			}
+
+			// local source
 			else 
 			{
-				// get source or use default
-				$source = $source ? $source : $this->getDefaultSource();
-		
-				if(!empty($source))
-				{
-					$files = array();
-					$sourcepath = $this->app->path->path("root:$source");
-					if($sourcepath && is_dir($sourcepath)){
-						// if directory get all files from it
-						foreach ($this->app->path->files("root:$source", false, '/^.*('.$this->getLegalExtensions().')$/i') as $filename) {
-							$file = $this->app->path->path("root:$source/$filename");
-							if ($file && is_file($file) && is_readable($file)) {
-								$files = "$source/$filename";
-							}
-						}
-						// save all files as source
-						$source = $files;
+				// get full path
+				$sourcepath = $this->app->path->path("root:$source");
 
-					} else if($sourcepath && is_file($sourcepath) && is_readable($sourcepath)) {
-						// if file procede as usual
+				// if directory
+				if($sourcepath && is_dir($sourcepath)){
+
+					// retrieve all valid files
+					foreach ($this->app->path->files("root:$source", false, '/^.*('.$this->getLegalExtensions().')$/i') as $filename) {
+						$file = "$sourcepath/$filename";
+						if ($file && is_file($file) && is_readable($file)) {
+							$files[] = "$source/$filename";
+						}
 					}
+
+				// if file
+				} else if($sourcepath && is_file($sourcepath) && is_readable($sourcepath)) {
+					$files[] = $source;
 				}
 			}
-
-			$this->_files[$source] = $source ? (array)$source : null;
 		}
-		
-		return $this->_files[$source];
+
+		return $files;
 	}
 
 	/*
@@ -939,7 +944,37 @@ abstract class ElementFilesPro extends ElementRepeatablePro {
 */
 class ZLSplFileInfo extends SplFileInfo
 {
-	public function getExtension($file='')
+	/**
+	 * Reference to the global App object
+	 *
+	 * @var App
+	 * @since 3.0.5
+	 */
+	public $app;
+	
+	/**
+	 * Class constructor. Creates a new ZLSplFileInfo object for the file_name specified.
+	 * The file does not need to exist, or be readable
+	 *
+	 * @param String $file_name Path to the file
+	 */
+	public function __construct($file_name) {
+
+		// call parent constructor
+		parent::__construct($file_name);
+
+		// set application
+		$this->app = App::getInstance('zoo');
+	}
+
+	/**
+	 * Gets the file extension
+	 *
+	 * @return string The file extension or empty if the file has no extension
+	 *
+	 * @since 3.0.4
+	 */
+	public function getExtension()
 	{
 		if (version_compare(PHP_VERSION, '5.3.6', '>=')) {
 			return parent::getExtension();
@@ -947,4 +982,17 @@ class ZLSplFileInfo extends SplFileInfo
 			return pathinfo($this->getPathname(), PATHINFO_EXTENSION);
 		}
 	}
+
+	/**
+	 * Get the file content type
+	 *
+	 * @return string The content type
+	 *
+	 * @since 3.0.5
+	 */
+	public function getContentType()
+	{
+		return $this->app->filesystem->getContentType($this->getPathname());
+	}
+
 }
