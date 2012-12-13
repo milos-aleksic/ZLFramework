@@ -288,7 +288,7 @@ class ZLModel extends ZLWorksAroundJoomlaToGetAModel
      */
     protected function _buildQueryOrder(&$query)
     {
-        $order_by = $this->_db->getEscaped( $this->getState('order_by') );
+        $order_by = $this->_db->escape( $this->getState('order_by') );
         if ($order_by){
             $query->order($order_by);
         }
@@ -299,9 +299,9 @@ class ZLModel extends ZLWorksAroundJoomlaToGetAModel
      */
     protected function _buildQueryLimit(&$query)
     {
-        $offset = $this->_db->getEscaped( $this->getState('offset') );
-        $limitstart = $this->_db->getEscaped( $this->getState('limitstart') );
-        $limit  = $this->_db->getEscaped( $this->getState('limit') );
+        $offset = $this->_db->escape( $this->getState('offset') );
+        $limitstart = $this->_db->escape( $this->getState('limitstart') );
+        $limit  = $this->_db->escape( $this->getState('limit') );
 
         if(strlen($limitstart)){
             $offset = $limitstart;

@@ -1,6 +1,9 @@
 Changelog
 ------------
 
+3.0.6
+ ^ Removed deprecated getEscaped code
+
 3.0.5
  # Fixed bug in widgetkit layouts
  # Fixed FilesPro directory source bug

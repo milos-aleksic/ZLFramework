@@ -41,7 +41,7 @@ class ZLModelItem extends ZLModel
             $this->orderby = $order;
             
             // join
-            if($join){ // don't use getEscaped here
+            if($join){ // don't use escape() here
                 $query->join('LEFT', $join);
             }
         }
@@ -66,7 +66,7 @@ class ZLModelItem extends ZLModel
     */
     protected function _buildQueryGroup(&$query)
     {
-        if($group_by = $this->_db->getEscaped( $this->getState('group_by') )){
+        if($group_by = $this->_db->escape( $this->getState('group_by') )){
             $query->group('a.' . $group_by);
         }
     }
@@ -126,7 +126,7 @@ class ZLModelItem extends ZLModel
         }
 
         // accessible
-        if ($user = $this->_db->getEscaped( $this->getState('user') )){
+        if ($user = $this->_db->escape( $this->getState('user') )){
             $user = $this->app->user->get($user);
             $query->where($this->app->user->getDBAccessString($user));
         }
@@ -147,7 +147,7 @@ class ZLModelItem extends ZLModel
         if ($this->getState('created_from') || $this->getState('modified_from'))
         {
             $date = $this->getState('created_from') ? $this->getState('created_from') : $this->getState('modified_from');
-            $date = $this->_db->Quote($this->_db->getEscaped( $date ));
+            $date = $this->_db->Quote($this->_db->escape( $date ));
 
             $where = array();
             $where[] = 'a.publish_up > ' . $date;
