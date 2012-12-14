@@ -74,6 +74,12 @@
 				$(this).parent().trigger('sortstop', { item: $(this) });
 			});
 
+			// init Core Elements on Edit view
+			(env == 'type-edit') &&
+			$('.col-left .core-element-configuration .element-list > li.element').each(function(){
+				$this.actions($(this));
+			});
+
 			// init on Item Edit view
 			env == 'item-edit' && $('.item-edit .creation-form .zlfield-main').each(function(){
 				$this.actions($(this));
