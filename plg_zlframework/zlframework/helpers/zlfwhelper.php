@@ -14,6 +14,97 @@ class ZlfwHelper extends AppHelper
 {
 
 	/**
+	 * get Enviroment
+	 *
+	 * @return @object The enviroment parameters
+	 *
+	 * @since 3.0.6
+	 */
+	public function getEnviroment()
+	{
+		$obj = new stdClass;
+
+		// component, eg. zoo
+		$obj->component = str_replace('com_', '', $this->app->request->getVar('option'));
+
+		// controller
+		$obj->controller = $this->app->request->getVar('controller');
+
+		// task
+		$obj->task = $this->app->request->getVar('task');
+
+		// group
+		$obj->group = $this->app->request->getVar('group');
+
+		return $obj;
+	}
+
+	/**
+	 * get The Enviroment
+	 *
+	 * @return @string An known enviroment in simple string
+	 *
+	 * @since 3.0.6
+	 */
+	public function getTheEnviroment()
+	{	
+		// init vars
+		$env = $this->getEnviroment();
+
+		// ZOO
+		if ($env->component == 'zoo')
+		{
+			$path = 'zoo-';
+			switch ($env->task) {
+				case 'editelements':
+				case 'addelement':
+					$path .= 'type-edit';
+					break;
+
+				case 'assignelements':
+					$path .= 'type-assignment';
+					break;
+
+				case 'assignsubmission':
+					$path .= 'type-assignment-submission';
+					break;
+
+				case 'edit':
+					$path .= 'item-edit';
+					break;
+
+				case 'add':
+					if ($env->controller == 'new' && strlen($env->group)) $path .= 'app-config';
+					break;
+
+				default:
+					if ($env->controller == 'configuration') $path .= 'app-config';
+					break;
+			}
+
+			return $path;
+		}
+
+		// Modules
+		if ($env->component == 'advancedmodules' || $env->component == 'modules')
+		{
+			return 'joomla-module';
+		}
+	}
+
+	/**
+	 * is the Enviroment
+	 *
+	 * @return @boolean True if enviroment match
+	 *
+	 * @since 3.0.6
+	 */
+	public function isTheEnviroment($enviroment)
+	{
+		return (strpos($this->getTheEnviroment(), $enviroment) === 0);
+	}
+
+	/**
 	 * Retrieve an plugin object
 	 *
 	 * @param  string $name The plugin name

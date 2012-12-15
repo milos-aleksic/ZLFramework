@@ -1,7 +1,6 @@
 Changelog
 ------------
 
-
 3.0.6
  ^ Removed deprecated getEscaped code
  # Fixed Core Elements ZLField Actions on Edit view
