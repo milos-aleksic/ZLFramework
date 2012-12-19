@@ -757,7 +757,7 @@ class ZlfwHelper extends AppHelper
 				break;
 			case 'bootstrap-js' :
 				// load bootstrap js
-				// $this->app->document->addScript('zlfw:assets/libraries/bootstrap/js/bootstrap.min.js');
+				$this->app->document->addScript('zlfw:assets/libraries/bootstrap/js/bootstrap.min.js');
 				break;
 
 			case 'zlux' :
