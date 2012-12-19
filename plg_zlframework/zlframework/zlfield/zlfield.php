@@ -1071,7 +1071,8 @@ class ZlfieldHelper extends AppHelper {
 		$apps = array_merge($apps, explode(' ', $spec->get('apps', '')));
 		// convert apps id to group
 		foreach ($apps as &$app) if(is_numeric($app)) {
-			$app = $this->appTable->get($app)->getGroup();
+			$app = $this->appTable->get($app);
+			$app = (is_object($app)) ? $app->getGroup() : null;
 		}
 		// clean duplicates
 		$apps = array_unique($apps);
