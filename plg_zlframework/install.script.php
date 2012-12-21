@@ -13,6 +13,7 @@ class plgSystemZlframeworkInstallerScript
 {
 	protected $_error;
 	protected $_src;
+	protected $_target;
 	protected $_ext = 'zlframework';
 	protected $_ext_name = 'ZL Framework';
 	protected $_lng_prefix = 'PLG_ZLFRAMEWORK_SYS';
@@ -56,9 +57,8 @@ class plgSystemZlframeworkInstallerScript
 	{
 		// init vars
 		$db = JFactory::getDBO();
-
-		// save install temp path
 		$this->_src = $parent->getParent()->getPath('source'); // tmp folder
+		$this->_target = JPATH_ROOT.'/plugins/system/zlframework'; // install folder
 
 		// load ZLFW sys language file EXAMPLE
 		// JFactory::getLanguage()->load('plg_system_zlframework.sys', JPATH_ADMINISTRATOR, 'en-GB', true);
@@ -67,6 +67,16 @@ class plgSystemZlframeworkInstallerScript
 		// if($type != 'uninstall' && !$this->checkRequirements($parent)){
 		// 	Jerror::raiseWarning(null, $this->_error);
 		// 	return false;
+		// }
+
+		// don't overide layouts EXAMPLE
+		/* 
+		 * when updating we don't wont to override renderer/item folder,
+		 * so let's delete the temp folder before install only if it already exists
+		 */
+		// if($type == 'update'){
+		// 	JFolder::exists($this->_target.'/renderer/item') && 
+		// 	JFolder::delete($this->_src.'/renderer/item');
 		// }
 	}
 
