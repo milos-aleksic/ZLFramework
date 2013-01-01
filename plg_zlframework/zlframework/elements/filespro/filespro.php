@@ -67,7 +67,7 @@ abstract class ElementFilesPro extends ElementRepeatablePro {
 	   Returns:
 		   Class - S3 php class
 	*/
-	protected function _S3()
+	public function _S3()
 	{
 		if ($this->_s3 == null)
 		{
@@ -953,18 +953,20 @@ class ZLSplFileInfo extends SplFileInfo
 	public $app;
 	
 	/**
-	 * Class constructor. Creates a new ZLSplFileInfo object for the file_name specified.
+	 * Class constructor. Creates a new ZLSplFileInfo object for the file_path specified.
 	 * The file does not need to exist, or be readable
 	 *
-	 * @param String $file_name Path to the file
+	 * @param String $file_path Path to the file
 	 */
-	public function __construct($file_name) {
+	public function __construct($file_path, $element) {
 
 		// call parent constructor
-		parent::__construct($file_name);
+		parent::__construct($file_path);
 
 		// set application
 		$this->app = App::getInstance('zoo');
+
+		$this->element = $element;
 	}
 
 	/**
@@ -993,6 +995,39 @@ class ZLSplFileInfo extends SplFileInfo
 	public function getContentType()
 	{
 		return $this->app->filesystem->getContentType($this->getPathname());
+	}
+
+	/**
+	 * Get the absolute url to a file
+	 *
+	 * @return string The absolute url
+	 *
+	 * @since 3.0.5
+	 */
+	public function getURL()
+	{
+		if ($this->element->config->find('files._s3', 0)) // Amazon S3
+		{
+			$bucket = $this->element->config->find('files._s3bucket');
+			return $this->element->_S3()->getAuthenticatedURL($bucket, $this->getPathname(), 3600);
+		} else {
+			return $this->app->path->url("root:{$this->getPathname()}");
+		}
+	}
+
+	/**
+	 * Gets the file title
+	 *
+	 * @return string The file title
+	 *
+	 * @since 3.0.5
+	 */
+	public function getTitle($title = null)
+	{
+		$title = $title ? $title : $this->getBasename('.'.$this->getExtension());
+
+		// return without _ carachter
+		return str_replace('_', ' ', $title);
 	}
 
 }
