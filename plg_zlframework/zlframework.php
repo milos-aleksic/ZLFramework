@@ -91,7 +91,7 @@ class plgSystemZlframework extends JPlugin {
 		if(!$this->checkInstallation()) return; // must go after language, elements path and helpers
 
 		// let's define the check was succesfull to speed up other plugins loading
-		define('ZLFW_DEPENDENCIES_CHECK_OK', true);
+		if (!defined('ZLFW_DEPENDENCIES_CHECK_OK')) define('ZLFW_DEPENDENCIES_CHECK_OK', true);
 
 		// register zlfield helper
 		if ($this->app->path->path('zlfield:')) $this->app->loader->register('ZlfieldHelper', 'zlfield:zlfield.php');

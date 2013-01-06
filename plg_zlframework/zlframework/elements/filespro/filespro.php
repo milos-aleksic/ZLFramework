@@ -942,7 +942,7 @@ abstract class ElementFilesPro extends ElementRepeatablePro {
 		The ZLSplFileInfo extends SplFileInfo class which offers a high-level object oriented interface to information for an individual file.
 		http://au1.php.net/manual/en/class.splfileinfo.php
 */
-class ZLSplFileInfo extends SplFileInfo
+class FilesProSplFileInfo extends SplFileInfo
 {
 	/**
 	 * Reference to the global App object
@@ -958,14 +958,15 @@ class ZLSplFileInfo extends SplFileInfo
 	 *
 	 * @param String $file_path Path to the file
 	 */
-	public function __construct($file_path, $element) {
+	public function __construct($file_path, &$element) {
 
 		// call parent constructor
 		parent::__construct($file_path);
 
 		// set application
 		$this->app = App::getInstance('zoo');
-
+		
+		// set element
 		$this->element = $element;
 	}
 
