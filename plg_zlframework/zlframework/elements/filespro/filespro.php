@@ -274,6 +274,8 @@ abstract class ElementFilesPro extends ElementRepeatablePro {
 		$this->app->document->addScript('elements:filespro/assets/plupload/jquery.ui.plupload.js');
 		$this->app->zlfw->pluploadTranslation();
 		$this->app->zlfw->filesproTranslation();
+
+		// dump(1);
 		
 		// and others
 		$this->app->zlfw->loadLibrary('qtip');
@@ -1011,8 +1013,10 @@ class FilesProSplFileInfo extends SplFileInfo
 		{
 			$bucket = $this->element->config->find('files._s3bucket');
 			return $this->element->_S3()->getAuthenticatedURL($bucket, $this->getPathname(), 3600);
+		} else if ($rel_url = $this->app->path->url("root:{$this->getPathname()}")) {
+			return $rel_url;
 		} else {
-			return $this->app->path->url("root:{$this->getPathname()}");
+			return $this->getPathname();
 		}
 	}
 
