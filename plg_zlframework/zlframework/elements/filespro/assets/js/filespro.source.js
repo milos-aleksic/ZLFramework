@@ -9,6 +9,7 @@
 			flashUrl: null,
 			type: null,
 			fileMode: 'files',
+			max_file_size: '1024kb',
 			title: 'Files',
 			extensions: 'jpg,gif,png,zip,pdf',
 			file_details: {}
@@ -17,7 +18,6 @@
             this.options = $.extend({}, this.options, c);
 			var d = this,
 				op = d.options;
-
 			// apply on each new instances
             b.delegate('p.add a', 'click', function () {
 				d.apply(b.find('input.'+op.type+'-element'));
@@ -72,6 +72,7 @@
 				url: op.url,
 				title: op.title,
 				extensions: op.extensions,
+				max_file_size: op.max_file_size,
 				filemanager: op.filemanager
 			});
 			

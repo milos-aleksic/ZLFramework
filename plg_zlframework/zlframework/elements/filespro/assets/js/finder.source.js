@@ -164,6 +164,7 @@
 					path: (path === undefined ? '' : path),
 					extensions:  b.options.extensions,
 					fileMode: 'files',
+					max_file_size: b.options.max_file_size,
 					callback: callback
 				});
 			
