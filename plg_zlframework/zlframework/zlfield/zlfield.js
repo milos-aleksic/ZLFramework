@@ -242,14 +242,15 @@
 				/* 
 				 * Toggle Fields
 				 */
-				$dom.find('.zltoggle-btn').each(function(){
+				$dom.find('.zl-toggle').each(function(){
 					var toggle = $(this),
 						content = toggle.next();
+
 					// set action
-					toggle.find('.tg-open').bind('click', function(){
+					$('.btn-open', toggle).on('click', function(){
 						toggle.toggleClass('open') && content.show();
 					});
-					toggle.find('.tg-close').bind('click', function(){
+					$('.btn-close', toggle).on('click', function(){
 						toggle.toggleClass('open') && content.hide();
 					});
 				}); // Toggle Fields END
