@@ -1,12 +1,9 @@
 <?php
 /**
-* @version		$Id: query.php 12628 2009-08-13 13:20:46Z erdsiger $
-* @copyright	Copyright (C) 2005 - 2009 Open Source Matters, Inc. All rights reserved.
-* @license      http://www.gnu.org/licenses/gpl-2.0.html GNU/GPLv2 only
-* expanding
-* @package      ZL Framework
-* @author       JOOlanders, SL http://www.zoolanders.com
-* @copyright    Copyright (C) JOOlanders, SL
+* @package		ZL Framework
+* @author    	JOOlanders, SL http://www.zoolanders.com
+* @copyright 	Copyright (C) JOOlanders, SL
+* @license   	http://www.gnu.org/licenses/gpl-2.0.html GNU/GPLv2 only
 */
 
 // no direct access
