@@ -209,7 +209,8 @@ class ZLModel extends ZLWorksAroundJoomlaToGetAModel
             return $this->_query;
         }
 
-        $query = new ZLQuery();
+        // Use joomla query builder
+        $query = $this->_db->getQuery(true);
 
         $this->_buildQueryFields($query);
         $this->_buildQueryFrom($query);
@@ -228,7 +229,8 @@ class ZLModel extends ZLWorksAroundJoomlaToGetAModel
      */
     protected function _buildResultQuery()
     {
-        $query = new ZLQuery();
+        // Use joomla query builder
+        $query = $this->_db->getQuery(true);
         $query->select( 'COUNT( DISTINCT a.id )');
 
         $this->_buildQueryFrom($query);
