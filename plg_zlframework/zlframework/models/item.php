@@ -42,7 +42,7 @@ class ZLModelItem extends ZLModel
             
             // join
             if($join){ // don't use escape() here
-                $query->join('LEFT', $join);
+                $query->leftJoin($join);
             }
         }
     }
