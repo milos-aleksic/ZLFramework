@@ -6,6 +6,9 @@
 * @license   	http://www.gnu.org/licenses/gpl-2.0.html GNU/GPLv2 only
 */
 
+// no direct access
+defined('_JEXEC') or die('Restricted access');
+
 App::getInstance('zoo')->loader->register('ElementRepeatable', 'elements:repeatable/repeatable.php');
 
 /*
@@ -139,7 +142,7 @@ abstract class ElementRepeatablePro extends ElementRepeatable {
 	*/
 	public function loadAssets() {
 		if ($this->config->get('repeatable')) {
-			$this->app->document->addScript('elements:repeatablepro/repeatablepro.js');
+			$this->app->document->addScript('elements:repeatablepro/repeatablepro.min.js');
 		}
 		$this->app->document->addStylesheet('zlfw:assets/css/zl_ui.css');
 		return $this;

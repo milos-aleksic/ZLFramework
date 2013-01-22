@@ -6,6 +6,9 @@
 * @license   	http://www.gnu.org/licenses/gpl-2.0.html GNU/GPLv2 only
 */
 
+// no direct access
+defined('_JEXEC') or die('Restricted access');
+
 	return
 	'{"fields": {
 
@@ -27,8 +30,10 @@
 		'./* separator */'
 		"_id":{
 			"type":"separator",
-			"text":"PLG_ZLFW_NAME",
-			"big":"1" // 0:default, 1
+			"specific":{
+				"title":"PLG_ZLFW_NAME"
+			},
+			"layout":"section/subsection/line"
 		},
 
 		'./* subfield */'
@@ -44,15 +49,16 @@
 			}
 		},
 
-		'./* wrapper/control_wrapper/fieldset/toggle */'
+		'./* wrapper */'
 		"_id": {
-			"type":"wrapper/control_wrapper/fieldset/toggle", './* all 3 are diferent kind of wrappers sharing same options */'
+			"type":"wrapper", './* all 3 are diferent kind of wrappers sharing same options */'
 			"min_count":"2", './* the wrapper will render only if min number of fields returns as a valid row */'
 			"fields": {
 				"_id":{},
 				"_id":{}
 			},
-			"control":"control_name" './* set the control of the subfields, if necesary */'
+			"control":"control_name", './* set the control of the subfields, if necesary */'
+			"layout":"wrapper/control_wrapper/fieldset/toggle" './* all 3 are diferent kind of wrappers sharing same 
 		},
 
 

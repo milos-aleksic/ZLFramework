@@ -1,0 +1,59 @@
+/* Copyright (C) JOOlanders SL http://www.gnu.org/licenses/gpl-2.0.html GNU/GPLv2 only */
+
+div.zlfield div.wrapper {
+	min-height: 30px;
+	overflow: hidden;
+}
+
+/* fieldset wrapper */
+div.zlfield fieldset.wrapper {
+	min-height: 30px;
+	margin: 10px 5px 0;
+	padding: 17px;
+	background-color: #FFFFFF;
+	border: 1px solid #CCCCCC;
+}
+div.zlfield fieldset.wrapper div.zl-row {
+	padding-left: 0 !important; 
+}
+
+div.zlfield fieldset.wrapper > .layout-separator:first-child {
+	margin-top: 0;
+}
+
+/* fieldset-toggle layout */
+div.zlfield fieldset.wrapper[data-layout="fieldset-toggle"] {
+	min-height: 0;
+	position: relative;
+	border-radius: 2px;
+}
+
+div.zlfield fieldset.wrapper[data-layout="fieldset-toggle"] .zl-toggle {
+	border-bottom: 1px solid #CCCCCC;
+	display: block;
+	position: absolute;
+	left: 0;
+	top: 0;
+	width: 100%;
+	font-size: 55px;
+	padding: 5px 0;
+	text-indent: 10px;
+	font-weight: bold;
+
+	background-color: #F0F0F0;
+}
+
+div.zlfield fieldset.wrapper[data-layout="fieldset-toggle"] .zl-toggle .btn-open,
+div.zlfield fieldset.wrapper[data-layout="fieldset-toggle"] .zl-toggle .btn-close {
+	border-radius: 2px;
+}
+
+div.zlfield fieldset.wrapper[data-layout="fieldset-toggle"] .zl-toggle-content {
+	margin-top: 20px;
+}
+
+/* nested fieldsets */
+div.zlfield fieldset.wrapper[data-layout="fieldset-toggle"] fieldset.wrapper[data-layout="fieldset-toggle"] .zl-toggle 
+{
+	background-color: #f7f7f7;
+}

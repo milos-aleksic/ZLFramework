@@ -10,6 +10,9 @@
 * @license   http://www.gnu.org/licenses/gpl.html GNU/GPL
 */
 
+// no direct access
+defined('_JEXEC') or die('Restricted access');
+
 	$widget_id = $widget->id.'-'.uniqid();
 	$settings  = $widget->settings;
 	$i = 0;

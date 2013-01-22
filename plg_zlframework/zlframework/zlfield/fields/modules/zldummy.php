@@ -6,7 +6,8 @@
 * @license   	http://www.gnu.org/licenses/gpl-2.0.html GNU/GPLv2 only
 */
 
-defined('JPATH_BASE') or die;
+// no direct access
+defined('_JEXEC') or die('Restricted access');
 
 jimport('joomla.form.formfield');
 
