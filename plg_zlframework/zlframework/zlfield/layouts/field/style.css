@@ -130,6 +130,7 @@ div.zlfield div.zl-row[data-layout="default"] .zl-label + .zl-field * {
 	clear: none;
 	float: left;
 	min-width: 0;
+	padding: 0;
 }
 
 /* help
