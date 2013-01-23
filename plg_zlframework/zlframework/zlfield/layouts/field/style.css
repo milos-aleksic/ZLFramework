@@ -130,7 +130,12 @@ div.zlfield div.zl-row[data-layout="default"] .zl-label + .zl-field * {
 	clear: none;
 	float: left;
 	min-width: 0;
-	padding: 0;
+}
+
+/* label fix for j3 */
+div.zlfield div.zl-row[data-layout="default"] .controls > .radio:first-child,
+div.zlfield div.zl-row[data-layout="default"] .controls > .checkbox:first-child {
+    padding-top: 0;
 }
 
 /* help

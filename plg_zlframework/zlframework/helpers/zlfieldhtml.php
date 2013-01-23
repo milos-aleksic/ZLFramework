@@ -320,7 +320,7 @@ class ZLFieldHTMLHelper extends AppHelper {
 		$element_type = explode(' ', $spec->get('elements', ''));
 		
 		// get elements list
-		$elements = $this->elementsList($apps, $element_type, $types);
+		$elements = $this->app->zlfield->elementsList($apps, $element_type, $types);
 		
 		if(empty($elements)){
 			// set text
@@ -472,62 +472,5 @@ class ZLFieldHTMLHelper extends AppHelper {
 			}
 		}
 		return $layouts;
-	}
-	
-	/*
-		Function: elementsList - Returns element list
-	*/
-	protected $_elements_list = array();
-	public function elementsList($groups_filter = array(), $elements_filter = array(), $filter_types = array())
-	{
-		$groups_filter 		= array_filter((array)($groups_filter));
-		$elements_filter 	= array_filter((array)($elements_filter));
-		$filter_types 		= array_filter((array)($filter_types));
-
-		$hash = md5(serialize( array($groups_filter, $elements_filter, $filter_types) ));
-		if (!array_key_exists($hash, $this->_elements_list))
-		{
-			// get apps
-			$apps = $this->app->table->application->all(array('order' => 'name'));
-			
-			// prepare types and filter app group
-			$types = array();
-			foreach ($apps as $app){
-				if (empty($groups_filter) || in_array($app->getGroup(), $groups_filter)) {
-					$types = array_merge($types, $app->getTypes());
-				}
-			}
-			
-			// filter types
-			if (count($filter_types) && !empty($filter_types[0])){
-				$filtered_types = array();
-				foreach ($types as $type){
-					if (in_array($type->id, $filter_types)){
-						$filtered_types[] = $type;
-					}
-				}
-				$types = $filtered_types;
-			}
-			
-			// get all elements
-			$elements = array();
-			foreach($types as $type){
-				$elements = array_merge( $elements, $type->getElements() );
-			}
-			
-			// create options
-			$options = array();			
-			foreach ($elements as $element) {
-				// include only desired element type
-				if (empty($elements_filter) || in_array($element->getElementType(), $elements_filter)) {
-					$options[$element->getType()->name.' > '.$element->config->get('name')] = $element->identifier;
-				}
-			}
-
-			$this->_elements_list[$hash] = $options;
-		}
-
-		// return elements array
-		return @$this->_elements_list[$hash];
 	}
 }
