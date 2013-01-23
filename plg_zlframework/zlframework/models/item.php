@@ -11,6 +11,70 @@ defined('_JEXEC') or die('Restricted access');
 
 class ZLModelItem extends ZLModel
 {
+    /**
+     * Magic method to set states by calling a method named as the filter
+     * @param  string $name The name of the state to apply
+     * @param  array  $args The list of arguments passed to the method
+     */
+    public function __call($name, $args)
+    {
+        // Go for the states!
+        if (!method_exists($this, $name)) {
+            if (isset($args[0])) {
+                // The state name to set is the method name
+                $state = (string) $name;
+                // $model->categories(array('value' => '123', 'mode' => 'AND'));
+                if (is_array($args[0]) || is_object($args[0])) {
+                    $options = new JRegistry($args[0]);
+                } else {
+                    // $model->element('id', $options);
+                    if (isset($args[1])) {
+                        // $model->element('id', $options);
+                        if (is_array($args[1]) || is_object($args[1])) {
+                            $options = new JRegistry($args[1]);
+                        } else {
+                            // $model->element('id', 'value');
+                            $options = new JRegistry();
+                            $options->set('value', $args[1]);
+                            $options->set('id', $args[0]);
+                        }
+                    } else {
+                        $options = new JRegistry;
+                        // Just the value
+                        $options->set('value', $args[0]);
+                    }
+                }
+
+                $this->setState($state, $options);
+                return $this;
+            }       
+        }
+        // Normal method calling
+        return parent::__call($name, $args);
+    }
+
+    /**
+     * Dont' overwrite the old state if requested
+     * @param [type] $key   [description]
+     * @param [type] $value [description]
+     */
+    public function setState($key, $value = null, $overwrite = false) {
+        
+        if (!$overwrite) {
+            $old_value = $this->getState($key, array());
+            if (is_array($value)) {
+                $value = array_merge($old_value, $value);
+            } else {
+                $old_value[] = $value;
+                $value = $old_value;
+            }
+        }
+
+        parent::setState($key, $value);
+
+        return $this;
+    }
+
     /*
         Function: _buildQueryFrom
             Builds FROM tables list for the query
@@ -49,7 +113,7 @@ class ZLModelItem extends ZLModel
 
     /*
         Function: _buildQueryWhere
-            Bilds WHERE query
+            Builds WHERE query
     */
     protected function _buildQueryWhere(&$query)
     {
@@ -58,6 +122,9 @@ class ZLModelItem extends ZLModel
         
         // Apply general item filters (type, app, etc)
         $this->itemFilters($query);
+        
+        // Element filters
+        $this->elementFilters($query);
     }
 
     /*
@@ -84,91 +151,160 @@ class ZLModelItem extends ZLModel
         }
     }
 
-
-    /*
-        Function: itemFilters
-            Apply general item filters (type, app, etc)
-    */
-    protected function itemFilters(&$query)
-    {   
-        $pqry = ''; // partial query
-
-        // application
-        if ($apps_id = $this->getState('apps'))
-        {    
-            if(is_array($apps_id))
-                $pqry = count($apps_id) > 1 ? 'IN ('.implode(',', $apps_id).')' : '= '.(int)array_shift($apps_id);
-            else
-                $pqry = '= '.(int)$apps_id;
-
-            $query->where('a.application_id '.$pqry);
-        }
-
-        // type
-        if ($types = $this->getState('types'))
-        {
-            if(is_array($types))
-                $pqry = count($types) > 1 ? "IN ('". implode("', '", $types)."')" : 'LIKE '.$this->_db->Quote(array_shift($types));
-            else
-                $pqry = 'LIKE '.$this->_db->Quote($types);
-
-            $query->where('a.type '.$pqry);
-        }
-
-        // categories
-        if($cats_id = $this->getState('categories')){
-            $query->where('b.category_id '.(is_array($cats_id) ? ' IN ('.implode(',', $cats_id).')' : ' = '.(int) $cats_id));
-        }
-
-        // published
-        if ($this->getState('published')){
-            $query->where('a.state = 1');
-        }
-
-        // accessible
-        if ($user = $this->_db->escape( $this->getState('user') )){
-            $user = $this->app->user->get($user);
-            $query->where($this->app->user->getDBAccessString($user));
-        }
-    }
-
-    /*
-        Function: itemFilters
-            Apply general filters like searchable, publicated, etc
-    */
+    /**
+     * Apply general filters like searchable, publicated, etc
+     */
     protected function basicFilters(&$query)
     {
         // init vars
+        $user = JFactory::getUser();
         $date = JFactory::getDate();
-        $now  = $this->_db->Quote($date->toMySQL());
+        $now  = $this->_db->Quote($date->toSql());
         $null = $this->_db->Quote($this->_db->getNullDate());
 
-        // created/published/modified from
-        if ($this->getState('created_from') || $this->getState('modified_from'))
-        {
-            $date = $this->getState('created_from') ? $this->getState('created_from') : $this->getState('modified_from');
-            $date = $this->_db->Quote($this->_db->escape( $date ));
+        // Basic filters
+        $query->where('a.searchable = 1');
+        // Searchable
+        $query->where( 'a.' . $this->app->user->getDBAccessString());
+        // User accessible
+        $query->where('a.state = 1');
+        // published
 
-            $where = array();
-            $where[] = 'a.publish_up > ' . $date;
-            $where[] = 'a.created > ' . $date;
-            $this->getState('modified_from') && $where[] = 'a.modified > ' . $date;
-            $query->where('(' . implode(' OR ', $where) . ')');
-        }
-        else
-        {
-            // publication up
-            $where = array();
-            $where[] = 'a.publish_up = ' . $null;
-            $where[] = 'a.publish_up <= ' . $now;
-            $query->where('(' . implode(' OR ', $where) . ')');
-        }
+        // Publication up
+        $where = array();
+        $where[] = 'a.publish_up = ' . $null;
+        $where[] = 'a.publish_up <= ' . $now;
+        $query->where('(' . implode(' OR ', $where) . ')');
 
-        // publication down
+        // Publication down
         $where = array();
         $where[] = 'a.publish_down = ' . $null;
         $where[] = 'a.publish_down >= ' . $now;
         $query->where('(' . implode(' OR ', $where) . ')');
+    }
+
+    /**
+     * Apply general item filters (type, app, etc)
+     */
+    protected function itemFilters(&$query)
+    {
+        // Filters
+        $apps   = $this->getState('application', false);
+        $types  = $this->getState('type', false);
+        
+        // Same application
+        if ($apps){
+            foreach($apps as $app) {
+                $query->where('a.application_id = ' . (int)($app->get('value', '')));
+            }
+        }
+
+        // Same type
+        if ($types){
+            foreach ($types as $type ) {
+                $query->where('a.type LIKE ' . $this->_db->Quote($type->get('value', '')));
+            }
+        }
+    }
+
+    /**
+     * Apply element filters
+     */
+    protected function elementFilters(&$query)
+    {
+        $wheres = array('AND' => array(), 'OR' => array());
+
+        // item name filtering
+        $names = $this->getState('name');
+        if ($names){
+            foreach ($names as $name) {
+                $logic = strtoupper($name->get('logic', 'AND'));
+                $wheres[$logic][] = 'a.name LIKE ' . $this->getQuotedValue( $name );
+            }
+        }
+        
+        // Category filtering
+        $categories = $this->getState('categories', false);
+        if ($categories) {
+            foreach ( $categories as $cats ) {
+                if ($value = $cats->get('value', array())) {
+                    $logic = $cats->get('logic', 'AND'); 
+                    // build the where for ORs
+                    if ( strtoupper($cats->get('mode', 'OR')) == 'OR' ){
+                        $wheres[$logic][] = "b.category_id IN (".implode(',', $value).")";
+                    } 
+                    else {
+                        // it's heavy query but the only way for AND mode
+                        foreach ($value as $id) {
+                            $wheres[$logic][]  = "a.id IN ("
+                                        ." SELECT b.id FROM ".ZOO_TABLE_ITEM." AS b"
+                                        ." LEFT JOIN " . ZOO_TABLE_CATEGORY_ITEM . " AS y"
+                                        ." ON b.id = y.item_id"
+                                        ." WHERE y.category_id = ".(int) $id .")";
+                        }
+                    }
+                }
+            }
+        }
+        
+        // Elements filters
+        $elements = $this->getState('element', array());
+        $k = 0;
+        if ($elements) {
+            foreach($elements as $element) {
+                // Options!
+                $id         = $element->get('id');
+                $value      = $element->get('value');
+                $logic      = strtoupper($element->get('logic', 'AND'));
+                $mode       = $element->get('mode', 'AND');
+                $is_select  = $element->get('is_select', false);
+                $from       = $element->get('from', false);
+                $to         = $element->get('to', false);
+                $convert    = $element->get('convert', 'DECIMAL');
+                $type       = $element->get('type', false);
+                $is_date    = $element->get('is_date', false);
+
+                $is_range   = in_array($type, array('range', 'rangeequal', 'from', 'to', 'fromequal', 'toequal', 'outofrange', 'outofrangeequal'));
+
+                // Multiple choice!
+                if( is_array( $value ) && !$from && !$to) {                 
+                    $wheres[$logic][] = $this->getMultipleSearch($id, $value, $mode, $k, $is_select, $logic);               
+                } else {                    
+                    // Search ranges!
+                    if ($is_range && !$is_date){
+                        // Handle everything in a special method
+                        $wheres[$logic][] = $this->getRangeSearch($id, $from, $to, $type, $convert, $k);
+                    } else  {
+                        // Special date case
+                        if ($is_date) {
+                            $d_value = !empty($search_value) ? $search_value : '';
+                            $d_value_to = !empty($search_value_to) ? $search_value_to : '';
+                            $d_value_from = !empty($search_value_from) ? $search_value_from : '';
+
+                            $wheres[$logic][] = $this->getDateSearch($id, $k, $d_value, $d_value_to, $d_value_from, $type);
+                        } else {
+                            // Normal search
+                            $value = $this->getQuotedValue($element);
+                            $wheres[$logic][] = "(b$k.element_id = '" . $id . "' AND TRIM(b$k.value) LIKE " . $value .') ';     
+                        }
+                    }
+                }
+                $k++;
+            }
+        }
+        
+        // At the end, merge ORs
+        if( count( $wheres['OR'] ) ) {
+            $query->where('(' . implode(' OR ', $wheres['OR']) . ')');
+        }
+        
+        // and the ANDs
+        foreach ($wheres['AND'] as $where) {
+            $query->where($where);
+        }
+        
+        // Add repeatable joins
+        $this->addRepeatableJoins($query, $k);
     }
 
     /**
@@ -235,5 +371,167 @@ class ZLModelItem extends ZLModel
         }
 
         return $result;
+    }
+
+    /**
+     * Get the range search sql
+     */
+    protected function getRangeSearch($identifier, $from, $to, $type, $convert, $k) {
+        $is_equal = false;
+        
+        // Add equal sign
+        if (stripos($type, "equal") != -1) {
+            $is_equal = true;
+            $type = str_ireplace("equal", "", $type);
+        }
+
+        // Defaults
+        $sql = array();
+        $value = $from;
+        $symbol = "";
+
+        // Symbol and value based on the type
+        switch($type) {
+            case "from":
+                $value = $from;
+                $symbol = ">";
+                break;
+            case "to": 
+                $value = $to;
+                $symbol = "<";
+                break;
+            case "range": 
+                if ($from) {
+                    $new_type = $is_equal ? 'fromequal' : 'from';
+                    $sql[] = $this->getRangeSearch($identifier, $from, $to, $new_type, $convert, $k);
+                }
+                if ($to) {
+                    $new_type = $is_equal ? 'toequal' : 'to';
+                    $sql[] = $this->getRangeSearch($identifier, $from, $to, $new_type, $convert, $k);
+                }
+                return implode(" AND ", $sql);
+                break;
+            case "outofrange":
+                if ($to) {
+                    $new_type = $is_equal ? 'fromequal' : 'from';
+                    $sql[] = $this->getRangeSearch($identifier, $to, $from, $new_type, $convert, $k);
+                }
+                if ($from) {
+                    $new_type = $is_equal ? 'toequal' : 'to';
+                    $sql[] = $this->getRangeSearch($identifier, $to, $from, $new_type, $convert, $k);
+                }
+                return implode(" AND ", $sql);
+                break;
+        }
+
+        // Add equal sign
+        if ($is_equal) {
+            $symbol .= "=";
+        }
+
+        // Build range sql
+        return "(b$k.element_id = '" . $identifier . "' AND CONVERT(TRIM(b$k.value+0), $convert) " . $symbol . " " . $value.")";
+    }
+
+    protected function getDateSearch($identifier, $k, $value, $value_to, $value_from, $search_type)
+    {
+        if (!empty($value)) { // search_type = to:from:default
+            $date = substr($value, 1, 10);
+            $from = $date.' 00:00:00';
+            $to   = $date.' 23:59:59';
+        } else { // search_type = range
+            $from = substr($value_from, 1, 10).' 00:00:00';
+            $to   = substr($value_to, 1, 10).' 23:59:59';
+        }
+        
+        $from = $this->_db->Quote($this->_db->escape($from));
+        $to   = $this->_db->Quote($this->_db->escape($to));
+        
+        switch ($search_type) {
+            case 'to':
+                $el_where = "(b$k.element_id = '$identifier' AND ((SUBSTRING(b$k.value, 1, 19) <= $to) OR ($to >= SUBSTRING(b$k.value, 1, 19)))) ";
+                break;
+            case 'from':
+                $el_where = "(b$k.element_id = '$identifier' AND ((SUBSTRING(b$k.value, -19) >= $from) OR ($from <= SUBSTRING(b$k.value, -19)))) ";
+                break;
+            case 'range':
+                $el_where = "(b$k.element_id = '$identifier' AND (($from BETWEEN SUBSTRING(b$k.value, 1, 19) AND SUBSTRING(b$k.value, -19)) OR ($to BETWEEN SUBSTRING(b$k.value, 1, 19) AND SUBSTRING(b$k.value, -19)) OR (SUBSTRING(b$k.value, 1, 19) BETWEEN $from AND $to) OR (SUBSTRING(b$k.value, -19) BETWEEN $from AND $to))) ";
+                break;
+            default:
+                $date = $this->_db->escape($date);
+                $el_where = "(b$k.element_id = '$identifier' AND ((b$k.value LIKE '%$date%') OR (('$date' BETWEEN SUBSTRING(b$k.value, 1, 10) AND SUBSTRING(b$k.value, -19, 10)) AND b$k.value NOT REGEXP '[[.LF.]]'))) ";
+        }
+        
+        return $el_where;
+    }
+    
+    protected function getMultipleSearch($identifier, $values, $mode, $k, $is_select = true, $logic='AND')
+    {
+        $el_where = "b$k.element_id = " . $this->_db->Quote($identifier);               
+        $el_where .= " $logic ";
+
+        // lets be sure mode is set
+        $mode = $mode ? $mode : "AND";
+        
+        $multiples = array();
+        
+        // Normal selects / radio / etc (ElementOption)
+        if($is_select)
+        {
+            foreach($values as $value)
+            {
+                $multiple = "TRIM(b$k.value) LIKE ".$this->_db->Quote(trim($this->_db->escape($value)))." OR ";
+                $multiple .= "TRIM(b$k.value) LIKE ".$this->_db->Quote(trim($this->_db->escape($value)."\n%"))." OR ";
+                $multiple .= "TRIM(b$k.value) LIKE ".$this->_db->Quote(trim("%\n".$this->_db->escape($value)))." OR ";
+                $multiple .= "TRIM(b$k.value) LIKE ".$this->_db->Quote(trim("%\n".$this->_db->escape($value)."\n%"));
+                $multiples[] = "(".$multiple.")";
+            }
+        } 
+        // This covers country element too
+        else 
+        {
+            foreach($values as $value)
+            {
+                $multiple = "TRIM(b$k.value) LIKE ".$this->_db->Quote(trim($this->_db->escape($value)))." OR ";
+                $multiple .= "TRIM(b$k.value) LIKE ".$this->_db->Quote(trim($this->_db->escape($value).' %'))." OR ";
+                $multiple .= "TRIM(b$k.value) LIKE ".$this->_db->Quote(trim('% '.$this->_db->escape($value)))." OR ";
+                $multiple .= "TRIM(b$k.value) LIKE ".$this->_db->Quote(trim('% '.$this->_db->escape($value).' %'));
+                $multiples[] = "(".$multiple.")";
+            }
+        }
+        
+        $el_where .= "(".implode(" ".$mode. " ", $multiples).")";
+        
+        return $el_where;
+    }
+
+    /**
+     * One Join for each element filter
+     */
+    protected function addRepeatableJoins(&$query, $k)
+    {
+        // 1 join for each parameter
+        for ( $i = 0; $i < $k; $i++ ){
+            $query->leftJoin(ZOO_TABLE_SEARCH . " AS b$i ON a.id = b$i.item_id");
+        }
+    }
+    
+    /**
+     * Get the value quoted and with %% if needed
+     */
+    protected function getQuotedValue($name, $quote = true)
+    {
+        // || @$name['is_select'] != true  -> this make allways partial searches
+        if( $name->get('type', 'partial') == 'partial'){
+            $value = '%' . $name->get('value', '') . '%';
+        } else {
+            $value = $name->get('value', '');   
+        } 
+
+        if($quote) {
+            return $this->_db->Quote( $value );
+        }
+        
+        return $value;
     }
 }
