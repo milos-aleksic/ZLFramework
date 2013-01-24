@@ -20,35 +20,39 @@ class ZLModelItem extends ZLModel
     {
         // Go for the states!
         if (!method_exists($this, $name)) {
-            if (isset($args[0])) {
-                // The state name to set is the method name
-                $state = (string) $name;
-                // $model->categories(array('value' => '123', 'mode' => 'AND'));
-                if (is_array($args[0]) || is_object($args[0])) {
-                    $options = new JRegistry($args[0]);
-                } else {
-                    // $model->element('id', $options);
-                    if (isset($args[1])) {
-                        // $model->element('id', $options);
-                        if (is_array($args[1]) || is_object($args[1])) {
-                            $options = new JRegistry($args[1]);
-                        } else {
-                            // $model->element('id', 'value');
-                            $options = new JRegistry();
-                            $options->set('value', $args[1]);
-                            $options->set('id', $args[0]);
-                        }
-                    } else {
-                        $options = new JRegistry;
-                        // Just the value
-                        $options->set('value', $args[0]);
-                    }
-                }
+            
+            // if no arguments supplied, abort
+            if (!isset($args[0])) return $this;
 
-                $this->setState($state, $options);
-                return $this;
-            }       
+            // The state name to set is the method name
+            $state = (string) $name;
+            
+            // $model->categories(array('value' => '123', 'mode' => 'AND'));
+            if (is_array($args[0]) || is_object($args[0])) {
+                $options = new JRegistry($args[0]);
+            } else {
+                // $model->element('id', $options);
+                if (isset($args[1])) {
+                    // $model->element('id', $options);
+                    if (is_array($args[1]) || is_object($args[1])) {
+                        $options = new JRegistry($args[1]);
+                    } else {
+                        // $model->element('id', 'value');
+                        $options = new JRegistry();
+                        $options->set('value', $args[1]);
+                        $options->set('id', $args[0]);
+                    }
+                } else {
+                    $options = new JRegistry;
+                    // Just the value
+                    $options->set('value', $args[0]);
+                }
+            }
+
+            $this->setState($state, $options);
+            return $this;
         }
+        
         // Normal method calling
         return parent::__call($name, $args);
     }
@@ -198,7 +202,7 @@ class ZLModelItem extends ZLModel
                 $query->where('a.application_id = ' . (int)($app->get('value', '')));
             }
         }
-
+        
         // Same type
         if ($types){
             foreach ($types as $type ) {
