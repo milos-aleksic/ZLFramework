@@ -12,7 +12,8 @@
 		options: {
 			url: '',
 			type: '',
-			enviroment: ''
+			enviroment: '',
+			enviroment_args: ''
 		},
 		initialize: function(body, options) {
 			this.options = $.extend({}, this.options, options);
@@ -390,7 +391,19 @@
 
 						// peform ajax request
 						ac.append($('<span class="activity zl-loader">'));
-						$.getJSON(b.url, {task: 'loadfield', json:json, ctrl:ctrl, psv:psv, pid:pid, node:null, args:args, ajaxcall:true, enviroment:$this.options.enviroment}, function(data){
+						$.getJSON(b.url, 
+							{
+								task: 'loadfield', 
+								json:json, 
+								ctrl:ctrl, 
+								psv:psv, 
+								pid:pid, 
+								node:null, 
+								args:args, 
+								ajaxcall:true, 
+								enviroment:$this.options.enviroment, 
+								enviroment_args:$this.options.enviroment_args
+							}, function(data){
 							ac.find('.activity').remove();
 
 							// set data

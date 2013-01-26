@@ -19,6 +19,7 @@ class ZlfieldHelper extends AppHelper {
 	protected $path;
 	protected $params;
 	protected $enviroment;
+	protected $enviroment_args;
 	protected $config;
 	protected $mode;
 
@@ -41,6 +42,10 @@ class ZlfieldHelper extends AppHelper {
 
 		// if no enviroment for ZL field, cancel
 		if (!$this->enviroment) return;
+
+		// decode and set enviroment arguments
+		$this->enviroment_args = json_decode($this->req->get('enviroment_args', 'string', ''), true);
+		$this->enviroment_args = $this->app->data->create($this->enviroment_args);
 
 		// get task
 		$this->task = $this->req->getVar('parent_task') ? $this->req->getVar('parent_task') : $this->req->getVar('task');
@@ -172,19 +177,25 @@ class ZlfieldHelper extends AppHelper {
 
 	protected function initModuleMode()
 	{
+		// init vars
+		$module_id = $this->enviroment_args->get('id', $this->req->getVar('id'));
+
 		// get module params
 		$db = JFactory::getDbo();
 		$query = $db->getQuery(true);
 
 		$query->select('m.params');
 		$query->from('#__modules AS m');
-		$query->where('m.id = '.$this->req->getVar('id'));
+		$query->where('m.id = '.$module_id);
 
 		$db->setQuery($query);
 		$result = $db->loadResult();
 
 		// create the necesay array path
 		$this->params = $this->data->create( array('jform' => array('params' => json_decode($result, true))) );
+
+		// save enviroment arguments
+		$this->enviroment_args = array('id' => $this->req->getVar('id'));
 	}
 
 	protected function initAppConfigMode()
@@ -344,12 +355,11 @@ class ZlfieldHelper extends AppHelper {
 					} else if ($fld->get('text')) {
 						$layout = 'subsection';
 					}
-					
 
 					// render layout
 					$field = $fld;
 					if ($layout = $this->getLayout("separator/{$layout}.php")) {
-						$result[] = $this->renderLayout($layout, compact('id', 'field'));
+						$result[] = $this->app->zlfw->renderLayout($layout, compact('id', 'field'));
 					}
 					break;
 
@@ -378,7 +388,7 @@ class ZlfieldHelper extends AppHelper {
 
 					// render layout
 					if ($layout = $this->getLayout("wrapper/{$layout}.php")) {
-						$result[] = $this->renderLayout($layout, compact('id', 'content', 'fld'));
+						$result[] = $this->app->zlfw->renderLayout($layout, compact('id', 'content', 'fld'));
 					}
 					
 					break;
@@ -480,6 +490,7 @@ class ZlfieldHelper extends AppHelper {
 
 						$p_task = $this->req->getVar('parent_task') ? $this->req->getVar('parent_task') : $this->req->getVar('task'); // parent task necesary if double field load ex: layout / sublayout
 						$url = $this->app->link(array('controller' => 'zlframework', 'format' => 'raw', 'type' => $this->type, 'layout' => $this->layout, 'group' => $this->group, 'path' => $this->req->getVar('path'), 'parent_task' => $p_task, 'zlfieldmode' => $this->mode), false);
+
 						// rely options to be used by JS later on
 						$json = $fld->find('childs.loadfields.subfield', '') ? array('paths' => $fld->find('childs.loadfields.subfield.path')) : array('fields' => $childs);
 						
@@ -542,6 +553,7 @@ class ZlfieldHelper extends AppHelper {
 		}
 
 		// return result
+		// dump($value, $id);
 		return $value; 
 	}
 
@@ -711,6 +723,7 @@ class ZlfieldHelper extends AppHelper {
 	{
 		// init vars
 		$url = $this->app->link(array('controller' => 'zlframework', 'format' => 'raw', 'type' => $this->type), false);
+		$enviroment_args = json_encode($this->enviroment_args);
 
 		// load zlfield assets
 		$this->app->document->addStylesheet('zlfield:zlfield.css');
@@ -725,7 +738,7 @@ class ZlfieldHelper extends AppHelper {
 		$this->app->document->addStylesheet('zlfw:assets/libraries/zlux/zlux.css');
 
 		// init scripts
-		$javascript = "jQuery(function($){ $('body').ZLfield({ url: '{$url}', type: '{$this->type}', enviroment: '{$this->enviroment}' }) });";
+		$javascript = "jQuery(function($){ $('body').ZLfield({ url: '{$url}', type: '{$this->type}', enviroment: '{$this->enviroment}', enviroment_args: '{$enviroment_args}' }) });";
 		$this->app->document->addScriptDeclaration($javascript);
 	}
 
@@ -740,36 +753,6 @@ class ZlfieldHelper extends AppHelper {
 	{
 		// find layout
 		return $this->app->path->path("zlfield:layouts/{$layout}");
-	}
-
-	/*
-		Function: renderLayout
-			Renders the element using template layout file.
-
-	   Parameters:
-            $__layout - layouts template file
-	        $__args - layouts template file args
-
-		Returns:
-			String - html
-	*/
-	protected function renderLayout($__layout, $__args = array())
-	{
-		// init vars
-		if (is_array($__args)) {
-			foreach ($__args as $__var => $__value) {
-				$$__var = $__value;
-			}
-		}
-
-		// render layout
-		$__html = '';
-		ob_start();
-		include($__layout);
-		$__html = ob_get_contents();
-		ob_end_clean();
-
-		return $__html;
 	}
 
 	/*
@@ -793,7 +776,7 @@ class ZlfieldHelper extends AppHelper {
 
 			// render layout
 			if ($layout = $this->getLayout("field/{$layout}.php")) {
-				return $this->renderLayout($layout, compact('params', 'field'));
+				return $this->app->zlfw->renderLayout($layout, compact('params', 'field'));
 			} else {
 				return $field;
 			}
