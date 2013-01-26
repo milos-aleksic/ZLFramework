@@ -170,7 +170,7 @@ class ZLModelItem extends ZLModel
         
         // published
         $published = $this->getState('published');
-        if (isset($published[0])) {
+        if (isset($published[0]) && !empty($published[0])) {
             $query->where('a.state = 1');
         }
 

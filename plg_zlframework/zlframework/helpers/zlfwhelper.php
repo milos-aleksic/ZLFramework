@@ -734,6 +734,36 @@ class ZlfwHelper extends AppHelper
 	}
 
 	/*
+		Function: renderLayout
+			Renders the element using template layout file.
+
+	   Parameters:
+            $__layout - layouts template file
+	        $__args - layouts template file args
+
+		Returns:
+			String - html
+	*/
+	function renderLayout($__layout, $__args = array())
+	{
+		// init vars
+		if (is_array($__args)) {
+			foreach ($__args as $__var => $__value) {
+				$$__var = $__value;
+			}
+		}
+
+		// render layout
+		$__html = '';
+		ob_start();
+		include($__layout);
+		$__html = ob_get_contents();
+		ob_end_clean();
+
+		return $__html;
+	}
+
+	/*
 	 Function: loadLibrary
 	 load libraries
 	 */

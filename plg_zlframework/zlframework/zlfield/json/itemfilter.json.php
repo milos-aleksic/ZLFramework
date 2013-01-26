@@ -31,6 +31,12 @@ defined('_JEXEC') or die('Restricted access');
 	$childs[] = isset($params['itemfilter']) ? '"_filter_fieldset":{
 		"type":"wrapper",
 		"fields": {
+			"_published":{
+				"type": "radio",
+				"label": "PLG_ZLFRAMEWORK_FT_PUBLISHED",
+				"help": "PLG_ZLFRAMEWORK_FT_PUBLISHED_DESC",
+				"default":"1"
+			},
 			"_offset":{
 				"type": "text",
 				"label": "PLG_ZLFRAMEWORK_FT_OFFSET",
