@@ -161,26 +161,48 @@ class ZLModelItem extends ZLModel
     protected function basicFilters(&$query)
     {
         // init vars
-        $user = JFactory::getUser();
         $date = JFactory::getDate();
         $now  = $this->_db->Quote($date->toSql());
         $null = $this->_db->Quote($this->_db->getNullDate());
 
-        // Basic filters
+        // searchable
         $query->where('a.searchable = 1');
-        // Searchable
-        $query->where( 'a.' . $this->app->user->getDBAccessString());
-        // User accessible
-        $query->where('a.state = 1');
+        
         // published
+        $published = $this->getState('published');
+        if (isset($published[0])) {
+            $query->where('a.state = 1');
+        }
 
-        // Publication up
-        $where = array();
-        $where[] = 'a.publish_up = ' . $null;
-        $where[] = 'a.publish_up <= ' . $now;
-        $query->where('(' . implode(' OR ', $where) . ')');
+        // accessible
+        if ($user = $this->_db->escape( $this->getState('user') )){
+            $query->where( 'a.' . $this->app->user->getDBAccessString($this->app->user->get($user)));
+        } else {
+            $query->where( 'a.' . $this->app->user->getDBAccessString());
+        }
 
-        // Publication down
+        // created/published/modified from
+        if ($this->getState('created_from') || $this->getState('modified_from'))
+        {
+            $date = $this->getState('created_from') ? $this->getState('created_from') : $this->getState('modified_from');
+            $date = $this->_db->Quote($this->_db->escape( $date ));
+
+            $where = array();
+            $where[] = 'a.publish_up > ' . $date;
+            $where[] = 'a.created > ' . $date;
+            $this->getState('modified_from') && $where[] = 'a.modified > ' . $date;
+            $query->where('(' . implode(' OR ', $where) . ')');
+        }
+        else
+        {
+            // publication up
+            $where = array();
+            $where[] = 'a.publish_up = ' . $null;
+            $where[] = 'a.publish_up <= ' . $now;
+            $query->where('(' . implode(' OR ', $where) . ')');
+        }
+
+        // publication down
         $where = array();
         $where[] = 'a.publish_down = ' . $null;
         $where[] = 'a.publish_down >= ' . $now;
@@ -317,7 +339,7 @@ class ZLModelItem extends ZLModel
      * @param array $order Array of order params
      * Example:array(0 => '_itemcreated', 1 => '_reversed', 2 => '_random')
      */
-    protected function _getItemOrder($order)
+     protected function _getItemOrder($order)
     {
         // if string, try to convert ordering
         if (is_string($order)) {
