@@ -732,6 +732,9 @@ class ZlfieldHelper extends AppHelper {
 		$this->app->document->addStylesheet('zlfield:layouts/wrapper/style.css');
 		$this->app->document->addScript('zlfield:zlfield.min.js');
 
+		// workaround for jQuery 9 transition
+		$this->app->document->addScript('zlfw:assets/js/jquery.plugins/jquery.migrate.min.js');
+
 		// load libraries
 		$this->app->zlfw->loadLibrary('qtip');
 		// $this->app->zlfw->loadLibrary('zlux'); // in progress
