@@ -276,47 +276,46 @@ class ZLModelItem extends ZLModel
         // Elements filters
         $elements = $this->getState('element', array());
         $k = 0;
-        if ($elements) {
-            foreach($elements as $element) {
-                // Options!
-                $id         = $element->get('id');
-                $value      = $element->get('value');
-                $logic      = strtoupper($element->get('logic', 'AND'));
-                $mode       = $element->get('mode', 'AND');
-                $is_select  = $element->get('is_select', false);
-                $from       = $element->get('from', false);
-                $to         = $element->get('to', false);
-                $convert    = $element->get('convert', 'DECIMAL');
-                $type       = $element->get('type', false);
-                $is_date    = $element->get('is_date', false);
+        if ($elements) foreach($elements as $element) if ($element->get('value'))
+        {
+            // Options!
+            $id         = $element->get('id');
+            $value      = $element->get('value');
+            $logic      = strtoupper($element->get('logic', 'AND'));
+            $mode       = $element->get('mode', 'AND');
+            $from       = $element->get('from', false);
+            $to         = $element->get('to', false);
+            $convert    = $element->get('convert', 'DECIMAL');
+            $type       = $element->get('type', false);
 
-                $is_range   = in_array($type, array('range', 'rangeequal', 'from', 'to', 'fromequal', 'toequal', 'outofrange', 'outofrangeequal'));
+            $is_select  = $element->get('is_select', false);
+            $is_date    = $element->get('is_date', false);
+            $is_range   = in_array($type, array('range', 'rangeequal', 'from', 'to', 'fromequal', 'toequal', 'outofrange', 'outofrangeequal'));
 
-                // Multiple choice!
-                if( is_array( $value ) && !$from && !$to) {                 
-                    $wheres[$logic][] = $this->getMultipleSearch($id, $value, $mode, $k, $is_select, $logic);               
-                } else {                    
-                    // Search ranges!
-                    if ($is_range && !$is_date){
-                        // Handle everything in a special method
-                        $wheres[$logic][] = $this->getRangeSearch($id, $from, $to, $type, $convert, $k);
-                    } else  {
-                        // Special date case
-                        if ($is_date) {
-                            $d_value = !empty($search_value) ? $search_value : '';
-                            $d_value_to = !empty($search_value_to) ? $search_value_to : '';
-                            $d_value_from = !empty($search_value_from) ? $search_value_from : '';
+            // Multiple choice!
+            if( is_array( $value ) && !$from && !$to) {                 
+                $wheres[$logic][] = $this->getMultipleSearch($id, $value, $mode, $k, $is_select, $logic);               
+            } else {                    
+                // Search ranges!
+                if ($is_range && !$is_date){
+                    // Handle everything in a special method
+                    $wheres[$logic][] = $this->getRangeSearch($id, $from, $to, $type, $convert, $k);
+                } else  {
+                    // Special date case
+                    if ($is_date) {
+                        $d_value = !empty($search_value) ? $search_value : '';
+                        $d_value_to = !empty($search_value_to) ? $search_value_to : '';
+                        $d_value_from = !empty($search_value_from) ? $search_value_from : '';
 
-                            $wheres[$logic][] = $this->getDateSearch($id, $k, $d_value, $d_value_to, $d_value_from, $type);
-                        } else {
-                            // Normal search
-                            $value = $this->getQuotedValue($element);
-                            $wheres[$logic][] = "(b$k.element_id = '" . $id . "' AND TRIM(b$k.value) LIKE " . $value .') ';     
-                        }
+                        $wheres[$logic][] = $this->getDateSearch($id, $k, $d_value, $d_value_to, $d_value_from, $type);
+                    } else {
+                        // Normal search
+                        $value = $this->getQuotedValue($element);
+                        $wheres[$logic][] = "(b$k.element_id = '" . $id . "' AND TRIM(b$k.value) LIKE " . $value .') ';     
                     }
                 }
-                $k++;
             }
+            $k++;
         }
         
         // At the end, merge ORs

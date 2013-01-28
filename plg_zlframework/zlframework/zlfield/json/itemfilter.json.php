@@ -33,8 +33,8 @@ defined('_JEXEC') or die('Restricted access');
 		"fields": {
 			"_published":{
 				"type": "radio",
-				"label": "PLG_ZLFRAMEWORK_FT_PUBLISHED",
-				"help": "PLG_ZLFRAMEWORK_FT_PUBLISHED_DESC",
+				"label": "PLG_ZLFRAMEWORK_IFT_PUBLISHED",
+				"help": "PLG_ZLFRAMEWORK_IFT_PUBLISHED_DESC",
 				"default":"1"
 			},
 			"_offset":{
