@@ -111,8 +111,18 @@ class ZLModel extends ZLWorksAroundJoomlaToGetAModel
         {
             $query = $this->getQuery();
 			
-			// ZOO way
-			$result = $this->app->database->query($query);
+            // Limits
+            $offset = $this->_db->escape( $this->getState('offset'));
+            $limitstart = $this->_db->escape( $this->getState('limitstart') );
+            $limit  = $this->_db->escape( $this->getState('limit') );
+
+            if (strlen($limitstart)) {
+                $offset = $limitstart;
+            }
+
+			
+			$this->_db->setQuery($query, $offset, $limit);
+            $result = $this->_db->execute();
 	
 			// fetch objects and execute init callback
 			$objects = array();
@@ -219,7 +229,6 @@ class ZLModel extends ZLWorksAroundJoomlaToGetAModel
         $this->_buildQueryGroup($query);
         $this->_buildQueryHaving($query);
         $this->_buildQueryOrder($query);
-		$this->_buildQueryLimit($query);
 
         return $query;
     }
@@ -293,25 +302,6 @@ class ZLModel extends ZLWorksAroundJoomlaToGetAModel
         $order_by = $this->_db->escape( $this->getState('order_by') );
         if ($order_by){
             $query->order($order_by);
-        }
-    }
-	
-	/**
-     * Builds a generic LIMIT clasue based on the model's state
-     */
-    protected function _buildQueryLimit(&$query)
-    {
-        $offset = $this->_db->escape( $this->getState('offset') );
-        $limitstart = $this->_db->escape( $this->getState('limitstart') );
-        $limit  = $this->_db->escape( $this->getState('limit') );
-
-        if(strlen($limitstart)){
-            $offset = $limitstart;
-        }
-                
-        if(strlen($offset) || strlen($limit))
-        {
-            $query->limit($offset, $limit);
         }
     }
 }
