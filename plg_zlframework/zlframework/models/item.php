@@ -149,9 +149,28 @@ class ZLModelItem extends ZLModel
     protected function _buildQueryOrder(&$query)
     {
         // custom order
-        if ($this->getState('order_by') && isset($this->orderby))
+        if ($this->getState('order_by')->get('value', '') && isset($this->orderby))
         {
             $query->order( $this->orderby );
+        }
+    }
+
+    /**
+     * Builds a generic LIMIT clasue based on the model's state
+     */
+    protected function _buildQueryLimit(&$query)
+    {
+        $offset = $this->_db->escape( $this->getState('offset')->get('value', '') );
+        $limitstart = $this->_db->escape( $this->getState('limitstart')->get('value', '') );
+        $limit  = $this->_db->escape( $this->getState('limit') );
+
+        if(strlen($limitstart)){
+            $offset = $limitstart;
+        }
+                
+        if(strlen($offset) || strlen($limit))
+        {
+            $query->limit($offset, $limit);
         }
     }
 
