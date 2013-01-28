@@ -81,81 +81,133 @@ defined('_JEXEC') or die('Restricted access');
 			// filter orderable elements
 			// $elements = array_filter($elements, create_function('$element', 'return $element->getMetaData("orderable") == "true";'));
 
-			// custom elements can add an "group" information on the Element XML and the element will be threated correspondly
-
-			// $xml = simplexml_load_file($this->app->path->path("elements:$el_type/$el_type.xml"));
-			// $group = $xml->attributes()->zfgroup ? (string) $xml->attributes()->zfgroup : $el_type;
-
-			// $files[] = $this->app->path->path('zoofilter:params/params.xml');
-
-			// switch($group) {
-			// 	case 'input':
-			// 	case 'itemname': case 'text': case 'textpro': case 'textarea': case 'textareapro':
-			// 		$files[] = $this->app->path->path('zoofilter:params/params-input.xml');
-			// 		break;
-				
-			// 	case 'option':
-			// 	case 'select': case 'selectpro': case 'checkbox': case 'radio': case 'country':
-			// 		$files[] = $this->app->path->path('zoofilter:params/params-option.xml');
-			// 		break;
-					
-			// 	case 'category':
-			// 	case 'itemcategory': case 'itemcategorypro': case 'relatedcategoriespro':
-			// 		$files[] = $this->app->path->path('zoofilter:params/params-category.xml');
-			// 		break;
-			// 	case 'relatedcategories': // not using search_index table, use Categories Element instead
-			// 		$files = array($this->app->path->path('zoofilter:params/params-category-use-instead.xml'));
-			// 		break;
-					
-			// 	case 'date':
-			// 	case 'datepro':
-			// 		$files[] = $this->app->path->path('zoofilter:params/params-date.xml');
-			// 		break;
-
-			// 	// Elements, without group
-			// 	case 'staticcontent': // do nothing to allow using it as usual
-			// 		$files = array();
-			// 		break;
-
-			// 	default: // all other elements deny setting
-			// 		$files = array($this->app->path->path('zoofilter:params/params-nocompatible.xml'));
-			// 		break;
-			// }
-
 			if(!empty($elements))
 			{
 				// process elements
-				foreach ($elements as $element) {
+				foreach ($elements as $element) 
+				{
+					$element_json = array();
 					$name = $element->config->name ? $element->config->name : $element->getMetaData('name');
-					$type_json[] =
-					'"_'.$element->identifier.'_wrapper":{
-						"type":"control_wrapper",
-						"fields": {
-							"name_separator":{
-								"type":"separator",
-								"layout":"section",
+
+					// custom elements can add an "group" information on the Element XML and the element will be threated correspondly
+					$group = $element->loadXML()->attributes()->zl_filter_group;
+					$group = $group ? $group : $element->getElementType();
+
+					switch($group) {
+						case 'input':
+						case 'itemname': case 'text': case 'textpro': case 'textarea': case 'textareapro':
+							$element_json[] =
+							'"type":{
+								"type":"select",
+								"label":"PLG_ZLFRAMEWORK_IFT_FILTER_TYPE",
+								"help":"PLG_ZLFRAMEWORK_IFT_FILTER_TYPE_DESC",
 								"specific":{
-									"title":"'.$name.' Element"
+									"options":{
+										"PLG_ZLFRAMEWORK_IFT_PARTIAL":"partial",
+										"PLG_ZLFRAMEWORK_IFT_EXACT":"exact",
+										"&gt;":"from",
+										"&lt;":"to",
+										"&gt;=":"fromequal",
+										"&lt;=":"toequal",
+										"PLG_ZLFRAMEWORK_IFT_WITHIN_RANGE_EQUAL":"rangeequal",
+										"PLG_ZLFRAMEWORK_IFT_WITHIN_RANGE":"range",
+										"PLG_ZLFRAMEWORK_IFT_WITHIN_OUT_OF_RANGE_EQUAL":"outofrangeequal",
+										"PLG_ZLFRAMEWORK_IFT_WITHIN_OUT_OF_RANGE":"outofrange"
+									}
+								},
+								"dependents":"convert !> partial | value_to > rangeequal OR range OR outofrangeequal OR outofrange"
+							},
+							"convert":{
+								"type": "select",
+								"label": "PLG_ZLFRAMEWORK_IFT_CONVERSION",
+								"help": "PLG_ZLFRAMEWORK_IFT_CONVERSION_DESC",
+								"specific": {
+									"options": {
+										"PLG_ZLFRAMEWORK_IFT_INTEGRER":"SIGNED",
+										"PLG_ZLFRAMEWORK_IFT_DECIMAL":"DECIMAL",
+										"PLG_ZLFRAMEWORK_IFT_DATE":"DATE",
+										"PLG_ZLFRAMEWORK_IFT_DATE_TIME":"DATETIME"
+									}
 								}
 							},
 							"value":{
 								"type":"text",
-								"label":"Value"
+								"label":"PLG_ZLFRAMEWORK_IFT_VALUE",
+								"help":"PLG_ZLFRAMEWORK_IFT_VALUE_DESC"
 							},
-							"search_type":{
-								"type":"select",
-								"label":"Search Type",
-								"specific":{
-									"options":{
-										"Exact":"exact",
-										"Partial":"partial"
+							"value_to":{
+								"type":"text",
+								"label":"PLG_ZLFRAMEWORK_IFT_VALUE_TO",
+								"help":"PLG_ZLFRAMEWORK_IFT_VALUE_TO_DESC"
+							}';
+							break;
+
+						case 'option':
+						case 'select': case 'selectpro': case 'checkbox': case 'radio': case 'country':
+							break;
+							
+						case 'category':
+						case 'itemcategory': case 'itemcategorypro': case 'relatedcategoriespro':
+							break;
+						case 'relatedcategories': // not using search_index table, use Categories Element instead
+							break;
+							
+						case 'date':
+						case 'datepro':
+							break;
+
+						// Elements without group or not supported, ignore
+						case 'staticcontent':
+						default:
+							break;
+					}
+
+					if (!empty($element_json)) {
+						$type_json[] =
+						'"_'.$element->identifier.'_wrapper":{
+							"type":"control_wrapper",
+							"fields": {
+								"name_separator":{
+									"type":"separator",
+									"layout":"section",
+									"specific":{
+										"title":"'.$name.' Element"
+									}
+								},
+								'.implode(',', $element_json).',
+								"logic":{
+									"type":"select",
+									"label":"Logic",
+									"specific":{
+										"options":{
+											"PLG_ZLFRAMEWORK_AND":"AND",
+											"PLG_ZLFRAMEWORK_OR":"OR"
+										}
+									},
+									"default":"AND"
+								}
+							},
+							"control":"'.$element->identifier.'"
+						}';
+						
+					} else {
+
+						$type_json[] =
+						'"_'.$element->identifier.'_wrapper":{
+							"type":"control_wrapper",
+							"fields": {
+								"name_separator":{
+									"type":"separator",
+									"layout":"section",
+									"specific":{
+										"title":"'.$name.' - Element not compatible"
 									}
 								}
 							}
-						},
-						"control":"'.$element->identifier.'"
-					}';
-				}
+						}';
+					}
+
+				} // end elements foreach
 
 				$json[] =
 				'"_'.$application->id.'_'.$type->id.'_fieldset":{
@@ -169,8 +221,10 @@ defined('_JEXEC') or die('Restricted access');
 					},
 					"layout":"fieldset"
 				}';
-			}
-		}
+
+			} // end elements
+
+		} // end Type foreach
 	}
 
 	// return json string

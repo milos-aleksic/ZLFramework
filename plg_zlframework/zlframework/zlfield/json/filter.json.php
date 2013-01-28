@@ -17,8 +17,8 @@ require_once(JPATH_ADMINISTRATOR . '/components/com_zoo/config.php');
 		.(isset($params['types']) ?
 		'"_types":{
 			"type": "types",
-			"label": "PLG_ZLFRAMEWORK_FT_TYPE",
-			"help": "PLG_ZLFRAMEWORK_FT_TYPE_DESC",
+			"label": "PLG_ZLFRAMEWORK_TYPE",
+			"help": "PLG_ZLFRAMEWORK_FILTER_TYPE_DESC",
 			"specific":{
 				"apps": '.json_encode($element->config->find('application._chosenapps')).',
 				"multi":"1"
