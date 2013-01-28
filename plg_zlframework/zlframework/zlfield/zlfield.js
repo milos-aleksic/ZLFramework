@@ -261,11 +261,12 @@
 				 * Dependents - Fields are shown/hidden depending on other fields values
 				 */
 				$dom.find('[data-dependents]').each(function(){
-					var a = $(this),
-						b = a.data("dependents").replace(/ /g, '').split('|'), // remove empty spaces and split into rules
-						ph = a.closest('.zlfield.placeholder .wrapper, .zlfield.placeholder').first();
+					var trigger = $(this),
+						rules = trigger.data("dependents").replace(/ /g, '').split('|'), // remove empty spaces and split into rules
+						ph = trigger.closest('.zlfield.placeholder .wrapper, .zlfield.placeholder').first();
 
-					b.each(function(val) // for each rule
+					// for each rule
+					rules.each(function(val)
 					{
 						var c = val.split('!>'),
 							m = c.length == 2 ? '!>' : '>'; // mode
@@ -274,12 +275,12 @@
 							e = c[1].replace('NONE', ''); // dependent option
 
 						// if select
-						(a.data("type") == 'select' || a.data("type") == 'itemLayoutList' || a.data("type") == 'layout' || a.data("type") == 'apps' || a.data("type") == 'types' || a.data("type") == 'elements' || a.data("type") == 'modulelist' || a.data("type") == 'separatedby') 
+						(trigger.data("type") == 'select' || trigger.data("type") == 'itemLayoutList' || trigger.data("type") == 'layout' || trigger.data("type") == 'apps' || trigger.data("type") == 'types' || trigger.data("type") == 'elements' || trigger.data("type") == 'modulelist' || trigger.data("type") == 'separatedby') 
 						&& d.each(function(val) // for each dependent of the option
 						{
 							var dep = ph.find('[data-id="'+val+'"]').data('e', e).data('m', m).hide();
 
-							a.find('.zl-field select').bind('change', function(){
+							trigger.find('.zl-field select').bind('change', function(){
 								var e = dep.data('e'), // dependent value
 									m = dep.data('m'), // dependent mode
 									selection = $.makeArray($(this).val()), // for multiselect compatibility
@@ -302,17 +303,18 @@
 										// check mode and Select value, mark any match
 									})
 								}
-								
+
 								// if match Show, otherwise Hide
 								match && dep.slideDown('fast') || dep.slideUp('fast');
 							}).trigger('change');
+
 						});
 						
 						// if checkbox
-						(a.data("type") == 'checkbox') && d.each(function(val)
+						(trigger.data("type") == 'checkbox') && d.each(function(val)
 						{
 							var dep = ph.find('[data-id="'+val+'"]').hide();
-							a.find('.zl-field input').bind('change', function(){
+							trigger.find('.zl-field input').bind('change', function(){
 								var checkd = $(this).attr('checked') == 'checked'; // it is checked?
 								
 								( (m == '!>' && !checkd) || (m == '>' && checkd) ) && dep.slideDown('fast') || dep.slideUp('fast');
@@ -321,11 +323,11 @@
 						});
 
 						// if radio
-						(a.data("type") == 'radio') && d.each(function(val)
+						(trigger.data("type") == 'radio') && d.each(function(val)
 						{
 							var option = e, // it must be declared local to avoid some weard issue that changes true string values to 1 number value
 								dep = ph.find('[data-id="'+val+'"]').hide();
-							a.find('.zl-field input').bind('change', function()
+							trigger.find('.zl-field input').bind('change', function()
 							{
 								var checkd = $(this).attr('checked') == 'checked', // it is checked?
 									match = 0, // by default no match
@@ -352,10 +354,10 @@
 						});
 						
 						// if text
-						(a.data("type") == 'text') && d.each(function(val)
+						(trigger.data("type") == 'text') && d.each(function(val)
 						{
 							var dep = ph.find('[data-id="'+val+'"]').hide();
-							a.find('.zl-field input').on('keyup change', function(){
+							trigger.find('.zl-field input').on('keyup change', function(){
 								var filled = $(this).val() != ''; // has text?
 								
 								( (m == '!>' && !filled) || (m == '>' && filled) ) && dep.slideDown('fast') || dep.slideUp('fast');

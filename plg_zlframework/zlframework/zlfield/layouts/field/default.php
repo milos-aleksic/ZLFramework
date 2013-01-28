@@ -42,7 +42,7 @@ defined('_JEXEC') or die('Restricted access');
 		$text = JText::_($help[0]);
 		unset($help[0]);
 
-		$help = count($help) ? $this->replaceVars($help[1], $text) : $text;
+		$help = count($help) ? $this->app->zlfield->replaceVars($help[1], $text) : $text;
 		//$help = $fld->get('default') ? $help.='<div class="default-value">'.strtolower(JText::_('PLG_ZLFRAMEWORK_DEFAULT')).': '.$fld->get('default').'</div>' : $help;
 	}
 ?>

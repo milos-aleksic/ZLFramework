@@ -165,7 +165,7 @@ defined('_JEXEC') or die('Restricted access');
 					if (!empty($element_json)) {
 						$type_json[] =
 						'"_'.$element->identifier.'_wrapper":{
-							"type":"control_wrapper",
+							"type":"wrapper",
 							"fields": {
 								"name_separator":{
 									"type":"separator",
