@@ -3,6 +3,7 @@ Changelog
 
 3.0.8
  ^ ZOO 3.0.9 compatibility
+ # ZLField elementsList App filtering fixed
 
 3.0.7
  ^ Files Pro improvements

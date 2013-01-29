@@ -1259,15 +1259,18 @@ class ZlfieldHelper extends AppHelper {
 	
 	/*
 		Function: elementsList - Returns element list
+
+		Parameters:
+			$app_filter App group or App id
 	*/
 	protected $_elements_list = array();
-	public function elementsList($groups_filter = array(), $elements_filter = array(), $filter_types = array())
+	public function elementsList($app_filter = array(), $elements_filter = array(), $filter_types = array())
 	{
-		$groups_filter 		= array_filter((array)($groups_filter));
+		$app_filter 	= array_filter((array)($app_filter));
 		$elements_filter 	= array_filter((array)($elements_filter));
 		$filter_types 		= array_filter((array)($filter_types));
 
-		$hash = md5(serialize( array($groups_filter, $elements_filter, $filter_types) ));
+		$hash = md5(serialize( array($app_filter, $elements_filter, $filter_types) ));
 		if (!array_key_exists($hash, $this->_elements_list))
 		{
 			// get apps
@@ -1276,7 +1279,8 @@ class ZlfieldHelper extends AppHelper {
 			// prepare types and filter app group
 			$types = array();
 			foreach ($apps as $app){
-				if (empty($groups_filter) || in_array($app->getGroup(), $groups_filter)) {
+				if (empty($app_filter) 
+					|| in_array($app->getGroup(), $app_filter) || in_array($app->id, $app_filter)) {
 					$types = array_merge($types, $app->getTypes());
 				}
 			}
@@ -1302,6 +1306,7 @@ class ZlfieldHelper extends AppHelper {
 			$options = array();			
 			foreach ($elements as $element) {
 				// include only desired element type
+
 				if (empty($elements_filter) || in_array($element->getElementType(), $elements_filter)) {
 					$options[$element->getType()->name.' > '.$element->config->get('name')] = $element->identifier;
 				}
