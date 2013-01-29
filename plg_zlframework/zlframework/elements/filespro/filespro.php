@@ -267,16 +267,17 @@ abstract class ElementFilesPro extends ElementRepeatablePro {
 		// ui must be loaded first
 		$this->app->document->addStylesheet('libraries:jquery/jquery-ui.custom.css');
 		$this->app->document->addScript('libraries:jquery/jquery-ui.custom.min.js');
+
+		// workaround for jQuery 1.9 transition
+		$this->app->document->addScript('zlfw:assets/js/jquery.plugins/jquery.migrate.min.js');
 		
-		//then plupload
+		// then plupload
 		$this->app->document->addStylesheet('elements:filespro/assets/plupload/css/jquery.ui.plupload.custom.css');
 		$this->app->document->addScript('elements:filespro/assets/plupload/plupload.full.js');
 		$this->app->document->addScript('elements:filespro/assets/plupload/jquery.ui.plupload.js');
 		$this->app->zlfw->pluploadTranslation();
 		$this->app->zlfw->filesproTranslation();
 
-		// dump(1);
-		
 		// and others
 		$this->app->zlfw->loadLibrary('qtip');
 		$this->app->document->addScript('elements:filespro/assets/js/plupload.js');

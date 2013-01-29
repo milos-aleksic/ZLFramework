@@ -729,6 +729,9 @@ class ZlfieldHelper extends AppHelper {
 		// init vars
 		$url = $this->app->link(array('controller' => 'zlframework', 'format' => 'raw', 'type' => $this->type), false);
 
+		// workaround for jQuery 1.9 transition
+		$this->app->document->addScript('zlfw:assets/js/jquery.plugins/jquery.migrate.min.js');
+
 		// load zlfield assets
 		$this->app->document->addStylesheet('zlfield:zlfield.css');
 		$this->app->document->addScript('zlfield:zlfield.min.js');
