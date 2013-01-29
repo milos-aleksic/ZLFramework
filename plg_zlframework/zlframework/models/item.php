@@ -303,11 +303,10 @@ class ZLModelItem extends ZLModel
                 } else  {
                     // Special date case
                     if ($is_date) {
-                        $d_value = !empty($search_value) ? $search_value : '';
-                        $d_value_to = !empty($search_value_to) ? $search_value_to : '';
-                        $d_value_from = !empty($search_value_from) ? $search_value_from : '';
+                        $d_value_from = !empty($from) ? $from : '';
+                        $d_value_to = !empty($to) ? $to : '';
 
-                        $wheres[$logic][] = $this->getDateSearch($id, $k, $d_value, $d_value_to, $d_value_from, $type);
+                        $wheres[$logic][] = $this->getDateSearch($id, $k, $value, $d_value_from, $d_value_to, $type);
                     } else {
                         // Normal search
                         $value = $this->getQuotedValue($element);
@@ -330,6 +329,144 @@ class ZLModelItem extends ZLModel
         
         // Add repeatable joins
         $this->addRepeatableJoins($query, $k);
+    }
+
+    /**
+     * Get the range search sql
+     */
+    protected function getRangeSearch($identifier, $from, $to, $type, $convert, $k) {
+        $is_equal = false;
+        
+        // Add equal sign
+        if (stripos($type, "equal") != -1) {
+            $is_equal = true;
+            $type = str_ireplace("equal", "", $type);
+        }
+
+        // Defaults
+        $sql = array();
+        $value = $from;
+        $symbol = "";
+
+        // Symbol and value based on the type
+        switch($type) {
+            case "from":
+                $value = $from;
+                $symbol = ">";
+                break;
+            case "to": 
+                $value = $to;
+                $symbol = "<";
+                break;
+            case "range": 
+                if ($from) {
+                    $new_type = $is_equal ? 'fromequal' : 'from';
+                    $sql[] = $this->getRangeSearch($identifier, $from, $to, $new_type, $convert, $k);
+                }
+                if ($to) {
+                    $new_type = $is_equal ? 'toequal' : 'to';
+                    $sql[] = $this->getRangeSearch($identifier, $from, $to, $new_type, $convert, $k);
+                }
+                return implode(" AND ", $sql);
+                break;
+            case "outofrange":
+                if ($to) {
+                    $new_type = $is_equal ? 'fromequal' : 'from';
+                    $sql[] = $this->getRangeSearch($identifier, $to, $from, $new_type, $convert, $k);
+                }
+                if ($from) {
+                    $new_type = $is_equal ? 'toequal' : 'to';
+                    $sql[] = $this->getRangeSearch($identifier, $to, $from, $new_type, $convert, $k);
+                }
+                return implode(" AND ", $sql);
+                break;
+        }
+
+        // Add equal sign
+        if ($is_equal) {
+            $symbol .= "=";
+        }
+
+        // Build range sql
+        return "(b$k.element_id = '" . $identifier . "' AND CONVERT(TRIM(b$k.value+0), $convert) " . $symbol . " " . $value.")";
+    }
+
+    /**
+     * Get the date search sql
+     */
+    protected function getDateSearch($identifier, $k, $value, $value_from, $value_to, $search_type)
+    {
+        if (!empty($value) && $search_type != 'range') { // search_type = to:from:default
+            $date = substr($value, 0, 10);
+            $from = $date.' 00:00:00';
+            $to   = $date.' 23:59:59';
+        } else { // search_type = range
+            $from = substr($value_from, 0, 10).' 00:00:00';
+            $to   = substr($value_to, 0, 10).' 23:59:59';
+        }
+        
+        $from = $this->_db->Quote($this->_db->escape($from));
+        $to   = $this->_db->Quote($this->_db->escape($to));
+
+        switch ($search_type) {
+            case 'to':
+                $el_where = "(b$k.element_id = '$identifier' AND ((SUBSTRING(b$k.value, 1, 19) <= $to) OR ($to >= SUBSTRING(b$k.value, 1, 19)))) ";
+                break;
+            case 'from':
+                $el_where = "(b$k.element_id = '$identifier' AND ((SUBSTRING(b$k.value, -19) >= $from) OR ($from <= SUBSTRING(b$k.value, -19)))) ";
+                break;
+            case 'range':
+                $el_where = "(b$k.element_id = '$identifier' AND (($from BETWEEN SUBSTRING(b$k.value, 1, 19) AND SUBSTRING(b$k.value, -19)) OR ($to BETWEEN SUBSTRING(b$k.value, 1, 19) AND SUBSTRING(b$k.value, -19)) OR (SUBSTRING(b$k.value, 1, 19) BETWEEN $from AND $to) OR (SUBSTRING(b$k.value, -19) BETWEEN $from AND $to))) ";
+                break;
+            default:
+                $date = $this->_db->escape($date);
+                $el_where = "(b$k.element_id = '$identifier' AND ((b$k.value LIKE '%$date%') OR (('$date' BETWEEN SUBSTRING(b$k.value, 1, 10) AND SUBSTRING(b$k.value, -19, 10)) AND b$k.value NOT REGEXP '[[.LF.]]'))) ";
+        }
+        
+        return $el_where;
+    }
+    
+    /**
+     * Get the multiple values search sql
+     */
+    protected function getMultipleSearch($identifier, $values, $mode, $k, $is_select = true, $logic='AND')
+    {
+        $el_where = "b$k.element_id = " . $this->_db->Quote($identifier);               
+        $el_where .= " $logic ";
+
+        // lets be sure mode is set
+        $mode = $mode ? $mode : "AND";
+        
+        $multiples = array();
+        
+        // Normal selects / radio / etc (ElementOption)
+        if($is_select)
+        {
+            foreach($values as $value)
+            {
+                $multiple = "TRIM(b$k.value) LIKE ".$this->_db->Quote(trim($this->_db->escape($value)))." OR ";
+                $multiple .= "TRIM(b$k.value) LIKE ".$this->_db->Quote(trim($this->_db->escape($value)."\n%"))." OR ";
+                $multiple .= "TRIM(b$k.value) LIKE ".$this->_db->Quote(trim("%\n".$this->_db->escape($value)))." OR ";
+                $multiple .= "TRIM(b$k.value) LIKE ".$this->_db->Quote(trim("%\n".$this->_db->escape($value)."\n%"));
+                $multiples[] = "(".$multiple.")";
+            }
+        } 
+        // This covers country element too
+        else 
+        {
+            foreach($values as $value)
+            {
+                $multiple = "TRIM(b$k.value) LIKE ".$this->_db->Quote(trim($this->_db->escape($value)))." OR ";
+                $multiple .= "TRIM(b$k.value) LIKE ".$this->_db->Quote(trim($this->_db->escape($value).' %'))." OR ";
+                $multiple .= "TRIM(b$k.value) LIKE ".$this->_db->Quote(trim('% '.$this->_db->escape($value)))." OR ";
+                $multiple .= "TRIM(b$k.value) LIKE ".$this->_db->Quote(trim('% '.$this->_db->escape($value).' %'));
+                $multiples[] = "(".$multiple.")";
+            }
+        }
+        
+        $el_where .= "(".implode(" ".$mode. " ", $multiples).")";
+        
+        return $el_where;
     }
 
     /**
@@ -396,138 +533,6 @@ class ZLModelItem extends ZLModel
         }
 
         return $result;
-    }
-
-    /**
-     * Get the range search sql
-     */
-    protected function getRangeSearch($identifier, $from, $to, $type, $convert, $k) {
-        $is_equal = false;
-        
-        // Add equal sign
-        if (stripos($type, "equal") != -1) {
-            $is_equal = true;
-            $type = str_ireplace("equal", "", $type);
-        }
-
-        // Defaults
-        $sql = array();
-        $value = $from;
-        $symbol = "";
-
-        // Symbol and value based on the type
-        switch($type) {
-            case "from":
-                $value = $from;
-                $symbol = ">";
-                break;
-            case "to": 
-                $value = $to;
-                $symbol = "<";
-                break;
-            case "range": 
-                if ($from) {
-                    $new_type = $is_equal ? 'fromequal' : 'from';
-                    $sql[] = $this->getRangeSearch($identifier, $from, $to, $new_type, $convert, $k);
-                }
-                if ($to) {
-                    $new_type = $is_equal ? 'toequal' : 'to';
-                    $sql[] = $this->getRangeSearch($identifier, $from, $to, $new_type, $convert, $k);
-                }
-                return implode(" AND ", $sql);
-                break;
-            case "outofrange":
-                if ($to) {
-                    $new_type = $is_equal ? 'fromequal' : 'from';
-                    $sql[] = $this->getRangeSearch($identifier, $to, $from, $new_type, $convert, $k);
-                }
-                if ($from) {
-                    $new_type = $is_equal ? 'toequal' : 'to';
-                    $sql[] = $this->getRangeSearch($identifier, $to, $from, $new_type, $convert, $k);
-                }
-                return implode(" AND ", $sql);
-                break;
-        }
-
-        // Add equal sign
-        if ($is_equal) {
-            $symbol .= "=";
-        }
-
-        // Build range sql
-        return "(b$k.element_id = '" . $identifier . "' AND CONVERT(TRIM(b$k.value+0), $convert) " . $symbol . " " . $value.")";
-    }
-
-    protected function getDateSearch($identifier, $k, $value, $value_to, $value_from, $search_type)
-    {
-        if (!empty($value)) { // search_type = to:from:default
-            $date = substr($value, 1, 10);
-            $from = $date.' 00:00:00';
-            $to   = $date.' 23:59:59';
-        } else { // search_type = range
-            $from = substr($value_from, 1, 10).' 00:00:00';
-            $to   = substr($value_to, 1, 10).' 23:59:59';
-        }
-        
-        $from = $this->_db->Quote($this->_db->escape($from));
-        $to   = $this->_db->Quote($this->_db->escape($to));
-        
-        switch ($search_type) {
-            case 'to':
-                $el_where = "(b$k.element_id = '$identifier' AND ((SUBSTRING(b$k.value, 1, 19) <= $to) OR ($to >= SUBSTRING(b$k.value, 1, 19)))) ";
-                break;
-            case 'from':
-                $el_where = "(b$k.element_id = '$identifier' AND ((SUBSTRING(b$k.value, -19) >= $from) OR ($from <= SUBSTRING(b$k.value, -19)))) ";
-                break;
-            case 'range':
-                $el_where = "(b$k.element_id = '$identifier' AND (($from BETWEEN SUBSTRING(b$k.value, 1, 19) AND SUBSTRING(b$k.value, -19)) OR ($to BETWEEN SUBSTRING(b$k.value, 1, 19) AND SUBSTRING(b$k.value, -19)) OR (SUBSTRING(b$k.value, 1, 19) BETWEEN $from AND $to) OR (SUBSTRING(b$k.value, -19) BETWEEN $from AND $to))) ";
-                break;
-            default:
-                $date = $this->_db->escape($date);
-                $el_where = "(b$k.element_id = '$identifier' AND ((b$k.value LIKE '%$date%') OR (('$date' BETWEEN SUBSTRING(b$k.value, 1, 10) AND SUBSTRING(b$k.value, -19, 10)) AND b$k.value NOT REGEXP '[[.LF.]]'))) ";
-        }
-        
-        return $el_where;
-    }
-    
-    protected function getMultipleSearch($identifier, $values, $mode, $k, $is_select = true, $logic='AND')
-    {
-        $el_where = "b$k.element_id = " . $this->_db->Quote($identifier);               
-        $el_where .= " $logic ";
-
-        // lets be sure mode is set
-        $mode = $mode ? $mode : "AND";
-        
-        $multiples = array();
-        
-        // Normal selects / radio / etc (ElementOption)
-        if($is_select)
-        {
-            foreach($values as $value)
-            {
-                $multiple = "TRIM(b$k.value) LIKE ".$this->_db->Quote(trim($this->_db->escape($value)))." OR ";
-                $multiple .= "TRIM(b$k.value) LIKE ".$this->_db->Quote(trim($this->_db->escape($value)."\n%"))." OR ";
-                $multiple .= "TRIM(b$k.value) LIKE ".$this->_db->Quote(trim("%\n".$this->_db->escape($value)))." OR ";
-                $multiple .= "TRIM(b$k.value) LIKE ".$this->_db->Quote(trim("%\n".$this->_db->escape($value)."\n%"));
-                $multiples[] = "(".$multiple.")";
-            }
-        } 
-        // This covers country element too
-        else 
-        {
-            foreach($values as $value)
-            {
-                $multiple = "TRIM(b$k.value) LIKE ".$this->_db->Quote(trim($this->_db->escape($value)))." OR ";
-                $multiple .= "TRIM(b$k.value) LIKE ".$this->_db->Quote(trim($this->_db->escape($value).' %'))." OR ";
-                $multiple .= "TRIM(b$k.value) LIKE ".$this->_db->Quote(trim('% '.$this->_db->escape($value)))." OR ";
-                $multiple .= "TRIM(b$k.value) LIKE ".$this->_db->Quote(trim('% '.$this->_db->escape($value).' %'));
-                $multiples[] = "(".$multiple.")";
-            }
-        }
-        
-        $el_where .= "(".implode(" ".$mode. " ", $multiples).")";
-        
-        return $el_where;
     }
 
     /**
