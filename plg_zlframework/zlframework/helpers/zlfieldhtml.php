@@ -137,6 +137,16 @@ class ZLFieldHTMLHelper extends AppHelper {
 		return $this->app->html->_('select.radiolist', $options, $name, $attrs, 'value', 'text', $value, $name, true);
 	}
 
+	/*
+		Function: date - Returns date select html string
+	*/
+	public function date($id, $name, $value, $spec, $attrs){
+		if ($value) try {
+			$value = $this->app->html->_('date', $value, $this->app->date->format('%Y-%m-%d %H:%M:%S'), $this->app->date->getOffset());
+		} catch (Exception $e) {}
+		
+		return $this->app->html->_('zoo.calendar', $value, $name, $name, '', true);
+	}
 
 	/*
 		Function: select - Returns select html string

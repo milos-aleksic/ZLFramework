@@ -96,64 +96,26 @@ defined('_JEXEC') or die('Restricted access');
 					switch($group) {
 						case 'input':
 						case 'itemname': case 'text': case 'textpro': case 'textarea': case 'textareapro':
-							$element_json[] =
-							'"type":{
-								"type":"select",
-								"label":"PLG_ZLFRAMEWORK_IFT_FILTER_TYPE",
-								"help":"PLG_ZLFRAMEWORK_IFT_FILTER_TYPE_DESC",
-								"specific":{
-									"options":{
-										"PLG_ZLFRAMEWORK_IFT_PARTIAL":"partial",
-										"PLG_ZLFRAMEWORK_IFT_EXACT":"exact",
-										"&gt;":"from",
-										"&lt;":"to",
-										"&gt;=":"fromequal",
-										"&lt;=":"toequal",
-										"PLG_ZLFRAMEWORK_IFT_WITHIN_RANGE_EQUAL":"rangeequal",
-										"PLG_ZLFRAMEWORK_IFT_WITHIN_RANGE":"range",
-										"PLG_ZLFRAMEWORK_IFT_WITHIN_OUT_OF_RANGE_EQUAL":"outofrangeequal",
-										"PLG_ZLFRAMEWORK_IFT_WITHIN_OUT_OF_RANGE":"outofrange"
-									}
-								},
-								"dependents":"convert !> partial | value_to > rangeequal OR range OR outofrangeequal OR outofrange"
-							},
-							"convert":{
-								"type": "select",
-								"label": "PLG_ZLFRAMEWORK_IFT_CONVERSION",
-								"help": "PLG_ZLFRAMEWORK_IFT_CONVERSION_DESC",
-								"specific": {
-									"options": {
-										"PLG_ZLFRAMEWORK_IFT_INTEGRER":"SIGNED",
-										"PLG_ZLFRAMEWORK_IFT_DECIMAL":"DECIMAL",
-										"PLG_ZLFRAMEWORK_IFT_DATE":"DATE",
-										"PLG_ZLFRAMEWORK_IFT_DATE_TIME":"DATETIME"
-									}
-								}
-							},
-							"value":{
-								"type":"text",
-								"label":"PLG_ZLFRAMEWORK_IFT_VALUE",
-								"help":"PLG_ZLFRAMEWORK_IFT_VALUE_DESC"
-							},
-							"value_to":{
-								"type":"text",
-								"label":"PLG_ZLFRAMEWORK_IFT_VALUE_TO",
-								"help":"PLG_ZLFRAMEWORK_IFT_VALUE_TO_DESC"
-							}';
+							$json_path = 'zlfield:json/itemfilter/input.json.php';
+							$element_json[] = include($this->app->path->path($json_path));
 							break;
 
 						case 'option':
 						case 'select': case 'selectpro': case 'checkbox': case 'radio': case 'country':
+							$json_path = 'zlfield:json/itemfilter/option.json.php';
+							$element_json[] = include($this->app->path->path($json_path));
 							break;
 							
 						case 'category':
-						case 'itemcategory': case 'itemcategorypro': case 'relatedcategoriespro':
-							break;
-						case 'relatedcategories': // not using search_index table, use Categories Element instead
+						case 'itemcategory': case 'itemcategorypro': case 'relatedcategories':
+						case 'relatedcategoriespro':
+							// ignore as it's filtered by general Category filter
 							break;
 							
 						case 'date':
 						case 'datepro':
+							$json_path = 'zlfield:json/itemfilter/date.json.php';
+							$element_json[] = include($this->app->path->path($json_path));
 							break;
 
 						// Elements without group or not supported, ignore
@@ -164,49 +126,41 @@ defined('_JEXEC') or die('Restricted access');
 
 					if (!empty($element_json)) {
 						$type_json[] =
-						'"_'.$element->identifier.'_wrapper":{
-							"type":"wrapper",
+						'"'.$element->identifier.'_wrapper":{
+							"type":"control_wrapper",
 							"fields": {
-								"name_separator":{
-									"type":"separator",
-									"layout":"section",
+								"_filter":{
+									"type": "checkbox",
+									"label": "'.$name.' - '.ucfirst($element->getElementType()).' element",
 									"specific":{
-										"title":"'.$name.' Element"
-									}
-								},
-								'.implode(',', $element_json).',
-								"logic":{
-									"type":"select",
-									"label":"Logic",
-									"specific":{
-										"options":{
-											"PLG_ZLFRAMEWORK_AND":"AND",
-											"PLG_ZLFRAMEWORK_OR":"OR"
-										}
+										"label":"PLG_ZLFRAMEWORK_FILTER"
 									},
-									"default":"AND"
+									"dependents":"'.$element->identifier.'_wrapper > 1",
+									"layout":"separator"
+								},
+								"'.$element->identifier.'_wrapper":{
+									"type":"wrapper",
+									"fields": {
+										'.implode(',', $element_json).',
+										"logic":{
+											"type":"select",
+											"label":"PLG_ZLFRAMEWORK_IFT_LOGIC",
+											"help":"PLG_ZLFRAMEWORK_IFT_LOGIC_DESC",
+											"specific":{
+												"options":{
+													"PLG_ZLFRAMEWORK_AND":"AND",
+													"PLG_ZLFRAMEWORK_OR":"OR"
+												}
+											},
+											"default":"AND"
+										}
+									}
 								}
 							},
 							"control":"'.$element->identifier.'"
 						}';
-						
-					} else {
-
-						$type_json[] =
-						'"_'.$element->identifier.'_wrapper":{
-							"type":"control_wrapper",
-							"fields": {
-								"name_separator":{
-									"type":"separator",
-									"layout":"section",
-									"specific":{
-										"title":"'.$name.' - Element not compatible"
-									}
-								}
-							}
-						}';
 					}
-
+					
 				} // end elements foreach
 
 				$json[] =

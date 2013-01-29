@@ -732,7 +732,14 @@ class ZlfieldHelper extends AppHelper {
 		$this->app->document->addStylesheet('zlfield:layouts/wrapper/style.css');
 		$this->app->document->addScript('zlfield:zlfield.min.js');
 
-		// workaround for jQuery 9 transition
+		if ($this->enviroment == 'module') {
+			$this->app->document->addScript('libraries:jquery/jquery-ui.custom.min.js');
+			$this->app->document->addStylesheet('libraries:jquery/jquery-ui.custom.css');
+			$this->app->document->addScript('libraries:jquery/plugins/timepicker/timepicker.js');
+			$this->app->document->addStylesheet('libraries:jquery/plugins/timepicker/timepicker.css');
+		}
+
+		// workaround for jQuery 1.9 transition
 		$this->app->document->addScript('zlfw:assets/js/jquery.plugins/jquery.migrate.min.js');
 
 		// load libraries

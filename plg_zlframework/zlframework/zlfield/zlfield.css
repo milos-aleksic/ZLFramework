@@ -44,6 +44,18 @@ div.zlfield > img {
  border: 0;
 }
 
+/*
+ --- Fields specific ----------------------------------------------------------------------------------- */
+
+/* date */
+div.zlfield div.zl-row[data-type="date"] .zl-field input {
+	width: 139px !important;
+}
+
+div.zlfield div.zl-row[data-type="date"] .zl-field img {
+	cursor: pointer;
+	margin-left: 2px;
+}
 
 /*
  --- Parameters fields ----------------------------------------------------------------------------------- */

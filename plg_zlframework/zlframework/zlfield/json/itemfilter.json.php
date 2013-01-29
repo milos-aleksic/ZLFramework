@@ -49,7 +49,7 @@ defined('_JEXEC') or die('Restricted access');
 			},
 			"_filter_subfield": {
 				"type":"subfield",
-				"path":"zlfield:json/itemfilter.elements.json.php"
+				"path":"zlfield:json/itemfilter/elements.json.php"
 			}
 		},
 		"specific":{
