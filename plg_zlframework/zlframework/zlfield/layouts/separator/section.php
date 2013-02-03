@@ -10,8 +10,7 @@
 defined('_JEXEC') or die('Restricted access');
 
 	// init vars
-	$title = JText::_($field->get('text', $field->find('specific.title')));
-	
+	$title = JText::_($field->find('specific.title'));
 ?>
 
 	<div class="row section-title" data-type="separator" data-id="<?php echo $id ?>" >

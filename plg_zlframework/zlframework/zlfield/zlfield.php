@@ -350,10 +350,9 @@ class ZlfieldHelper extends AppHelper {
 					$layout = $fld->get('layout', 'default');
 
 					// backward compatibility
-					if ($fld->get('big')) {
-						$layout = 'section';
-					} else if ($fld->get('text')) {
-						$layout = 'subsection';
+					if ($fld->get('text')) {
+						$layout = $fld->get('big') ? 'section' : 'subsection';
+						$fld->set('specific', array('title' => $fld->get('text')));
 					}
 
 					// render layout

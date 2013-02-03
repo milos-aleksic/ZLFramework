@@ -58,19 +58,6 @@ class ZLFieldHTMLHelper extends AppHelper {
 		}
 		return $pvs;
 	}
-
-	/**
-	 * Retrun an HTML separator
-	 *
-	 * @param   array	$data	An array of objects
-	 *
-	 * @return  string HTML for the select list
-	 *
-	 * @since  3.0.8
-	 */
-	public function separator($text, $id, $big=false){
-		return '<div class="row '.($big ? 'big' : '').'section-title" data-type="separator" data-id="'.$id.'" >'.JText::_($text).'</div>';
-	}
 	
 	/**
 	 * Return an HTML string
@@ -141,11 +128,12 @@ class ZLFieldHTMLHelper extends AppHelper {
 		Function: date - Returns date select html string
 	*/
 	public function date($id, $name, $value, $spec, $attrs){
+		$time = $spec->get('time') ? true : false;
 		if ($value) try {
 			$value = $this->app->html->_('date', $value, $this->app->date->format('%Y-%m-%d %H:%M:%S'), $this->app->date->getOffset());
 		} catch (Exception $e) {}
 		
-		return $this->app->html->_('zoo.calendar', $value, $name, $name, '', true);
+		return $this->app->html->_('zoo.calendar', $value, $name, $name, '', $time);
 	}
 
 	/*
