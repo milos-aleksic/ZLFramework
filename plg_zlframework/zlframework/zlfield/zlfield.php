@@ -662,7 +662,7 @@ class ZlfieldHelper extends AppHelper {
 	*/
 	public function replaceVars($vars, $string)
 	{
-		$vars = explode(',', trim($vars, ' '));
+		$vars = is_string($vars) ? explode(',', trim($vars, ' ')) : $vars;
 		
 		$pattern = $replace = array(); $i=1;
 		foreach((array)$vars as $var){
