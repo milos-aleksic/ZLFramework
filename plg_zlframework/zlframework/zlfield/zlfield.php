@@ -443,9 +443,6 @@ class ZlfieldHelper extends AppHelper {
 						}
 					}
 
-					// get value
-					$value = strlen($value) ? $value : $this->_getParam($id, $fld->get('default'), $final_ctrl, $fld->get('old_id', false));
-
 					// get value from config instead
 					if($fld->get('data_from_config'))
 					{
@@ -457,7 +454,22 @@ class ZlfieldHelper extends AppHelper {
 						$path = "{$this->element->identifier}.{$path}";
 						$value = $this->config->find($path.".$id", $value);
 					}
+					else
+					{
+						// get value
+						$value = strlen($value) ? $value : $this->_getParam($id, $fld->get('default'), $final_ctrl, $fld->get('old_id', false));
+					}
+
+					// get inital value dinamicly
+					if (empty($value) && $fld->get('request_value')) {
+
+						// from url
+						if ($fld->find('request_value.from') == 'url') {
+							$value = $this->req->get($fld->find('request_value.param'), $fld->find('request_value.type'), $fld->find('request_value.default'));
+						}
+					}
 					
+					// set specific
 					$specific = $fld->get('specific', array()); /**/ if ($psv) $specific['parents_val'] = $psv;
 					
 

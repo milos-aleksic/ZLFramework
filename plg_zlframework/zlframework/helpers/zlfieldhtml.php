@@ -97,6 +97,15 @@ class ZLFieldHTMLHelper extends AppHelper {
 	public function hidden($id, $name, $value, $spec, $attrs){
 		return '<input type="hidden" name="'.$name.'" value="'.$spec->get('value').'" />';
 	}
+
+	/*
+		Function: urlvar - Returns text input html string
+	*/
+	public function request($id, $name, $value, $spec, $attrs){
+		$value = $this->app->request->get($spec->get('var'), $spec->get('type'), $spec->get('default'));
+		return $this->app->html->_('control.text', $name, (string)$value, 'size="60" maxlength="255"'.$attrs);
+	}
+
 	
 	/*
 		Function: password - Returns password input html string

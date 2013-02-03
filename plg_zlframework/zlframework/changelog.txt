@@ -1,14 +1,10 @@
 Changelog
 ------------
 
-3.0.9
- + ZLField cleaned up and improved
+3.0.8
+ ^ ZLField improvements
  ^ Files Pro improvements
  + Item Filter Model
-
-3.0.8
- ^ ZOO 3.0.9 compatibility
- # ZLField elementsList App filtering fixed
 
 3.0.7
  ^ Files Pro improvements

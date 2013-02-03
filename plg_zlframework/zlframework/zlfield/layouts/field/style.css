@@ -6,16 +6,14 @@ div.zlfield div.zl-row[data-layout="default"] {
 	padding: 5px 0;
 }
 
-div.zlfield div.zl-row[data-layout="default"][data-type="hidden"] {
-	display: none
-}
-
 div.zlfield div.zl-row[data-layout="default"][data-type="info"] .zl-field {
 	float: none;
 }
+
 div.zlfield div.zl-row[data-layout="default"][data-type="info"] .zl-label + .zl-field {
 	float: left;
 }
+
 div.zlfield div.zl-row[data-layout="default"] .zl-field .info {
 	font-size: 90%;
 	padding: 4px 3px 3px;
@@ -29,8 +27,14 @@ div.zlfield div.zl-row[data-layout="default"][data-type="radio"] .zl-field,
 div.zlfield div.zl-row[data-layout="default"][data-type="checkbox"] .zl-field { 
 	padding: 3px 
 }
+
 div.zlfield div.zl-row[data-layout="default"] .zl-loader {
 	margin: 3px 0 0 7px
+}
+
+/* hidden */
+div.zlfield div.zl-row[data-type="hidden"] {
+	display: none
 }
 
 
