@@ -6,6 +6,9 @@
 * @license   	http://www.gnu.org/licenses/gpl-2.0.html GNU/GPLv2 only
 */
 
+// no direct access
+defined('_JEXEC') or die('Restricted access');
+
 // register ElementRepeatablePro class
 App::getInstance('zoo')->loader->register('ElementRepeatablePro', 'elements:repeatablepro/repeatablepro.php');
 
@@ -270,7 +273,7 @@ abstract class ElementFilesPro extends ElementRepeatablePro {
 
 		// workaround for jQuery 1.9 transition
 		$this->app->document->addScript('zlfw:assets/js/jquery.plugins/jquery.migrate.min.js');
-		
+
 		// then plupload
 		$this->app->document->addStylesheet('elements:filespro/assets/plupload/css/jquery.ui.plupload.custom.css');
 		$this->app->document->addScript('elements:filespro/assets/plupload/plupload.full.js');

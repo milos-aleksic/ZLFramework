@@ -33,37 +33,58 @@ defined('_JEXEC') or die('Restricted access');
 	}
 
 	// depricated method beacuse in modules for ex will not work
-	// $applications = array($this->app->zoo->getApplication()); 
+	// $applications = array($this->app->zoo->getApplication());
 
 	// check if at least one app is loaded
 	if (empty($applications)) return;
 
-	// add core elements
+
+	/* add general options */
+	$json[] =
+	'"_reversed":{
+		"type":"checkbox",
+		"label":"PLG_ZLFRAMEWORK_REVERSE",
+		"specific": {
+			"label": "JYES",
+			"value":"_reversed"
+		}
+	},
+	"_priority":{
+		"type":"checkbox",
+		"label":"PLG_ZLFRAMEWORK_PRIORITY",
+		"specific": {
+			"label": "JYES",
+			"value":"_priority"
+		}
+	}';
+
+
+	/* add core elements */
 	$elements = $this->app->object->create('Type', array('_core', $applications[0]))->getCoreElements();
 	
-		// filter orderable elements
-		$elements = array_filter($elements, create_function('$element', 'return $element->getMetaData("orderable") == "true";'));
+	// filter orderable elements
+	$elements = array_filter($elements, create_function('$element', 'return $element->getMetaData("orderable") == "true";'));
 
-		$options = array();
-		foreach ($elements as $element) {
-			$options[$element->config->name ? $element->config->name : $element->getMetaData('name')] = $element->identifier;
+	$options = array();
+	foreach ($elements as $element) {
+		$options[$element->config->name ? $element->config->name : $element->getMetaData('name')] = $element->identifier;
+	}
+	
+	if ($node->get('add_default')) {
+		array_unshift($options, array(JText::_('default') => ''));
+	}
+
+	$json[] =
+	'"_core":{
+		"type":"select",
+		"label":"PLG_ZLFRAMEWORK_CORE",
+		"specific": {
+			"options":'.json_encode($options).'
 		}
-		
-		if ($node->get('add_default')) {
-			array_unshift($options, array(JText::_('default') => ''));
-		}
-
-		$json[] =
-		'"_core":{
-			"type":"select",
-			"label":"'.JText::_('Core').'",
-			"specific": {
-				"options":'.json_encode($options).'
-			}
-		}';
+	}';
 
 
-	// add type elements
+	/* add type elements */
 	foreach ($applications as $application)
 	{
 		// get types
@@ -72,10 +93,12 @@ defined('_JEXEC') or die('Restricted access');
 		// filter types
 		$types = !empty($allowed_types) ? array_filter($types, create_function('$type', 'return in_array($type->id, array(\''.implode('\', \'', $allowed_types).'\'));')) : $types;
 
+		$type_json = array();
 		if(!empty($types)) foreach ($types as $type)
 		{
+			$element_json = array();
 			$elements = $type->getElements();
-			$options = array('- '.JText::_('Select Element').' -' => false);
+			$options = array('- '.JText::_('PLG_ZLFRAMEWORK_SELECT_ELEMENT').' -' => false);
 			
 			// filter orderable elements
 			$elements = array_filter($elements, create_function('$element', 'return $element->getMetaData("orderable") == "true";'));
@@ -87,15 +110,8 @@ defined('_JEXEC') or die('Restricted access');
 					$options[$element->config->name ? $element->config->name : $element->getMetaData('name')] = $element->identifier;
 				}
 
-				// app separator
-				$json[] =
-				'"_'.$application->id.'_separator":{
-					"type":"separator",
-					"text":"'.$application->name.' App"
-				}';
-
 				// elements
-				$json[] =
+				$type_json[] =
 				'"_'.$type->id.'":{
 					"type":"select",
 					"label":"'.$type->name.'",
@@ -103,48 +119,32 @@ defined('_JEXEC') or die('Restricted access');
 						"options":'.json_encode($options).'
 					}
 				}';
-			}
-		}
-	}
 
-	// app separator
-	$json[] =
-	'"_general_separator":{
-		"type":"separator",
-		"text":"General"
-	}';
-	
-	// reversed
-	$json[] =
-	'"_reversed":{
-		"type":"checkbox",
-		"label":"'.JText::_('Reverse').'",
-		"specific": {
-			"label": "JYES",
-			"value":"_reversed"
-		}
-	}';
+			} // end if Elements
+		} // end Type foreach
 
-	// priority
-	$json[] =
-	'"_priority":{
-		"type":"checkbox",
-		"label":"'.JText::_('Priority').'",
-		"specific": {
-			"label": "JYES",
-			"value":"_priority"
-		}
-	}';
+		$json[] =
+		'"_'.$application->id.'_fieldset":{
+			"type":"wrapper",
+			"fields": {'.implode(",", $type_json).'},
+			"specific":{
+				"toggle":{
+					"label":"PLG_ZLFRAMEWORK_NAME_APP_ELEMENTS||'.$application->name.'"
+				}
+			},
+			"layout":"fieldset"
+		}';
 
+	} // end App foreach
 
-	// return json string
+	// JSON
 	return 
 	'{"fields": {
 		
 		'. /* random */ '
 		"_random":{
 			"type":"checkbox",
-			"label":"'.JText::_('Random').'",
+			"label":"PLG_ZLFRAMEWORK_RANDOM",
 			"specific": {
 				"label": "JYES",
 				"value":"_random"

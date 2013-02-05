@@ -85,6 +85,7 @@ class plgSystemZlframework extends JPlugin {
 			$this->app->loader->register('ZlPathHelper', 'helpers:zlpath.php');
 			$this->app->loader->register('ZlModelHelper', 'helpers:model.php');
 			$this->app->loader->register('ZLXmlHelper', 'helpers:zlxmlhelper.php');
+			$this->app->loader->register('ZLFieldHTMLHelper', 'helpers:zlfieldhtml.php');
 		}
 		
 		// check and perform installation tasks
@@ -104,8 +105,8 @@ class plgSystemZlframework extends JPlugin {
 		// register models
 		if ( $path = $this->app->path->path( 'zlfw:models' ) ) {
 			$this->app->path->register( $path, 'models' );
-			$this->app->loader->register('ZlQuery', 'models:query.php');
 			$this->app->loader->register('ZLModel', 'models:zl.php');
+			$this->app->loader->register('ZLModelItem', 'models:item.php');
 		}
 		
 		// register events

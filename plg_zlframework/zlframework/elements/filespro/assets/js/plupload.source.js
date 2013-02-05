@@ -357,19 +357,20 @@
 			extensions: null,
 			path: null,
 			fileMode: 'files',
+			max_file_size: '1024kb',
 			callback: null
         },
         initialize: function (b, c) {
             this.options = $.extend({}, this.options, c);
 			var d = this,
-			
+				
 				// init plupload
 				h = $('<div class="plupload" />').appendTo(b).plupload({
 					// General settings
 					runtimes : 'html5,flash',
 					url : this.options.url+'&method=uploadFiles',
 					flash_swf_url : this.options.flashUrl,
-					max_file_size : '1000mb',
+					max_file_size : this.options.max_file_size,
 					max_file_count: 10, // user can add no more then 20 files at a time
 					chunk_size : '1mb',
 					// This resize has a bug in chrome / ff with pngs
@@ -399,7 +400,8 @@
 								d.options.callback();
 								h.find('.plupload_cancel').show();	
 							}
-						}		
+						}
+
 					}
 				});
 
@@ -407,7 +409,7 @@
 			var browse_button = $('.plupload_add', h);
 			var start_button = $('.plupload_start', h);
 			var stop_button = $('.plupload_stop', h);
-		
+
 			browse_button.buttonzl({
 				icons: { primary: 'ui-icon-circle-plus' }
 			});
@@ -429,6 +431,19 @@
 					start_button.buttonzl('enable');
 				}	
 			});
+
+			// Replace Max File Size in Error Message
+			var MaxFileSize = this.options.max_file_size;
+			up.bind('Error', function(up, err){
+				if (err.code=='-600') {
+					var MsgBox 	= $('.plupload_message'),
+						Msg 	= MsgBox.html().replace("max file size: 1024", "max file size: " + MaxFileSize);
+					MsgBox.html(MsgBox.html().replace("max file size: 1024", "max file size: " +  MaxFileSize))
+
+				}
+				up.refresh(); // Reposition Flash/Silverlight
+		    });
+
 
 			start_button.click(function(e) {
 				if (!$(this).buttonzl('option', 'disabled')) {

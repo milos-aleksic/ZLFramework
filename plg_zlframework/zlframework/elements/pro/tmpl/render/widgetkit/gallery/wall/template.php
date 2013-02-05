@@ -10,6 +10,9 @@
 * @license   YOOtheme Proprietary Use License (http://www.yootheme.com/license)
 */
 
+// no direct access
+defined('_JEXEC') or die('Restricted access');
+
 	$widget_id = $widget->id.'-'.uniqid();
 	$settings  = $widget->settings;
 	$zoom      = in_array($settings['effect'], array('zoom', 'polaroid')) ? 1.4 : 1;

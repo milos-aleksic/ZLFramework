@@ -12,7 +12,8 @@
 		options: {
 			url: '',
 			type: '',
-			enviroment: ''
+			enviroment: '',
+			enviroment_args: ''
 		},
 		initialize: function(body, options) {
 			this.options = $.extend({}, this.options, options);
@@ -242,14 +243,15 @@
 				/* 
 				 * Toggle Fields
 				 */
-				$dom.find('.zltoggle-btn').each(function(){
+				$dom.find('.zl-toggle').each(function(){
 					var toggle = $(this),
 						content = toggle.next();
+
 					// set action
-					toggle.find('.tg-open').bind('click', function(){
+					$('.btn-open', toggle).on('click', function(){
 						toggle.toggleClass('open') && content.show();
 					});
-					toggle.find('.tg-close').bind('click', function(){
+					$('.btn-close', toggle).on('click', function(){
 						toggle.toggleClass('open') && content.hide();
 					});
 				}); // Toggle Fields END
@@ -259,11 +261,12 @@
 				 * Dependents - Fields are shown/hidden depending on other fields values
 				 */
 				$dom.find('[data-dependents]').each(function(){
-					var a = $(this),
-						b = a.data("dependents").replace(/ /g, '').split('|'), // remove empty spaces and split into rules
-						ph = a.closest('.zlfield.placeholder .wrapper, .zlfield.placeholder').first();
+					var field = $(this),
+						rules = field.data("dependents").replace(/ /g, '').split('|'), // remove empty spaces and split into rules
+						ph = field.closest('.zlfield.placeholder .wrapper, .zlfield.placeholder').first();
 
-					b.each(function(val) // for each rule
+					// for each rule
+					rules.each(function(val)
 					{
 						var c = val.split('!>'),
 							m = c.length == 2 ? '!>' : '>'; // mode
@@ -272,12 +275,12 @@
 							e = c[1].replace('NONE', ''); // dependent option
 
 						// if select
-						(a.data("type") == 'select' || a.data("type") == 'itemLayoutList' || a.data("type") == 'layout' || a.data("type") == 'apps' || a.data("type") == 'types' || a.data("type") == 'elements' || a.data("type") == 'modulelist' || a.data("type") == 'separatedby') 
+						(field.data("type") == 'select' || field.data("type") == 'itemLayoutList' || field.data("type") == 'layout' || field.data("type") == 'apps' || field.data("type") == 'types' || field.data("type") == 'elements' || field.data("type") == 'modulelist' || field.data("type") == 'separatedby') 
 						&& d.each(function(val) // for each dependent of the option
 						{
 							var dep = ph.find('[data-id="'+val+'"]').data('e', e).data('m', m).hide();
 
-							a.find('.zl-field select').bind('change', function(){
+							field.find('.zl-field select').bind('change', function(){
 								var e = dep.data('e'), // dependent value
 									m = dep.data('m'), // dependent mode
 									selection = $.makeArray($(this).val()), // for multiselect compatibility
@@ -285,32 +288,39 @@
 
 								if (e && e.match(/OR/g)){
 									$.each(selection, function(index, value){ // for each selected value
-										var re = new RegExp(value, 'g');
+										// regex search value on begin/end of string or with OR in any side
+										var re = new RegExp('(\\b|OR)'+value+'(\\b|OR)', 'g');
 										( (m == '!>' && !e.match(re)) || (m == '>' && e.match(re)) ) && (match = 1);
 										// check mode and Select value, mark any match
 									})
 								} else if (e && e.match(/AND/g)){
-									$.each(selection, function(index, value){ // for each selected value
-										( (m == '!>' && value != e) || (m == '>' && value == e) ) && (match = 1);
-										// check mode and Select value, mark any match
+									var min = e.split('AND').length;
+									(selection.length == min) && $.each(selection, function(index, value){
+										// regex search value on begin/end of string or with AND in any side
+										var re = new RegExp('(\\b|AND)'+value+'(\\b|AND)', 'g');
+										if ( (m == '!>' && !e.match(re)) || (m == '>' && e.match(re)) ) {
+											match = 1;
+										} else { match = 0; }
+										// check mode and Select value, mark only if all matched
 									})
 								} else {
-									$.each(selection, function(index, value){ // for each selected value
+									$.each(selection, function(index, value){
 										( (m == '!>' && value != e) || (m == '>' && value == e) ) && (match = 1);
 										// check mode and Select value, mark any match
 									})
 								}
-								
+
 								// if match Show, otherwise Hide
 								match && dep.slideDown('fast') || dep.slideUp('fast');
 							}).trigger('change');
+
 						});
 						
 						// if checkbox
-						(a.data("type") == 'checkbox') && d.each(function(val)
+						(field.data("type") == 'checkbox') && d.each(function(val)
 						{
 							var dep = ph.find('[data-id="'+val+'"]').hide();
-							a.find('.zl-field input').bind('change', function(){
+							field.find('.zl-field input').bind('change', function(){
 								var checkd = $(this).attr('checked') == 'checked'; // it is checked?
 								
 								( (m == '!>' && !checkd) || (m == '>' && checkd) ) && dep.slideDown('fast') || dep.slideUp('fast');
@@ -319,11 +329,11 @@
 						});
 
 						// if radio
-						(a.data("type") == 'radio') && d.each(function(val)
+						(field.data("type") == 'radio') && d.each(function(val)
 						{
 							var option = e, // it must be declared local to avoid some weard issue that changes true string values to 1 number value
 								dep = ph.find('[data-id="'+val+'"]').hide();
-							a.find('.zl-field input').bind('change', function()
+							field.find('.zl-field input').bind('change', function()
 							{
 								var checkd = $(this).attr('checked') == 'checked', // it is checked?
 									match = 0, // by default no match
@@ -350,10 +360,10 @@
 						});
 						
 						// if text
-						(a.data("type") == 'text') && d.each(function(val)
+						(field.data("type") == 'text') && d.each(function(val)
 						{
 							var dep = ph.find('[data-id="'+val+'"]').hide();
-							a.find('.zl-field input').on('keyup change', function(){
+							field.find('.zl-field input').on('keyup change', function(){
 								var filled = $(this).val() != ''; // has text?
 								
 								( (m == '!>' && !filled) || (m == '>' && filled) ) && dep.slideDown('fast') || dep.slideUp('fast');
@@ -389,7 +399,19 @@
 
 						// peform ajax request
 						ac.append($('<span class="activity zl-loader">'));
-						$.getJSON(b.url, {task: 'loadfield', json:json, ctrl:ctrl, psv:psv, pid:pid, node:null, args:args, ajaxcall:true, enviroment:$this.options.enviroment}, function(data){
+						$.getJSON(b.url, 
+							{
+								task: 'loadfield', 
+								json:json, 
+								ctrl:ctrl, 
+								psv:psv, 
+								pid:pid, 
+								node:null, 
+								args:args, 
+								ajaxcall:true, 
+								enviroment:$this.options.enviroment, 
+								enviroment_args:$this.options.enviroment_args
+							}, function(data){
 							ac.find('.activity').remove();
 
 							// set data

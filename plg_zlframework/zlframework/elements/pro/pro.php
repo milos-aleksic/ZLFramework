@@ -6,6 +6,9 @@
 * @license   	http://www.gnu.org/licenses/gpl-2.0.html GNU/GPLv2 only
 */
 
+// no direct access
+defined('_JEXEC') or die('Restricted access');
+
 // register Element class
 App::getInstance('zoo')->loader->register('Element', 'elements:element/element.php');
 

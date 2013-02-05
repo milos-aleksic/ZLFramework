@@ -24,15 +24,15 @@ if(!class_exists('ZLWorksAroundJoomlaToGetAModel')) {
 
 class ZLModel extends ZLWorksAroundJoomlaToGetAModel
 {
-	protected $app = null;
-	
-	function __construct($config = array())
-	{
-		parent::__construct($config);
-		
-		$this->app = App::getInstance('zoo');
-	}
-	
+    protected $app = null;
+    
+    function __construct($config = array())
+    {
+        parent::__construct($config);
+        
+        $this->app = App::getInstance('zoo');
+    }
+    
     /**
      * Empties the state
      *
@@ -105,52 +105,62 @@ class ZLModel extends ZLWorksAroundJoomlaToGetAModel
      */
     function getList()
     {
-    	//echo str_replace('#__', 'oo1dl_', $this->getQuery());die();
-		
+        //echo str_replace('#__', 'oo1dl_', $this->getQuery());die();
+        
         if (empty( $this->_list ))
         {
             $query = $this->getQuery();
-			
-			// ZOO way
-			$result = $this->app->database->query($query);
-	
-			// fetch objects and execute init callback
-			$objects = array();
-			while ($object = $this->app->database->fetchObject($result, 'Item')) 
-			{
-				$objects[$object->id] = $this->initObject($object);
-			}
-	
-			$this->app->database->freeResult($result);
-			$this->_list = $objects;
+            
+            // Limits
+            $offset = $this->_db->escape( $this->getState('offset'));
+            $limitstart = $this->_db->escape( $this->getState('limitstart') );
+            $limit  = $this->_db->escape( $this->getState('limit') );
+
+            if (strlen($limitstart)) {
+                $offset = $limitstart;
+            }
+
+            
+            $this->_db->setQuery($query, $offset, $limit);
+            $result = $this->_db->execute();
+    
+            // fetch objects and execute init callback
+            $objects = array();
+            while ($object = $this->app->database->fetchObject($result, 'Item')) 
+            {
+                $objects[$object->id] = $this->initObject($object);
+            }
+    
+            $this->app->database->freeResult($result);
+            $this->_list = $objects;
         }
-		
+        
         return $this->_list;
     }
-	
-	protected function initObject($object)
-	{
-		// add reference to related app instance
-		if (property_exists($object, 'app')) {
-			$object->app = $this->app;
-		}
-		
-		// workaround for php bug, which calls constructor before filling values
-		if (is_string($object->params) || is_null($object->params)) {
-			// decorate data as object
-			$object->params = $this->app->parameter->create($object->params);
-		}
+    
+    protected function initObject($object)
+    {
+        // add reference to related app instance
+        if (property_exists($object, 'app')) {
+            $object->app = $this->app;
+        }
+        
+        // workaround for php bug, which calls constructor before filling values
+        if (is_string($object->params) || is_null($object->params)) {
+            // decorate data as object
+            $object->params = $this->app->parameter->create($object->params);
+        }
 
-		if (is_string($object->elements) || is_null($object->elements)) {
-			// decorate data as object
-			$object->elements = $this->app->data->create($object->elements);
-		}
+        if (is_string($object->elements) || is_null($object->elements)) {
+            // decorate data as object
+            $object->elements = $this->app->data->create($object->elements);
+        }
 
-		// trigger init event
-		$this->app->event->dispatcher->notify($this->app->event->create($object, 'item:init'));
+        // trigger init event
+        $this->app->event->dispatcher->notify($this->app->event->create($object, 'item:init'));
 
-		return $object;
-	}
+        return $object;
+    }
 
     /**
      * Retrieves the data for an un-paginated list
@@ -196,7 +206,7 @@ class ZLModel extends ZLWorksAroundJoomlaToGetAModel
         }
         return $this->_result;
     }
-	
+    
     /**
      * Builds a generic SELECT query
      *
@@ -209,7 +219,8 @@ class ZLModel extends ZLWorksAroundJoomlaToGetAModel
             return $this->_query;
         }
 
-        $query = new ZLQuery();
+        // Use joomla query builder
+        $query = $this->_db->getQuery(true);
 
         $this->_buildQueryFields($query);
         $this->_buildQueryFrom($query);
@@ -218,7 +229,6 @@ class ZLModel extends ZLWorksAroundJoomlaToGetAModel
         $this->_buildQueryGroup($query);
         $this->_buildQueryHaving($query);
         $this->_buildQueryOrder($query);
-		$this->_buildQueryLimit($query);
 
         return $query;
     }
@@ -228,7 +238,8 @@ class ZLModel extends ZLWorksAroundJoomlaToGetAModel
      */
     protected function _buildResultQuery()
     {
-        $query = new ZLQuery();
+        // Use joomla query builder
+        $query = $this->_db->getQuery(true);
         $query->select( 'COUNT( DISTINCT a.id )');
 
         $this->_buildQueryFrom($query);
@@ -291,25 +302,6 @@ class ZLModel extends ZLWorksAroundJoomlaToGetAModel
         $order_by = $this->_db->escape( $this->getState('order_by') );
         if ($order_by){
             $query->order($order_by);
-        }
-    }
-	
-	/**
-     * Builds a generic LIMIT clasue based on the model's state
-     */
-    protected function _buildQueryLimit(&$query)
-    {
-        $offset = $this->_db->escape( $this->getState('offset') );
-        $limitstart = $this->_db->escape( $this->getState('limitstart') );
-        $limit  = $this->_db->escape( $this->getState('limit') );
-
-        if(strlen($limitstart)){
-            $offset = $limitstart;
-        }
-                
-        if(strlen($offset) || strlen($limit))
-        {
-            $query->limit($offset, $limit);
         }
     }
 }

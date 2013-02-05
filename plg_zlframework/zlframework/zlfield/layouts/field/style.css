@@ -1,0 +1,193 @@
+/* Copyright (C) JOOlanders SL http://www.gnu.org/licenses/gpl-2.0.html GNU/GPLv2 only */
+
+
+/* row */
+div.zlfield div.zl-row[data-layout="default"] {
+	padding: 5px 0;
+}
+
+div.zlfield div.zl-row[data-layout="default"][data-type="info"] .zl-field {
+	float: none;
+}
+
+div.zlfield div.zl-row[data-layout="default"][data-type="info"] .zl-label + .zl-field {
+	float: left;
+}
+
+div.zlfield div.zl-row[data-layout="default"] .zl-field .info {
+	font-size: 90%;
+	padding: 4px 3px 3px;
+	margin: 0 auto;
+	/*width: 170px;*/
+	text-align: center;
+	width: 100%;
+}
+
+div.zlfield div.zl-row[data-layout="default"][data-type="radio"] .zl-field,
+div.zlfield div.zl-row[data-layout="default"][data-type="checkbox"] .zl-field { 
+	padding: 3px 
+}
+
+div.zlfield div.zl-row[data-layout="default"] .zl-loader {
+	margin: 3px 0 0 7px
+}
+
+/* hidden */
+div.zlfield div.zl-row[data-type="hidden"] {
+	display: none
+}
+
+
+/* field
+-------------------------------------------------*/
+div.zlfield div.zl-row[data-layout="default"] .zl-field { 
+	float: left;
+}
+div.zlfield div.zl-row[data-layout="default"] .zl-field span.content { 
+	
+}
+div.zlfield div.zl-row[data-layout="default"] input {
+	margin: 0;
+}
+div.zlfield div.zl-row[data-layout="default"] input[type="text"],
+div.zlfield div.zl-row[data-layout="default"] input[type="password"],
+div.zlfield div.zl-row[data-layout="default"] select,
+div.zlfield div.zl-row[data-layout="default"] textarea {
+	border: 1px solid #D2D2D2;
+	border-radius: 4px;
+	margin: 0;
+	padding: 3px;
+	min-width: 0;
+	width: 159px;
+}
+div.zlfield div.zl-row[data-layout="default"] textarea,
+div.zlfield div.zl-row[data-layout="default"] input[type="text"],
+div.zlfield div.zl-row[data-layout="default"] input[type="password"] {
+	/*width: 159px;*/
+	/*padding: 3px 7px;*/
+}
+div.zlfield div.zl-row[data-layout="default"] select{
+	padding-left: 1px;
+	width: 167px;
+}
+	div.zlfield select option {
+	 padding: 0 4px;
+	}
+div.zlfield div.zl-row[data-layout="default"] textarea {
+	min-height: 60px;
+}
+div.zlfield div.zl-row[data-layout="default"] textarea{
+	width: 159px;
+	max-width: 159px;
+	min-width: 159px
+}
+div.zlfield div.zl-row[data-layout="default"] input[type="checkbox"],
+div.zlfield div.zl-row[data-layout="default"] input[type="radio"] {
+	margin-right: 4px;
+}
+
+/* state */
+div.zlfield div.zl-row[data-layout="default"] .zl-state {
+	float: left;
+	padding: 2px 0;
+}
+
+/* label
+-------------------------------------------------*/
+div.zlfield div.zl-row[data-layout="default"] .zl-label span.active {
+	padding-right: 4px;
+	position: relative;
+	top: -1px;
+	visibility: hidden;
+}
+div.zlfield div.zl-row[data-layout="default"]:hover .zl-label span.active {
+	visibility: visible;
+}
+div.zlfield div.zl-row[data-layout="default"] .zl-label span.text {
+	vertical-align: middle;
+	padding-top: 1px;
+}
+
+div.zlfield div.zl-row[data-layout="default"] .zl-label {
+	border-bottom: 1px dotted transparent;
+	
+	color: #666666;
+	float: left;
+	font-weight: bold;
+	margin: 0 18px;
+	width: 180px;
+	padding: 3px;
+}
+div.zlfield div.zl-row[data-layout="default"] .zl-disabled .zl-label {
+	 color: #999
+}
+
+/* when state make no margin */
+div.zlfield div.zl-row[data-layout="default"] .zl-state + .zl-label {
+	margin-left: 0;
+}
+/* when no help make bigger margin */
+div.zlfield div.zl-row[data-layout="default"] .zl-label + .zl-field {
+	margin-left: 24px;
+}
+div.zlfield div.zl-row[data-layout="default"] .zl-label + .zl-field * {
+	clear: none;
+	float: left;
+	min-width: 0;
+}
+
+/* label fix for j3 */
+div.zlfield div.zl-row[data-layout="default"] .controls > .radio:first-child,
+div.zlfield div.zl-row[data-layout="default"] .controls > .checkbox:first-child {
+    padding-top: 0;
+}
+
+/* help
+-------------------------------------------------*/
+div.zlfield div.zl-row[data-layout="default"] .zl-help {
+	float: right;
+}
+
+/* qTip trigger */
+div.zlfield div.zl-row[data-layout="default"] .qTipHelp {
+	cursor: help;
+	display: inline-block;
+	padding: 5px 9px 0;
+	visibility: hidden;
+}
+div.zlfield div.zl-row[data-layout="default"]:hover .qTipHelp {
+	visibility: visible;
+}
+
+div.zlfield div.zl-row[data-layout="default"] .qtip-content {
+	display: none
+}
+
+
+/*
+ --- Separator Layout specific ----------------------------------------------------------------------------- */
+
+/* row */
+div.zlfield div.zl-row[data-layout="separator"] {
+	border-bottom: 1px solid #CCCCCC;
+	margin: 18px 0 15px;
+}
+
+/* label */
+div.zlfield div.zl-row[data-layout="separator"] .zl-label {
+	color: #666666;
+	font-weight: bold;
+	text-align: left;
+	text-indent: 0;
+}
+
+/* field */
+div.zlfield div.zl-row[data-layout="separator"] .zl-field {
+	float: right;
+}
+
+/*checkbox*/
+div.zlfield div.zl-row[data-layout="separator"][data-type="checkbox"] .zl-field input {
+	float: right;
+	margin: 0 1px 1px 3px;
+}

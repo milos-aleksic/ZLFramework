@@ -6,6 +6,9 @@
 * @license   	http://www.gnu.org/licenses/gpl-2.0.html GNU/GPLv2 only
 */
 
+// no direct access
+defined('_JEXEC') or die('Restricted access');
+
 /*
 	Class: ZlframeworkController
 		The controller class for zoolanders extensions
@@ -217,6 +220,34 @@ class ZlframeworkController extends AppController {
 			$items[] = array('name' => basename($file), 'type' => 'file', 'path' => $path, 'size' => $size);
 		}
 		
+		echo json_encode($items);
+	}
+
+	/*
+		Function: callModule
+			callModule for AJAX requests
+	*/
+	public function callModule()
+	{
+		// init vars
+		$module_id = $this->app->request->getInt('module_id', 0);
+		$db = JFactory::getDbo();
+
+		// get module params
+		$query = $db->getQuery(true);
+		$query->select('m.params')->from('#__modules AS m')->where('m.id = '.$module_id);
+		$params = $this->app->data->create(json_decode($db->setQuery($query)->loadResult(), true));
+
+		// get module base name
+		$query = $db->getQuery(true);
+		$query->select('m.module')->from('#__modules AS m')->where('m.id = '.$module_id);
+		$module = $db->setQuery($query)->loadResult();
+
+		// load helper
+		require_once(JPATH_ROOT.'/modules/'.$module.'/helper.php');
+
+		// get and return items
+		$items = call_user_func_array(array($module.'Helper', 'callback'), compact('params'));
 		echo json_encode($items);
 	}
 }

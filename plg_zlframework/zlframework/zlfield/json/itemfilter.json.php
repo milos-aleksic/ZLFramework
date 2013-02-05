@@ -28,9 +28,15 @@ defined('_JEXEC') or die('Restricted access');
 	}' : '';
 
 	// Item Filter
-	$childs[] = isset($params['itemfilter']) ? '"_filter_wrapper":{
-		"type":"control_wrapper",
+	$childs[] = isset($params['itemfilter']) ? '"_filter_fieldset":{
+		"type":"wrapper",
 		"fields": {
+			"_published":{
+				"type": "radio",
+				"label": "PLG_ZLFRAMEWORK_IFT_PUBLISHED",
+				"help": "PLG_ZLFRAMEWORK_IFT_PUBLISHED_DESC",
+				"default":"1"
+			},
 			"_offset":{
 				"type": "text",
 				"label": "PLG_ZLFRAMEWORK_FT_OFFSET",
@@ -40,25 +46,40 @@ defined('_JEXEC') or die('Restricted access');
 				"type": "text",
 				"label": "PLG_ZLFRAMEWORK_FT_LIMIT",
 				"help": "PLG_ZLFRAMEWORK_FT_LIMIT_DESC"
+			},
+			"_created_subfield": {
+				"type":"subfield",
+				"path":"zlfield:json/itemfilter/created.json.php"
+			},
+			"_filter_subfield": {
+				"type":"subfield",
+				"path":"zlfield:json/itemfilter/elements.json.php"
 			}
 		},
+		"specific":{
+			"toggle":{
+				"label":"PLG_ZLFRAMEWORK_FILTER"
+			}
+		},
+		"layout":"fieldset",
 		"control":"itemfilter"
 	}' : '';
 
 	// Item Order
-	$childs[] = isset($params['itemorder']) ? '"_order_wrapper":{
-		"type":"wrapper",
+	$childs[] = isset($params['itemorder']) ? '"_order_fieldset":{
+		"type":"fieldset",
 		"fields": {
-			"_order_separator":{
-				"type":"separator",
-				"text":"PLG_ZLFRAMEWORK_ORDER",
-				"big":"1"
-			},
 			"_order_subfield": {
 				"type":"subfield",
 				"path":"zlfield:json/itemorder.json.php"
 			}
 		},
+		"specific":{
+			"toggle":{
+				"label":"PLG_ZLFRAMEWORK_ORDER"
+			}
+		},
+		"layout":"fieldset",
 		"control":"itemorder"
 	}' : '';
 
@@ -69,12 +90,6 @@ defined('_JEXEC') or die('Restricted access');
 	// return json string
 	return
 	'{
-		'.(isset($params['itemorder']) ? '"_filter_separator":{
-			"type":"separator",
-			"text":"PLG_ZLFRAMEWORK_FILTER",
-			"big":"1"
-		},' : '').'
-
 		"_chosenapps":{
 			"type": "apps",
 			"label": "'.$params->find('apps.label').'",

@@ -19,6 +19,7 @@ class ZlfieldHelper extends AppHelper {
 	protected $path;
 	protected $params;
 	protected $enviroment;
+	protected $enviroment_args;
 	protected $config;
 	protected $mode;
 
@@ -41,6 +42,10 @@ class ZlfieldHelper extends AppHelper {
 
 		// if no enviroment for ZL field, cancel
 		if (!$this->enviroment) return;
+
+		// decode and set enviroment arguments
+		$this->enviroment_args = json_decode($this->req->get('enviroment_args', 'string', ''), true);
+		$this->enviroment_args = $this->app->data->create($this->enviroment_args);
 
 		// get task
 		$this->task = $this->req->getVar('parent_task') ? $this->req->getVar('parent_task') : $this->req->getVar('task');
@@ -109,27 +114,6 @@ class ZlfieldHelper extends AppHelper {
 		$this->loadAssets();
 	}
 
-	public function _($type)
-	{
-		// get arguments
-		$args = func_get_args();
-
-		// Check to see if we need to load a helper file
-		$parts = explode('.', $type);
-
-		if (count($parts) >= 2) {
-			$func = array_pop($parts);
-			$file = array_pop($parts);
-
-			if (in_array($file, array('zoo', 'control')) && method_exists($this, $func)) {
-				array_shift($args);
-				return call_user_func_array(array($this, $func), $args);
-			}
-		}
-
-		return call_user_func_array(array('JHTML', '_'), $args);
-	}
-
 	protected function initEditMode()
 	{
 		// get application
@@ -193,19 +177,25 @@ class ZlfieldHelper extends AppHelper {
 
 	protected function initModuleMode()
 	{
+		// init vars
+		$module_id = $this->enviroment_args->get('id', $this->req->getVar('id'));
+
 		// get module params
 		$db = JFactory::getDbo();
 		$query = $db->getQuery(true);
 
 		$query->select('m.params');
 		$query->from('#__modules AS m');
-		$query->where('m.id = '.$this->req->getVar('id'));
+		$query->where('m.id = '.$module_id);
 
 		$db->setQuery($query);
 		$result = $db->loadResult();
 
 		// create the necesay array path
 		$this->params = $this->data->create( array('jform' => array('params' => json_decode($result, true))) );
+
+		// save enviroment arguments
+		$this->enviroment_args = array('id' => $this->req->getVar('id'));
 	}
 
 	protected function initAppConfigMode()
@@ -219,11 +209,8 @@ class ZlfieldHelper extends AppHelper {
 
 	/*
 		Function: render - Returns the result from _parseJSON wrapped with main html dom
-
-		Params
-			$thl togglehiddenlabel
 	*/
-	public function render($parseJSONargs, $toggle=false, $thl='', $ajaxargs=array(), $class='', $ajaxLoading=false)
+	public function render($parseJSONargs, $toggle=false, $open_btn_txt='', $ajaxargs=array(), $class='', $ajaxLoading=false)
 	{
 		// init vars
 		$html = array();
@@ -237,7 +224,7 @@ class ZlfieldHelper extends AppHelper {
 		if($ajaxLoading)
 		{
 			$html[] = '<div class="load-field-btn">';
-				$html[] = '<span>'.strtolower(JText::sprintf('PLG_ZLFRAMEWORK_EDIT_THIS_PARAMS', $thl)).'</span>';
+				$html[] = '<span>'.strtolower(JText::sprintf('PLG_ZLFRAMEWORK_EDIT_THIS_PARAMS', $open_btn_txt)).'</span>';
 			$html[] = '</div>';
 		}
 		else if(!$toggle)
@@ -247,11 +234,11 @@ class ZlfieldHelper extends AppHelper {
 		else 
 		{
 			$hidden = $toggle == 'starthidden' ? true : false;
-			$html[] = '<div class="zltoggle-btn '.($hidden ? '' : 'open').'">';
-				$html[] = '<span class="tg-close">- '.JText::_('PLG_ZLFRAMEWORK_TOGGLE').'</span>';
-				$html[] = '<div class="tg-open"><span>'.strtolower(JText::sprintf('PLG_ZLFRAMEWORK_EDIT_THIS_PARAMS', $thl)).'</span></div>';
+			$html[] = '<div class="zl-toggle '.($hidden ? '' : 'open').'" data-layout="params">';
+				$html[] = '<span class="btn-close">- '.JText::_('PLG_ZLFRAMEWORK_TOGGLE').'</span>';
+				$html[] = '<div class="btn-open"><span class="">'.strtolower(JText::sprintf('PLG_ZLFRAMEWORK_EDIT_THIS_PARAMS', $open_btn_txt)).'</span></div>';
 			$html[] = '</div>';
-			$html[] = '<div class="zltoggle"'.($hidden ? ' style=" display: none;"' : '').'>'.$parsedFields.'</div>';
+			$html[] = '<div class="zl-toggle-content"'.($hidden ? ' style=" display: none;"' : '').'>'.$parsedFields.'</div>';
 		}
 
 		$html[] = '</div>';
@@ -359,41 +346,48 @@ class ZlfieldHelper extends AppHelper {
 			switch ($field_type)
 			{
 				case 'separator':
-					$result[] = $this->$fld['type']($fld->get('text'), $id, $fld->get('big'));
+					// set layout
+					$layout = $fld->get('layout', 'default');
+
+					// backward compatibility
+					if ($fld->get('text')) {
+						$layout = $fld->get('big') ? 'section' : 'subsection';
+						$fld->set('specific', array('title' => $fld->get('text')));
+					}
+
+					// render layout
+					$field = $fld;
+					if ($layout = $this->getLayout("separator/{$layout}.php")) {
+						$result[] = $this->app->zlfw->renderLayout($layout, compact('id', 'field'));
+					}
 					break;
+
 				case 'wrapper':
-				case 'control_wrapper':
-				case 'toggle':
-				case 'fieldset':
-					// result
-					$res = array_filter($this->parseJSON(json_encode(array('fields' => $fld->get('fields'))), $final_ctrl, $psv, $pid, true, $arguments));
+				case 'control_wrapper': case 'toggle': case 'fieldset': // backward compatibility
+
+					// get content
+					$content = array_filter($this->parseJSON(json_encode(array('fields' => $fld->get('fields'))), $final_ctrl, $psv, $pid, true, $arguments));
 					
 					// abort if no minimum fields reached
-					if (count($res) == 0 || count($res) < $fld->get('min_count', 0)) continue;
+					if (count($content) == 0 || count($content) < $fld->get('min_count', 0)) continue;
 
-					if($field_type == 'toggle')
-					{
-						$toggle = JText::_($fld->get('toggle'));
-						$result[] = '<div class="zltoggle-btn open"><span>-</span>'.$toggle.'<div class="toggle-text">...<small>'.strtolower($toggle).'</small>...</div></div>';
-						$result[] = '<div class="wrapper zltoggle" data-id="'.$id.'" >';
-							$result = array_merge($result, $res);
-						$result[] = '</div>';
+					// init vars
+					$layout = $fld->get('layout', 'default');
+					$content = implode("\n", $content);
+
+					// backward compatibility
+					if ($field_type == 'control_wrapper') {
+						$result[] = $content;
+						continue;
+					} else if ($field_type == 'fieldset'){
+						$layout = 'fieldset';
+					} else if ($field_type == 'toggle'){
+						$layout = 'toggle';
 					}
-					elseif($field_type == 'fieldset')
-					{
-						$result[] = '<fieldset class="wrapper">';
-							$result = array_merge($result, $res);
-						$result[] = '</fieldset>';
-					}
-					elseif($field_type == 'wrapper')
-					{
-						$result[] = '<div class="wrapper" data-id="'.$id.'" >';
-							$result = array_merge($result, $res);
-						$result[] = '</div>';
-					}
-					else
-					{
-						$result = array_merge($result, $res);
+
+					// render layout
+					if ($layout = $this->getLayout("wrapper/{$layout}.php")) {
+						$result[] = $this->app->zlfw->renderLayout($layout, compact('id', 'content', 'fld'));
 					}
 					
 					break;
@@ -449,9 +443,6 @@ class ZlfieldHelper extends AppHelper {
 						}
 					}
 
-					// get value
-					$value = strlen($value) ? $value : $this->_getParam($id, $fld->get('default'), $final_ctrl, $fld->get('old_id', false));
-
 					// get value from config instead
 					if($fld->get('data_from_config'))
 					{
@@ -462,41 +453,60 @@ class ZlfieldHelper extends AppHelper {
 						);
 						$path = "{$this->element->identifier}.{$path}";
 						$value = $this->config->find($path.".$id", $value);
-						
+					}
+					else
+					{
+						// get value
+						$value = strlen($value) ? $value : $this->_getParam($id, $fld->get('default'), $final_ctrl, $fld->get('old_id', false));
+					}
+
+					// get inital value dinamicly
+					if (empty($value) && $fld->get('request_value')) {
+
+						// from url
+						if ($fld->find('request_value.from') == 'url') {
+							$value = $this->req->get($fld->find('request_value.param'), $fld->find('request_value.type'), $fld->find('request_value.default'));
+						}
 					}
 					
+					// set specific
 					$specific = $fld->get('specific', array()); /**/ if ($psv) $specific['parents_val'] = $psv;
 					
-					// state
-					$state = null;
-					if($state = $fld->get('state', array())){
-						$state['init_state'] = $this->_getParam($id.'_state', $state['init_state'], $final_ctrl);
-						$state['field'] = $this->checkbox($id, "{$final_ctrl}[{$id}_state]", $state['init_state'], $this->app->data->create(array()), array());
-					}
-					
-					// prepare help
-					if($help = $fld->get('help'))
-					{
-						$help = explode('||', $help);
-						$text = JText::_($help[0]);
-						unset($help[0]);
 
-						$help = count($help) ? $this->replaceVars($help[1], $text) : $text;
-						//$help = $fld->get('default') ? $help.='<div class="default-value">'.strtolower(JText::_('PLG_ZLFRAMEWORK_DEFAULT')).': '.$fld->get('default').'</div>' : $help;
-					}
+					// prepare row params
+					$params = array(
+						'field'		=> (array)$fld,
+						'type' 		=> $field_type,
+						'id'		=> $id,
+						'name'		=> $final_ctrl.'['.$id.']',
+						'specific'	=> $specific,
+						'label'		=> $fld->get('label'),
+						'class'		=> $fld->get('class'),
+						'dependents' => $fld->get('dependents'),
+						'renderif'	=> $fld->get('renderif'),
+						'render'	=> $fld->get('render', 1),
+						'layout'	=> $fld->get('layout', 'default'),
+						'final_ctrl' => $final_ctrl
+					);
 
 					// render individual field row
-					if($res = $this->row($field_type, $id, "{$final_ctrl}[{$id}]", $value, $specific, $state, $fld->get('label'), $fld->get('class'), $help, $fld->get('dependents'), $fld->get('renderif'), $fld->get('render', 1), $fld->get('layout', 'default'))) $result[] = $res;
-					
+					$params = $this->app->data->create($params);
+					if($field = $this->field($params, $value)) {
+						$result[] = $this->row($params, $field);
+					}
+
 					// load childs
 					if($childs = $fld->find('childs.loadfields'))
 					{
 						// create parent values
 						$pid = $id;
-						$psv[$id] = $value; // add current value to parents array
+
+						// add current value to parents array, if empty calculate it
+						$psv[$id] = $value ? $value : $this->field($params, $value, true); 
 
 						$p_task = $this->req->getVar('parent_task') ? $this->req->getVar('parent_task') : $this->req->getVar('task'); // parent task necesary if double field load ex: layout / sublayout
 						$url = $this->app->link(array('controller' => 'zlframework', 'format' => 'raw', 'type' => $this->type, 'layout' => $this->layout, 'group' => $this->group, 'path' => $this->req->getVar('path'), 'parent_task' => $p_task, 'zlfieldmode' => $this->mode), false);
+
 						// rely options to be used by JS later on
 						$json = $fld->find('childs.loadfields.subfield', '') ? array('paths' => $fld->find('childs.loadfields.subfield.path')) : array('fields' => $childs);
 						
@@ -559,6 +569,7 @@ class ZlfieldHelper extends AppHelper {
 		}
 
 		// return result
+		// dump($value, $id);
 		return $value; 
 	}
 
@@ -668,7 +679,7 @@ class ZlfieldHelper extends AppHelper {
 	*/
 	public function replaceVars($vars, $string)
 	{
-		$vars = explode(',', trim($vars, ' '));
+		$vars = is_string($vars) ? explode(',', trim($vars, ' ')) : $vars;
 		
 		$pattern = $replace = array(); $i=1;
 		foreach((array)$vars as $var){
@@ -728,13 +739,24 @@ class ZlfieldHelper extends AppHelper {
 	{
 		// init vars
 		$url = $this->app->link(array('controller' => 'zlframework', 'format' => 'raw', 'type' => $this->type), false);
-
-		// workaround for jQuery 1.9 transition
-		$this->app->document->addScript('zlfw:assets/js/jquery.plugins/jquery.migrate.min.js');
+		$enviroment_args = json_encode($this->enviroment_args);
 
 		// load zlfield assets
 		$this->app->document->addStylesheet('zlfield:zlfield.css');
+		$this->app->document->addStylesheet('zlfield:layouts/field/style.css');
+		$this->app->document->addStylesheet('zlfield:layouts/separator/style.css');
+		$this->app->document->addStylesheet('zlfield:layouts/wrapper/style.css');
 		$this->app->document->addScript('zlfield:zlfield.min.js');
+
+		if ($this->enviroment == 'module') {
+			$this->app->document->addScript('libraries:jquery/jquery-ui.custom.min.js');
+			$this->app->document->addStylesheet('libraries:jquery/jquery-ui.custom.css');
+			$this->app->document->addScript('libraries:jquery/plugins/timepicker/timepicker.js');
+			$this->app->document->addStylesheet('libraries:jquery/plugins/timepicker/timepicker.css');
+		}
+
+		// workaround for jQuery 1.9 transition
+		$this->app->document->addScript('zlfw:assets/js/jquery.plugins/jquery.migrate.min.js');
 
 		// load libraries
 		$this->app->zlfw->loadLibrary('qtip');
@@ -742,535 +764,74 @@ class ZlfieldHelper extends AppHelper {
 		$this->app->document->addStylesheet('zlfw:assets/libraries/zlux/zlux.css');
 
 		// init scripts
-		$javascript = "jQuery(function($){ $('body').ZLfield({ url: '{$url}', type: '{$this->type}', enviroment: '{$this->enviroment}' }) });";
+		$javascript = "jQuery(function($){ $('body').ZLfield({ url: '{$url}', type: '{$this->type}', enviroment: '{$this->enviroment}', enviroment_args: '{$enviroment_args}' }) });";
 		$this->app->document->addScriptDeclaration($javascript);
 	}
 
 	/*
-		Function: _rowLayout
-			Renders the row layout using template layout file
-
-	   Parameters:
-            $__layout - layouts template file
-	        $__args - layouts template file args
+		Function: getLayout
+			Get element layout path and use override if exists.
 
 		Returns:
-			String - html
+			String - Layout path
 	*/
-	private function _rowLayout($__layout, $__args = array())
+	public function getLayout($layout = null)
 	{
-		// init vars
-		if (is_array($__args)) {
-			foreach ($__args as $__var => $__value) {
-				$$__var = $__value;
-			}
-		}
-
-		// render layout
-		$__html = '';
-		ob_start();
-
-		// include($__layout); // when using external files
-		switch ($__layout) {
-			case 'separator':
-				$label = $label ? '<span class="zl-label">'.JText::_($label).'</span>' : '';
-				$class = 'class="row layout-separator'.($class ? " {$class}" : '').(!$init_state ? ' zl-disabled' : '').'"';
-
-				// attributes
-				$attrs = '';
-				$attrs .= $type ? " data-type='{$type}'" : '';
-				$attrs .= $dependents ? " data-dependents='{$dependents}'" : '';
-
-				echo '<div data-id="'.$id.'" '.$class.$attrs.'>'.$label.'<span class="zl-field">'.$field.'</span>'.$help.'</div>';
-				break;
-			
-			default:
-				$help = $help ? '<span class="zl-help qTipHelp">?<span class="qtip-content">'.$help.'</span></span>' : '';
-				$label = $label ? '<div class="zl-label"><span class="active">»</span>'.JText::_($label).'</div>' : '';
-				$class = 'class="row layout-default'.($class ? " {$class}" : '').(!$init_state ? ' zl-disabled' : '').'"';
-
-				// attributes
-				$attrs = '';
-				$attrs .= $type ? " data-type='{$type}'" : '';
-				$attrs .= $dependents ? " data-dependents='{$dependents}'" : '';
-
-				// state
-				$tooltip = @$state['label'] ? ' tooltip="'.JText::_($state['label']).'"' : '';
-				echo '<div data-id="'.$id.'" '.$class.$attrs.'>'
-					.($state != null ? '<div '.$tooltip.'class="zl-state">'.$state['field'].'</div>' : '')
-					.$label.'<div class="zl-field">'.$field.'</div>'.$help.'</div>';
-				break;
-		}
-
-		$__html = ob_get_contents();
-		ob_end_clean();
-
-		return $__html;
+		// find layout
+		return $this->app->path->path("zlfield:layouts/{$layout}");
 	}
 
+	/*
+		Function: field - Returns field html string
+	*/
+	public function field($params, $value, $getCurrentValue=false)
+	{
+		$type	= $params->get('type');
 
-	/* HTML Fields
-	--------------------------------------------------------------------------------------------------------------------------------------------*/
+		if ($type && $params->get('render') && $this->renderIf($params->get('renderif')))
+		{
+			$id 		= $params->get('id');
+			$name 		= $params->get('final_ctrl').'['.$id.']';
+			$specific 	= $this->app->data->create((array)$params->get('specific'));
+			$attrs		= '';
+
+			// render field
+			$field = $this->app->zlfieldhtml->_('zlf.'.$type, $id, $name, $value, $specific, $attrs, $getCurrentValue);
+
+			if (!empty($field)) return $field;
+		}
+
+		return null;
+	}
 
 	/*
 		Function: row - Returns row html string
 	*/
-	public function row($type, $id, $name, $value, $specific=array(), $state=null, $label=false, $class='', $help='', $dependents='', $renderif=array(), $render=1, $layout=false)
+	public function row($params, $field)
 	{
-		if ($type && $render && $this->renderIf($renderif))
-		{
-			$init_state = true; /**/ $attribs = '';
-			if($state != null) {
-				$init_state = @$state['init_state'] == '0' ? false : true;
-				$attribs 	= !$init_state ? ' disabled="disabled"' : '';
-			}
-			$specific = $this->data->create($specific);
+		$layout = $params->get('layout', 'default');
 
-			if ($field = $this->$type($id, $name, $value, $specific, $attribs))
-			{
-				return $this->_rowLayout($layout, compact('type', 'field', 'id', 'state', 'label', 'class', 'help', 'dependents', 'init_state', 'name'));
-			}
+		// render layout
+		if ($layout = $this->getLayout("field/{$layout}.php")) {
+			return $this->app->zlfw->renderLayout($layout, compact('params', 'field'));
+		} else {
+			return $field;
 		}
+
 		return null;
 	}
 
-	
-
-	/*
-		Function: separator - Returns html string
-	*/
-	public function separator($text, $id, $big=false){
-		return '<div class="row '.($big ? 'big' : '').'section-title" data-type="separator" data-id="'.$id.'" >'.JText::_($text).'</div>';
-	}
-	
-	/*
-		Function: info - Returns html string
-	*/
-	public function info($id, $name, $value, $spec, $attrs)
-	{
-		return '<div class="info">'.$this->replaceVars($spec->get('var'), JText::_($spec->get('text'))).'</div>';
-	}
-	
-	/*
-		Function: text - Returns text input html string
-	*/
-	public function text($id, $name, $value, $spec, $attrs){
-		$attrs .= $spec->get('placeholder') ? ' placeholder="'.JText::_($spec->get('placeholder')).'"' : '';
-		return $this->app->html->_('control.text', $name, (string)$value, 'size="60" maxlength="255"'.$attrs);
-	}
-
-	/*
-		Function: textarea - Returns textarea input html string
-	*/
-	public function textarea($id, $name, $value, $spec, $attrs){
-		return '<textarea '.$attrs.' name="'.$name.'" >'.$value.'</textarea>';
-	}
-	
-	/*
-		Function: hidden - Returns hidden input html string
-	*/
-	public function hidden($id, $name, $value, $spec, $attrs){
-		return '<input type="hidden" name="'.$name.'" value="'.$spec->get('value').'" />';
-	}
-	
-	/*
-		Function: password - Returns password input html string
-	*/
-	public function password($id, $name, $value, $spec, $attrs){
-		$value = $this->app->zlfw->decryptPassword($value);
-		return '<input type="password" '.$attrs.' name="'.$name.'" value="'.$value.'">';
-	}
-	
-	/*
-		Function: checkbox - Returns checkbox input html string
-	*/
-	public function checkbox($id, $name, $value, $spec, $attrs){
-		$extra_label = $spec->get('label');
-		$input_value = $spec->get('value', 1);
-		return '<input type="checkbox" '.$attrs.' name="'.$name.'" '.($value ? 'checked="checked"' : '').' value="'.$input_value.'" />'.($extra_label ? '<span>'.JText::_($extra_label).'</span>' : '');
-	}
-	
-	/*
-		Function: radio - Returns radio select html string
-	*/
-	public function radio($id, $name, $value, $spec, $attrs){
-		$preoptions = $spec->get('options') ? $spec->get('options') : array('JYES' => '1', 'JNO' => '0');
-		$options = array(); foreach ($preoptions as $text => $val) $options[] = $this->app->html->_('select.option', $val, $text);
-		return $this->app->html->_('select.radiolist', $options, $name, $attrs, 'value', 'text', $value, $name, true);
-	}
-	
-	/*
-		Function: select - Returns select html string
-	*/
-	protected $_select_options = array();
-	public function select($id, $name, $value, $spec, $attrs)
-	{
-		$name   = $spec->get('multi') ? $name.'[]' : $name;
-		$attrs .= $spec->get('multi') ? ' multiple="multiple" size="'.$spec->get('size', 3).'"' : '';
-
-		$hash = md5(serialize( $spec ));
-		if (!array_key_exists($hash, $this->_select_options))
-		{
-			$hidden_opts = $spec->get('hidden_opts', 0) ? explode('|', $spec->get('hidden_opts', '')) : '';
-			
-			// options file
-			$opt_file = str_replace('{value}', (string)$value, $spec->get('opt_file'));
-
-			$preoptions = array_merge($spec->get('options', array()), $spec->get('fix_options', array()));
-			if (!empty($opt_file) && $path = $this->app->path->path($opt_file))
-			{	// get options from json file
-				$preoptions = array_merge($preoptions, json_decode(file_get_contents($path), true));
-			}
-			
-			$options = array(); // prepare options
-			foreach ($preoptions as $text => $val) {
-				if (empty($hidden_opts) || !in_array($val, $hidden_opts)) {
-					$options[] = $this->app->html->_('select.option', $val, JText::_($text));
-				}
-			}
-
-			$this->_select_options[$hash] = $options;
-		}
-		
-		// render if enaugh options
-		$options = @$this->_select_options[$hash];
-
-		
-		if ($spec->get('min_opts') && count($options) < $spec->get('min_opts', 0)) {
-			return;
-		} elseif (!empty($options)){
-			return $this->app->html->_('select.genericlist', $options, $name, $attrs, 'value', 'text', $value, $name)
-				  .($spec->get('multi') && count($options) > 3 ? '<span class="zl-btn-small zl-btn-expand zl-select-expand" data-zl-qtip="'.JText::_('PLG_ZLFRAMEWORK_EXPAND').'"></span>' : '');
-		} else {
-			// render message instead
-			$spec->set('text', JText::_('PLG_ZLFRAMEWORK_ZLFD_NO_OPTIONS'));
-			return $this->info($id, $name, $value, $spec, $attrs);
-		}
-	}
-	
-	/*
-		Function: layout - Returns select html string
-			It list the files or folder of specified path as options
-	*/
-	public function layout($id, $name, $value, $spec, $attrs)
-	{
-		// if no path supplied abort
-		if(!$spec->get('path')) return JText::_('PLG_ZLFRAMEWORK_ZLFD_NO_OPTIONS');
-
-		$psv	 = $spec->get('parents_val');
-		$mode	 = $spec->get('mode', 'files'); // OR folders
-		$regex	 = $spec->get('regex', '^([_A-Za-z0-9]*)');
-		$layouts = (array)$spec->get('options', array());
-
-		// dynamic values {}
-		$path = str_replace('{value}', (string)$value, $spec->get('path'));
-
-		// replace parent values in path
-		foreach ((array)$psv as $key => $pvalue) {
-			$path = str_replace('{'.$key.'}', basename($pvalue, '.php'), $path);
-		}
-
-		// get all resources
-		$resources = array();
-		$paths = array_map('trim', explode(',',$path)); // multiple paths allowed with comma separator
-		foreach($paths as $path) {
-			if(preg_match('/(.*){subfolders}(.*)/', $path, $result)) { // process subfolders
-				$path = trim(@$result[1], '/');
-				$postpath = trim(@$result[2], '/');
-				foreach ($this->app->path->dirs($path) as $dir) {
-					$resources = array_merge($resources, $this->app->zlpath->resources("$path/$dir/$postpath"));
-				}
-			} else {
-				$resources = array_merge($resources, $this->app->zlpath->resources($path));
-			}
-		}
-
-		// get layout options from resources
-		foreach($resources as $resource) {
-			if(is_dir($resource)) foreach(JFolder::$mode($resource, $regex) as $tmpl) {
-				$basename = basename($tmpl, '.php');
-				$layouts[ucwords($basename)] = $tmpl;
-			}
-		}
-		
-		// sort letting default.php the first
-		uasort($layouts, array($this, 'cmp'));
-		
-		$spec->set('options', $layouts);
-		return $this->select($id, $name, $value, $spec, $attrs);
-	}
-	
-	public function cmp($a, $b){
-		// sets the default.php allways first
-		if(stripos('default.php', $a) === 0) return -1;
-		if(stripos('default.php', $b) === 0) return 1;
-		return ($a < $b) ? -1 : 1;
-	}
-	
-	/*
-		Function: apps - Returns zoo apps html string
-	*/
-	public function apps($id, $name, $value, $spec, $attrs)
-	{
-		// init vars
-		$group   = $spec->get('group', ''); // filter apps
-		$apps    = (array)$spec->get('options', array());
-
-		foreach ($this->appTable->all(array('order' => 'name')) as $app) {
-			if (empty($group) || $app->getGroup() == $group){
-				$apps[$app->name] = $app->id;
-			}
-		}
-
-		// set options for select
-		$spec->set('options', $apps);
-		
-		return $this->select($id, $name, $value, $spec, $attrs);
-	}
-	
-	/*
-		Function: types - Returns zoo types html string
-	*/
-	public function types($id, $name, $value, $spec, $attrs)
-	{
-		// init vars
-		$pv	 	 = $this->data->create( $this->trslValues($spec->get('parents_val'), $spec->get('value_map')) );
-		$group   = $spec->get('group', ''); // filter Types with app groups
-		$apps    = (array)$spec->get('apps', $pv->get('apps', array())); // get static or parent app value
-		$ft	     = (array)$spec->get('types', array()); // filterTypes
-		
-		$apps = $this->app->zlfw->getApplications($apps, true, $group); // if empty will return All apps
- 		
-		// prepare types avoiding duplicates
-		$types = array();
-		foreach ($apps as $app){
-			$types = array_merge($types, $app->getTypes());
-		}
-		
-		// create options
-		$options = array();
-		foreach ($types as $type) {
-			if (empty($ft) || in_array($type->id, $ft)){ // direct filter
-				$options[$type->name] = $type->id;
-			}
-		}
-
-		// set options for select
-		$spec->set('options', $options);
-		
-		return $this->select($id, $name, $value, $spec, $attrs);
-	}
-	
-	/*
-		Function: elements - Returns zoo elements html string
-	*/
-	public function elements($id, $name, $value, $spec, $attrs)
-	{
-		// init vars
-		$pv = $this->data->create( $this->trslValues($spec->get('parents_val'), $spec->get('value_map')) );
-
-		// apps
-		$apps = (array)$pv->get('apps'); // from parent value
-		$apps = array_merge($apps, explode(' ', $spec->get('apps', '')));
-		// convert apps id to group
-		foreach ($apps as &$app) if(is_numeric($app)) {
-			$app = $this->appTable->get($app);
-			$app = (is_object($app)) ? $app->getGroup() : null;
-		}
-		// clean duplicates
-		$apps = array_unique($apps);
-
-		// types
-		$types = (array)$pv->get('types'); // from parent value
-		$types = array_merge($types, explode(' ', (string)$spec->get('types', '')));
-
-		// elements
-		$element_type = explode(' ', $spec->get('elements', ''));
-		
-		// get elements list
-		$elements = $this->elementsList($apps, $element_type, $types);
-		
-		if(empty($elements)){
-			// set text
-			$spec->set('text', JText::_('PLG_ZLFRAMEWORK_APP_NO_ELEMENTS'));
-			return $this->info($id, $name, $value, $spec, $attrs);
-		} else {
-			// merge predefined options
-			$options = array_merge($spec->get('options', array()), $elements); 
-
-			// set options for select
-			$spec->set('options', $options);
-			
-			return $this->select($id, $name, $value, $spec, $attrs);
-		}
-	}
-	
-	/*
-		Function: cats - Returns zoo cats html string
-	*/
-	public function cats($id, $name, $value, $spec, $attrs)
-	{
-		// init vars
-		$pv	  = $this->data->create( $this->trslValues($spec->get('parents_val'), $spec->get('value_map')) );
-		$apps = (array)$spec->get('apps', $pv->get('apps', array())); // get static or relied app value
-		$apps = $this->app->zlfw->getApplications($apps);
-		
-		$categories = array();
- 		if (!empty($apps)) foreach($apps as $app)
-		{
-			// get category tree list
-			$list = $this->app->tree->buildList(0, $app->getCategoryTree(), array(), '- ', '.   ', '  ');
-
-			// create options
-			$categories['-- -- -- '.$app->name.' ROOT -- -- --'] = 0;
-			foreach ($list as $category) {
-				$categories[$category->treename] = $category->id;
-			}
-		}
-
-		// set options for select
-		$spec->set('options', $categories);
-		
-		return $this->select($id, $name, $value, $spec, $attrs);
-	}
-	
-	/*
-		Function: trslValues - Returns parent values array
-			Used to translate the value_map to real values
-	*/
-	protected function trslValues($values, $map)
-	{
-		$pvs = array();
-		if($map && is_array($map)){
-			foreach ($map as $key => $parent) if (isset($values[$parent]) && $values[$parent] != 'null'){ // important
-				$pvs[$key] = $values[$parent];
-			}
-		}
-		return $pvs;
-	}
-	
-	/*
-		Function: apps - Returns zoo apps html string
-	*/
-	public function modulelist($id, $name, $value, $specific=array(), $attribs='') {
-		return $this->app->html->_('zoo.modulelist', array(), $name, null, 'value', 'text', $value);
-	}
-	
-	/*
-		Function: separatedBy - Returns separated options for repeatable elements
-	*/
-	public function separatedby($id, $name, $value, $spec, $attrs)
-	{
-		// init vars
-		$constraint = $spec->get('constraint', ''); // filter layouts by metadata
-		$options    = (array)$spec->get('options', array());
-		
-		$options['None'] 							= '';
-		$options['Space'] 							= 'separator=[ ]';
-		$options['Span'] 							= 'tag=[<span>%s</span>]';
-		$options['Paragraph']						= 'tag=[<p>%s</p>]';
-		$options['Div'] 							= 'tag=[<div>%s</div>]';
-
-		$options['Comma'] 							= 'separator=[, ]';
-		$options['Hyphen'] 							= 'separator=[ - ]';
-		$options['Pipe'] 							= 'separator=[ | ]';
-		$options['Break'] 							= 'separator=[<br />]';
-		$options['List Item'] 						= 'tag=[<li>%s</li>]';
-		$options['Unordered List'] 					= 'tag=[<li>%s</li>] enclosing_tag=[<ul>%s</ul>]';
-		$options['Ordered List'] 					= 'tag=[<li><div>%s</div></li>] enclosing_tag=[<ol>%s</ol>]';
-		$options['PLG_ZLFRAMEWORK_CUSTOM'] 			= 'custom';
-
-		// set options for select
-		$spec->set('options', $options);
-		
-		return $this->select($id, $name, $value, $spec, $attrs);
-	}
-
-
-	/* HTML Fields Helpers
-	--------------------------------------------------------------------------------------------------------------------------------------------*/
-	
-	/*
-		Function: itemLayoutList - Returns related layouts list
-	*/
-	public function itemLayoutList($id, $name, $value, $spec, $attrs)
-	{
-		// init vars
-		$constraint = $spec->get('constraint', ''); // filter layouts by metadata
-		$options    = (array)$spec->get('options', array());
-		$typeFilter = $spec->get('typefilter') ? explode(',', 'event') : null;
-		
-		// pass trough all apps
-		$layouts = array();	
-		foreach($this->appTable->all(array('order' => 'name')) as $application) if ($template = $application->getTemplate())
-		{	
-			$layout_path = str_replace("\\", "/", $template->getPath());
-			
-			// get renderer
-			$renderer = $this->app->renderer->create('item')->addPath($layout_path);
-			
-			// get all types
-			$folders = array();			
-			foreach (JFolder::folders($layout_path.'/'.$renderer->getFolder().'/item') as $folder) {
-				$folders[] = $folder;
-			}
-			
-			// Check for root folder, in case app doesn't have type related layouts
-			$layouts = array_merge($layouts, $this->_getLayouts(null, $constraint, $renderer));
-			
-			// Now in subfolders
-			foreach ($folders as $type){
-				if (empty($typeFilter) || in_array($type, $typeFilter)) {
-					$layouts = array_merge($layouts, $this->_getLayouts($type, $constraint, $renderer));
-				}
-			}
-		}
-		
-		// create layout options
-		foreach ($layouts as $layout) $options[$layout['name']] = $layout['layout'];
-
-		// set options for select
-		$spec->set('options', $options);
-
-		return $this->select($id, $name, $value, $spec, $attrs);
-	}
-	
-	protected function _getLayouts($type = null, $constraint = null, $renderer = null)
-	{
-		$path   = 'item';
-		$prefix = 'item.';
-		if (!empty($type) && $renderer->pathExists($path.DIRECTORY_SEPARATOR.$type)) {
-			$path   .= DIRECTORY_SEPARATOR.$type;
-			$prefix .= $type.'.';
-		}
-		
-		$layouts = array();
-		foreach ($renderer->getLayouts($path) as $layout) {
-	
-			$metadata = $renderer->getLayoutMetaData($prefix.$layout);
-			
-			if (empty($constraint) || $metadata->get('type') == $constraint) {
-				$name = $metadata->get('name') ? $metadata->get('name') : ucfirst($layout);
-				$layouts[$layout] = array('name' => $name, 'layout' => $layout);
-			}
-		}
-		return $layouts;
-	}
-	
 	/*
 		Function: elementsList - Returns element list
-
-		Parameters:
-			$app_filter App group or App id
 	*/
 	protected $_elements_list = array();
-	public function elementsList($app_filter = array(), $elements_filter = array(), $filter_types = array())
+	public function elementsList($groups_filter = array(), $elements_filter = array(), $filter_types = array())
 	{
-		$app_filter 	= array_filter((array)($app_filter));
+		$groups_filter 		= array_filter((array)($groups_filter));
 		$elements_filter 	= array_filter((array)($elements_filter));
 		$filter_types 		= array_filter((array)($filter_types));
 
-		$hash = md5(serialize( array($app_filter, $elements_filter, $filter_types) ));
+		$hash = md5(serialize( array($groups_filter, $elements_filter, $filter_types) ));
 		if (!array_key_exists($hash, $this->_elements_list))
 		{
 			// get apps
@@ -1279,8 +840,7 @@ class ZlfieldHelper extends AppHelper {
 			// prepare types and filter app group
 			$types = array();
 			foreach ($apps as $app){
-				if (empty($app_filter) 
-					|| in_array($app->getGroup(), $app_filter) || in_array($app->id, $app_filter)) {
+				if (empty($groups_filter) || in_array($app->getGroup(), $groups_filter)) {
 					$types = array_merge($types, $app->getTypes());
 				}
 			}
@@ -1306,7 +866,6 @@ class ZlfieldHelper extends AppHelper {
 			$options = array();			
 			foreach ($elements as $element) {
 				// include only desired element type
-
 				if (empty($elements_filter) || in_array($element->getElementType(), $elements_filter)) {
 					$options[$element->getType()->name.' > '.$element->config->get('name')] = $element->identifier;
 				}
@@ -1318,5 +877,4 @@ class ZlfieldHelper extends AppHelper {
 		// return elements array
 		return @$this->_elements_list[$hash];
 	}
-	
 }

@@ -1,10 +1,13 @@
 <?php
 /**
- * @package		ZL Framework
- * @author    	JOOlanders, SL http://www.zoolanders.com
- * @copyright 	Copyright (C) JOOlanders, SL
- * @license   	http://www.gnu.org/licenses/gpl-2.0.html GNU/GPLv2 only
- */
+* @package		ZL Framework
+* @author    	ZOOlanders http://www.zoolanders.com
+* @copyright 	Copyright (C) JOOlanders SL
+* @license   	http://www.gnu.org/licenses/gpl-2.0.html GNU/GPLv2 only
+*/
+
+// no direct access
+defined('_JEXEC') or die('Restricted access');
 
 /*
  Class: ZLFW Helper
@@ -728,6 +731,36 @@ class ZlfwHelper extends AppHelper
 				return $shortcode;
 				break;
 		}
+	}
+
+	/*
+		Function: renderLayout
+			Renders the element using template layout file.
+
+	   Parameters:
+            $__layout - layouts template file
+	        $__args - layouts template file args
+
+		Returns:
+			String - html
+	*/
+	function renderLayout($__layout, $__args = array())
+	{
+		// init vars
+		if (is_array($__args)) {
+			foreach ($__args as $__var => $__value) {
+				$$__var = $__value;
+			}
+		}
+
+		// render layout
+		$__html = '';
+		ob_start();
+		include($__layout);
+		$__html = ob_get_contents();
+		ob_end_clean();
+
+		return $__html;
 	}
 
 	/*

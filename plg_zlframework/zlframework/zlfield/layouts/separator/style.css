@@ -1,0 +1,41 @@
+/* Copyright (C) JOOlanders SL http://www.gnu.org/licenses/gpl-2.0.html GNU/GPLv2 only */
+
+
+/*ul.parameter-form li.parameter*/
+div.zlfield fieldset.wrapper div.subsection-title {
+    padding-left: 0 !important; 
+}
+
+div.zlfield div.section-title {
+	/*padding-left: 19px;*/
+}
+
+div.zlfield fieldset.wrapper > .section-title:first-child {
+    margin-top: 0;
+}
+
+/*default layout*/
+div.zlfield [data-type="separator"][data-layout="default"] {
+	border-top: 1px solid #CCCCCC;
+	margin: 15px 0;
+}
+
+/*section layout*/
+div.zlfield .section-title,
+div.zlfield .subsection-title {
+	clear: none;
+	color: #666666;
+	display: block;
+	font-weight: lighter;
+	margin: 8px 0 6px;
+	text-align: left;
+	text-indent: 10px;
+}
+
+div.zlfield .section-title {
+	font-size: 12px;
+	font-weight: bold;
+	margin: 18px 0 15px;
+	text-indent: 0;
+	border-bottom: 1px solid #ccc;
+}

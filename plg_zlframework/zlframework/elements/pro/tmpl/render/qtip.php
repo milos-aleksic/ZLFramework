@@ -1,9 +1,9 @@
 <?php
-/*
+/**
 * @package		ZL Framework
-* @author		ZOOlanders.com
-* @copyright	Copyright (C) - ZOOlanders.com
-* @license		http://www.gnu.org/licenses/gpl-2.0.html GNU/GPLv2 only
+* @author    	JOOlanders, SL http://www.zoolanders.com
+* @copyright 	Copyright (C) JOOlanders, SL
+* @license   	http://www.gnu.org/licenses/gpl-2.0.html GNU/GPLv2 only
 */
 
 // no direct access
