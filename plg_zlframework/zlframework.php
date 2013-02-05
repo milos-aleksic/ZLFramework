@@ -126,7 +126,11 @@ class plgSystemZlframework extends JPlugin {
 			// register path and include
 			$this->app->path->register($path, 'zoomailing');
 			require_once($path.'/init.php');
-		}		
+		}
+
+		// set global JS vars
+		$javascript = "var \$zl_vars = {zoo_ajax:'{$this->app->link(array('format' => 'raw'), false)}'};";
+		$this->app->document->addScriptDeclaration($javascript);
 	}
 
 	/**
