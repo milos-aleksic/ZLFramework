@@ -38,32 +38,7 @@ defined('_JEXEC') or die('Restricted access');
 	// check if at least one app is loaded
 	if (empty($applications)) return;
 
-	// add core elements
-	$elements = $this->app->object->create('Type', array('_core', $applications[0]))->getCoreElements();
-	
-	// filter orderable elements
-	// $elements = array_filter($elements, create_function('$element', 'return $element->getMetaData("orderable") == "true";'));
-
-	$options = array();
-	foreach ($elements as $element) {
-		$options[$element->config->name ? $element->config->name : $element->getMetaData('name')] = $element->identifier;
-	}
-	
-	if ($node->get('add_default')) {
-		array_unshift($options, array(JText::_('default') => ''));
-	}
-
-	$json[] =
-	'"_core":{
-		"type":"select",
-		"label":"'.JText::_('Core').'",
-		"specific": {
-			"options":'.json_encode($options).'
-		}
-	}';
-
-
-	// add type elements
+	// elements
 	foreach ($applications as $application)
 	{
 		// get types
@@ -78,9 +53,6 @@ defined('_JEXEC') or die('Restricted access');
 			$elements = $type->getElements();
 			$type_json = array();
 			
-			// filter orderable elements
-			// $elements = array_filter($elements, create_function('$element', 'return $element->getMetaData("orderable") == "true";'));
-
 			if(!empty($elements))
 			{
 				// process elements
@@ -96,13 +68,13 @@ defined('_JEXEC') or die('Restricted access');
 					switch($group) {
 						case 'input':
 						case 'itemname': case 'text': case 'textpro': case 'textarea': case 'textareapro':
-							$json_path = 'zlfield:json/itemfilter/input.json.php';
+							$json_path = 'zlfield:json/itemfilter/_input.json.php';
 							$element_json[] = include($this->app->path->path($json_path));
 							break;
 
 						case 'option':
 						case 'select': case 'selectpro': case 'checkbox': case 'radio': case 'country':
-							$json_path = 'zlfield:json/itemfilter/option.json.php';
+							$json_path = 'zlfield:json/itemfilter/_option.json.php';
 							$element_json[] = include($this->app->path->path($json_path));
 							break;
 							
@@ -114,7 +86,7 @@ defined('_JEXEC') or die('Restricted access');
 							
 						case 'date':
 						case 'datepro':
-							$json_path = 'zlfield:json/itemfilter/date.json.php';
+							$json_path = 'zlfield:json/itemfilter/_date.json.php';
 							$element_json[] = include($this->app->path->path($json_path));
 							break;
 
@@ -131,7 +103,7 @@ defined('_JEXEC') or die('Restricted access');
 							"fields": {
 								"_filter":{
 									"type": "checkbox",
-									"label": "'.$name.' - '.ucfirst($element->getElementType()).' element",
+									"label": "'.$name.' - '.ucfirst($element->getElementType()).'",
 									"specific":{
 										"label":"PLG_ZLFRAMEWORK_FILTER"
 									},
@@ -170,16 +142,15 @@ defined('_JEXEC') or die('Restricted access');
 					"control":"elements",
 					"specific":{
 						"toggle":{
-							"label":"'.$application->name.' App / '.$type->name.' Type"
+							"label":"PLG_ZLFRAMEWORK_NAME_APP_NAME_TYPE_ELEMENTS||'.$application->name.'||'.$type->name.'"
 						}
 					},
 					"layout":"fieldset"
 				}';
 
 			} // end elements
-
 		} // end Type foreach
-	}
+	} // end App foreach
 
 	// return json string
 	return 

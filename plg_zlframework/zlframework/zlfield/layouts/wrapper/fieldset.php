@@ -9,8 +9,15 @@
 // no direct access
 defined('_JEXEC') or die('Restricted access');
 	
-	// init vars
-	$label = JText::_($fld->find('specific.toggle.label'));
+	// prepare label
+	if($label = $fld->find('specific.toggle.label'))
+	{
+		$vars = explode('||', $label);
+		$text = JText::_($vars[0]);
+		unset($vars[0]);
+
+		$label = count($vars) ? $this->app->zlfield->replaceVars($vars, $text) : $text;
+	}
 
 ?>
 

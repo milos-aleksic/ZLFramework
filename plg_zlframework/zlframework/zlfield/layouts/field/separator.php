@@ -46,13 +46,23 @@ defined('_JEXEC') or die('Restricted access');
 		//$help = $fld->get('default') ? $help.='<div class="default-value">'.strtolower(JText::_('PLG_ZLFRAMEWORK_DEFAULT')).': '.$fld->get('default').'</div>' : $help;
 	}
 
+	// prepare label
+	if($label = $params->find('field.label'))
+	{
+		$vars = explode('||', $label);
+		$text = JText::_($vars[0]);
+		unset($vars[0]);
+
+		$label = count($vars) ? $this->app->zlfield->replaceVars($vars, $text) : $text;
+	}
+
 ?>
 
 <div data-id="<?php echo $id ?>" data-layout="separator" class="zl-row<?php echo $class ?>" <?php echo $attrs ?>>
 
-	<?php if ($params->get('label')) : ?>
+	<?php if ($label) : ?>
 	<span class="zl-label">
-		<?php echo JText::_($params->get('label')) ?>
+		<?php echo $label ?>
 	</span>
 	<?php endif; ?>
 

@@ -47,6 +47,10 @@ defined('_JEXEC') or die('Restricted access');
 				"label": "PLG_ZLFRAMEWORK_FT_LIMIT",
 				"help": "PLG_ZLFRAMEWORK_FT_LIMIT_DESC"
 			},
+			"_created_subfield": {
+				"type":"subfield",
+				"path":"zlfield:json/itemfilter/created.json.php"
+			},
 			"_filter_subfield": {
 				"type":"subfield",
 				"path":"zlfield:json/itemfilter/elements.json.php"

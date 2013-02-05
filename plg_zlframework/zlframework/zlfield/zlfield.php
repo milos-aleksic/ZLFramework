@@ -350,10 +350,9 @@ class ZlfieldHelper extends AppHelper {
 					$layout = $fld->get('layout', 'default');
 
 					// backward compatibility
-					if ($fld->get('big')) {
-						$layout = 'section';
-					} else if ($fld->get('text')) {
-						$layout = 'subsection';
+					if ($fld->get('text')) {
+						$layout = $fld->get('big') ? 'section' : 'subsection';
+						$fld->set('specific', array('title' => $fld->get('text')));
 					}
 
 					// render layout
@@ -444,9 +443,6 @@ class ZlfieldHelper extends AppHelper {
 						}
 					}
 
-					// get value
-					$value = strlen($value) ? $value : $this->_getParam($id, $fld->get('default'), $final_ctrl, $fld->get('old_id', false));
-
 					// get value from config instead
 					if($fld->get('data_from_config'))
 					{
@@ -458,7 +454,22 @@ class ZlfieldHelper extends AppHelper {
 						$path = "{$this->element->identifier}.{$path}";
 						$value = $this->config->find($path.".$id", $value);
 					}
+					else
+					{
+						// get value
+						$value = strlen($value) ? $value : $this->_getParam($id, $fld->get('default'), $final_ctrl, $fld->get('old_id', false));
+					}
+
+					// get inital value dinamicly
+					if (empty($value) && $fld->get('request_value')) {
+
+						// from url
+						if ($fld->find('request_value.from') == 'url') {
+							$value = $this->req->get($fld->find('request_value.param'), $fld->find('request_value.type'), $fld->find('request_value.default'));
+						}
+					}
 					
+					// set specific
 					$specific = $fld->get('specific', array()); /**/ if ($psv) $specific['parents_val'] = $psv;
 					
 
@@ -479,14 +490,19 @@ class ZlfieldHelper extends AppHelper {
 					);
 
 					// render individual field row
-					if($res = $this->row($params, $value)) $result[] = $res;
-					
+					$params = $this->app->data->create($params);
+					if($field = $this->field($params, $value)) {
+						$result[] = $this->row($params, $field);
+					}
+
 					// load childs
 					if($childs = $fld->find('childs.loadfields'))
 					{
 						// create parent values
 						$pid = $id;
-						$psv[$id] = $value; // add current value to parents array
+
+						// add current value to parents array, if empty calculate it
+						$psv[$id] = $value ? $value : $this->field($params, $value, true); 
 
 						$p_task = $this->req->getVar('parent_task') ? $this->req->getVar('parent_task') : $this->req->getVar('task'); // parent task necesary if double field load ex: layout / sublayout
 						$url = $this->app->link(array('controller' => 'zlframework', 'format' => 'raw', 'type' => $this->type, 'layout' => $this->layout, 'group' => $this->group, 'path' => $this->req->getVar('path'), 'parent_task' => $p_task, 'zlfieldmode' => $this->mode), false);
@@ -663,7 +679,7 @@ class ZlfieldHelper extends AppHelper {
 	*/
 	public function replaceVars($vars, $string)
 	{
-		$vars = explode(',', trim($vars, ' '));
+		$vars = is_string($vars) ? explode(',', trim($vars, ' ')) : $vars;
 		
 		$pattern = $replace = array(); $i=1;
 		foreach((array)$vars as $var){
@@ -766,12 +782,10 @@ class ZlfieldHelper extends AppHelper {
 	}
 
 	/*
-		Function: row - Returns row html string
+		Function: field - Returns field html string
 	*/
-	public function row($params, $value)
+	public function field($params, $value, $getCurrentValue=false)
 	{
-		$params = $this->app->data->create($params);
-		$layout = $params->get('layout', 'default');
 		$type	= $params->get('type');
 
 		if ($type && $params->get('render') && $this->renderIf($params->get('renderif')))
@@ -782,14 +796,26 @@ class ZlfieldHelper extends AppHelper {
 			$attrs		= '';
 
 			// render field
-			$field = $this->app->zlfieldhtml->_('zlf.'.$type, $id, $name, $value, $specific, $attrs);
+			$field = $this->app->zlfieldhtml->_('zlf.'.$type, $id, $name, $value, $specific, $attrs, $getCurrentValue);
 
-			// render layout
-			if ($layout = $this->getLayout("field/{$layout}.php")) {
-				return $this->app->zlfw->renderLayout($layout, compact('params', 'field'));
-			} else {
-				return $field;
-			}
+			if (!empty($field)) return $field;
+		}
+
+		return null;
+	}
+
+	/*
+		Function: row - Returns row html string
+	*/
+	public function row($params, $field)
+	{
+		$layout = $params->get('layout', 'default');
+
+		// render layout
+		if ($layout = $this->getLayout("field/{$layout}.php")) {
+			return $this->app->zlfw->renderLayout($layout, compact('params', 'field'));
+		} else {
+			return $field;
 		}
 
 		return null;

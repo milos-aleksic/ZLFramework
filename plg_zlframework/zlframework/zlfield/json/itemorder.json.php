@@ -77,7 +77,7 @@ defined('_JEXEC') or die('Restricted access');
 	$json[] =
 	'"_core":{
 		"type":"select",
-		"label":"'.JText::_('Core').'",
+		"label":"PLG_ZLFRAMEWORK_CORE",
 		"specific": {
 			"options":'.json_encode($options).'
 		}
@@ -96,8 +96,9 @@ defined('_JEXEC') or die('Restricted access');
 		$type_json = array();
 		if(!empty($types)) foreach ($types as $type)
 		{
+			$element_json = array();
 			$elements = $type->getElements();
-			$options = array('- '.JText::_('Select Element').' -' => false);
+			$options = array('- '.JText::_('PLG_ZLFRAMEWORK_SELECT_ELEMENT').' -' => false);
 			
 			// filter orderable elements
 			$elements = array_filter($elements, create_function('$element', 'return $element->getMetaData("orderable") == "true";'));
@@ -109,14 +110,6 @@ defined('_JEXEC') or die('Restricted access');
 					$options[$element->config->name ? $element->config->name : $element->getMetaData('name')] = $element->identifier;
 				}
 
-				// app separator
-				$type_json[] =
-				'"_'.$application->id.'_separator":{
-					"type":"separator",
-					"text":"'.$application->name.' App",
-					"big":1
-				}';
-
 				// elements
 				$type_json[] =
 				'"_'.$type->id.'":{
@@ -126,15 +119,23 @@ defined('_JEXEC') or die('Restricted access');
 						"options":'.json_encode($options).'
 					}
 				}';
-			}
-		}
+
+			} // end if Elements
+		} // end Type foreach
 
 		$json[] =
 		'"_'.$application->id.'_fieldset":{
-			"type":"fieldset",
-			"fields": {'.implode(",", $type_json).'}
+			"type":"wrapper",
+			"fields": {'.implode(",", $type_json).'},
+			"specific":{
+				"toggle":{
+					"label":"PLG_ZLFRAMEWORK_NAME_APP_ELEMENTS||'.$application->name.'"
+				}
+			},
+			"layout":"fieldset"
 		}';
-	}
+
+	} // end App foreach
 
 	// JSON
 	return 
