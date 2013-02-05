@@ -106,6 +106,7 @@ class plgSystemZlframework extends JPlugin {
 		if ( $path = $this->app->path->path( 'zlfw:models' ) ) {
 			$this->app->path->register( $path, 'models' );
 			$this->app->loader->register('ZLModel', 'models:zl.php');
+			$this->app->loader->register('ZLModelItem', 'models:item.php');
 		}
 		
 		// register events
