@@ -189,7 +189,10 @@ defined('_JEXEC') or die('Restricted access');
 		"_id":{
 			"type":"types",
 			"specific": {
-				'./* it inherits all specific options from select */'
+				'./* it inherits all specific options from select plus */'
+				"submissions":{
+					"submission_id":"id" './* Filter Types based if they are part of provided submissions */'
+				}
 			}
 		},
 

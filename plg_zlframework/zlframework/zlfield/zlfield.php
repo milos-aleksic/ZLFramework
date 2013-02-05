@@ -490,14 +490,19 @@ class ZlfieldHelper extends AppHelper {
 					);
 
 					// render individual field row
-					if($res = $this->row($params, $value)) $result[] = $res;
-					
+					$params = $this->app->data->create($params);
+					if($field = $this->field($params, $value)) {
+						$result[] = $this->row($params, $field);
+					}
+
 					// load childs
 					if($childs = $fld->find('childs.loadfields'))
 					{
 						// create parent values
 						$pid = $id;
-						$psv[$id] = $value; // add current value to parents array
+
+						// add current value to parents array, if empty calculate it
+						$psv[$id] = $value ? $value : $this->field($params, $value, true); 
 
 						$p_task = $this->req->getVar('parent_task') ? $this->req->getVar('parent_task') : $this->req->getVar('task'); // parent task necesary if double field load ex: layout / sublayout
 						$url = $this->app->link(array('controller' => 'zlframework', 'format' => 'raw', 'type' => $this->type, 'layout' => $this->layout, 'group' => $this->group, 'path' => $this->req->getVar('path'), 'parent_task' => $p_task, 'zlfieldmode' => $this->mode), false);
@@ -777,12 +782,10 @@ class ZlfieldHelper extends AppHelper {
 	}
 
 	/*
-		Function: row - Returns row html string
+		Function: field - Returns field html string
 	*/
-	public function row($params, $value)
+	public function field($params, $value, $getCurrentValue=false)
 	{
-		$params = $this->app->data->create($params);
-		$layout = $params->get('layout', 'default');
 		$type	= $params->get('type');
 
 		if ($type && $params->get('render') && $this->renderIf($params->get('renderif')))
@@ -793,14 +796,26 @@ class ZlfieldHelper extends AppHelper {
 			$attrs		= '';
 
 			// render field
-			$field = $this->app->zlfieldhtml->_('zlf.'.$type, $id, $name, $value, $specific, $attrs);
+			$field = $this->app->zlfieldhtml->_('zlf.'.$type, $id, $name, $value, $specific, $attrs, $getCurrentValue);
 
-			// render layout
-			if ($layout = $this->getLayout("field/{$layout}.php")) {
-				return $this->app->zlfw->renderLayout($layout, compact('params', 'field'));
-			} else {
-				return $field;
-			}
+			if (!empty($field)) return $field;
+		}
+
+		return null;
+	}
+
+	/*
+		Function: row - Returns row html string
+	*/
+	public function row($params, $field)
+	{
+		$layout = $params->get('layout', 'default');
+
+		// render layout
+		if ($layout = $this->getLayout("field/{$layout}.php")) {
+			return $this->app->zlfw->renderLayout($layout, compact('params', 'field'));
+		} else {
+			return $field;
 		}
 
 		return null;
