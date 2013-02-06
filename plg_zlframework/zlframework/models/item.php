@@ -168,9 +168,9 @@ class ZLModelItem extends ZLModel
 		// searchable
 		$query->where('a.searchable = 1');
 		
-		// published
-		$published = $this->getState('published');
-		if (isset($published[0]) && !empty($published[0])) {
+		// state
+		$state = $this->getState('state');
+		if (isset($state[0]) && !empty($state[0])) {
 			$query->where('a.state = 1');
 		}
 
@@ -181,7 +181,7 @@ class ZLModelItem extends ZLModel
 			$query->where( 'a.' . $this->app->user->getDBAccessString());
 		}
 
-		// DEPRICATED - created/published/modified from
+		// DEPRICATED - created/modified from
 		if ($this->getState('created_from') || $this->getState('modified_from'))
 		{
 			$date = $this->getState('created_from') ? $this->getState('created_from') : $this->getState('modified_from');
@@ -199,79 +199,40 @@ class ZLModelItem extends ZLModel
 			// created
 			if ($created = array_shift($this->getState('created', array())))
 			{
-				$where = array();
-				$date = substr($this->_db->escape($created->get('value', '')), 0, 10);
-				$from = $this->_db->Quote($date.' 00:00:00');
-				$date = $this->_db->Quote($date);
+				$date = $created->get('value', '');
+				$to   = $created->get('value_to', '');
+				$type = $created->get('type', false);
 
-				if ($created->get('type') == 'from') {
-					$where[] = 'a.publish_up > '.$from;
-					$where[] = "(SUBSTRING(a.created, 1, 19) >= $from)";
-					$where[] = "($from <= SUBSTRING(a.created, 1, 19))";
+				$d_value_from = !empty($date) ? $date : '';
+				$d_value_to = !empty($to) ? $to : '';
 
-				} else if ($created->get('type') == 'to') {
-					$to = $date;
-					$where[] = 'a.publish_up > '.$to;
-					$where[] = "(SUBSTRING(a.created, 1, 19) <= $to)";
-					$where[] = "($to >= SUBSTRING(a.created, 1, 19))";
-				
-				} else if ($created->get('type') == 'range' && $created->get('value_to')) {
-					$where[] = 'a.publish_up > '.$from;
-					$where[] = "(SUBSTRING(a.created, 1, 19) >= $from)";
-					$where[] = "($from <= SUBSTRING(a.created, 1, 19))";
-					$query->where('('.implode(' OR ', $where).')');
-					
-					$to = substr($this->_db->escape($created->get('value_to', '')), 0, 10);
-					$to = $this->_db->Quote($to.' 23:59:59');
-
-					$where = array();
-					$where[] = 'a.publish_up > '.$to;
-					$where[] = "(SUBSTRING(a.created, 1, 19) <= $to)";
-					$where[] = "($to >= SUBSTRING(a.created, 1, 19))";
-
-				} else {
-					$where[] = 'a.publish_up > '.$date;
-					$where[] = 'a.created = '.$date;
-					// $where[] = "(a.created LIKE '%$date%')";
-					// $where[] = "(('$date' BETWEEN SUBSTRING(a.created, 1, 10) AND SUBSTRING(a.created, -19, 10)) AND a.created NOT REGEXP '[[.LF.]]'))";
-				}
-
-				$query->where('('.implode(' OR ', $where).')');
+				$query->where($this->getDateSearch("a.created", $date, $d_value_from, $d_value_to, $type));
 			}
 
 			// modified
 			if ($modified = array_shift($this->getState('modified', array())))
 			{
-				$where = array();
-				$date = substr($this->_db->escape($modified->get('value', '')), 0, 10);
-				$from = $this->_db->Quote($date.' 00:00:00');
-				$date = $this->_db->Quote($date);
+				$date = $created->get('value', '');
+				$to   = $created->get('value_to', '');
+				$type = $created->get('type', false);
 
-				if ($modified->get('type') == 'from') {
-					$where[] = 'a.publish_up > '.$from;
-					$where[] = 'a.modified >= '.$from;
+				$d_value_from = !empty($date) ? $date : '';
+				$d_value_to = !empty($to) ? $to : '';
 
-				} else if ($modified->get('type') == 'to') {
-					$where[] = 'a.publish_up > '.$date;
-					$where[] = 'a.modified <= '.$date;
-				
-				} else if ($modified->get('type') == 'range' && $modified->get('value_to')) {
-					$where[] = 'a.publish_up > '.$from;
-					$where[] = 'a.modified >= '.$from;
-					$query->where('('.implode(' OR ', $where).')');
+				$query->where($this->getDateSearch("a.modified", $date, $d_value_from, $d_value_to, $type));
+			}
 
-					$to = substr($this->_db->escape($modified->get('value_to', '')), 0, 10);
-					$to = $this->_db->Quote($to.' 23:59:59');
-					$where = array();
-					$where[] = 'a.publish_up > '.$to;
-					$where[] = 'a.modified <= '.$to;
+			// published
+			if ($published = array_shift($this->getState('published', array())))
+			{
+				$date = $published->get('value', '');
+				$to   = $published->get('value_to', '');
+				$type = $published->get('type', false);
 
-				} else {
-					$where[] = 'a.publish_up > '.$date;
-					$where[] = 'a.modified = '.$date;
-				}
+				$d_value_from = !empty($date) ? $date : '';
+				$d_value_to = !empty($to) ? $to : '';
 
-				$query->where('('.implode(' OR ', $where).')');
+				$query->where($this->getDateSearch("a.publish_up", $date, $d_value_from, $d_value_to, $type));
 			}
 		}
 
@@ -391,7 +352,7 @@ class ZLModelItem extends ZLModel
 						$d_value_from = !empty($from) ? $from : '';
 						$d_value_to = !empty($to) ? $to : '';
 
-						$wheres[$logic][] = $this->getElementDateSearch($id, $k, $value, $d_value_from, $d_value_to, $type);
+						$wheres[$logic][] = $this->getDateSearch("b$k.value", $value, $d_value_from, $d_value_to, $type, "(b$k.element_id = '$id' AND {query})");
 					} else {
 						// Normal search
 						$value = $this->getQuotedValue($element);
@@ -479,7 +440,7 @@ class ZLModelItem extends ZLModel
 	/**
 	 * Get the date search sql
 	 */
-	protected function getElementDateSearch($identifier, $k, $value, $value_from, $value_to, $search_type)
+	protected function getDateSearch($sql_value, $value, $value_from, $value_to, $search_type, $wrapper=false)
 	{
 		if (!empty($value) && $search_type != 'range') { // search_type = to:from:default
 			$date = substr($value, 0, 10);
@@ -494,21 +455,28 @@ class ZLModelItem extends ZLModel
 		$to   = $this->_db->Quote($this->_db->escape($to));
 
 		switch ($search_type) {
-			case 'to':
-				$el_where = "(b$k.element_id = '$identifier' AND ((SUBSTRING(b$k.value, 1, 19) <= $to) OR ($to >= SUBSTRING(b$k.value, 1, 19)))) ";
-				break;
 			case 'from':
-				$el_where = "(b$k.element_id = '$identifier' AND ((SUBSTRING(b$k.value, -19) >= $from) OR ($from <= SUBSTRING(b$k.value, -19)))) ";
+				$el_where = "( (SUBSTRING($sql_value, -19) >= $from) OR ($from <= SUBSTRING($sql_value, -19)) )";
 				break;
+
+			case 'to':
+				$el_where = "( (SUBSTRING($sql_value, 1, 19) <= $to) OR ($to >= SUBSTRING($sql_value, 1, 19)) )";
+				break;
+
 			case 'range':
-				$el_where = "(b$k.element_id = '$identifier' AND (($from BETWEEN SUBSTRING(b$k.value, 1, 19) AND SUBSTRING(b$k.value, -19)) OR ($to BETWEEN SUBSTRING(b$k.value, 1, 19) AND SUBSTRING(b$k.value, -19)) OR (SUBSTRING(b$k.value, 1, 19) BETWEEN $from AND $to) OR (SUBSTRING(b$k.value, -19) BETWEEN $from AND $to))) ";
+				$el_where = "( ($from BETWEEN SUBSTRING($sql_value, 1, 19) AND SUBSTRING($sql_value, -19)) OR ($to BETWEEN SUBSTRING($sql_value, 1, 19) AND SUBSTRING($sql_value, -19)) OR (SUBSTRING($sql_value, 1, 19) BETWEEN $from AND $to) OR (SUBSTRING($sql_value, -19) BETWEEN $from AND $to) )";
 				break;
+
 			default:
 				$date = $this->_db->escape($date);
-				$el_where = "(b$k.element_id = '$identifier' AND ((b$k.value LIKE '%$date%') OR (('$date' BETWEEN SUBSTRING(b$k.value, 1, 10) AND SUBSTRING(b$k.value, -19, 10)) AND b$k.value NOT REGEXP '[[.LF.]]'))) ";
+				$el_where = "( ($sql_value LIKE '%$date%') OR (('$date' BETWEEN SUBSTRING($sql_value, 1, 10) AND SUBSTRING($sql_value, -19, 10)) AND $sql_value NOT REGEXP '[[.LF.]]') )";
 		}
+
+		// wrapper the query if necesary
+		$el_where = $wrapper ? preg_replace('/{query}/', $el_where, $wrapper) : $el_where;
 		
-		return $el_where;
+		// return with extra space
+		return $el_where.' ';
 	}
 	
 	/**

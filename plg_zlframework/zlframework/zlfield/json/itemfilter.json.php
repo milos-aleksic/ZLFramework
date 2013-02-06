@@ -31,7 +31,7 @@ defined('_JEXEC') or die('Restricted access');
 	$childs[] = isset($params['itemfilter']) ? '"_filter_fieldset":{
 		"type":"wrapper",
 		"fields": {
-			"_published":{
+			"_state":{
 				"type": "radio",
 				"label": "PLG_ZLFRAMEWORK_IFT_PUBLISHED",
 				"help": "PLG_ZLFRAMEWORK_IFT_PUBLISHED_DESC",
@@ -47,11 +47,11 @@ defined('_JEXEC') or die('Restricted access');
 				"label": "PLG_ZLFRAMEWORK_FT_LIMIT",
 				"help": "PLG_ZLFRAMEWORK_FT_LIMIT_DESC"
 			},
-			"_created_subfield": {
+			"item_dates": {
 				"type":"subfield",
-				"path":"zlfield:json/itemfilter/created.json.php"
+				"path":"zlfield:json/itemfilter/dates.json.php"
 			},
-			"_filter_subfield": {
+			"elements_filter": {
 				"type":"subfield",
 				"path":"zlfield:json/itemfilter/elements.json.php"
 			}
