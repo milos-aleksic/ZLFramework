@@ -185,7 +185,7 @@ class ZLFieldHTMLHelper extends AppHelper {
 		// return current value instead
 		if ($curVal) {
 			$option = array_shift($options);
-			return $option->get('value', '');
+			return $spec->get('multi') ? '' : $option->get('value', '');
 		}
 		
 		// abort if minimal options not reached
@@ -331,7 +331,6 @@ class ZLFieldHTMLHelper extends AppHelper {
 		$subms = array_filter($subms);
 
 		// if is child and no filter provided, don't render
-		if ($spec->find('value_map.apps') && empty($apps)) return;
 		if ($spec->find('value_map.submissions') && empty($subms)) return;
 
 		// get apps
@@ -436,8 +435,8 @@ class ZLFieldHTMLHelper extends AppHelper {
 		// init vars
 		$pv	  = $this->app->data->create( $this->trslValues($spec->get('parents_val'), $spec->get('value_map')) );
 		$apps = (array)$spec->get('apps', $pv->get('apps', array())); // get static or relied app value
-		$apps = $this->app->zlfw->getApplications($apps);
-		
+		$apps = $this->app->zlfw->getApplications($apps, true);
+
 		$options = array();
  		if (!empty($apps)) foreach($apps as $app)
 		{

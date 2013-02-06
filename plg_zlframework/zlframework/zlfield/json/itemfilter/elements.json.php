@@ -14,10 +14,10 @@ defined('_JEXEC') or die('Restricted access');
 
 	// init vars
 	$json = array();
-	$allowed_types = (array)$psv->get('_chosentypes', array());
+	$allowed_types = array_filter((array)$psv->get('_chosentypes', array()));
 
 	// get parent apps value
-	$apps = $psv->get('_chosenapps', array());
+	$apps = array_filter((array)$psv->get('_chosenapps', array()));
 
 	// get apps
 	$applications = array();
