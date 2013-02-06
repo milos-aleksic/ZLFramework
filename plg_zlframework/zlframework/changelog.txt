@@ -5,6 +5,7 @@ Changelog
  ^ ZLField improvements
  ^ Files Pro improvements
  + Item Filter Model
+ + ZLFW Helper Link Function
 
 3.0.8
  ^ ZLField improvements
