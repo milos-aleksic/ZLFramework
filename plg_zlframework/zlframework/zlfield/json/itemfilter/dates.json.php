@@ -123,10 +123,10 @@ defined('_JEXEC') or die('Restricted access');
 							"specific":{
 								"label":"PLG_ZLFRAMEWORK_FILTER"
 							},
-							"dependents":"modified_wrapper > 1",
+							"dependents":"published_wrapper > 1",
 							"layout":"separator"
 						},
-						"modified_wrapper":{
+						"published_wrapper":{
 							"type":"wrapper",
 							"fields": {
 
