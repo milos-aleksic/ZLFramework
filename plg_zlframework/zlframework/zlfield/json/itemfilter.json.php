@@ -32,10 +32,16 @@ defined('_JEXEC') or die('Restricted access');
 		"type":"wrapper",
 		"fields": {
 			"_state":{
-				"type": "radio",
-				"label": "PLG_ZLFRAMEWORK_IFT_PUBLISHED",
-				"help": "PLG_ZLFRAMEWORK_IFT_PUBLISHED_DESC",
-				"default":"1"
+				"type":"select",
+				"label":"PLG_ZLFRAMEWORK_IFT_PUBLISHED_STATE",
+				"help":"PLG_ZLFRAMEWORK_IFT_PUBLISHED_STATE_DESC",
+				"default":"1",
+				"specific":{
+					"options":{
+						"PLG_ZLFRAMEWORK_ENABLED":"1",
+						"PLG_ZLFRAMEWORK_DISABLED":"0"
+					}
+				}
 			},
 			"_offset":{
 				"type": "text",
