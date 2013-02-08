@@ -203,8 +203,8 @@ abstract class ElementRepeatablePro extends ElementRepeatable {
 			if (empty($result)) return null; // if no results abort
 			
 			// set offset/limit
-			$offset = $params->find('filter._offset', '') == '' ? 0 : $params->find('filter._offset', 0);
-			$limit  = $params->find('filter._limit', '') == '' ? null : $params->find('filter._limit', null);
+			$offset = ( ($params->find('filter._offset', '') == '') || (!is_int($params->find('filter._offset', 0))) ) ? 0 : $params->find('filter._offset', 0);
+			$limit  = ( ($params->find('filter._limit', '') == '') || (!is_int($params->find('filter._limit', 0))) ) ? null : $params->find('filter._limit', null);
 			
 			$report['limited'] = $limit != null ? $limit < count($result) : false;
 			$result = array_slice($result, $offset, $limit);
