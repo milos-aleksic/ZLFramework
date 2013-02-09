@@ -587,7 +587,7 @@ abstract class ElementFilesPro extends ElementRepeatablePro {
 					$folders[] = array('name' => basename($name), 'path' => $name, 'type' => 'folder', 'val' => $name);
 				} else {
 					// continue if no regex filter match
-					if (!preg_match('/^.*('.$this->_extensions.')$/i', $name)) continue;
+					if (!preg_match('/^.*('.$this->getLegalExtensions().')$/i', $name)) continue;
 					$files[]   = array('name' => basename($name), 'path' => $name, 'type' => 'file', 'val' => $name);
 				}
 			}
