@@ -199,19 +199,19 @@ class ZlFilesystemHelper extends FilesystemHelper
 		$gigabyte = $megabyte * 1024;
 		$terabyte = $gigabyte * 1024;
 
-		if (($bytes >= 0) && ($bytes < $kilobyte)) {
+		if (($bytes >= 0) && ($bytes < $kilobyte) && !$format || $format == 'B') {
 			return $bytes . ' B';
 
-		} elseif (($bytes >= $kilobyte) && ($bytes < $megabyte) || $format == 'KB') {
+		} elseif (($bytes >= $kilobyte) && ($bytes < $megabyte) && !$format || $format == 'KB') {
 			return round($bytes / $kilobyte, $precision) . ' KB';
 
-		} elseif (($bytes >= $megabyte) && ($bytes < $gigabyte) || $format == 'MB') {
+		} elseif (($bytes >= $megabyte) && ($bytes < $gigabyte) && !$format || $format == 'MB') {
 			return round($bytes / $megabyte, $precision) . ' MB';
 
-		} elseif (($bytes >= $gigabyte) && ($bytes < $terabyte) || $format == 'GB') {
+		} elseif (($bytes >= $gigabyte) && ($bytes < $terabyte) && !$format || $format == 'GB') {
 			return round($bytes / $gigabyte, $precision) . ' GB';
 
-		} elseif ($bytes >= $terabyte || $format == 'TB') {
+		} elseif ($bytes >= $terabyte && !$format || $format == 'TB') {
 			return round($bytes / $terabyte, $precision) . ' TB';
 		} else {
 			return $bytes . ' B';
@@ -222,10 +222,14 @@ class ZlFilesystemHelper extends FilesystemHelper
 		Function: getSourceSize
 			get the file or folder files size (with extension filter - incomplete)
 
+		Parameters:
+			$source - the source path string
+			$format - Boolean, if true will return the result formated for better reading
+
 		Returns:
-			Array
+			String
 	*/
-	public function getSourceSize($source = null)
+	public function getSourceSize($source = null, $format = true)
 	{
 		// init vars
 		$sourcepath = $this->app->path->path('root:'.$source);
@@ -250,7 +254,11 @@ class ZlFilesystemHelper extends FilesystemHelper
 		else if(is_dir($sourcepath)) foreach ($this->app->path->files('root:'.$source, false, '/^.*()$/i') as $file){
 			$size += filesize($this->app->path->path("root:{$source}/{$file}"));
 		}
+
+		// value check
+		if (!$size) return 0;
 		
-		return ($size ? self::formatFilesize($size) : 0);
+		// return size
+		return $format ? self::formatFilesize($size) : $size;
 	}
 }

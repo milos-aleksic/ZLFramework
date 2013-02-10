@@ -168,8 +168,8 @@ class ZLModelItem extends ZLModel
 		// searchable
 		$query->where('a.searchable = 1');
 		
-		// state
-		$state = $this->getState('state');
+		// published state
+		$state = $this->getState('published');
 		if (isset($state[0]) && !empty($state[0])) {
 			$query->where('a.state = 1');
 		}
@@ -197,8 +197,9 @@ class ZLModelItem extends ZLModel
 		else
 		{
 			// created
-			if ($created = array_shift($this->getState('created', array())))
+			if ($created = $this->getState('created', array()))
 			{
+				$created = array_shift($created);
 				$date = $created->get('value', '');
 				$to   = $created->get('value_to', '');
 				$type = $created->get('type', false);
@@ -210,8 +211,9 @@ class ZLModelItem extends ZLModel
 			}
 
 			// modified
-			if ($modified = array_shift($this->getState('modified', array())))
+			if ($modified = $this->getState('modified', array()))
 			{
+				$modified = array_shift($modified);
 				$date = $created->get('value', '');
 				$to   = $created->get('value_to', '');
 				$type = $created->get('type', false);
@@ -223,11 +225,12 @@ class ZLModelItem extends ZLModel
 			}
 
 			// published
-			if ($published = array_shift($this->getState('published', array())))
+			if ($published_date = $this->getState('published_date', array()))
 			{
-				$date = $published->get('value', '');
-				$to   = $published->get('value_to', '');
-				$type = $published->get('type', false);
+				$published_date = array_shift($published_date);
+				$date = $published_date->get('value', '');
+				$to   = $published_date->get('value_to', '');
+				$type = $published_date->get('type', false);
 
 				$d_value_from = !empty($date) ? $date : '';
 				$d_value_to = !empty($to) ? $to : '';

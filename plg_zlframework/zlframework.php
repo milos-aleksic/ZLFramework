@@ -129,7 +129,7 @@ class plgSystemZlframework extends JPlugin {
 		}
 
 		// set global JS vars
-		$javascript = "var \$zl_vars = {zoo_ajax:'{$this->app->zlfw->link(array('option' => 'com_zoo', 'format' => 'raw'), false)}'};";
+		$javascript = "var \$zl_vars = { sAjaxUrl:'{$this->app->zlfw->link(array('option' => 'com_zoo', 'format' => 'raw'), false)}', aAjaxDataCache:[] };";
 		$this->app->document->addScriptDeclaration($javascript);
 	}
 

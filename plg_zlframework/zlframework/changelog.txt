@@ -6,6 +6,7 @@ Changelog
  ^ Files Pro improvements
  + Item Filter Model
  + ZLFW Helper Link Function
+ # Fixed Amazon S3 integration Legal Extensions
 
 3.0.8
  ^ ZLField improvements
