@@ -299,7 +299,7 @@ class ZLModelItem extends ZLModel
 		}
 		
 		// Category filtering
-		$categories = $this->getState('categories', false);
+		$categories = $this->getState('categories', array());
 		if ($categories) {
 			foreach ( $categories as $cats ) {
 				if ($value = $cats->get('value', array())) {

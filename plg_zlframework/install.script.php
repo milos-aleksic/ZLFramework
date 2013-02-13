@@ -28,6 +28,7 @@ class plgSystemZlframeworkInstallerScript
 			'plugins/system/zlframework/zlframework/elements/core.config',
 			'plugins/system/zlframework/zlframework/elements/staticcontent/tmpl/render/qtip.php',
 			'plugins/system/zlframework/zlframework/assets/css/repeatablepro.css',
+			'plugins/system/zlframework/zlframework/models/query.php',
 			'plugins/system/zoo_zlelements/zoo_zlelements/fields/specific.php',
 
 			// until complete cleanup of this folder, proceede individually
