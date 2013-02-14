@@ -29,7 +29,8 @@ defined('_JEXEC') or die('Restricted access');
 	$default = $params->find('layout.default', '');
 	if(empty($default)){
 		$func = $mode == 'files' ? 'files' : 'dirs';
-		$default = array_shift($this->app->path->$func($path, false, "/$regex/"));
+		$default = $this->app->path->$func($path, false, "/$regex/");
+		$default = array_shift($default);
 	}
 
 	// encode path
