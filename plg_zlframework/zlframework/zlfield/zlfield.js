@@ -29,6 +29,12 @@
 
 			$(document).ready(function()
 			{
+				// remove chosen script on J3
+				$('.chzn-container').each(function(){
+					$(this).prev('select').data("chosen", null).show();
+					$(this).remove();
+				});
+
 				// set element actions when added to a type
 				$('.col-left ul.element-list').on('element.added', function(event, element){ 
 					// set action
@@ -87,9 +93,10 @@
 			});
 
 			// init on Module view
-			env == 'module' && $('form#module-form ul.adminformlist .zlfield-main').each(function(){
+			env == 'module' && $('form#module-form .zlfield-main').each(function(){
 				// add Class for specific styling
-				$(this).parent('li').addClass('zlfield-module');
+				$(this).closest('li, .control-group').addClass('zlfield-module');
+				$(this).closest('.controls').removeClass('controls'); // j3
 
 				// call actions
 				$this.actions($(this));
