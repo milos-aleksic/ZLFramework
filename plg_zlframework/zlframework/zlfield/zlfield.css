@@ -1,5 +1,18 @@
 /* Copyright (C) JOOlanders SL http://www.gnu.org/licenses/gpl-2.0.html GNU/GPLv2 only */
 
+
+/*ZOO CSS Adjust for smaller screens*/
+ul.element-list li.element .label {
+	width: 50px
+}
+
+/*Module CSS Adjust for smaller screens*/
+.form-validate div.width-60 {
+    width: 50%;
+}
+.form-validate div.width-40 {
+    width: 50%;
+}
 /*
  --- Parameters fields ----------------------------------------------------------------------------------- */
 
@@ -21,7 +34,8 @@ div.zlfield {
 }
 
 div.zlfield textarea, div.zlfield input, div.zlfield select {
- font: 10px Arial,Helvetica,sans-serif
+ font: 10px Arial,Helvetica,sans-serif;
+ height: auto !important;
 }
 
 div.zlfield > table
@@ -61,7 +75,8 @@ div.zlfield div.zl-row[data-type="date"] .zl-field img {
  --- Parameters fields ----------------------------------------------------------------------------------- */
 
 /* module specific */
-ul.adminformlist li.zlfield-module > label {
+ul.adminformlist li.zlfield-module > label,
+.control-group.zlfield-module .control-label { /* j3 */
 	display: none
 }
 

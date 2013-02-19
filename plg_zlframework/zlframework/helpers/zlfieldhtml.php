@@ -185,7 +185,7 @@ class ZLFieldHTMLHelper extends AppHelper {
 		// return current value instead
 		if ($curVal) {
 			$option = array_shift($options);
-			return $spec->get('multi') ? '' : $option->get('value', '');
+			return $spec->get('multi') ? '' : $option->value;
 		}
 		
 		// abort if minimal options not reached

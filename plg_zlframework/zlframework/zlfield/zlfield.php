@@ -735,37 +735,43 @@ class ZlfieldHelper extends AppHelper {
 	/*
 		Function: loadAssets - Load the necesary assets
 	*/
-	protected function loadAssets()
+	protected $loadedAssets = false;
+	public function loadAssets()
 	{
-		// init vars
-		$url = $this->app->link(array('controller' => 'zlframework', 'format' => 'raw', 'type' => $this->type), false);
-		$enviroment_args = json_encode($this->enviroment_args);
+		if (!$this->loadedAssets) {
+			// init vars
+			$url = $this->app->link(array('controller' => 'zlframework', 'format' => 'raw', 'type' => $this->type), false);
+			$enviroment_args = json_encode($this->enviroment_args);
 
-		// load zlfield assets
-		$this->app->document->addStylesheet('zlfield:zlfield.css');
-		$this->app->document->addStylesheet('zlfield:layouts/field/style.css');
-		$this->app->document->addStylesheet('zlfield:layouts/separator/style.css');
-		$this->app->document->addStylesheet('zlfield:layouts/wrapper/style.css');
-		$this->app->document->addScript('zlfield:zlfield.min.js');
+			// load zlfield assets
+			$this->app->document->addStylesheet('zlfield:zlfield.css');
+			$this->app->document->addStylesheet('zlfield:layouts/field/style.css');
+			$this->app->document->addStylesheet('zlfield:layouts/separator/style.css');
+			$this->app->document->addStylesheet('zlfield:layouts/wrapper/style.css');
+			$this->app->document->addScript('zlfield:zlfield.min.js');
 
-		if ($this->enviroment == 'module') {
-			$this->app->document->addScript('libraries:jquery/jquery-ui.custom.min.js');
-			$this->app->document->addStylesheet('libraries:jquery/jquery-ui.custom.css');
-			$this->app->document->addScript('libraries:jquery/plugins/timepicker/timepicker.js');
-			$this->app->document->addStylesheet('libraries:jquery/plugins/timepicker/timepicker.css');
+			if ($this->enviroment == 'module') {
+				$this->app->document->addScript('libraries:jquery/jquery-ui.custom.min.js');
+				$this->app->document->addStylesheet('libraries:jquery/jquery-ui.custom.css');
+				$this->app->document->addScript('libraries:jquery/plugins/timepicker/timepicker.js');
+				$this->app->document->addStylesheet('libraries:jquery/plugins/timepicker/timepicker.css');
+			}
+
+			// workaround for jQuery 1.9 transition
+			$this->app->document->addScript('zlfw:assets/js/jquery.plugins/jquery.migrate.min.js');
+
+			// load libraries
+			$this->app->zlfw->loadLibrary('qtip');
+			// $this->app->zlfw->loadLibrary('zlux'); // in progress
+			$this->app->document->addStylesheet('zlfw:assets/libraries/zlux/zlux.css');
+
+			// init scripts
+			$javascript = "jQuery(function($){ $('body').ZLfield({ url: '{$url}', type: '{$this->type}', enviroment: '{$this->enviroment}', enviroment_args: '{$enviroment_args}' }) });";
+			$this->app->document->addScriptDeclaration($javascript);
+
+			// don't load them twice
+			$this->loadedAssets = true;
 		}
-
-		// workaround for jQuery 1.9 transition
-		$this->app->document->addScript('zlfw:assets/js/jquery.plugins/jquery.migrate.min.js');
-
-		// load libraries
-		$this->app->zlfw->loadLibrary('qtip');
-		// $this->app->zlfw->loadLibrary('zlux'); // in progress
-		$this->app->document->addStylesheet('zlfw:assets/libraries/zlux/zlux.css');
-
-		// init scripts
-		$javascript = "jQuery(function($){ $('body').ZLfield({ url: '{$url}', type: '{$this->type}', enviroment: '{$this->enviroment}', enviroment_args: '{$enviroment_args}' }) });";
-		$this->app->document->addScriptDeclaration($javascript);
 	}
 
 	/*

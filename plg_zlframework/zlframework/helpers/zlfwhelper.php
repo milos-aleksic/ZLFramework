@@ -27,13 +27,9 @@ class ZlfwHelper extends AppHelper
 	 *
 	 * @since 3.0.9
 	 */
-	public function link($query = array(), $sef = true, $xhtml = false, $ssl = null)
+	public function link($query = array(), $xhtml = true, $ssl = null)
 	{
-		if ($sef) {
-			return JRoute::_('index.php?'.http_build_query($query, '', '&'), $xhtml, $ssl);	
-		} else {
-			return JURI::base( true ).'/index.php?'.http_build_query($query, '', '&');
-		}
+		return $this->app->link($query, $xhtml, $ssl).'&format=raw';
 	}
 
 	/**
