@@ -30,7 +30,7 @@
 			$(document).ready(function()
 			{
 				// remove chosen script on J3
-				$('.chzn-container').each(function(){
+				$('.zlfield-main .chzn-container').each(function(){
 					$(this).prev('select').data("chosen", null).show();
 					$(this).remove();
 				});

@@ -1,6 +1,6 @@
 /* Copyright (C) JOOlanders SL http://www.gnu.org/licenses/gpl-2.0.html GNU/GPLv2 only */
 
-/*Module CSS Adjust for smaller screens*/
+/* Module CSS Adjust for smaller screens */
 .form-validate div.width-60 {
     width: 50%;
 }
@@ -29,7 +29,7 @@ div.zlfield {
 
 div.zlfield textarea, div.zlfield input, div.zlfield select {
  font: 10px Arial,Helvetica,sans-serif;
- height: auto !important;
+ height: auto;
 }
 
 div.zlfield > table
@@ -104,6 +104,7 @@ ul.parameter-form li.parameter div.zlfield div.zl-row {
 div.zlfield.zlfield-main {
 	padding-top: 10px;
 	min-height: 30px;
+	min-width: 500px;
 }
 div.zlfield div.zl-row {
 	overflow: hidden;
