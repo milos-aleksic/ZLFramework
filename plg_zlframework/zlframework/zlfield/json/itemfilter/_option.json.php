@@ -12,7 +12,7 @@ defined('_JEXEC') or die('Restricted access');
 	// get options
 	$element_options = array();
 	if ($element->getElementType() == 'country'){
-		$element_options = $this->app->zf->getCountryOptions($element->config->get('selectable_country', array()));
+		$element_options = $this->app->zlfw->getCountryOptions($element->config->get('selectable_country', array()));
 	} else {
 		$element_options = $element->config->get('option', array());
 	}

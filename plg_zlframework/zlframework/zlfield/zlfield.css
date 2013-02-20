@@ -1,11 +1,5 @@
 /* Copyright (C) JOOlanders SL http://www.gnu.org/licenses/gpl-2.0.html GNU/GPLv2 only */
 
-
-/*ZOO CSS Adjust for smaller screens*/
-ul.element-list li.element .label {
-	width: 50px
-}
-
 /*Module CSS Adjust for smaller screens*/
 .form-validate div.width-60 {
     width: 50%;

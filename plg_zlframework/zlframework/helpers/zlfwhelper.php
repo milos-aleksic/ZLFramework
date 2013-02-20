@@ -830,6 +830,25 @@ class ZlfwHelper extends AppHelper
 	}
 
 	/*
+		Function: getCountryOptions
+			Returns well formated Countries options
+		
+		Parameters:
+			$selectable_countries - Element Chosen Countries
+	*/
+	public function getCountryOptions($selectable_countries)
+	{
+		$element_options = array();
+		$countries = $this->app->country->getIsoToNameMapping();
+		$keys = array_flip($selectable_countries);
+		$countries = array_intersect_key($countries, $keys);
+		foreach ($countries as $key => $country) {
+			$element_options[] = array('name' => $country, 'value' => $key);
+		}
+		return $element_options;
+	}
+
+	/*
 	 Function: getqtipOptions
 	 */
 	public function getqtipOptions($element = null, $lparams)
