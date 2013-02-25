@@ -128,10 +128,6 @@ class plgSystemZlframework extends JPlugin {
 			require_once($path.'/init.php');
 		}
 
-		// set global JS vars
-		$javascript = "var \$zl_vars = { sAjaxUrl:'{$this->app->zlfw->link(array('option' => 'com_zoo', 'format' => 'raw'), false)}', aAjaxDataCache:[] };";
-		$this->app->document->addScriptDeclaration($javascript);
-
 		// load ZL Fields, workaround for first time using ZL elements
 		if ($this->app->zlfw->isTheEnviroment('zoo-type-edit')) $this->app->zlfield->loadAssets();
 	}
