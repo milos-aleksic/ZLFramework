@@ -470,6 +470,21 @@ class ZLModelItem extends ZLModel
 				$el_where = "( ($from BETWEEN SUBSTRING($sql_value, 1, 19) AND SUBSTRING($sql_value, -19)) OR ($to BETWEEN SUBSTRING($sql_value, 1, 19) AND SUBSTRING($sql_value, -19)) OR (SUBSTRING($sql_value, 1, 19) BETWEEN $from AND $to) OR (SUBSTRING($sql_value, -19) BETWEEN $from AND $to) )";
 				break;
 
+			// Special case: $from is the interval, $to is the interval unit
+			case 'period':
+				$value_to = strtoupper($value_to);
+				$valid = array('MONTH', 'DAY', 'WEEK', 'YEAR', 'MINUTE', 'SECOND', 'HOUR');
+				if (!in_array($value_to, $valid)) {
+					$value_to = 'WEEK';
+				}
+				// DATE ADD
+				if ($value_from > 0) {
+					$el_where = "($value BETWEEN SUBSTRING($sql_value, -19) AND DATE_ADD(SUBSTRING($sql_value, -19), INTERVAL $value_from $value_to))";	
+				} else {
+					$el_where = "($value BETWEEN DATE_SUB(SUBSTRING($sql_value, -19), INTERVAL $value_from $value_to) AND SUBSTRING($sql_value, -19))";	
+				}
+				break;
+
 			default:
 				$date = $this->_db->escape($date);
 				$el_where = "( ($sql_value LIKE '%$date%') OR (('$date' BETWEEN SUBSTRING($sql_value, 1, 10) AND SUBSTRING($sql_value, -19, 10)) AND $sql_value NOT REGEXP '[[.LF.]]') )";
