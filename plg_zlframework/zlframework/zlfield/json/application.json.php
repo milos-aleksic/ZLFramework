@@ -48,7 +48,8 @@ defined('_JEXEC') or die('Restricted access');
 	$childs = array_filter($childs);
 
 	// get default App
-	$default_app = array_shift( $this->app->table->application->all(array('order' => 'name')) );
+	$applications = $this->app->table->application->all(array('order' => 'name'));
+	$default_app = array_shift( $applications );
 
 	// return json string
 	return

@@ -2,6 +2,7 @@ Changelog
 ------------
 
 3.0.9
+ ^ jQuery 1.9 compatibility
  ^ ZLField improvements
  ^ Files Pro improvements
  + Item Filter Model

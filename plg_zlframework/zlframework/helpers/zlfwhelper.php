@@ -16,23 +16,6 @@ defined('_JEXEC') or die('Restricted access');
 class ZlfwHelper extends AppHelper
 {
 	/**
-	 * Format a link
-	 *
-	 * @param array $query HTTP query options
-	 * @param boolean $sef Make the url human redeable
-	 * @param boolean $xhtml Replace & by &amp; for xml compilance
-	 * @param boolean $ssl Secure state for the resolved URI. [1 => Make URI secure using global secure site URI, 0 => Leave URI in the same secure state as it was passed to the function, -1 => Make URI unsecure using the global unsecure site URI]
-	 *
-	 * @return string The formaated link
-	 *
-	 * @since 3.0.9
-	 */
-	public function link($query = array(), $xhtml = true, $ssl = null)
-	{
-		return $this->app->link($query, $xhtml, $ssl).'&format=raw';
-	}
-
-	/**
 	 * get Enviroment
 	 *
 	 * @return @object The enviroment parameters
