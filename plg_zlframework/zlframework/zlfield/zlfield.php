@@ -482,6 +482,7 @@ class ZlfieldHelper extends AppHelper {
 						'specific'	=> $specific,
 						'label'		=> $fld->get('label'),
 						'class'		=> $fld->get('class'),
+						'dependent' => $fld->get('dependent'),
 						'dependents' => $fld->get('dependents'),
 						'renderif'	=> $fld->get('renderif'),
 						'render'	=> $fld->get('render', 1),

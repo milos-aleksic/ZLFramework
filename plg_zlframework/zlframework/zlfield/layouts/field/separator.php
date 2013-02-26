@@ -25,6 +25,7 @@ defined('_JEXEC') or die('Restricted access');
 
 	// attributes
 	$attrs .= $params->get('type') ? " data-type='{$params->get('type')}'" : '';
+	$attrs .= $params->get('dependent') ? " data-dependent='{$params->get('dependent')}'" : '';
 	$attrs .= $params->get('dependents') ? " data-dependents='{$params->get('dependents')}'" : '';
 
 	// state
