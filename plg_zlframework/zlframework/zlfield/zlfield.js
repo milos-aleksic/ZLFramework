@@ -386,148 +386,19 @@
 				 */
 				$dom.find('[data-dependent]').each(function(){
 					var dep = $(this).hide(),
-						AND_rules = dep.data("dependent").replace(/ /g, '').split('&&'), // remove empty spaces and split into rules
-						ph = dep.closest('.zlfield.placeholder .wrapper, .zlfield.placeholder').first();
-
-					dep.bind('zlfield-dependent-event', function(event)
-					{
-						// for each AND rule
-						var AND_match = 0, loop = 1; // by default no match
-						AND_rules.each(function(val)
-						{
-							if (!loop) return false;
-
-							var c = val.split('!='),
-								m = c.length == 2 ? '!=' : '=='; // mode
-								c = m == '==' ? val.split('==') : c, // second split if necesary
-								field = ph.find('[data-id="'+c[0]+'"]'), // the field value it depends on
-								type = field.data("type"),
-								unique_id = field.data("id")+'_'+ph.data("id"),
-								e = c[1].replace('NONE', ''); // dependent option
-
-							// if select
-							if (type == 'select' || type == 'itemLayoutList' || type == 'layout' || type == 'apps' || type == 'types' || type == 'elements' || type == 'modulelist' || type == 'separatedby')
-							{
-								var select = field.find('.zl-field select'),
-									selection = $.makeArray(select.val()), // for multiselect compatibility
-									match = 0;
-
-								if (e && e.match(/OR/g)){
-									$.each(selection, function(index, value){ // for each selected value
-										// regex search value on begin/end of string or with OR in any side
-										var re = new RegExp('(\\b|OR)'+value+'(\\b|OR)', 'g');
-										( (m == '!=' && !e.match(re)) || (m == '==' && e.match(re)) ) && (match = 1);
-										// check mode and Select value, mark any match
-									})
-								} else if (e && e.match(/AND/g)){
-									var min = e.split('AND').length;
-									(selection.length == min) && $.each(selection, function(index, value){
-										// regex search value on begin/end of string or with AND in any side
-										var re = new RegExp('(\\b|AND)'+value+'(\\b|AND)', 'g');
-										if ( (m == '!=' && !e.match(re)) || (m == '==' && e.match(re)) ) {
-											match = 1;
-										} else { match = 0; }
-										// check mode and Select value, mark only if all matched
-									})
-								} else {
-									$.each(selection, function(index, value){
-										( (m == '!=' && value != e) || (m == '==' && value == e) ) && (match = 1);
-										// check mode and Select value, mark any match
-									})
-								}
-
-								// save match
-								AND_match = match;
-
-								if (!select.data('zlfield-dependent-'+unique_id+'-init')) {
-									select.on('change', function(){
-										dep.trigger('zlfield-dependent-event');
-									});
-								select.data('zlfield-dependent-'+unique_id+'-init', !0)}
-							};
-							
-							// if checkbox
-							if (type == 'checkbox')
-							{
-								var checkbox = field.find('.zl-field input'),
-									match = 0,
-									checkd = checkbox.attr('checked') == 'checked'; // it is checked?
-									
-									// check mode and Checkbox state, mark any match
-									( (m == '!=' && !checkd) || (m == '==' && checkd) ) && (match = 1)
-
-								// save match
-								AND_match = match;
-
-								if (!checkbox.data('zlfield-dependent-'+unique_id+'-init')) {
-									checkbox.on('change', function(){
-										dep.trigger('zlfield-dependent-event');
-									});
-								checkbox.data('zlfield-dependent-'+unique_id+'-init', !0)}
-							};
-
-							// if radio
-							if (type == 'radio')
-							{
-								var radio = field.find('.zl-field input'),
-									match = 0, // by default no match
-									option = e; // it must be declared local to avoid some weard issue that changes true string values to 1 number value
-
-								radio.each(function()
-								{
-									var checkd = $(this).attr('checked') == 'checked', // it is checked?
-										value = $(this).attr('value');
-
-									if(checkd) // proceed only if it's the checked input
-									{
-										if (option && option.match(/OR/g)){
-											var re = new RegExp(value, 'g');
-											// check mode, value and check state for multiple values, mark any match
-											( (m == '!=' && !option.match(re)) || (m == '==' && option.match(re)) ) && (match = 1);
-										}
-										else
-										{
-											// check mode, value and check state, mark any match
-											( (m == '!=' && value != option && checkd) || (m == '==' && value == option && checkd) && checkd) && (match = 1);
-										}
-									}
-								});
-
-								// save match
-								AND_match = match;
-
-								if (!radio.data('zlfield-dependent-'+unique_id+'-init')) {
-									radio.on('change', function(){
-										dep.trigger('zlfield-dependent-event');
-									});
-								radio.data('zlfield-dependent-'+unique_id+'-init', !0)}
-							};
-							
-							// if text
-							if (type == 'text')
-							{
-								var input = field.find('.zl-field input'),
-									filled = input.val() != ''; // has text?
-									
-								// check mode and Input state, then slide Up or Down
-								( (m == '!=' && !filled) || (m == '==' && filled) ) && (match = 1);
-									
-								// save match
-								AND_match = match;
-
-								if (!input.data('zlfield-dependent-'+unique_id+'-init')) {
-									input.on('keyup change', function(){
-										dep.trigger('zlfield-dependent-event');
-									});
-								input.data('zlfield-dependent-'+unique_id+'-init', !0)}
-							};
-
-							// stop iteration if not match allready
-							if (!AND_match) loop = false;
-						});
+						rules = dep.data("dependent").replace(/ /g, ''), // remove empty spaces 
+						AND_rules = rules.match(/AND/g) ? rules.split('AND') : [], // split AND rules
+						OR_rules = rules.match(/OR/g) ? rules.split('OR') : [], // split OR rules
+						ph = dep.parents('.zlfield.placeholder .wrapper, .zlfield.placeholder').first();
 					
+					dep.on('zlfield-dependent-event', function(event)
+					{
+						A_match = 0;
+						if (AND_rules.length) A_match = $this.evaluateDependentRules(AND_rules, dep, ph, 'AND');
+						else A_match = $this.evaluateDependentRules(OR_rules, dep, ph, 'OR');
+
 						// Show if match, Hide otherwise
-						AND_match && dep.slideDown('fast') || dep.slideUp('fast');
+						A_match && dep.slideDown('fast') || dep.slideUp('fast');
 					}).trigger('zlfield-dependent-event');
 
 				}); // Dependent END
@@ -641,6 +512,150 @@
 				}); // Load Field
 
 			$dom.data('zlfield-actions-init', !0)}
+		},
+
+		/* 
+		 * evaluateDependentRules - evaluate the Dependent rules
+		 */
+		evaluateDependentRules: function(rules, dep, ph, mode) {
+			var $this = this,
+				A_match = 0, // by default no match
+				loop = 1;
+
+			rules.each(function(val)
+			{
+				if (!loop) return false; // workaround for braking the loop
+
+				var c = val.split('!='),
+					m = c.length == 2 ? '!=' : '=='; // mode
+					c = m == '==' ? val.split('==') : c, // second split if necesary
+					field = ph.find('[data-id="'+c[0]+'"]'), // the field value it depends on
+					type = field.data("type"),
+					unique_id = mode+'-'+dep.data("id")+'-'+field.data("id")+'-'+ph.data("id"),
+					e = c[1].replace('NONE', ''); // dependent option
+
+				// if select
+				if (type == 'select' || type == 'itemLayoutList' || type == 'layout' || type == 'apps' || type == 'types' || type == 'elements' || type == 'modulelist' || type == 'separatedby')
+				{
+					var select = field.find('.zl-field select'),
+						selection = $.makeArray(select.val()), // for multiselect compatibility
+						match = 0;
+
+					if (e && e.match(/OR/g)){
+						$.each(selection, function(index, value){ // for each selected value
+							// regex search value on begin/end of string or with OR in any side
+							var re = new RegExp('(\\b|OR)'+value+'(\\b|OR)', 'g');
+							( (m == '!=' && !e.match(re)) || (m == '==' && e.match(re)) ) && (match = 1);
+							// check mode and Select value, mark any match
+						})
+					} else if (e && e.match(/AND/g)){
+						var min = e.split('AND').length;
+						(selection.length == min) && $.each(selection, function(index, value){
+							// regex search value on begin/end of string or with AND in any side
+							var re = new RegExp('(\\b|AND)'+value+'(\\b|AND)', 'g');
+							// check mode and Select value, mark only if all matched
+							if ( (m == '!=' && !e.match(re)) || (m == '==' && e.match(re)) ) {
+								match = 1;
+							} else { match = 0; }
+						})
+					} else {
+						$.each(selection, function(index, value){
+							// check mode and Select value, mark any match
+							( (m == '!=' && value != e) || (m == '==' && value == e) ) && (match = 1);
+						})
+					}
+
+					// save match
+					A_match = match;
+
+					if (!select.data('zlfield-dependent-'+unique_id+'-init')) {
+						select.on('change', function(){
+							dep.trigger('zlfield-dependent-event');
+						});
+					select.data('zlfield-dependent-'+unique_id+'-init', !0)}
+				};
+				
+				// if checkbox
+				if (type == 'checkbox')
+				{
+					var checkbox = field.find('.zl-field input'),
+						match = 0,
+						checkd = checkbox.attr('checked') == 'checked'; // it is checked?
+						
+						// check mode and Checkbox state, mark any match
+						( (m == '!=' && !checkd) || (m == '==' && checkd) ) && (match = 1)
+
+					// save match
+					A_match = match;
+
+					if (!checkbox.data('zlfield-dependent-'+unique_id+'-init')) {
+						checkbox.on('change', function(){
+							dep.trigger('zlfield-dependent-event');
+						});
+					checkbox.data('zlfield-dependent-'+unique_id+'-init', !0)}
+				};
+
+				// if radio
+				if (type == 'radio')
+				{
+					var radio = field.find('.zl-field input'),
+						match = 0, // by default no match
+						option = e; // it must be declared local to avoid some weard issue that changes true string values to 1 number value
+
+					radio.each(function()
+					{
+						var checkd = $(this).attr('checked') == 'checked', // it is checked?
+							value = $(this).attr('value');
+
+						if(checkd) // proceed only if it's the checked input
+						{
+							if (option && option.match(/OR/g)){
+								var re = new RegExp(value, 'g');
+								// check mode, value and check state for multiple values, mark any match
+								( (m == '!=' && !option.match(re)) || (m == '==' && option.match(re)) ) && (match = 1);
+							}
+							else
+							{
+								// check mode, value and check state, mark any match
+								( (m == '!=' && value != option && checkd) || (m == '==' && value == option && checkd) && checkd) && (match = 1);
+							}
+						}
+					});
+
+					// save match
+					A_match = match;
+
+					if (!radio.data('zlfield-dependent-'+unique_id+'-init')) {
+						radio.on('change', function(){
+							dep.trigger('zlfield-dependent-event');
+						});
+					radio.data('zlfield-dependent-'+unique_id+'-init', !0)}
+				};
+				
+				// if text
+				if (type == 'text')
+				{
+					var input = field.find('.zl-field input'),
+						filled = input.val() != ''; // has text?
+						
+					// check mode and Input state, then slide Up or Down
+					( (m == '!=' && !filled) || (m == '==' && filled) ) && (match = 1);
+						
+					// save match
+					A_match = match;
+
+					if (!input.data('zlfield-dependent-'+unique_id+'-init')) {
+						input.on('keyup change', function(){
+							dep.trigger('zlfield-dependent-event');
+						});
+					input.data('zlfield-dependent-'+unique_id+'-init', !0)}
+				};
+
+				// stop iteration if not match allready
+				if ( (mode == 'AND' && !A_match) || (mode == 'OR' && A_match) ) loop = false;
+			});
+			
+			return A_match;
 		}
 	});
 	// Don't touch
