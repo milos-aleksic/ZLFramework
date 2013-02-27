@@ -34,29 +34,9 @@ defined('_JEXEC') or die('Restricted access');
 							"type":"wrapper",
 							"fields": {
 
-								"type":{
-									"type":"select",
-									"label":"PLG_ZLFRAMEWORK_IFT_FILTER_TYPE",
-									"help":"PLG_ZLFRAMEWORK_IFT_FILTER_TYPE_DESC",
-									"specific":{
-										"options":{
-											"PLG_ZLFRAMEWORK_IFT_EXACT":"exact",
-											"&gt;=":"from",
-											"&lt;=":"to",
-											"PLG_ZLFRAMEWORK_IFT_WITHIN_RANGE_EQUAL":"range"
-										}
-									},
-									"dependents":"value_to > range"
-								},
-								"value":{
-									"type":"date",
-									"label":"PLG_ZLFRAMEWORK_IFT_VALUE",
-									"help":"PLG_ZLFRAMEWORK_IFT_VALUE_DESC"
-								},
-								"value_to":{
-									"type":"date",
-									"label":"PLG_ZLFRAMEWORK_IFT_VALUE_TO",
-									"help":"PLG_ZLFRAMEWORK_IFT_VALUE_TO_DESC"
+								"date": {
+									"type":"subfield",
+									"path":"zlfield:json/itemfilter/_date.json.php"
 								}
 								
 							}
@@ -82,29 +62,9 @@ defined('_JEXEC') or die('Restricted access');
 							"type":"wrapper",
 							"fields": {
 
-								"type":{
-									"type":"select",
-									"label":"PLG_ZLFRAMEWORK_IFT_FILTER_TYPE",
-									"help":"PLG_ZLFRAMEWORK_IFT_FILTER_TYPE_DESC",
-									"specific":{
-										"options":{
-											"PLG_ZLFRAMEWORK_IFT_EXACT":"exact",
-											"&gt;=":"from",
-											"&lt;=":"to",
-											"PLG_ZLFRAMEWORK_IFT_WITHIN_RANGE_EQUAL":"range"
-										}
-									},
-									"dependents":"value_to > range"
-								},
-								"value":{
-									"type":"date",
-									"label":"PLG_ZLFRAMEWORK_IFT_VALUE",
-									"help":"PLG_ZLFRAMEWORK_IFT_VALUE_DESC"
-								},
-								"value_to":{
-									"type":"date",
-									"label":"PLG_ZLFRAMEWORK_IFT_VALUE_TO",
-									"help":"PLG_ZLFRAMEWORK_IFT_VALUE_TO_DESC"
+								"date": {
+									"type":"subfield",
+									"path":"zlfield:json/itemfilter/_date.json.php"
 								}
 								
 							}
@@ -130,29 +90,9 @@ defined('_JEXEC') or die('Restricted access');
 							"type":"wrapper",
 							"fields": {
 
-								"type":{
-									"type":"select",
-									"label":"PLG_ZLFRAMEWORK_IFT_FILTER_TYPE",
-									"help":"PLG_ZLFRAMEWORK_IFT_FILTER_TYPE_DESC",
-									"specific":{
-										"options":{
-											"PLG_ZLFRAMEWORK_IFT_EXACT":"exact",
-											"&gt;=":"from",
-											"&lt;=":"to",
-											"PLG_ZLFRAMEWORK_IFT_WITHIN_RANGE_EQUAL":"range"
-										}
-									},
-									"dependents":"value_to > range"
-								},
-								"value":{
-									"type":"date",
-									"label":"PLG_ZLFRAMEWORK_IFT_VALUE",
-									"help":"PLG_ZLFRAMEWORK_IFT_VALUE_DESC"
-								},
-								"value_to":{
-									"type":"date",
-									"label":"PLG_ZLFRAMEWORK_IFT_VALUE_TO",
-									"help":"PLG_ZLFRAMEWORK_IFT_VALUE_TO_DESC"
+								"date": {
+									"type":"subfield",
+									"path":"zlfield:json/itemfilter/_date.json.php"
 								}
 								
 							}

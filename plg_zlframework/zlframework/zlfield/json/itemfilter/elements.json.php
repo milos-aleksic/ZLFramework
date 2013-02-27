@@ -68,13 +68,13 @@ defined('_JEXEC') or die('Restricted access');
 					switch($group) {
 						case 'input':
 						case 'itemname': case 'text': case 'textpro': case 'textarea': case 'textareapro':
-							$json_path = 'zlfield:json/itemfilter/_input.json.php';
+							$json_path = 'zlfield:json/itemfilter/_elements.input.json.php';
 							$element_json[] = include($this->app->path->path($json_path));
 							break;
 
 						case 'option':
 						case 'select': case 'selectpro': case 'checkbox': case 'radio': case 'country':
-							$json_path = 'zlfield:json/itemfilter/_option.json.php';
+							$json_path = 'zlfield:json/itemfilter/_elements.option.json.php';
 							$element_json[] = include($this->app->path->path($json_path));
 							break;
 							
@@ -86,7 +86,7 @@ defined('_JEXEC') or die('Restricted access');
 							
 						case 'date':
 						case 'datepro':
-							$json_path = 'zlfield:json/itemfilter/_date.json.php';
+							$json_path = 'zlfield:json/itemfilter/_elements.date.json.php';
 							$element_json[] = include($this->app->path->path($json_path));
 							break;
 
