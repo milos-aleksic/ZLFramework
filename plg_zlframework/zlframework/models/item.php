@@ -169,7 +169,7 @@ class ZLModelItem extends ZLModel
 		$query->where('a.searchable = 1');
 		
 		// published state
-		$state = $this->getState('published');
+		$state = $this->getState('state');
 		if (isset($state[0]) && !empty($state[0])) {
 			$query->where('a.state = 1');
 		}
@@ -216,7 +216,7 @@ class ZLModelItem extends ZLModel
 		}
 
 		// published
-		if ($published_date = $this->getState('published_date', array()))
+		if ($date = $this->getState('published', array()))
 		{
 			$date = array_shift($date);
 
@@ -471,7 +471,6 @@ class ZLModelItem extends ZLModel
 
 		switch ($search_type) {
 			case 'from':
-				$from = $date.' 00:00:00';
 				$el_where = "( (SUBSTR($sql_value, -19) >= $from) OR ($from <= SUBSTR($sql_value, -19)) )";
 				break;
 
