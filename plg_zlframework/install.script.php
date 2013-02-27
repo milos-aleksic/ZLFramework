@@ -19,7 +19,8 @@ class plgSystemZlframeworkInstallerScript
 	protected $_target;
 	protected $_ext = 'zlframework';
 	protected $_ext_name = 'ZL Framework';
-	protected $_lng_prefix = 'PLG_ZLFRAMEWORK_SYS';
+	protected $_ext_version = '';
+	protected $_lng_prefix = 'PLG_ZLFRAMEWORK_SYS';	
 
 	/* List of obsolete files and folders */
 	protected $_obsolete = array(
@@ -63,6 +64,7 @@ class plgSystemZlframeworkInstallerScript
 		$db = JFactory::getDBO();
 		$this->_src = $parent->getParent()->getPath('source'); // tmp folder
 		$this->_target = JPATH_ROOT.'/plugins/system/zlframework'; // install folder
+		$this->_ext_version = $parent->get( "manifest" )->version;
 
 		// load ZLFW sys language file EXAMPLE
 		// JFactory::getLanguage()->load('plg_system_zlframework.sys', JPATH_ADMINISTRATOR, 'en-GB', true);
@@ -82,6 +84,31 @@ class plgSystemZlframeworkInstallerScript
 		// 	JFolder::exists($this->_target.'/renderer/item') && 
 		// 	JFolder::delete($this->_src.'/renderer/item');
 		// }
+		
+		
+		if($type == 'update'){
+
+			/* warn about update requirements only once */
+			if(!JFile::exists($this->_src.'/warned.txt')
+				&& !$this->checkCompatibility($this->_src.'/zlframework/dependencies.config')) {
+
+				// rise error
+				Jerror::raiseWarning(null, $this->_error);
+
+				// create a dummy indicational mark file
+				$some = 'dummy content';
+				JFile::write($this->_src.'/warned.txt', $some);
+
+				// copy the entire install to avoid it delition on cancel
+				JFolder::copy($this->_src, $this->_src.'_copy');
+
+				// cancel update
+				return false;
+			} else {
+				if (JFile::exists($this->_src.'/warned.txt')) JFile::delete($this->_src.'/warned.txt');
+			}
+
+		}
 	}
 
 	/**
@@ -137,6 +164,9 @@ class plgSystemZlframeworkInstallerScript
 
 		// remove obsolete
 		$this->removeObsolete();
+
+		// remove install folder
+		JFolder::delete($this->_src);
 	}
 
 	/**
@@ -200,4 +230,44 @@ class plgSystemZlframeworkInstallerScript
 		return true;
 	}
 
+	/**
+	 * Check if the extensions are updated before current update is allowed
+	 * @version 1.0
+	 *
+	 * @return  boolean  true if all extensions are compatible
+	 */
+	protected function checkCompatibility($file)
+	{
+		$zoo = App::getInstance('zoo');
+
+		$pass = true;
+		if (JFile::exists($file) && $dependencies = json_decode(JFile::read($file)))
+		{
+			$outdated_ext = array();
+			foreach ($dependencies as $key => $dependency) {
+				$version  = $dependency->version;
+				$manifest = $zoo->path->path('root:'.$dependency->manifest);
+				if ($version && is_file($manifest) && is_readable($manifest)) {
+					if ($xml = simplexml_load_file($manifest)) {
+						if (version_compare($version, (string) $xml->version, 'g')) 
+						{
+							$outdated_ext[] = isset($dependency->url) ? "<a href=\"{$dependency->url}\" target=\"_blank\">{$key} v{$xml->version}</a>" : (string) $xml->name;
+							
+							// set the pass state
+							$pass = false;
+						}
+					}
+				}
+			}
+
+			if (!$pass) {
+				// set the proceede link with it's behaviour
+				$path = str_replace('\\', '\\/', $this->_src.'_copy');
+				$javascript = "document.getElementById('install_directory').value = '{$path}';document.querySelectorAll('form .uploadform .button')[1].click();return false;";
+				$this->_error = JText::sprintf('PLG_ZLFRAMEWORK_SYS_OUTDATED_EXTENSIONS', $this->_ext_version, implode(', ', $outdated_ext), $javascript);
+			}
+		}
+
+		return $pass;
+	}
 }
