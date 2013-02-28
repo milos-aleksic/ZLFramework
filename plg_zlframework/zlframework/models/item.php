@@ -452,6 +452,7 @@ class ZLModelItem extends ZLModel
 		}
 
 		$wrapper = isset($wrapper) ? $wrapper : false;
+		$period_mode = isset($period_mode) ? $period_mode : 'static';
 		$search_type = $search_type == 'range' ? 'period' : $search_type; // workaround
 
 		// search_type = to:from:default
