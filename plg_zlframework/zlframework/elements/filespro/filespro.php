@@ -923,7 +923,14 @@ abstract class ElementFilesPro extends ElementRepeatablePro {
 				// get file name
 				$ext = strtolower($this->app->zlfilesystem->getExtension($userfile['name']));
 				$base_path = JPATH_ROOT . '/' . $this->getDirectory() . '/';
-				$file = $tmp = $base_path . $userfile['name'];
+
+				// transliterate utf8 carachters
+				$fileName = JLanguageTransliterate::utf8_latin_to_ascii($userfile['name']);
+		
+				// Clean the fileName for security reasons
+				$fileName = JFile::makeSafe($fileName);
+
+				$file = $tmp = $base_path . $fileName;
 				$filename = basename($file, '.'.$ext);
 	
 				$i = 1;
