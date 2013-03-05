@@ -840,34 +840,44 @@ abstract class ElementFilesPro extends ElementRepeatablePro {
 	*/
 	public function validateSubmission($value, $params)
 	{	
-		// get old file values
+		// get old file values, the allready stored ones
 		$old_files = array();
 		foreach($this as $self) {
 			$old_files[] = $this->get('file');
 		}
-		
+		$old_files = array_filter($old_files);
+
 		// Reorganize the files to make them easier to manage (tricky)
 		$userfiles = array();
-		foreach($value->get('userfile', array()) as $key => $vals) foreach($vals as $i => $val){
-			$userfiles[$i][$key] = $val;
+		foreach($value->get('userfile', array()) as $key => $vals) {
+			$vals = array_filter($vals);
+			foreach($vals as $i => $val){
+				$userfiles[$i][$key] = $val;
+			}
 		}
 
 		// remove the old user info
 		if(isset($value['userfile']))
 			unset($value['userfile']);
 
-			
+		// reindex values, important
+		$value = array_values((array)$value);
+
 		$result = array();
 		foreach($value as $key => $single_value)
 		{
 			// prepare value array
-			if (isset($userfiles[$key]))
+			if (isset($userfiles[$key]['error']))
+			{
+				return true; // if no file provided, abort validation
+			}
+			else if (isset($userfiles[$key]))
 			{
 				$single_value = array('old_file' => (isset($old_files[$key]) ? $old_files[$key] : ''), 'userfile' => $userfiles[$key], 'values' => $single_value);
 			} else {
 				$single_value = array('values' => $single_value);
 			}
-	
+
 			try {
 			
 				$result[] = $this->_validateSubmission($this->app->data->create($single_value), $params);
