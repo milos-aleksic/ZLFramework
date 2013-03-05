@@ -450,6 +450,8 @@ abstract class ElementFilesPro extends ElementRepeatablePro {
 			JFile::delete($fullpath);
 		else if (is_readable($fullpath) && is_dir($fullpath))
 			JFolder::delete($fullpath);
+
+		echo json_encode(array('result' => true));
 	}
 	
 	/*
@@ -468,6 +470,8 @@ abstract class ElementFilesPro extends ElementRepeatablePro {
 		// if does not exist, create
 		if (!JFolder::exists($fullpath))
 			JFolder::create($fullpath);
+
+		echo json_encode(array('result' => true));
 	}
 
 	/*

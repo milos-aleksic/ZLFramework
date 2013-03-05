@@ -44,7 +44,7 @@
 										$('<span class="zl-btn-small refresh action" title="Refresh" />').bind('click', function()
 										{
 											f.addClass('reload').find('li').addClass('loading');
-											a.trigger("retrieve:finderpro").trigger("retrieve:finderpro");
+											a.trigger("retrieve:finderpro");
 										})
 									).append(
 										// upload feature
