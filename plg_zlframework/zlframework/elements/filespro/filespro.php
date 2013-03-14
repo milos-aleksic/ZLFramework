@@ -12,6 +12,9 @@ defined('_JEXEC') or die('Restricted access');
 // register ElementRepeatablePro class
 App::getInstance('zoo')->loader->register('ElementRepeatablePro', 'elements:repeatablepro/repeatablepro.php');
 
+// load libraries
+jimport('joomla.filesystem.file');
+
 /*
 	Class: ElementFilesPro
 		The files pro element class
@@ -445,7 +448,6 @@ abstract class ElementFilesPro extends ElementRepeatablePro {
 		$path = $this->app->request->get('path', 'string', ''); // selected path to delete
 		$fullpath = JPATH_ROOT . '/' . $this->getDirectory() . '/' . ($path ? $path : '');
 	
-		jimport('joomla.filesystem.file');
 		if (is_readable($fullpath) && is_file($fullpath))
 			JFile::delete($fullpath);
 		else if (is_readable($fullpath) && is_dir($fullpath))
@@ -679,7 +681,7 @@ abstract class ElementFilesPro extends ElementRepeatablePro {
 		// split into path parts to preserve /
 		$parts = explode('/', $root);
 		// clean path parts
-		$parts = $this->app->zlfilesystem->makeSafe($parts, $this->config->find('files._websafe_mode', 'utf-8'));
+		$parts = $this->app->zlfilesystem->makeSafe($parts, 'ascii');
 		// join path parts
 		$root = implode('/', $parts);
 		
@@ -718,18 +720,15 @@ abstract class ElementFilesPro extends ElementRepeatablePro {
 		$chunk = JRequest::getVar("chunk", 0);
 		$chunks = JRequest::getVar("chunks", 0);
 		$fileName = JRequest::getVar("name", '');
-
-		// Load libraries
-		jimport('joomla.filesystem.file');
-		jimport('joomla.language.language');
-		$lang = JFactory::getLanguage();
-		$lang->transliterate(); // workaround to load the JLanguageTransliterate class
-
-		// Translate UTF-8 to ASCII
-		$fileName = JLanguageTransliterate::utf8_latin_to_ascii($fileName);
 		
-		// Clean the fileName for security reasons
-		$fileName = JFile::makeSafe($fileName);
+		// split into parts
+		$parts = explode('/', $fileName);
+
+		// clean path parts
+		$parts = $this->app->zlfilesystem->makeSafe($parts, 'ascii');
+
+		// join path parts
+		$fileName = implode('/', $parts);
 
 		// Make sure the fileName is unique but only if chunking is disabled
 		if ($chunks < 2 && JFile::exists($targetDir . '/' . $fileName)) {
@@ -868,7 +867,7 @@ abstract class ElementFilesPro extends ElementRepeatablePro {
 		$value = array_values((array)$value);
 
 		$result = array();
-		foreach($value as $key => $single_value)
+		foreach($value as $key => &$single_value)
 		{
 			// prepare value array
 			if (isset($userfiles[$key]['error']))
@@ -883,7 +882,18 @@ abstract class ElementFilesPro extends ElementRepeatablePro {
 			}
 
 			try {
-			
+				// split into parts
+				$parts = explode('/', $single_value['userfile']['name']);
+
+				// clean path parts
+				$parts = $this->app->zlfilesystem->makeSafe($parts, 'ascii');
+
+				// join path parts
+				$fileName = implode('/', $parts);
+
+				// save back the new name
+				$single_value['userfile']['name'] = $fileName;
+
 				$result[] = $this->_validateSubmission($this->app->data->create($single_value), $params);
 
 			} catch (AppValidatorException $e) {
@@ -904,7 +914,7 @@ abstract class ElementFilesPro extends ElementRepeatablePro {
 		// connect to submission beforesave event
 		$this->params = $params;
 		$this->app->event->dispatcher->connect('submission:beforesave', array($this, 'submissionBeforeSave'));
-		
+
 		return $result;
 	}
 	
@@ -938,11 +948,14 @@ abstract class ElementFilesPro extends ElementRepeatablePro {
 				$ext = strtolower($this->app->zlfilesystem->getExtension($userfile['name']));
 				$base_path = JPATH_ROOT . '/' . $this->getDirectory() . '/';
 
-				// transliterate utf8 carachters
-				$fileName = JLanguageTransliterate::utf8_latin_to_ascii($userfile['name']);
-		
-				// Clean the fileName for security reasons
-				$fileName = JFile::makeSafe($fileName);
+				// split into parts
+				$parts = explode('/', $userfile['name']);
+
+				// clean path parts
+				$parts = $this->app->zlfilesystem->makeSafe($parts, 'ascii');
+
+				// join path parts
+				$fileName = implode('/', $parts);
 
 				$file = $tmp = $base_path . $fileName;
 				$filename = basename($file, '.'.$ext);
@@ -956,13 +969,112 @@ abstract class ElementFilesPro extends ElementRepeatablePro {
 				if (!JFile::upload($userfile['tmp_name'], $file)) {
 					throw new AppException('Unable to upload file.');
 				}
-	
+
+				$this->app->zoo->putIndexFile(dirname($file));
+
 				$files[] = $file;
 			}
 		}
 	}
-	
 }
+
+// register AppValidatorFile class
+App::getInstance('zoo')->loader->register('AppValidatorFile', 'classes:validator.php');
+
+/**
+ * Filespro validator
+ *
+ * @package Component.Classes.Validators
+ */
+class AppValidatorFilepro extends AppValidatorFile {
+
+  /**
+	 * Clean the file value
+	 *
+	 * @param  mixed $value The value to clean
+	 *
+	 * @return mixed        The cleaned value
+	 *
+	 * @see AppValidator::clean()
+	 *
+	 * @since 2.0
+	 */
+	public function clean($value) {
+		if (!is_array($value) || !isset($value['tmp_name'])) {
+			throw new AppValidatorException($this->getMessage('invalid'));
+		}
+
+		if (!isset($value['name'])) {
+			$value['name'] = '';
+		}
+
+		// split into parts
+		$parts = explode('/', $value['name']);
+
+		// clean path parts
+		$parts = $this->app->zlfilesystem->makeSafe($parts, 'ascii');
+
+		// join path parts
+		$value['name'] = implode('/', $parts);
+
+		if (!isset($value['error'])) {
+			$value['error'] = UPLOAD_ERR_OK;
+		}
+
+		if (!isset($value['size'])) {
+			$value['size'] = filesize($value['tmp_name']);
+		}
+
+		if (!isset($value['type'])) {
+			$value['type'] = 'application/octet-stream';
+		}
+
+		switch ($value['error']) {
+			case UPLOAD_ERR_INI_SIZE:
+				throw new AppValidatorException(sprintf($this->getMessage('max_size'), $this->returnBytes(@ini_get('upload_max_filesize')) / 1024), UPLOAD_ERR_INI_SIZE);
+			case UPLOAD_ERR_FORM_SIZE:
+				throw new AppValidatorException($this->getMessage('max_size'), UPLOAD_ERR_FORM_SIZE);
+			case UPLOAD_ERR_PARTIAL:
+				throw new AppValidatorException($this->getMessage('partial'), UPLOAD_ERR_PARTIAL);
+			case UPLOAD_ERR_NO_FILE:
+				throw new AppValidatorException($this->getMessage('no_file'), UPLOAD_ERR_NO_FILE);
+			case UPLOAD_ERR_NO_TMP_DIR:
+				throw new AppValidatorException($this->getMessage('no_tmp_dir'), UPLOAD_ERR_NO_TMP_DIR);
+			case UPLOAD_ERR_CANT_WRITE:
+				throw new AppValidatorException($this->getMessage('cant_write'), UPLOAD_ERR_CANT_WRITE);
+			case UPLOAD_ERR_EXTENSION:
+				throw new AppValidatorException($this->getMessage('err_extension'), UPLOAD_ERR_EXTENSION);
+		}
+
+		// check mime type
+		if ($this->hasOption('mime_types')) {
+			$mime_types = $this->getOption('mime_types') ? $this->getOption('mime_types') : array();
+			if (!in_array($value['type'], array_map('strtolower', $mime_types))) {
+				throw new AppValidatorException($this->getMessage('mime_types'));
+			}
+		}
+
+		// check mime type group
+		if ($this->hasOption('mime_type_group')) {
+			if (!in_array($value['type'], $this->_getGroupMimeTypes($this->getOption('mime_type_group')))) {
+				throw new AppValidatorException($this->getMessage('mime_type_group'));
+			}
+		}
+
+		// check file size
+		if ($this->hasOption('max_size') && $this->getOption('max_size') < (int) $value['size']) {
+			throw new AppValidatorException(sprintf(JText::_($this->getMessage('max_size')), ($this->getOption('max_size') / 1024)));
+		}
+
+		// check extension
+		if ($this->hasOption('extension') && !in_array($this->app->filesystem->getExtension($value['name']), $this->getOption('extension'))) {
+			throw new AppValidatorException($this->getMessage('extension'));
+		}
+
+		return $value;
+	}
+}
+
 
 /*
 	Class: ZLSplFileInfo

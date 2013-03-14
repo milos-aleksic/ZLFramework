@@ -31,87 +31,112 @@ class ZlFilesystemHelper extends FilesystemHelper
 	 * Adapted to ZOO (ZOOlanders.com)
 	 * Copyright 2011, ZOOlanders.com
 	 */
-	public static function makeSafe($subject, $mode = 'utf-8')
-	{		
-		// remove multiple . characters
-		$search = array('#(\.){2,}#');		
+	public function makeSafe($subject, $mode = 'utf-8', $allowspaces = false) {
+		$search = array();
 
-		switch($mode) {
+		// replace spaces with underscore
+		if (!$allowspaces) {
+			$subject = preg_replace('#[\s ]#', '_', $subject);
+		}
+
+		switch ($mode) {
 			default:
-			case 'utf-8':
-				$search[] 	= '#[^a-zA-Z0-9_\.\-\s~ \p{L}\p{N}]#u';
-				$mode 		= 'utf-8';
+			case 'utf-8':    
+				$search[] = '#[^a-zA-Z0-9_\.\-~\p{L}\p{N}\s ]#u';
+				$mode = 'utf-8';
 				break;
 			case 'ascii':
-				$subject 	= self::utf8_latin_to_ascii($subject);
-				$search[] 	= '#[^a-zA-Z0-9_\.\-\s~ ]#';
+				$subject = $this->utf8_latin_to_ascii($subject);    
+				$search[] = '#[^a-zA-Z0-9_\.\-~\s ]#';
 				break;
 		}
 		
-		// strip leading .
-		$search[] = '#^\.*#';
-		// strip whitespace
-		$saerch[] = '#^\s*|\s*$#';
+		// remove multiple . characters
+		$search[] = '#(\.){2,}#';
+
+		// strip leading period
+		$search[] = '#^\.#';
 		
+		// strip trailing period
+		$search[] = '#\.$#';
+
+		// strip whitespace
+		$search[] = '#^\s*|\s*$#';
+
 		// only for utf-8 to avoid PCRE errors - PCRE must be at least version 5
 		if ($mode == 'utf-8') {
-			try {
-				return preg_replace($search, '', $subject);
+			try {                
+				$result = preg_replace($search, '', $subject);                
 			} catch (Exception $e) {
 				// try ascii
-				return self::makeSafe($subject, 'ascii');
+				return $this->makeSafe($subject, 'ascii');
 			}
+			
+			// try ascii
+			if (is_null($result) || $result === false) {                
+				return $this->makeSafe($subject, 'ascii');
+			}
+
+			return $result;
 		}
-		
+
 		return preg_replace($search, '', $subject);
 	}
 	
-	private static function utf8_latin_to_ascii( $subject ){
+	private function utf8_latin_to_ascii($subject) {
 
 		static $CHARS = NULL;
 
 		if (is_null($CHARS)) {
 			$CHARS = array(
-				'�'=>'A','�'=>'A','�'=>'A','�'=>'A','�'=>'A','�'=>'A','�'=>'AE',
-				'�'=>'C','�'=>'E','�'=>'E','�'=>'E','�'=>'E','�'=>'I','�'=>'I','�'=>'I','�'=>'I',
-				'�'=>'D','�'=>'N','�'=>'O','�'=>'O','�'=>'O','�'=>'O','�'=>'O','�'=>'O',
-				'�'=>'U','�'=>'U','�'=>'U','�'=>'U','�'=>'Y','�'=>'s',
-				'�'=>'a','�'=>'a','�'=>'a','�'=>'a','�'=>'a','�'=>'a','�'=>'ae',
-				'�'=>'c','�'=>'e','�'=>'e','�'=>'e','�'=>'e','�'=>'i','�'=>'i','�'=>'i','�'=>'i',
-				'�'=>'n','�'=>'o','�'=>'o','�'=>'o','�'=>'o','�'=>'o','�'=>'o','�'=>'u','�'=>'u','�'=>'u','�'=>'u',
-				'�'=>'y','�'=>'y','A'=>'A','a'=>'a','A'=>'A','a'=>'a','A'=>'A','a'=>'a',
-				'C'=>'C','c'=>'c','C'=>'C','c'=>'c','C'=>'C','c'=>'c','C'=>'C','c'=>'c','D'=>'D','d'=>'d','�'=>'D','d'=>'d',
-				'E'=>'E','e'=>'e','E'=>'E','e'=>'e','E'=>'E','e'=>'e','E'=>'E','e'=>'e','E'=>'E','e'=>'e',
-				'G'=>'G','g'=>'g','G'=>'G','g'=>'g','G'=>'G','g'=>'g','G'=>'G','g'=>'g','H'=>'H','h'=>'h','H'=>'H','h'=>'h',
-				'I'=>'I','i'=>'i','I'=>'I','i'=>'i','I'=>'I','i'=>'i','I'=>'I','i'=>'i','I'=>'I','i'=>'i',
-				'?'=>'IJ','?'=>'ij','J'=>'J','j'=>'j','K'=>'K','k'=>'k','L'=>'L','l'=>'l','L'=>'L','l'=>'l','L'=>'L','l'=>'l','?'=>'L','?'=>'l','L'=>'l','l'=>'l',
-				'N'=>'N','n'=>'n','N'=>'N','n'=>'n','N'=>'N','n'=>'n','?'=>'n','O'=>'O','o'=>'o','O'=>'O','o'=>'o','O'=>'O','o'=>'o','�'=>'OE','�'=>'oe',
-				'R'=>'R','r'=>'r','R'=>'R','r'=>'r','R'=>'R','r'=>'r','S'=>'S','s'=>'s','S'=>'S','s'=>'s','S'=>'S','s'=>'s','�'=>'S','�'=>'s',
-				'T'=>'T','t'=>'t','T'=>'T','t'=>'t','T'=>'T','t'=>'t','U'=>'U','u'=>'u','U'=>'U','u'=>'u','U'=>'U','u'=>'u','U'=>'U','u'=>'u','U'=>'U','u'=>'u','U'=>'U','u'=>'u',
-				'W'=>'W','w'=>'w','Y'=>'Y','y'=>'y','�'=>'Y','Z'=>'Z','z'=>'z','Z'=>'Z','z'=>'z','�'=>'Z','�'=>'z','?'=>'s','�'=>'f','O'=>'O','o'=>'o','U'=>'U','u'=>'u',
-				'A'=>'A','a'=>'a','I'=>'I','i'=>'i','O'=>'O','o'=>'o','U'=>'U','u'=>'u','U'=>'U','u'=>'u','U'=>'U','u'=>'u','U'=>'U','u'=>'u','U'=>'U','u'=>'u',
-				'?'=>'A','?'=>'a','?'=>'AE','?'=>'ae','?'=>'O','?'=>'o'
+				'À' => 'A', 'Á' => 'A', 'Â' => 'A', 'Ã' => 'A', 'Ä' => 'A', 'Å' => 'A', 'Æ' => 'AE',
+				'Ç' => 'C', 'È' => 'E', 'É' => 'E', 'Ê' => 'E', 'Ë' => 'E', 'Ì' => 'I', 'Í' => 'I', 'Î' => 'I', 'Ï' => 'I',
+				'Ð' => 'D', 'Ñ' => 'N', 'Ò' => 'O', 'Ó' => 'O', 'Ô' => 'O', 'Õ' => 'O', 'Ö' => 'O', 'Ø' => 'O',
+				'Ù' => 'U', 'Ú' => 'U', 'Û' => 'U', 'Ü' => 'U', 'Ý' => 'Y', 'ß' => 's',
+				'à' => 'a', 'á' => 'a', 'â' => 'a', 'ã' => 'a', 'ä' => 'a', 'å' => 'a', 'æ' => 'ae',
+				'ç' => 'c', 'è' => 'e', 'é' => 'e', 'ê' => 'e', 'ë' => 'e', 'ì' => 'i', 'í' => 'i', 'î' => 'i', 'ï' => 'i',
+				'ñ' => 'n', 'ò' => 'o', 'ó' => 'o', 'ô' => 'o', 'õ' => 'o', 'ö' => 'o', 'ø' => 'o', 'ù' => 'u', 'ú' => 'u', 'û' => 'u', 'ü' => 'u',
+				'ý' => 'y', 'ÿ' => 'y', 'Ā' => 'A', 'ā' => 'a', 'Ă' => 'A', 'ă' => 'a', 'Ą' => 'A', 'ą' => 'a',
+				'Ć' => 'C', 'ć' => 'c', 'Ĉ' => 'C', 'ĉ' => 'c', 'Ċ' => 'C', 'ċ' => 'c', 'Č' => 'C', 'č' => 'c', 'Ď' => 'D', 'ď' => 'd', 'Đ' => 'D', 'đ' => 'd',
+				'Ē' => 'E', 'ē' => 'e', 'Ĕ' => 'E', 'ĕ' => 'e', 'Ė' => 'E', 'ė' => 'e', 'Ę' => 'E', 'ę' => 'e', 'Ě' => 'E', 'ě' => 'e',
+				'Ĝ' => 'G', 'ĝ' => 'g', 'Ğ' => 'G', 'ğ' => 'g', 'Ġ' => 'G', 'ġ' => 'g', 'Ģ' => 'G', 'ģ' => 'g', 'Ĥ' => 'H', 'ĥ' => 'h', 'Ħ' => 'H', 'ħ' => 'h',
+				'Ĩ' => 'I', 'ĩ' => 'i', 'Ī' => 'I', 'ī' => 'i', 'Ĭ' => 'I', 'ĭ' => 'i', 'Į' => 'I', 'į' => 'i', 'İ' => 'I', 'ı' => 'i',
+				'Ĳ' => 'IJ', 'ĳ' => 'ij', 'Ĵ' => 'J', 'ĵ' => 'j', 'Ķ' => 'K', 'ķ' => 'k', 'Ĺ' => 'L', 'ĺ' => 'l', 'Ļ' => 'L', 'ļ' => 'l', 'Ľ' => 'L', 'ľ' => 'l', 'Ŀ' => 'L', 'ŀ' => 'l', 'Ł' => 'l', 'ł' => 'l',
+				'Ń' => 'N', 'ń' => 'n', 'Ņ' => 'N', 'ņ' => 'n', 'Ň' => 'N', 'ň' => 'n', 'ŉ' => 'n', 'Ō' => 'O', 'ō' => 'o', 'Ŏ' => 'O', 'ŏ' => 'o', 'Ő' => 'O', 'ő' => 'o', 'Œ' => 'OE', 'œ' => 'oe',
+				'Ŕ' => 'R', 'ŕ' => 'r', 'Ŗ' => 'R', 'ŗ' => 'r', 'Ř' => 'R', 'ř' => 'r', 'Ś' => 'S', 'ś' => 's', 'Ŝ' => 'S', 'ŝ' => 's', 'Ş' => 'S', 'ş' => 's', 'Š' => 'S', 'š' => 's',
+				'Ţ' => 'T', 'ţ' => 't', 'Ť' => 'T', 'ť' => 't', 'Ŧ' => 'T', 'ŧ' => 't', 'Ũ' => 'U', 'ũ' => 'u', 'Ū' => 'U', 'ū' => 'u', 'Ŭ' => 'U', 'ŭ' => 'u', 'Ů' => 'U', 'ů' => 'u', 'Ű' => 'U', 'ű' => 'u', 'Ų' => 'U', 'ų' => 'u',
+				'Ŵ' => 'W', 'ŵ' => 'w', 'Ŷ' => 'Y', 'ŷ' => 'y', 'Ÿ' => 'Y', 'Ź' => 'Z', 'ź' => 'z', 'Ż' => 'Z', 'ż' => 'z', 'Ž' => 'Z', 'ž' => 'z', 'ſ' => 's', 'ƒ' => 'f', 'Ơ' => 'O', 'ơ' => 'o', 'Ư' => 'U', 'ư' => 'u',
+				'Ǎ' => 'A', 'ǎ' => 'a', 'Ǐ' => 'I', 'ǐ' => 'i', 'Ǒ' => 'O', 'ǒ' => 'o', 'Ǔ' => 'U', 'ǔ' => 'u', 'Ǖ' => 'U', 'ǖ' => 'u', 'Ǘ' => 'U', 'ǘ' => 'u', 'Ǚ' => 'U', 'ǚ' => 'u', 'Ǜ' => 'U', 'ǜ' => 'u',
+				'Ǻ' => 'A', 'ǻ' => 'a', 'Ǽ' => 'AE', 'ǽ' => 'ae', 'Ǿ' => 'O', 'ǿ' => 'o'
 			);
 		}
-			
+
 		return str_replace(array_keys($CHARS), array_values($CHARS), $subject);
 	}
 	
-	public static function cleanPath($path){
-		return preg_replace('#[/\\\\]+#', '/', trim($path));
+	public function cleanPath($path, $ds = DIRECTORY_SEPARATOR, $prefix = '') {
+		$path = trim(urldecode($path));
+		
+		// check for UNC path on IIS and set prefix
+		if ($ds == '\\' && $path[0] == '\\' && $path[1] == '\\') {
+			$prefix = "\\";
+		}
+		// clean path, removing double slashes, replacing back/forward slashes with DIRECTORY_SEPARATOR
+		$path = preg_replace('#[/\\\\]+#', $ds, $path);
+		
+		// return path with prefix if any
+		return $prefix . $path;
 	}
 	
-	/*
-		Function: makePath
-			Concat two paths together. Basically $a + $b
-		Parameters:
-			$a string Path one
-			$b string Path two
-		Returns:
-			string $a DIRECTORY_SEPARATOR $b
-	*/
-	public static function makePath($a, $b){
-		return self::cleanPath($a . '/' . $b);
+	/**
+	 * Concat two paths together. Basically $a + $b
+	 * @param string $a path one
+	 * @param string $b path two
+	 * @param string $ds optional directory seperator
+	 * @return string $a DIRECTORY_SEPARATOR $b
+	 */
+	public function makePath($a, $b, $ds = DIRECTORY_SEPARATOR) {
+		return $this->cleanPath($a . $ds . $b, $ds);
 	}
 	
 	/*
@@ -172,12 +197,12 @@ class ZlFilesystemHelper extends FilesystemHelper
 			String
 	*/
 	public function returnBytes($size_str) {
-	    switch (substr ($size_str, -1)) {
-	        case 'M': case 'm': return (int)$size_str * 1048576;
-	        case 'K': case 'k': return (int)$size_str * 1024;
-	        case 'G': case 'g': return (int)$size_str * 1073741824;
-	        default: return $size_str;
-	    }
+		switch (substr ($size_str, -1)) {
+			case 'M': case 'm': return (int)$size_str * 1048576;
+			case 'K': case 'k': return (int)$size_str * 1024;
+			case 'G': case 'g': return (int)$size_str * 1073741824;
+			default: return $size_str;
+		}
 	}
 	
 	/*
@@ -259,6 +284,6 @@ class ZlFilesystemHelper extends FilesystemHelper
 		if (!$size) return 0;
 		
 		// return size
-		return $format ? self::formatFilesize($size) : $size;
+		return $format ? $this->formatFilesize($size) : $size;
 	}
 }

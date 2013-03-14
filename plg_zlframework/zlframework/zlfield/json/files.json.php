@@ -38,17 +38,6 @@ defined('_JEXEC') or die('Restricted access');
 			"help": "PLG_ZLFRAMEWORK_FLS_EXTENSIONS_DESC",
 			"default": "png|jpg|gif|bmp|doc|mp3|mov|avi|mpg|zip|rar|gz|pdf"
 		},
-		"_websafe_mode":{
-			"type": "select",
-			"label": "PLG_ZLFRAMEWORK_FLS_WEBSAFE_MODE",
-			"help": "PLG_ZLFRAMEWORK_FLS_WEBSAFE_MODE_DESC",
-			"specific": {
-				"options": {
-					"UTF-8":"utf-8",
-					"ASCII":"ascii"
-				}
-			}
-		},
 		"_source_dir":{
 			"type": "text",
 			"label": "PLG_ZLFRAMEWORK_FLS_DIRECTORY",

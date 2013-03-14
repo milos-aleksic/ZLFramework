@@ -1,6 +1,10 @@
 Changelog
 ------------
 
+3.0.10
+ - Files Pro UTF-8 filesname compatibility removed
+ # Submission upload issues fixed
+
 3.0.9
  ^ jQuery 1.9 compatibility
  ^ ZLField improvements
