@@ -428,7 +428,7 @@ class ZlfieldHelper extends AppHelper {
 						$old_value_ctrl = $final_ctrl;
 						if($adjust = $fld->find('check_old_value.adjust_ctrl')) $old_value_ctrl = preg_replace($adjust['pattern'], $adjust['replacement'], $old_value_ctrl);
 						// get old value
-						$value = $this->_getParam($fld->find('check_old_value.id'), null, $old_value_ctrl);
+						$value = $this->getFieldValue($fld->find('check_old_value.id'), null, $old_value_ctrl);
 						// translate old value
 						if($translations = $fld->find('check_old_value.translate_value')){
 							foreach($translations as $key => $trans) if($value == $key){
@@ -457,7 +457,7 @@ class ZlfieldHelper extends AppHelper {
 					else
 					{
 						// get value
-						$value = strlen($value) ? $value : $this->_getParam($id, $fld->get('default'), $final_ctrl, $fld->get('old_id', false));
+						$value = strlen($value) ? $value : $this->getFieldValue($id, $fld->get('default'), $final_ctrl, $fld->get('old_id', false));
 					}
 
 					// get inital value dinamicly
@@ -525,10 +525,10 @@ class ZlfieldHelper extends AppHelper {
 	}
 	
 	/*
-		Function: _getParam - retrieves the field stored value from the $params
+		Function: getFieldValue - retrieves the field stored value from the $params
 		$params, $fieldID, $fieldControl, $defaultValue
 	*/
-	private function _getParam($id, $default, $ctrl, $old_id=false)
+	public function getFieldValue($id, $default, $ctrl, $old_id=false)
 	{
 		$path = preg_replace( // create path to the params from control
 		array('/(^positions\[|^elements\[|^addons\[|\]$)/', '/(\]\[|\[|\])/'),

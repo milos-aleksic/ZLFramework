@@ -1,12 +1,12 @@
 /* Copyright (C) JOOlanders SL http://www.gnu.org/licenses/gpl-2.0.html GNU/GPLv2 only */
 
 /* Module CSS Adjust for smaller screens */
-.form-validate div.width-60 {
-    width: 50%;
-}
+.form-validate div.width-60,
 .form-validate div.width-40 {
-    width: 50%;
+	min-width: 0 !important;
+    width: 50% !important;
 }
+
 /*
  --- Parameters fields ----------------------------------------------------------------------------------- */
 

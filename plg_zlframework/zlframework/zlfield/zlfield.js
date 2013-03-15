@@ -179,7 +179,7 @@
 				 * Password Field
 				 */
 				$('#toolbar-apply, #toolbar-save').on('mousedown', function(){
-					$dom.find('.row[data-type=password] .zl-field input').each(function(){
+					$dom.find('.zl-row[data-type=password] .zl-field input').each(function(){
 						$(this).val('zl-decrypted['+$(this).val()+']');
 					});
 				})
@@ -190,9 +190,9 @@
 				 */
 				$dom.find('.zl-state').each(function(){
 					var $checkbox = $(this).find('input'),
-						$row = $checkbox.closest('.row');
+						$row = $checkbox.closest('.zl-row');
 
-					$checkbox.bind('change', function(){
+					$checkbox.on('change', function(){
 						var checkd = $(this).attr('checked') == 'checked'; // it is checked?
 
 						if (checkd){
@@ -202,7 +202,10 @@
 							$row.addClass('zl-disabled')
 							$row.find('.zl-field').children().attr('disabled', true);
 						}
-					});
+					})
+
+					// init the action
+					.trigger('change');
 				}); // Override Field END
 
 
@@ -221,12 +224,12 @@
 							effect: false
 						},
 						show: {
-							target: $checkbox.closest('.row'),
+							target: $checkbox.closest('.zl-row'),
 							solo: true,
 							delay: 200
 						},
 						hide: {
-							target: $checkbox.closest('.row'),
+							target: $checkbox.closest('.zl-row'),
 							delay: 0
 						},
 						style: 'ui-tooltip-light ui-tooltip-zlparam',

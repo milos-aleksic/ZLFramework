@@ -31,8 +31,8 @@ defined('_JEXEC') or die('Restricted access');
 	// state
 	$state = null;
 	if($state = $params->find('field.state', array())) {
-		$state['init_state'] = $this->_getParam($id.'_state', $params->find('field.state.init_state'), $final_ctrl);
-		$state['field'] = $this->checkbox($id, "{$final_ctrl}[{$id}_state]", $state['init_state'], $this->app->data->create(array()), array());
+		$state['init_state'] = $this->app->zlfield->getFieldValue($id.'_state', $params->find('field.state.init_state'), $final_ctrl);
+		$state['field'] = $this->app->zlfieldhtml->_('zlf.checkbox', $id, "{$final_ctrl}[{$id}_state]", $state['init_state'], $this->app->data->create(array()), array(), false);
 	}
 	$state_tooltip = $params->find('state.label') ? ' tooltip="'.JText::_($params->find('state.label')).'"' : '';
 
