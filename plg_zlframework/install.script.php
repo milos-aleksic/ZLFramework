@@ -261,10 +261,12 @@ class plgSystemZlframeworkInstallerScript
 			}
 
 			if (!$pass) {
+
 				// set the proceede link with it's behaviour
 				$path = str_replace('\\', '\\/', $this->_src.'_copy');
-				$javascript = "document.getElementById('install_directory').value = '{$path}';document.querySelectorAll('form .uploadform .button')[1].click();return false;";
+				$javascript = "document.getElementById('install_directory').value = '{$path}';document.querySelectorAll('form .uploadform .button, form .uploadform .btn')[1].click();return false;";
 				$this->_error = JText::sprintf('PLG_ZLFRAMEWORK_SYS_OUTDATED_EXTENSIONS', $this->_ext_version, implode(', ', $outdated_ext), $javascript);
+				
 			}
 		}
 
