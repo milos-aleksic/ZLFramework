@@ -5,6 +5,7 @@
 .form-validate div.width-40 {
 	min-width: 0 !important;
     width: 50% !important;
+    max-width: inherit !important;
 }
 
 /*

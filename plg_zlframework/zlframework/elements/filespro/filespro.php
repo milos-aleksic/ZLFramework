@@ -870,7 +870,7 @@ abstract class ElementFilesPro extends ElementRepeatablePro {
 		foreach($value as $key => &$single_value)
 		{
 			// prepare value array
-			if (isset($userfiles[$key]['error']))
+			if (isset($userfiles[$key]['error']) && !isset($old_files[$key]))
 			{
 				return true; // if no file provided, abort validation
 			}
@@ -881,6 +881,7 @@ abstract class ElementFilesPro extends ElementRepeatablePro {
 				$single_value = array('values' => $single_value);
 			}
 
+			// validate
 			try {
 				// split into parts
 				$parts = explode('/', $single_value['userfile']['name']);

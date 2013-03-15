@@ -316,8 +316,11 @@ class ZLModelItem extends ZLModel
 		// Elements filters
 		$elements = $this->getState('element', array());
 		$k = 0;
-		if ($elements) foreach($elements as $element) if ($element->get('value'))
+		if ($elements) foreach($elements as $element) 
 		{
+			// abort if no value is set
+			if (!$element->get('value')) return;
+			
 			// Options!
 			$id         = $element->get('id');
 			$value      = $element->get('value');
@@ -327,7 +330,6 @@ class ZLModelItem extends ZLModel
 			$to         = $element->get('to', false);
 			$convert    = $element->get('convert', 'DECIMAL');
 			$type       = $element->get('type', false);
-
 
 			$is_select  = $element->get('is_select', false);
 			$is_date    = $element->get('is_date', false);
