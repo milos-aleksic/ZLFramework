@@ -616,7 +616,7 @@ abstract class ElementFilesPro extends ElementRepeatablePro {
 	 *
 	 * Original Credits:
 	 * @package   	JCE
-	 * @copyright 	Copyright ¬© 2009-2011 Ryan Demmer. All rights reserved.
+	 * @copyright 	Copyright Â¬Â© 2009-2011 Ryan Demmer. All rights reserved.
 	 * @license   	GNU/GPL 2 or later - http://www.gnu.org/licenses/old-licenses/gpl-2.0.html
 	 * 
 	 * Adapted to ZOO (ZOOlanders.com)
@@ -711,38 +711,29 @@ abstract class ElementFilesPro extends ElementRepeatablePro {
 	 */
 	public function uploadFiles()
 	{	
-		$path = $this->app->request->get('path', 'string', ''); // selected subfolder
-		
-		// Settings
-		$targetDir = JPATH_ROOT . '/' . $this->getDirectory() . '/' . (isset($path) ? $path.'/' : '');
-		
-		// Get parameters
-		$chunk = JRequest::getVar("chunk", 0);
-		$chunks = JRequest::getVar("chunks", 0);
-		$fileName = JRequest::getVar("name", '');
-		
-		// split into parts
-		$parts = explode('/', $fileName);
+		// get filename and make itwebsafe
+		$fileName = $this->app->zlfilesystem->makeSafe(JRequest::getVar("name", ''), 'ascii');
 
-		// clean path parts
-		$parts = $this->app->zlfilesystem->makeSafe($parts, 'ascii');
+		// init vars
+		$path 		= $this->app->request->get('path', 'string', ''); // selected subfolder
+		$chunk 		= JRequest::getVar("chunk", 0);
+		$chunks 	= JRequest::getVar("chunks", 0);
+		$ext 		= strtolower(JFile::getExt($fileName));
+		$basename 	= substr($fileName, 0, strrpos($fileName, '.'));
+		$targetDir 	= JPATH_ROOT.'/'.$this->getDirectory().(isset($path) ? '/'.$path : '');
 
-		// join path parts
-		$fileName = implode('/', $parts);
+		// construct filename
+		$fileName = "{$basename}.{$ext}";
 
 		// Make sure the fileName is unique but only if chunking is disabled
-		if ($chunks < 2 && JFile::exists($targetDir . '/' . $fileName)) {
-			$ext = strrpos($fileName, '.');
-			$fileName_a = substr($fileName, 0, $ext);
-			$fileName_b = substr($fileName, $ext);
-		
+		if ($chunks < 2 && JFile::exists("$targetDir/$fileName")) {
 			$count = 1;
-			while (JFile::exists($targetDir . '/' . $fileName_a . '_' . $count . '.' . $fileName_b))
+			while (JFile::exists("{$targetDir}/{$basename}_{$count}.{$ext}"))
 				$count++;
 		
-			$fileName = $fileName_a . '_' . $count . '.' . $fileName_b;
+			$fileName = "{$basename}_{$count}.{$ext}";
 		}
-		
+
 		// Create target dir
 		if (!JFolder::exists($targetDir))
 			JFolder::create($targetDir);
@@ -945,32 +936,37 @@ abstract class ElementFilesPro extends ElementRepeatablePro {
 		{
 			// get the uploaded file information
 			if ($userfile && $userfile['error'] == 0 && is_array($userfile)) {
-				// get file name
-				$ext = strtolower($this->app->zlfilesystem->getExtension($userfile['name']));
-				$base_path = JPATH_ROOT . '/' . $this->getDirectory() . '/';
 
-				// split into parts
-				$parts = explode('/', $userfile['name']);
+				// get filename and make it websafe
+				$fileName = $this->app->zlfilesystem->makeSafe($userfile['name'], 'ascii');
 
-				// clean path parts
-				$parts = $this->app->zlfilesystem->makeSafe($parts, 'ascii');
+				// init vars
+				$ext 		= strtolower(JFile::getExt($fileName));
+				$basename 	= substr($fileName, 0, strrpos($fileName, '.'));
+				$targetDir 	= JPATH_ROOT.'/'.$this->getDirectory();
 
-				// join path parts
-				$fileName = implode('/', $parts);
+				// construct filename
+				$fileName = "{$basename}.{$ext}";
 
-				$file = $tmp = $base_path . $fileName;
-				$filename = basename($file, '.'.$ext);
-	
-				$i = 1;
-				while (JFile::exists($tmp)) {
-					$tmp = $base_path . $filename . '-' . $i++ . '.' . $ext;
-				}
-				$file = $this->app->path->relative($tmp);
+				// Make sure the fileName is unique
+				if (JFile::exists("$targetDir/$fileName")) {
+					$count = 1;
+					while (JFile::exists("{$targetDir}/{$basename}_{$count}.{$ext}"))
+						$count++;
 				
-				if (!JFile::upload($userfile['tmp_name'], $file)) {
+					$fileName = "{$basename}_{$count}.{$ext}";
+				}
+
+				// Create target dir
+				if (!JFolder::exists($targetDir))
+					JFolder::create($targetDir);
+				
+				// upload the file
+				if (!JFile::upload($userfile['tmp_name'], "$targetDir/$fileName")) {
 					throw new AppException('Unable to upload file.');
 				}
 
+				// set the index file if not exist
 				$this->app->zoo->putIndexFile(dirname($file));
 
 				$files[] = $file;
@@ -1008,6 +1004,13 @@ class AppValidatorFilepro extends AppValidatorFile {
 		if (!isset($value['name'])) {
 			$value['name'] = '';
 		}
+
+		// init vars
+		$ext 		= strtolower(JFile::getExt($value['name']));
+		$basename 	= substr($value['name'], 0, strrpos($value['name'], '.'));
+
+		// construct filename
+		$value['name'] = "{$basename}.{$ext}";
 
 		// split into parts
 		$parts = explode('/', $value['name']);

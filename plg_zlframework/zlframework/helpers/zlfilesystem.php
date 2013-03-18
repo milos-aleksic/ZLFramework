@@ -46,7 +46,8 @@ class ZlFilesystemHelper extends FilesystemHelper
 				$mode = 'utf-8';
 				break;
 			case 'ascii':
-				$subject = $this->utf8_latin_to_ascii($subject);    
+				$subject = $this->utf8_latin_to_ascii($subject);  
+				$subject = $this->utf8_cyrillic_to_ascii($subject);  
 				$search[] = '#[^a-zA-Z0-9_\.\-~\s ]#';
 				break;
 		}
@@ -108,6 +109,19 @@ class ZlFilesystemHelper extends FilesystemHelper
 				'Ŵ' => 'W', 'ŵ' => 'w', 'Ŷ' => 'Y', 'ŷ' => 'y', 'Ÿ' => 'Y', 'Ź' => 'Z', 'ź' => 'z', 'Ż' => 'Z', 'ż' => 'z', 'Ž' => 'Z', 'ž' => 'z', 'ſ' => 's', 'ƒ' => 'f', 'Ơ' => 'O', 'ơ' => 'o', 'Ư' => 'U', 'ư' => 'u',
 				'Ǎ' => 'A', 'ǎ' => 'a', 'Ǐ' => 'I', 'ǐ' => 'i', 'Ǒ' => 'O', 'ǒ' => 'o', 'Ǔ' => 'U', 'ǔ' => 'u', 'Ǖ' => 'U', 'ǖ' => 'u', 'Ǘ' => 'U', 'ǘ' => 'u', 'Ǚ' => 'U', 'ǚ' => 'u', 'Ǜ' => 'U', 'ǜ' => 'u',
 				'Ǻ' => 'A', 'ǻ' => 'a', 'Ǽ' => 'AE', 'ǽ' => 'ae', 'Ǿ' => 'O', 'ǿ' => 'o'
+			);
+		}
+
+		return str_replace(array_keys($CHARS), array_values($CHARS), $subject);
+	}
+
+	private function utf8_cyrillic_to_ascii($subject) {
+		static $CHARS = NULL;
+
+		if (is_null($CHARS)) {
+			$CHARS = array(
+				'а' => 'a', 'б' => 'b', 'в' => 'v', 'г' => 'g', 'д' => 'd', 'е' => 'e', 'ё' => 'e', 'ж' => 'zh', 'з' => 'z', 'и' => 'i', 'й' => 'y', 'к' => 'k', 'л' => 'l', 'м' => 'm', 'н' => 'n', 'о' => 'o', 'п' => 'p', 'р' => 'r', 'с' => 's', 'т' => 't', 'у' => 'u', 'ф' => 'f', 'х' => 'h', 'ц' => 'c', 'ч' => 'ch', 'ш' => 'sh', 'щ' => 'sch', 'ь' => '_', 'ы' => 'y', 'ъ' => '_', 'э' => 'e', 'ю' => 'yu', 'я' => 'ya',
+				'А' => 'A', 'Б' => 'B', 'В' => 'V', 'Г' => 'G', 'Д' => 'D', 'Е' => 'E', 'Ё' => 'E', 'Ж' => 'Zh', 'З' => 'Z', 'И' => 'I', 'Й' => 'Y', 'К' => 'K', 'Л' => 'L', 'М' => 'M', 'Н' => 'N', 'О' => 'O', 'П' => 'P', 'Р' => 'R', 'С' => 'S', 'Т' => 'T', 'У' => 'U', 'Ф' => 'F', 'Х' => 'H', 'Ц' => 'C', 'Ч' => 'Ch', 'Ш' => 'Sh', 'Щ' => 'Sch', 'Ь' => '_', 'Ы' => 'Y', 'Ъ' => '_', 'Э' => 'E', 'Ю' => 'Yu', 'Я' => 'Ya'
 			);
 		}
 
