@@ -874,18 +874,6 @@ abstract class ElementFilesPro extends ElementRepeatablePro {
 
 			// validate
 			try {
-				// split into parts
-				$parts = explode('/', $single_value['userfile']['name']);
-
-				// clean path parts
-				$parts = $this->app->zlfilesystem->makeSafe($parts, 'ascii');
-
-				// join path parts
-				$fileName = implode('/', $parts);
-
-				// save back the new name
-				$single_value['userfile']['name'] = $fileName;
-
 				$result[] = $this->_validateSubmission($this->app->data->create($single_value), $params);
 
 			} catch (AppValidatorException $e) {
