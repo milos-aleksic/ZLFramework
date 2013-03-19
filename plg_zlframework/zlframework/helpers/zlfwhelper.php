@@ -95,6 +95,26 @@ class ZlfwHelper extends AppHelper
 	}
 
 	/**
+	 * output json content
+	 *
+	 * @return @json The JSON string with application/json content type
+	 *
+	 * @since 3.0.10
+	 */
+	public function outputJSON($json)
+	{
+		header("Pragma: public");
+		header("Cache-Control: must-revalidate, post-check=0, pre-check=0");
+		header("Expires: 0");
+		header("Content-Transfer-Encoding: binary");
+		header("Content-Type: application/json");
+
+		echo $json;
+
+		exit;
+	}
+
+	/**
 	 * is the Enviroment
 	 *
 	 * @return @boolean True if enviroment match

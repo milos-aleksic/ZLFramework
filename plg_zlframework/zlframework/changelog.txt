@@ -3,6 +3,7 @@ Changelog
 
 3.0.10
  - Files Pro UTF-8 filesname compatibility removed
+ + Files Cyrillic transliteration
  # Submission upload issues fixed
 
 3.0.9
