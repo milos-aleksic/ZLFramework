@@ -436,10 +436,12 @@
 			var MaxFileSize = this.options.max_file_size;
 			up.bind('Error', function(up, err){
 				if (err.code=='-600') {
-					var MsgBox 	= $('.plupload_message'),
-						Msg 	= MsgBox.html().replace("max file size: 1024", "max file size: " + MaxFileSize);
-					MsgBox.html(MsgBox.html().replace("max file size: 1024", "max file size: " +  MaxFileSize))
+					var MsgBox 		= $('.plupload_message'),
+						MsgTxt 		= MsgBox.find('i').html().split(","),
+						FileSize 	= MsgTxt[1].replace('size: ','').trim();
+						MxFileSize  = MsgTxt[2].replace('max file size: ','').trim();
 
+					MsgBox.html(MsgBox.html().replace("size: " + FileSize, "size: " +  (FileSize/1024).toFixed(2) + "kb").replace("max file size: " + MxFileSize, "max file size: " +  MaxFileSize));
 				}
 				up.refresh(); // Reposition Flash/Silverlight
 		    });
