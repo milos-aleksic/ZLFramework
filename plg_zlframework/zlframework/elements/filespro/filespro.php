@@ -860,14 +860,9 @@ abstract class ElementFilesPro extends ElementRepeatablePro {
 		$result = array();
 		foreach($value as $key => &$single_value)
 		{
-			// prepare value array
-			if (isset($userfiles[$key]['error']) && !isset($old_files[$key]))
-			{
-				return true; // if no file provided, abort validation
-			}
-			else if (isset($userfiles[$key]))
-			{
-				$single_value = array('old_file' => (isset($old_files[$key]) ? $old_files[$key] : ''), 'userfile' => $userfiles[$key], 'values' => $single_value);
+			if (isset($userfiles[$key]))
+			{	
+				$single_value = array('old_file' => (isset($old_files) ? $old_files : ''), 'userfile' => $userfiles[$key], 'values' => $single_value);
 			} else {
 				$single_value = array('values' => $single_value);
 			}
