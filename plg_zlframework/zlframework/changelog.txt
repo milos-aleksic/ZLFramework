@@ -1,6 +1,12 @@
 Changelog
 ------------
 
+3.0.11
+ # Submission reordering issues fixed
+ ^ Item Model Searchable query is now optional
+ # ZL Field issue on Modules creation fixed
+ + Item Model IDs feature
+
 3.0.10
  - Files Pro UTF-8 filesname compatibility removed
  + Files Cyrillic transliteration
