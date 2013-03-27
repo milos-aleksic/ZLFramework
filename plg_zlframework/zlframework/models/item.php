@@ -165,8 +165,11 @@ class ZLModelItem extends ZLModel
 		$now  = $this->_db->Quote($date->toSql());
 		$null = $this->_db->Quote($this->_db->getNullDate());
 
-		// searchable
-		$query->where('a.searchable = 1');
+		// searchable state
+		$searchable = $this->getState('searchable');
+		if (isset($searchable[0]) && !empty($searchable[0])) {
+			$query->where('a.searchable = 1');
+		}
 		
 		// published state
 		$state = $this->getState('state');
