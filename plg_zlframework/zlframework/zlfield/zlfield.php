@@ -179,17 +179,20 @@ class ZlfieldHelper extends AppHelper {
 	{
 		// init vars
 		$module_id = $this->enviroment_args->get('id', $this->req->getVar('id'));
+		$result = '';
 
-		// get module params
-		$db = JFactory::getDbo();
-		$query = $db->getQuery(true);
+		if ($module_id) {
+			// get module params
+			$db = JFactory::getDbo();
+			$query = $db->getQuery(true);
 
-		$query->select('m.params');
-		$query->from('#__modules AS m');
-		$query->where('m.id = '.$module_id);
+			$query->select('m.params');
+			$query->from('#__modules AS m');
+			$query->where('m.id = '.$module_id);
 
-		$db->setQuery($query);
-		$result = $db->loadResult();
+			$db->setQuery($query);
+			$result = $db->loadResult();
+		}
 
 		// create the necesay array path
 		$this->params = $this->data->create( array('jform' => array('params' => json_decode($result, true))) );

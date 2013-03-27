@@ -432,9 +432,12 @@
 
 						// peform ajax request
 						ac.append($('<span class="activity zl-loader">'));
-						$.getJSON(b.url, 
-							{
-								task: 'loadfield', 
+
+						// make ajax request
+						var jqxhr = $.ajax({
+							type: 'POST',
+							url: b.url+'&task=loadfield',
+							data: {
 								json:json, 
 								ctrl:ctrl, 
 								psv:psv, 
@@ -444,7 +447,14 @@
 								ajaxcall:true, 
 								enviroment:$this.options.enviroment, 
 								enviroment_args:$this.options.enviroment_args
-							}, function(data){
+							}
+						})
+
+						// if success
+						.done(function(data){
+							data = $.parseJSON(data);
+
+							// remove activity indication
 							ac.find('.activity').remove();
 
 							// set data
