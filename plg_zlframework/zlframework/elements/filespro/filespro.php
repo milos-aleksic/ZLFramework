@@ -182,7 +182,7 @@ abstract class ElementFilesPro extends ElementRepeatablePro {
 		Returns:
 			Array
 	*/
-	protected function getFiles($source = null)
+	public function getFiles($source = null)
 	{
 		// get source or use default
 		$source = $source ? $source : $this->getDefaultSource();
