@@ -1,6 +1,9 @@
 Changelog
 ------------
 
+3.0.12
+ # Fixed Submission DateTime error introduced in v3.0.11
+
 3.0.11
  # Submission reordering issues fixed
  ^ Item Model Searchable query is now optional
