@@ -15,6 +15,70 @@ defined('_JEXEC') or die('Restricted access');
  */
 class ZlfwHelper extends AppHelper
 {
+	/* prefix */
+	protected $_prefix;
+
+	/* models */
+	protected $_helpers = array();
+    
+	/*
+		Function: __construct
+			Class Constructor.
+	*/
+	public function __construct($app) {
+		parent::__construct($app);
+
+		// set table prefix
+		$this->_prefix = 'zlfwHelper';
+	}
+
+	/*
+		Function: get
+			Retrieve a helper
+
+		Parameters:
+			$name - Helper name
+			$prefix - Helper prefix
+
+		Returns:
+			Mixed
+	*/
+	public function get($name, $prefix = null) {
+		
+		// set prefix
+		if ($prefix == null) {
+			$prefix = $this->_prefix;
+		}
+		
+		// load class
+		$class = $prefix . $name;
+		
+		$this->app->loader->register($class, 'zlfw:zlfwhelpers/'.strtolower($name).'.php');
+		
+		// add helper, if not exists
+		if (!isset($this->_helpers[$name])) {
+			$this->_helpers[$name] = class_exists($class) ? new $class($this->app) : new AppHelper($this->app, $prefix.$name);
+		}
+
+		return $this->_helpers[$name];
+	}
+	
+	/*
+		Function: __get
+			Retrieve a helper
+
+		Parameters:
+			$name - Helper name
+
+		Returns:
+			Mixed
+	*/
+	public function __get($name) {
+		return $this->get($name);
+	}
+
+	// ======================
+
 	/**
 	 * get Enviroment
 	 *
