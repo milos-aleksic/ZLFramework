@@ -256,6 +256,16 @@ class ZLModelItem extends ZLModel
 		// Filters
 		$apps   = $this->getState('application', false);
 		$types  = $this->getState('type', false);
+		$ids  	= $this->getState('id', false);
+
+		// filter by id
+		if ($ids){
+			$where = array();
+			foreach($ids as $id) {
+				$where[] = 'a.id IN ('.implode(',', $id->toArray()).')';
+			}
+			$query->where('(' . implode(' OR ', $where) . ')');
+		}
 		
 		// filter apps
 		if ($apps){

@@ -1,6 +1,9 @@
 Changelog
 ------------
 
+3.0.13
+ + Item Model IDs filtering
+
 3.0.12
  # Fixed Submission DateTime error introduced in v3.0.11
 
