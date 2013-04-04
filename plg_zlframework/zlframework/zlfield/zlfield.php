@@ -207,7 +207,7 @@ class ZlfieldHelper extends AppHelper {
 		$this->application = $this->app->zoo->getApplication();
 
 		// set params
-		$this->params = $this->application->getParams();
+		$this->params = $this->application ? $this->application->getParams() : $this->data->create(array());
 	}
 
 	/*
