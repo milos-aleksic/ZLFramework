@@ -78,7 +78,7 @@ class plgSystemZlframework extends JPlugin {
 		// register helpers
 		if ( $path = $this->app->path->path( 'zlfw:helpers' ) ) {
 			$this->app->path->register($path, 'helpers');
-			$this->app->loader->register('ZlfwHelper', 'helpers:zlfwhelper.php');
+			$this->app->loader->register('zlfwHelper', 'helpers:zlfwhelper.php');
 			$this->app->loader->register('ZLDependencyHelper', 'helpers:zldependency.php');
 			$this->app->loader->register('ZlStringHelper', 'helpers:zlstring.php');
 			$this->app->loader->register('ZlFilesystemHelper', 'helpers:zlfilesystem.php');

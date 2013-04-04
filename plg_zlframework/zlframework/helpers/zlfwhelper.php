@@ -13,7 +13,7 @@ defined('_JEXEC') or die('Restricted access');
  Class: ZLFW Helper
  The general ZL Framework helper Class for zoo
  */
-class ZlfwHelper extends AppHelper
+class zlfwHelper extends AppHelper
 {
 	/* prefix */
 	protected $_prefix;
@@ -28,7 +28,7 @@ class ZlfwHelper extends AppHelper
 	public function __construct($app) {
 		parent::__construct($app);
 
-		// set table prefix
+		// set helper prefix
 		$this->_prefix = 'zlfwHelper';
 	}
 
