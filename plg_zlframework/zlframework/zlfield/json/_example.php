@@ -33,7 +33,7 @@ defined('_JEXEC') or die('Restricted access');
 			"specific":{
 				"title":"PLG_ZLFW_NAME"
 			},
-			"layout":"section/subsection/line"
+			"layout":"default/section/subsection"
 		},
 
 		'./* subfield */'

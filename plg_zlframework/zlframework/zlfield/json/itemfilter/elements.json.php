@@ -19,6 +19,25 @@ defined('_JEXEC') or die('Restricted access');
 	// get parent apps value
 	$apps = array_filter((array)$psv->get('_chosenapps', array()));
 
+	// if no apps return message instead
+	if(empty($apps)) {
+		// json string
+		return 
+		'{"fields": {
+			"message_wrapper": {
+				"type":"fieldset",
+				"fields": {
+					"message": {
+						"type":"info",
+						"specific":{
+							"text":"PLG_ZLFRAMEWORK_IFT_ELEMENT_FILTERING_MSG"
+						}
+					}
+				}
+			}
+		}}';	
+	}
+
 	// get apps
 	$applications = array();
 	if (!empty($apps)) {

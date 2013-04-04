@@ -84,8 +84,8 @@ defined('_JEXEC') or die('Restricted access');
 	}';
 
 
-	/* add type elements */
-	foreach ($applications as $application)
+	/* add type elements, if at least one app selected */
+	if(!empty($apps)) foreach ($applications as $application)
 	{
 		// get types
 		$types = $application->getTypes();
@@ -136,6 +136,22 @@ defined('_JEXEC') or die('Restricted access');
 		}';
 
 	} // end App foreach
+	else
+	{
+		// if no apps return message instead
+		$json[] =
+		'"message_wrapper": {
+			"type":"fieldset",
+			"fields": {
+				"message": {
+					"type":"info",
+					"specific":{
+						"text":"PLG_ZLFRAMEWORK_IFT_ELEMENT_ORDERING_MSG"
+					}
+				}
+			}
+		}';	
+	}
 
 	// JSON
 	return 
