@@ -163,10 +163,10 @@ class ZLFieldHTMLHelper extends AppHelper {
 			// options file
 			$opt_file = str_replace('{value}', (string)$value, $spec->get('opt_file'));
 
-			$preoptions = array_merge($spec->get('fix_options', array()), $spec->get('options', array()));
+			$preoptions = $spec->get('fix_options', array()) + $spec->get('options', array());
 			if (!empty($opt_file) && $path = $this->app->path->path($opt_file))
 			{	// get options from json file
-				$preoptions = array_merge($preoptions, json_decode(file_get_contents($path), true));
+				$preoptions = $preoptions + json_decode(file_get_contents($path), true);
 			}
 			
 			$options = array(); // prepare options
@@ -247,7 +247,7 @@ class ZLFieldHTMLHelper extends AppHelper {
 		uasort($options, array($this, 'cmp'));
 
 		// merge with current options
-		$options = array_merge($spec->get('options', array()), $options);
+		$options = $spec->get('options', array()) + $options;
 		
 		$spec->set('options', $options);
 		return $this->select($id, $name, $value, $spec, $attrs, $returnRawValue);
@@ -269,7 +269,7 @@ class ZLFieldHTMLHelper extends AppHelper {
 		}
 
 		// merge with current options
-		$options = array_merge($spec->get('options', array()), $options);
+		$options = $spec->get('options', array()) + $options;
 
 		// set options for select
 		$spec->set('options', $options);
@@ -306,7 +306,7 @@ class ZLFieldHTMLHelper extends AppHelper {
 		}
 
 		// merge with current options
-		$options = array_merge($spec->get('options', array()), $options);
+		$options = $spec->get('options', array()) + $options;
 
 		// set options for select
 		$spec->set('options', $options);
@@ -376,7 +376,7 @@ class ZLFieldHTMLHelper extends AppHelper {
 		}
 
 		// merge with current options
-		$options = array_merge($spec->get('options', array()), $options);
+		$options = $spec->get('options', array()) + $options;
 
 		// set options for select
 		$spec->set('options', $options);
@@ -420,7 +420,7 @@ class ZLFieldHTMLHelper extends AppHelper {
 		} else {
 
 			// merge with current options
-			$options = array_merge($spec->get('options', array()), $options);
+			$options = $spec->get('options', array()) + $options;
 
 			$spec->set('options', $options);			
 			return $this->select($id, $name, $value, $spec, $attrs, $returnRawValue);
@@ -451,7 +451,7 @@ class ZLFieldHTMLHelper extends AppHelper {
 		}
 
 		// merge with current options
-		$options = array_merge($spec->get('options', array()), $options);
+		$options = $spec->get('options', array()) + $options;
 
 		$spec->set('options', $options);		
 		return $this->select($id, $name, $value, $spec, $attrs, $returnRawValue);
@@ -489,7 +489,7 @@ class ZLFieldHTMLHelper extends AppHelper {
 		$options['PLG_ZLFRAMEWORK_CUSTOM'] 			= 'custom';
 
 		// merge with current options
-		$options = array_merge($spec->get('options', array()), $options);
+		$options = $spec->get('options', array()) + $options;
 
 		$spec->set('options', $options);		
 		return $this->select($id, $name, $value, $spec, $attrs, $returnRawValue);
@@ -539,7 +539,7 @@ class ZLFieldHTMLHelper extends AppHelper {
 		foreach ($layouts as $layout) $options[$layout['name']] = $layout['layout'];
 
 		// merge with current options
-		$options = array_merge($spec->get('options', array()), $options);
+		$options = $spec->get('options', array()) + $options;
 
 		$spec->set('options', $options);
 		return $this->select($id, $name, $value, $spec, $attrs, $returnRawValue);
