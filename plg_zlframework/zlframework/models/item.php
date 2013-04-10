@@ -235,18 +235,18 @@ class ZLModelItem extends ZLModel
 		}
 
 		// default publication up
-		// if (!$this->getState('created') && !$this->getState('modified')) {
-		// 	$where = array();
-		// 	$where[] = 'a.publish_up = '.$null;
-		// 	$where[] = 'a.publish_up <= '.$now;
-		// 	$query->where('('.implode(' OR ', $where).')');
-		// }
+		if (!$this->getState('created') && !$this->getState('modified')) {
+			$where = array();
+			$where[] = 'a.publish_up = '.$null;
+			$where[] = 'a.publish_up <= '.$now;
+			$query->where('('.implode(' OR ', $where).')');
+		}
 
 		// default publication down
-		// $where = array();
-		// $where[] = 'a.publish_down = '.$null;
-		// $where[] = 'a.publish_down >= '.$now;
-		// $query->where('('.implode(' OR ', $where).')');
+		$where = array();
+		$where[] = 'a.publish_down = '.$null;
+		$where[] = 'a.publish_down >= '.$now;
+		$query->where('('.implode(' OR ', $where).')');
 	}
 
 	/**
@@ -255,11 +255,11 @@ class ZLModelItem extends ZLModel
 	protected function itemFilters(&$query)
 	{
 		// Filters
-		$apps   = $this->getState('application', false);
+		$apps   = $this->getState('application', array());
 		$types  = $this->getState('type', array());
 		$ids  	= $this->getState('id', false);
 
-		// filter by id
+		// set filtering by items id
 		if ($ids){
 			$where = array();
 			foreach($ids as $id) {
@@ -268,33 +268,52 @@ class ZLModelItem extends ZLModel
 			$query->where('(' . implode(' OR ', $where) . ')');
 		}
 
-// $where[] = 'a.type LIKE ' . $this->_db->Quote($type->get('value', ''));
-		// $where[] = 'a.application_id = ' . (int)$app->get('value', '');
-// group filters in nested arrays
-		// $filters[$app_id][$type_id] = array()
-
-
 		// convert types into raw array
-		if (!empty($types)) foreach ($types as &$type) {
-			$type = $type->get('value', '');
+		if (count($apps)) foreach ($apps as $key => $app) {
+			$apps[$key] = $app->get('value', '');
 		}
 
-		// populate $filters as nested array for further filtering
+		// convert types into raw array
+		if (count($types)) foreach ($types as $key => $type) {
+			$types[$key] = $type->get('value', '');
+		}
+
+		// get apps selected objects, or all if none filtered
+		$apps = $this->app->table->application->all(array('conditions' => count($apps) ? 'id IN('.implode(',', $apps).')' : ''));
+
+		// create a nested array with all app/type/elements filtering data
 		$this->filters = array();
-		
-		// filter apps
-		if ($apps){
-			foreach($apps as $app) {
-				// get app object for getting it's related types
-				$app = $this->app->table->application->get((int)$app->get('value'));
-				
-				$this->filters[$app->id] = array();
-				foreach ($app->getTypes() as $type) {
-					if (empty($types) || in_array($type->id, $types)) {
-						$elements = $type->getElements();
-						$elements = array_keys($elements);
-						$this->filters[$app->id][$type->id] = $elements;
+		foreach($apps as $app) {
+			
+			$this->filters[$app->id] = array();
+			foreach ($app->getTypes() as $type) {
+
+				// get type elements
+				$type_elements = $type->getElements();
+				$type_elements = array_keys($type_elements);
+
+				// get selected elements
+				$elements = $this->getState('element', array());
+
+				// filter the current type elements
+				$valid_elements = array();
+				if ($elements) foreach ($elements as $key => $element) {
+					$identifier = $element->get('id');
+
+					// if element part of current type, it's valid
+					if (in_array($identifier, $type_elements)) {
+						$valid_elements[] = $element;
+
+						// remove current element to avoid revalidation
+						unset($elements[$key]);
 					}
+				}
+
+				// if there are elements for current type, or type is selected for filtering
+				if (count($valid_elements) || in_array($type->id, $types)) {
+
+					// save the type and it's elements
+					$this->filters[$app->id][$type->id] = $valid_elements;
 				}
 			}
 		}
@@ -341,32 +360,7 @@ class ZLModelItem extends ZLModel
 		}
 		
 		// Elements filtering
-		$elements = $this->getState('element', array());
 		$k = 0;
-
-		// organize the elements in filter array
-		foreach ($this->filters as $app => &$types) {
-
-			// iterate over types and validate it' elements
-			foreach ($types as $type => &$type_elements) {
-			
-				$valid_elements = array();
-				if ($elements) foreach ($elements as $key => $element) {
-					$identifier = $element->get('id');
-
-					// if element part of current type, it's valid
-					if (in_array($identifier, $type_elements)) {
-						$valid_elements[] = $element;
-
-						// remove current element to avoid revalidation
-						unset($elements[$key]);
-					}
-				}
-
-				// save valid elements
-				$type_elements = $valid_elements;
-			}
-		}
 
 		// get the filter query
 		foreach ($this->filters as $app => &$types) {
@@ -406,7 +400,7 @@ class ZLModelItem extends ZLModel
 			}
 
 			// set the app->type->elements query
-			$wheres['OR'][] = '(a.application_id = ' . (int)$app . ' AND (' . implode(' OR ', $types_queries) . '))';
+			$wheres['OR'][] = '(a.application_id = ' . (int)$app . (count($types_queries) ? ' AND (' . implode(' OR ', $types_queries) . '))' : ')');
 		}
 
 		// At the end, merge ORs
