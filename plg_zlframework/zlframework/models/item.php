@@ -348,6 +348,30 @@ class ZLModelItem extends ZLModel
 		foreach ($this->filters as $app => &$types) {
 
 			// iterate over types and validate it' elements
+			foreach ($types as $type => &$type_elements) {
+			
+				$valid_elements = array();
+				if ($elements) foreach ($elements as $key => $element) {
+					$identifier = $element->get('id');
+
+					// if element part of current type, it's valid
+					if (in_array($identifier, $type_elements)) {
+						$valid_elements[] = $element;
+
+						// remove current element to avoid revalidation
+						unset($elements[$key]);
+					}
+				}
+
+				// save valid elements
+				$type_elements = $valid_elements;
+			}
+		}
+
+		// get the filter query
+		foreach ($this->filters as $app => &$types) {
+
+			// iterate over types
 			$types_queries = array();
 			foreach ($types as $type => &$type_elements) {
 				
@@ -357,17 +381,9 @@ class ZLModelItem extends ZLModel
 				// set the type query
 				$type_query = 'a.type LIKE ' . $this->_db->Quote($type);
 
-				// validate the elements
-				if ($elements) foreach ($elements as $key => $element) {
-					$identifier = $element->get('id');
-
-					// get element query if it's part of current type
-					if (in_array($identifier, $type_elements)) {
-						$this->getElementSearch($element, $k, $elements_where);
-
-						// remove current element to avoid revalidation
-						unset($elements[$key]);
-					}
+				// get individual element query
+				foreach ($type_elements as $element) {
+					$this->getElementSearch($element, $k, $elements_where);
 				}
 
 				// merge elements ORs / ANDs
@@ -376,14 +392,16 @@ class ZLModelItem extends ZLModel
 					$elements_query .= '(' . implode(' OR ', $elements_where['OR']) . ')';
 				}
 
-				// foreach ($element_where['AND'] as $where) {
-				// 	$elements_query .= $where;
-				// }
+				if ( count( $elements_where['AND'] ) ) {
+					$elements_query .= '(' . implode(' AND ', $elements_where['AND']) . ')';
+				}
+
+				// append elements query to the type one
 				if ( strlen($elements_query) ) {
 					$type_query .= ' AND (' . $elements_query . ')';
 				}
 
-				$type_query .= ''; // close query
+				// save type query
 				$types_queries[] = $type_query;
 			}
 
