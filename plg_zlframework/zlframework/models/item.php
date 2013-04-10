@@ -45,6 +45,7 @@ class ZLModelItem extends ZLModel
 				} else {
 					$options = new JRegistry;
 					// Just the value
+					
 					$options->set('value', $args[0]);
 				}
 			}
@@ -234,18 +235,18 @@ class ZLModelItem extends ZLModel
 		}
 
 		// default publication up
-		if (!$this->getState('created') && !$this->getState('modified')) {
-			$where = array();
-			$where[] = 'a.publish_up = '.$null;
-			$where[] = 'a.publish_up <= '.$now;
-			$query->where('('.implode(' OR ', $where).')');
-		}
+		// if (!$this->getState('created') && !$this->getState('modified')) {
+		// 	$where = array();
+		// 	$where[] = 'a.publish_up = '.$null;
+		// 	$where[] = 'a.publish_up <= '.$now;
+		// 	$query->where('('.implode(' OR ', $where).')');
+		// }
 
 		// default publication down
-		$where = array();
-		$where[] = 'a.publish_down = '.$null;
-		$where[] = 'a.publish_down >= '.$now;
-		$query->where('('.implode(' OR ', $where).')');
+		// $where = array();
+		// $where[] = 'a.publish_down = '.$null;
+		// $where[] = 'a.publish_down >= '.$now;
+		// $query->where('('.implode(' OR ', $where).')');
 	}
 
 	/**
@@ -255,7 +256,7 @@ class ZLModelItem extends ZLModel
 	{
 		// Filters
 		$apps   = $this->getState('application', false);
-		$types  = $this->getState('type', false);
+		$types  = $this->getState('type', array());
 		$ids  	= $this->getState('id', false);
 
 		// filter by id
@@ -266,23 +267,36 @@ class ZLModelItem extends ZLModel
 			}
 			$query->where('(' . implode(' OR ', $where) . ')');
 		}
+
+// $where[] = 'a.type LIKE ' . $this->_db->Quote($type->get('value', ''));
+		// $where[] = 'a.application_id = ' . (int)$app->get('value', '');
+// group filters in nested arrays
+		// $filters[$app_id][$type_id] = array()
+
+
+		// convert types into raw array
+		if (!empty($types)) foreach ($types as &$type) {
+			$type = $type->get('value', '');
+		}
+
+		// populate $filters as nested array for further filtering
+		$this->filters = array();
 		
 		// filter apps
 		if ($apps){
-			$where = array();
 			foreach($apps as $app) {
-				$where[] = 'a.application_id = ' . (int)$app->get('value', '');
+				// get app object for getting it's related types
+				$app = $this->app->table->application->get((int)$app->get('value'));
+				
+				$this->filters[$app->id] = array();
+				foreach ($app->getTypes() as $type) {
+					if (empty($types) || in_array($type->id, $types)) {
+						$elements = $type->getElements();
+						$elements = array_keys($elements);
+						$this->filters[$app->id][$type->id] = $elements;
+					}
+				}
 			}
-			$query->where('(' . implode(' OR ', $where) . ')');
-		}
-		
-		// filter types
-		if ($types){
-			$where = array();
-			foreach ($types as $type) {
-				$where[] = 'a.type LIKE ' . $this->_db->Quote($type->get('value', ''));
-			}
-			$query->where('(' . implode(' OR ', $where) . ')');
 		}
 	}
 
@@ -293,7 +307,7 @@ class ZLModelItem extends ZLModel
 	{
 		$wheres = array('AND' => array(), 'OR' => array());
 
-		// item name filtering
+		// Item name filtering
 		$names = $this->getState('name');
 		if ($names){
 			foreach ($names as $name) {
@@ -326,59 +340,57 @@ class ZLModelItem extends ZLModel
 			}
 		}
 		
-		// Elements filters
+		// Elements filtering
 		$elements = $this->getState('element', array());
 		$k = 0;
-		if ($elements) foreach($elements as $element) 
-		{
-			// abort if no value is set
-			if (!$element->get('value')) return;
-			
-			// Options!
-			$id         = $element->get('id');
-			$value      = $element->get('value');
-			$logic      = strtoupper($element->get('logic', 'AND'));
-			$mode       = $element->get('mode', 'AND');
-			$from       = $element->get('from', false);
-			$to         = $element->get('to', false);
-			$convert    = $element->get('convert', 'DECIMAL');
-			$type       = $element->get('type', false);
 
-			$is_select  = $element->get('is_select', false);
-			$is_date    = $element->get('is_date', false);
-			$is_range   = in_array($type, array('range', 'rangeequal', 'from', 'to', 'fromequal', 'toequal', 'outofrange', 'outofrangeequal'));
+		// organize the elements in filter array
+		foreach ($this->filters as $app => &$types) {
 
-			// Multiple choice!
-			if( is_array( $value ) && !$from && !$to) {
-				$wheres[$logic][] = $this->getElementMultipleSearch($id, $value, $mode, $k, $is_select, $logic);
-			} else {                    
-				// Search ranges!
-				if ($is_range && !$is_date){
-					// Handle everything in a special method
-					$wheres[$logic][] = $this->getElementRangeSearch($id, $from, $to, $type, $convert, $k);
-				} else  {
-					// Special date case
-					if ($is_date) {
-						$sql_value = "b$k.value";
-						$value_from = !empty($from) ? $from : '';
-						$value_to = !empty($to) ? $to : '';
-						$search_type = $type;
-						$period_mode = $element->get('period_mode', 'static');
-						$interval = $element->get('interval', 0);
-						$interval_unit = $element->get('interval_unit', '');
-						$wrapper = "(b$k.element_id = '$id' AND {query})";
+			// iterate over types and validate it' elements
+			$types_queries = array();
+			foreach ($types as $type => &$type_elements) {
+				
+				// init vars
+				$elements_where = array('AND' => array(), 'OR' => array());
 
-						$wheres[$logic][] = $this->getDateSearch(compact('sql_value', 'value', 'value_from', 'value_to', 'search_type', 'period_mode', 'interval', 'interval_unit', 'wrapper'));
-					} else {
-						// Normal search
-						$value = $this->getQuotedValue($element);
-						$wheres[$logic][] = "(b$k.element_id = '" . $id . "' AND TRIM(b$k.value) LIKE " . $value .') ';     
+				// set the type query
+				$type_query = 'a.type LIKE ' . $this->_db->Quote($type);
+
+				// validate the elements
+				if ($elements) foreach ($elements as $key => $element) {
+					$identifier = $element->get('id');
+
+					// get element query if it's part of current type
+					if (in_array($identifier, $type_elements)) {
+						$this->getElementSearch($element, $k, $elements_where);
+
+						// remove current element to avoid revalidation
+						unset($elements[$key]);
 					}
 				}
+
+				// merge elements ORs / ANDs
+				$elements_query = '';
+				if ( count( $elements_where['OR'] ) ) {
+					$elements_query .= '(' . implode(' OR ', $elements_where['OR']) . ')';
+				}
+
+				// foreach ($element_where['AND'] as $where) {
+				// 	$elements_query .= $where;
+				// }
+				if ( strlen($elements_query) ) {
+					$type_query .= ' AND (' . $elements_query . ')';
+				}
+
+				$type_query .= ''; // close query
+				$types_queries[] = $type_query;
 			}
-			$k++;
+
+			// set the app->type->elements query
+			$wheres['OR'][] = '(a.application_id = ' . (int)$app . ' AND (' . implode(' OR ', $types_queries) . '))';
 		}
-		
+
 		// At the end, merge ORs
 		if( count( $wheres['OR'] ) ) {
 			$query->where('(' . implode(' OR ', $wheres['OR']) . ')');
@@ -391,6 +403,59 @@ class ZLModelItem extends ZLModel
 		
 		// Add repeatable joins
 		$this->addRepeatableJoins($query, $k);
+	}
+
+	/**
+	 * Get the individual element search
+	 */
+	protected function getElementSearch($element, &$k, &$wheres)
+	{
+		// abort if no value is set
+		if (!$element->get('value')) return;
+		
+		// Options!
+		$id         = $element->get('id');
+		$value      = $element->get('value');
+		$logic      = strtoupper($element->get('logic', 'AND'));
+		$mode       = $element->get('mode', 'AND');
+		$from       = $element->get('from', false);
+		$to         = $element->get('to', false);
+		$convert    = $element->get('convert', 'DECIMAL');
+		$type       = $element->get('type', false);
+
+		$is_select  = $element->get('is_select', false);
+		$is_date    = $element->get('is_date', false);
+		$is_range   = in_array($type, array('range', 'rangeequal', 'from', 'to', 'fromequal', 'toequal', 'outofrange', 'outofrangeequal'));
+
+		// Multiple choice!
+		if( is_array( $value ) && !$from && !$to) {
+			$wheres[$logic][] = $this->getElementMultipleSearch($id, $value, $mode, $k, $is_select, $logic);
+		} else {                    
+			// Search ranges!
+			if ($is_range && !$is_date){
+				// Handle everything in a special method
+				$wheres[$logic][] = $this->getElementRangeSearch($id, $from, $to, $type, $convert, $k);
+			} else  {
+				// Special date case
+				if ($is_date) {
+					$sql_value = "b$k.value";
+					$value_from = !empty($from) ? $from : '';
+					$value_to = !empty($to) ? $to : '';
+					$search_type = $type;
+					$period_mode = $element->get('period_mode', 'static');
+					$interval = $element->get('interval', 0);
+					$interval_unit = $element->get('interval_unit', '');
+					$wrapper = "(b$k.element_id = '$id' AND {query})";
+
+					$wheres[$logic][] = $this->getDateSearch(compact('sql_value', 'value', 'value_from', 'value_to', 'search_type', 'period_mode', 'interval', 'interval_unit', 'wrapper'));
+				} else {
+					// Normal search
+					$value = $this->getQuotedValue($element);
+					$wheres[$logic][] = "(b$k.element_id = '" . $id . "' AND TRIM(b$k.value) LIKE " . $value .') ';     
+				}
+			}
+		}
+		$k++;
 	}
 
 	/**
