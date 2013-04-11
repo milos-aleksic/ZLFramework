@@ -255,7 +255,7 @@ class ZLModelItem extends ZLModel
 	protected function itemFilters(&$query)
 	{
 		// Filters
-		$apps   = $this->getState('application', array());
+		$this->apps   = $this->getState('application', array());
 		$types  = $this->getState('type', array());
 		$ids  	= $this->getState('id', false);
 
@@ -269,8 +269,8 @@ class ZLModelItem extends ZLModel
 		}
 
 		// convert types into raw array
-		if (count($apps)) foreach ($apps as $key => $app) {
-			$apps[$key] = $app->get('value', '');
+		if (count($this->apps)) foreach ($this->apps as $key => $app) {
+			$this->apps[$key] = $app->get('value', '');
 		}
 
 		// convert types into raw array
@@ -279,7 +279,7 @@ class ZLModelItem extends ZLModel
 		}
 
 		// get apps selected objects, or all if none filtered
-		$apps = $this->app->table->application->all(array('conditions' => count($apps) ? 'id IN('.implode(',', $apps).')' : ''));
+		$apps = $this->app->table->application->all(array('conditions' => count($this->apps) ? 'id IN('.implode(',', $this->apps).')' : ''));
 
 		// create a nested array with all app/type/elements filtering data
 		$this->filters = array();
@@ -399,8 +399,18 @@ class ZLModelItem extends ZLModel
 				$types_queries[] = $type_query;
 			}
 
+			// types query
+			$types_query = count($types_queries) ? implode(' OR ', $types_queries) : '';
+
+			// app query
+			$app_query = in_array($app, $this->apps) ? 'a.application_id = ' . (int)$app : '';
+
 			// set the app->type->elements query
-			$wheres['OR'][] = '(a.application_id = ' . (int)$app . (count($types_queries) ? ' AND (' . implode(' OR ', $types_queries) . '))' : ')');
+			if ($app_query && $types_query) {
+				$wheres['OR'][] = '(' . $app_query . ' AND (' . $types_query . '))';
+			} else if ($app_query || $types_query) {
+				$wheres['OR'][] = '(' . $app_query . $types_query . ')';
+			}
 		}
 
 		// At the end, merge ORs
