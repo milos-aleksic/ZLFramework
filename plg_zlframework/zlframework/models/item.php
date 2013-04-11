@@ -452,11 +452,17 @@ class ZLModelItem extends ZLModel
 		// Multiple choice!
 		if( is_array( $value ) && !$from && !$to) {
 			$wheres[$logic][] = $this->getElementMultipleSearch($id, $value, $mode, $k, $is_select, $logic);
-		} else {                    
+		} else {
 			// Search ranges!
 			if ($is_range && !$is_date){
-				// Handle everything in a special method
-				$wheres[$logic][] = $this->getElementRangeSearch($id, $from, $to, $type, $convert, $k);
+
+				// proceede only if values provided
+				if ($from && $to) {
+
+					// Handle everything in a special method
+					$wheres[$logic][] = $this->getElementRangeSearch($id, $from, $to, $type, $convert, $k);
+				}
+
 			} else  {
 				// Special date case
 				if ($is_date) {
@@ -535,7 +541,7 @@ class ZLModelItem extends ZLModel
 		if ($is_equal) {
 			$symbol .= "=";
 		}
-
+		
 		// Build range sql
 		return "(b$k.element_id = '" . $identifier . "' AND CONVERT(TRIM(b$k.value+0), $convert) " . $symbol . " " . $value.")";
 	}
