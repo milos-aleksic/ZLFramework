@@ -746,13 +746,41 @@ class ZLModelItem extends ZLModel
 	 */
 	protected function getQuotedValue($name, $quote = true)
 	{
-		// || @$name['is_select'] != true  -> this make allways partial searches
-		if( $name->get('type', 'partial') == 'partial'){
-			$value = '%' . $name->get('value', '') . '%';
-		} else {
-			$value = $name->get('value', '');   
-		} 
+		// init vars
+		$type = $name->get('type', 'exact_phrase');
 
+		// backward compatibility
+		if($type == 'partial') $name->set('type', 'exact_phrase');
+			
+		switch($type) {
+			case 'exact_phrase':
+				$value = '%' . $name->get('value', '') . '%';
+				break;
+
+			case 'all_words':
+				$value = '%' . str_replace(' ', '%', $name->get('value', '')) . '%';
+				break;
+
+			case 'any_word':
+				// get all words and quote them
+				$words = explode(' ', $name->get('value', ''));
+				foreach ($words as &$word) {
+					$word = $this->_db->Quote( "%$word%" );
+				}
+
+				// disable general quote
+				$quote = false;
+
+				// save all values
+				$value = implode(' OR ', $words);
+				break;
+
+			default:
+				$value = $name->get('value', '');
+				break;
+		}
+
+		// quote the value
 		if($quote) {
 			return $this->_db->Quote( $value );
 		}
