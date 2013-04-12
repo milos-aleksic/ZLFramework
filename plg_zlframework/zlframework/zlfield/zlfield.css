@@ -87,6 +87,10 @@ ul.adminformlist li.zlfield-module .zlfield-main {
 	min-width: 0;
 }
 
+ul.adminformlist li.zlfield-module {
+	clear: both;
+}
+
 /* elements specific */
 ul.parameter-form li.parameter:first-child div.label { /* a workaround for basic fields effect */
 	border-bottom: none;
