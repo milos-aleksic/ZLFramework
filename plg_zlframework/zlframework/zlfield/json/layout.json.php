@@ -10,6 +10,7 @@
 defined('_JEXEC') or die('Restricted access');
 
 	// init vars
+	$id   = $params->find('layout.id', '_layout');
 	$mode = $params->find('layout.mode', 'files');
 	$path = $params->find('layout.path');
 	$regex = $params->find('layout.regex');
@@ -39,7 +40,7 @@ defined('_JEXEC') or die('Restricted access');
 	// json
 	return
 	'{
-		"_layout":{
+		"'.$id.'":{
 			"type":"layout",
 			"label":"'.$params->find('layout.label').'",
 			"help":"'.$params->find('layout.help').'",
