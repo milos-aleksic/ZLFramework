@@ -3,8 +3,8 @@ Changelog
 
 3.0.13
  + Item Model IDs filtering
- + ZLFW Helpers
- # Fixed ZLField bug when no App Instances were created
+ + Item Model Alphanumeric sorting
+ # Fixed ZLField issue when no App Instances were created
 
 3.0.12
  # Fixed Submission DateTime error introduced in v3.0.11
