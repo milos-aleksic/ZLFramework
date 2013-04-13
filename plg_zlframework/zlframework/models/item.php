@@ -697,6 +697,13 @@ class ZLModelItem extends ZLModel
 			$reversed = 'ASC';
 		}
 
+		// get ordering type
+		$alphanumeric = false;
+		if (($index = array_search('_alphanumeric', $order)) !== false) {
+			$alphanumeric = true;
+			unset($order[$index]);
+		}
+
 		// item priority
 		if (($index = array_search('_priority', $order)) !== false) {
 			$result[1] = "a.priority DESC, ";
@@ -717,14 +724,22 @@ class ZLModelItem extends ZLModel
 		foreach ($order as $element) {
 			if (strpos($element, '_item') === 0) {
 				$var = str_replace('_item', '', $element);
-				$result[1] .= $reversed == 'ASC' ? "a.$var+0<>0 DESC, a.$var+0, a.$var" : "a.$var+0<>0, a.$var+0 DESC, a.$var DESC";
+				if ($alphanumeric) {
+					$result[1] = $reversed == 'ASC' ? "a.$var+0<>0 DESC, a.$var+0, a.$var" : "a.$var+0<>0, a.$var+0 DESC, a.$var DESC";
+				} else {
+					$result[1] = $reversed == 'ASC' ? "a.$var" : "a.$var DESC";
+				}
 			}
 		}
 
 		// else order by elements
 		if (!isset($result[1])) {
 			$result[0] = ZOO_TABLE_SEARCH." AS s ON a.id = s.item_id AND s.element_id IN ('".implode("', '", $order)."')";
-			$result[1] = $reversed == 'ASC' ? "ISNULL(s.value), s.value+0<>0 DESC, s.value+0, s.value" : "s.value+0<>0, s.value+0 DESC, s.value DESC";
+			if ($alphanumeric) {
+				$result[1] = $reversed == 'ASC' ? "ISNULL(s.value), s.value+0<>0 DESC, s.value+0, s.value" : "s.value+0<>0, s.value+0 DESC, s.value DESC";
+			} else {
+				$result[1] = $reversed == 'ASC' ? "s.value" : "s.value DESC";
+			}
 		}
 
 		return $result;
