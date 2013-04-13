@@ -59,7 +59,7 @@ defined('_JEXEC') or die('Restricted access');
 	},
 	"_alphanumeric":{
 		"type":"checkbox",
-		"label":"PLG_ZLFRAMEWORK_ALPHANUMERIC_SORTING",
+		"label":"PLG_ZLFRAMEWORK_ALPHANUMERIC",
 		"specific": {
 			"label": "JYES",
 			"value":"_alphanumeric"
