@@ -498,6 +498,10 @@ class ZLModelItem extends ZLModel
 			$type = str_ireplace("equal", "", $type);
 		}
 
+		// Decimal conversion fix
+		if ($convert == 'DECIMAL') 
+			$convert = 'DECIMAL(10,2)';
+
 		// Defaults
 		$sql = array();
 		$value = $from;
