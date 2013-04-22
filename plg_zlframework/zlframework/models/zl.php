@@ -224,8 +224,8 @@ class ZLModel extends ZLWorksAroundJoomlaToGetAModel
 
         $this->_buildQueryFields($query);
         $this->_buildQueryFrom($query);
-        $this->_buildQueryJoins($query);
         $this->_buildQueryWhere($query);
+        $this->_buildQueryJoins($query);
         $this->_buildQueryGroup($query);
         $this->_buildQueryHaving($query);
         $this->_buildQueryOrder($query);
@@ -243,8 +243,8 @@ class ZLModel extends ZLWorksAroundJoomlaToGetAModel
         $query->select( 'COUNT( DISTINCT a.id )');
 
         $this->_buildQueryFrom($query);
-        $this->_buildQueryJoins($query);
         $this->_buildQueryWhere($query);
+        $this->_buildQueryJoins($query);
         $this->_buildQueryGroup($query);
         $this->_buildQueryHaving($query);
 
