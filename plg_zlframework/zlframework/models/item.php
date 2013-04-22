@@ -101,7 +101,7 @@ class ZLModelItem extends ZLModel
 		}
 
 		// tags
-		if ($this->getState('tag')) {
+		if ($this->getState('tags')) {
 			$query->join('LEFT', ZOO_TABLE_TAG." AS c ON a.id = c.item_id");
 		}
 
@@ -271,48 +271,6 @@ class ZLModelItem extends ZLModel
 			}
 			$query->where('(' . implode(' OR ', $where) . ')');
 		}
-
-		// set tag filtering
-		if ($tags) {
-			$where = '';
-			$wheres = array('AND' => array(), 'OR' => array());
-
-			// for each tag
-			foreach ($tags as $tag) if ($value = $tag->get('value', '')) {
-
-				// build the where for ORs
-				if ( strtoupper($tag->get('mode', 'OR')) == 'OR' ) {
-					$wheres['OR'][] = 'c.name LIKE ' . $this->_db->Quote( $value );
-
-				// it's heavy query but the only way for AND mode
-				} else {
-					
-					$wheres['AND'][] = 
-					"a.id IN ("
-					." SELECT b.id FROM " . ZOO_TABLE_ITEM . " AS b"
-					." LEFT JOIN " . ZOO_TABLE_TAG . " AS y"
-					." ON b.id = y.item_id"
-					." WHERE y.name = " . $this->_db->Quote( $value ) . ")";
-				}
-			}
-
-			// merge ORs
-			if ( count($wheres['OR']) && count($wheres['AND']) ) {
-				// $where .= '(' . implode(' OR ', $wheres['OR']) . ') AND (' . implode(' AND ', $wheres['AND']) . ')';
-			}
-
-			// and the ORs
-			if ( count($wheres['OR']) ) {
-				$where .= '(' . implode(' OR ', $wheres['OR']) . ')';
-			}
-			
-			// and the ANDs
-			if ( count($wheres['AND']) ) {
-				// $where .= '(' . implode(' OR ', $wheres['AND']) . ')';
-			}
-
-			$query->where( '(' . $where . ')' );
-		}
 	}
 
 	/**
@@ -406,11 +364,43 @@ class ZLModelItem extends ZLModel
 					else {
 						// it's heavy query but the only way for AND mode
 						foreach ($value as $id) {
-							$wheres[$logic][]  = "a.id IN ("
-										." SELECT b.id FROM ".ZOO_TABLE_ITEM." AS b"
-										." LEFT JOIN " . ZOO_TABLE_CATEGORY_ITEM . " AS y"
-										." ON b.id = y.item_id"
-										." WHERE y.category_id = ".(int) $id .")";
+							$wheres[$logic][] =
+							"a.id IN ("
+							." SELECT b.id FROM ".ZOO_TABLE_ITEM." AS b"
+							." LEFT JOIN " . ZOO_TABLE_CATEGORY_ITEM . " AS y"
+							." ON b.id = y.item_id"
+							." WHERE y.category_id = ".(int) $id .")";
+						}
+					}
+				}
+			}
+		}
+
+		// Tags filtering
+		$allTags = $this->getState('tags', array());
+		if ($allTags) {
+			foreach ( $allTags as $tags ) {
+				if ($values = $tags->get('value', array())) {
+					$logic = $tags->get('logic', 'AND'); 
+
+					// quote the values
+					foreach ($values as &$val) {
+						$val = $this->_db->Quote( $val );
+					}
+
+					// build the where for ORs
+					if ( strtoupper($tags->get('mode', 'OR')) == 'OR' ){
+						$wheres[$logic][] = "c.name IN (".implode(',', $values ).")";
+					} 
+					else {
+						// it's heavy query but the only way for AND mode
+						foreach ($values as $val) {
+							$wheres[$logic][] =
+							"a.id IN ("
+							." SELECT b.id FROM " . ZOO_TABLE_ITEM . " AS b"
+							." LEFT JOIN " . ZOO_TABLE_TAG . " AS y"
+							." ON b.id = y.item_id"
+							." WHERE y.name = " . $val . ")";
 						}
 					}
 				}
