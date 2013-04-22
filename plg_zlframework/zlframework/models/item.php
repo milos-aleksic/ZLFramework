@@ -11,6 +11,9 @@ defined('_JEXEC') or die('Restricted access');
 
 class ZLModelItem extends ZLModel
 {
+	protected $join_cats = false;
+	protected $join_tags = false;
+
 	/**
 	 * Magic method to set states by calling a method named as the filter
 	 * @param  string $name The name of the state to apply
@@ -96,8 +99,13 @@ class ZLModelItem extends ZLModel
 	protected function _buildQueryJoins(&$query)
 	{
 		// categories
-		if($this->getState('categories')){
+		if ($this->join_cats) {
 			$query->join('LEFT', ZOO_TABLE_CATEGORY_ITEM." AS b ON a.id = b.item_id");
+		}
+
+		// tags
+		if ($this->join_tags) {
+			$query->join('LEFT', ZOO_TABLE_TAG." AS t ON a.id = t.item_id");
 		}
 
 		// elements
@@ -254,10 +262,9 @@ class ZLModelItem extends ZLModel
 	 */
 	protected function itemFilters(&$query)
 	{
-		// Filters
-		$this->apps   = $this->getState('application', array());
-		$types  = $this->getState('type', array());
-		$ids  	= $this->getState('id', false);
+		// init vars
+		$ids  = $this->getState('id', false);
+		$tags = $this->getState('tag', false);
 
 		// set filtering by items id
 		if ($ids){
@@ -267,25 +274,35 @@ class ZLModelItem extends ZLModel
 			}
 			$query->where('(' . implode(' OR ', $where) . ')');
 		}
+	}
 
-		// convert types into raw array
+	/**
+	 * Create and returns a nested array of App->Type->Elements
+	 */
+	protected function getNestedArrayFilter()
+	{
+		// init vars
+		$this->apps  = $this->getState('application', array());
+		$this->types = $this->getState('type', array());
+
+		// convert apps into raw array
 		if (count($this->apps)) foreach ($this->apps as $key => $app) {
 			$this->apps[$key] = $app->get('value', '');
 		}
 
 		// convert types into raw array
-		if (count($types)) foreach ($types as $key => $type) {
-			$types[$key] = $type->get('value', '');
+		if (count($this->types)) foreach ($this->types as $key => $type) {
+			$this->types[$key] = $type->get('value', '');
 		}
 
 		// get apps selected objects, or all if none filtered
 		$apps = $this->app->table->application->all(array('conditions' => count($this->apps) ? 'id IN('.implode(',', $this->apps).')' : ''));
 
 		// create a nested array with all app/type/elements filtering data
-		$this->filters = array();
+		$filters = array();
 		foreach($apps as $app) {
 			
-			$this->filters[$app->id] = array();
+			$filters[$app->id] = array();
 			foreach ($app->getTypes() as $type) {
 
 				// get type elements
@@ -310,13 +327,15 @@ class ZLModelItem extends ZLModel
 				}
 
 				// if there are elements for current type, or type is selected for filtering
-				if (count($valid_elements) || in_array($type->id, $types)) {
+				if (count($valid_elements) || in_array($type->id, $this->types)) {
 
 					// save the type and it's elements
-					$this->filters[$app->id][$type->id] = $valid_elements;
+					$filters[$app->id][$type->id] = $valid_elements;
 				}
 			}
 		}
+
+		return $filters;
 	}
 
 	/**
@@ -344,15 +363,53 @@ class ZLModelItem extends ZLModel
 					// build the where for ORs
 					if ( strtoupper($cats->get('mode', 'OR')) == 'OR' ){
 						$wheres[$logic][] = "b.category_id IN (".implode(',', $value).")";
+
+						// set the join only on the OR, since AND has a subquery
+						$this->join_cats = true;
 					} 
 					else {
 						// it's heavy query but the only way for AND mode
 						foreach ($value as $id) {
-							$wheres[$logic][]  = "a.id IN ("
-										." SELECT b.id FROM ".ZOO_TABLE_ITEM." AS b"
-										." LEFT JOIN " . ZOO_TABLE_CATEGORY_ITEM . " AS y"
-										." ON b.id = y.item_id"
-										." WHERE y.category_id = ".(int) $id .")";
+							$wheres[$logic][] =
+							"a.id IN ("
+							." SELECT b.id FROM ".ZOO_TABLE_ITEM." AS b"
+							." LEFT JOIN " . ZOO_TABLE_CATEGORY_ITEM . " AS y"
+							." ON b.id = y.item_id"
+							." WHERE y.category_id = ".(int) $id .")";
+						}
+					}
+				}
+			}
+		}
+
+		// Tags filtering
+		$allTags = $this->getState('tags', array());
+		if ($allTags) {
+			foreach ( $allTags as $tags ) {
+				if ($values = $tags->get('value', array())) {
+					$logic = $tags->get('logic', 'AND'); 
+
+					// quote the values
+					foreach ($values as &$val) {
+						$val = $this->_db->Quote( $val );
+					}
+
+					// build the where for ORs
+					if ( strtoupper($tags->get('mode', 'OR')) == 'OR' ){
+						$wheres[$logic][] = "t.name IN (".implode(',', $values ).")";
+
+						// set the join only on the OR, since AND has a subquery
+						$this->join_tags = true;
+					} 
+					else {
+						// it's heavy query but the only way for AND mode
+						foreach ($values as $val) {
+							$wheres[$logic][] =
+							"a.id IN ("
+							." SELECT ti.id FROM " . ZOO_TABLE_ITEM . " AS ti"
+							." LEFT JOIN " . ZOO_TABLE_TAG . " AS t"
+							." ON ti.id = t.item_id"
+							." WHERE t.name = " . $val . ")";
 						}
 					}
 				}
@@ -363,7 +420,8 @@ class ZLModelItem extends ZLModel
 		$k = 0;
 
 		// get the filter query
-		foreach ($this->filters as $app => &$types) {
+		$nestedFilter = $this->getNestedArrayFilter();
+		foreach ($nestedFilter as $app => &$types) {
 
 			// iterate over types
 			$types_queries = array();
