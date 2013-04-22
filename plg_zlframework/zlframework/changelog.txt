@@ -2,9 +2,12 @@ Changelog
 ------------
 
 3.0.13
- + Item Model IDs filtering
+ + Item Model Items IDs/Tags filtering, 
  + Item Model Alphanumeric sorting
+ ^ Item Model Cross App/Type filtering improved
+ ^ Item Model Search Type feature improved
  # Fixed ZLField issue when no App Instances were created
+ # Minor bugs fixed
 
 3.0.12
  # Fixed Submission DateTime error introduced in v3.0.11
