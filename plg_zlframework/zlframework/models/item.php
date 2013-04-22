@@ -96,13 +96,19 @@ class ZLModelItem extends ZLModel
 	protected function _buildQueryJoins(&$query)
 	{
 		// categories
-		if ($this->getState('categories')) {
-			$query->join('LEFT', ZOO_TABLE_CATEGORY_ITEM." AS b ON a.id = b.item_id");
+		if ($cats = $this->getState('categories')) {
+			// Join only on the OR, since AND has a subquery
+			if ( strtoupper($cats->get('mode', 'OR')) == 'OR' ){
+				$query->join('LEFT', ZOO_TABLE_CATEGORY_ITEM." AS b ON a.id = b.item_id");
+			}
 		}
 
 		// tags
-		if ($this->getState('tags')) {
-			$query->join('LEFT', ZOO_TABLE_TAG." AS c ON a.id = c.item_id");
+		if ($tags = $this->getState('tags')) {
+			// Join only on the OR, since AND has a subquery
+			if ( strtoupper($tags->get('mode', 'OR')) == 'OR' ){
+				$query->join('LEFT', ZOO_TABLE_TAG." AS t ON a.id = t.item_id");
+			}
 		}
 
 		// elements
@@ -390,17 +396,17 @@ class ZLModelItem extends ZLModel
 
 					// build the where for ORs
 					if ( strtoupper($tags->get('mode', 'OR')) == 'OR' ){
-						$wheres[$logic][] = "c.name IN (".implode(',', $values ).")";
+						$wheres[$logic][] = "t.name IN (".implode(',', $values ).")";
 					} 
 					else {
 						// it's heavy query but the only way for AND mode
 						foreach ($values as $val) {
 							$wheres[$logic][] =
 							"a.id IN ("
-							." SELECT b.id FROM " . ZOO_TABLE_ITEM . " AS b"
-							." LEFT JOIN " . ZOO_TABLE_TAG . " AS y"
-							." ON b.id = y.item_id"
-							." WHERE y.name = " . $val . ")";
+							." SELECT ti.id FROM " . ZOO_TABLE_ITEM . " AS ti"
+							." LEFT JOIN " . ZOO_TABLE_TAG . " AS t"
+							." ON ti.id = t.item_id"
+							." WHERE t.name = " . $val . ")";
 						}
 					}
 				}
