@@ -2,6 +2,7 @@ Changelog
 ------------
 
 3.0.13
+ ^ Updated Plupload to v1.5.7
  + Item Model Items IDs/Tags filtering, 
  + Item Model Alphanumeric sorting
  ^ Item Model Cross App/Type filtering improved
