@@ -1,0 +1,838 @@
+/* Copyright (C) JOOlanders SL http://www.gnu.org/licenses/gpl-2.0.html GNU/GPLv2 only */
+
+.col-left {width: 80% !important}
+.col-right {width: 40px !important}
+
+/* Common
+----------------------------------------------------------------------------------------------------*/
+.zlux-loader-horiz {
+	background: url(img/loader-horiz.gif) no-repeat scroll 0 0 transparent;
+	width: 60px;
+	height: 6px;
+	display: inline-block;
+}
+
+.zlux-loader-circle-big {
+	background: url(img/loader-circe-big.gif) no-repeat scroll 0 0 transparent;
+	width: 60px;
+	height: 60px;
+	display: inline-block;
+}
+
+.zlux-loader {
+	background: url(img/loader.gif) no-repeat scroll 0 0 transparent;
+	width: 16px;
+	height: 16px;
+	display: inline-block;
+}
+
+.zlux-loader-raw {
+	background-image: url(img/loader.gif) !important;
+}
+
+.zlux-loader-horiz-raw {
+	background-image: url(img/loader-horiz.gif) !important;
+}
+
+/* ZLUX Sprite example
+----------------------------------------------------------------------------------------------------*/
+
+// .zlux-sprite-example {
+	// background: url(img/zlux-sprite.gif) no-repeat scroll 0 0 transparent;
+	// width: 60px;
+	// height: 60px;
+	// display: inline-block;
+// }
+
+/* ZLUX Icons
+----------------------------------------------------------------------------------------------------*/
+
+
+// .zlux [class^="zlux-icon-"],
+// .zlux [class*=" zlux-icon-"] {
+// 	background-image: url("img/zlux-icons.png");
+// 	background-position: 14px 14px;
+// 	background-repeat: no-repeat;
+// 	display: inline-block;
+// 	height: 14px;
+// 	line-height: 14px;
+// 	margin-top: 1px;
+// 	vertical-align: text-top;
+// 	width: 14px;
+// }
+
+/* ZL Bootstrap
+----------------------------------------------------------------------------------------------------*/
+
+.zl-bootstrap {
+
+	.btn {
+
+		&:focus {
+			outline: 0;
+		}
+
+		[class^="icon-"],
+		[class*=" icon-"] {
+			margin-right: 6px;
+		}
+
+		.caret {
+			margin-left: 6px;
+		}
+
+		&.btn-working [class^="icon-"],
+		&.btn-working [class*=" icon-"] {
+			background: url(img/loader-btn.gif) no-repeat scroll 0 0 transparent;
+		}
+
+		&.btn-mini [class^="icon-"],
+		&.btn-mini [class*=" icon-"] {
+			margin-top: 0;
+		}
+	}
+
+	.zlux-btn-edit {
+		margin-bottom: 9px;
+		margin-left: 6px;
+		vertical-align: middle;
+
+		[class^="icon-"],
+		[class*=" icon-"] {
+			margin-right: 0
+		}
+	}
+
+	[class^="icon-zlux-loading"],
+	[class*=" icon-zlux-loading"] {
+		background: url(img/loader-btn.gif) no-repeat scroll 0 0 transparent;
+	}
+}
+
+/* ZLUX Upload
+----------------------------------------------------------------------------------------------------*/
+.zlux-upload {
+
+	// DROPZONE
+	.zlux-upload-dropzone {
+		border: 4px dashed transparent;
+		border-radius: 3px;
+		width: 287px;
+		height: 346px;
+		top: 0;
+		left: 0;
+		margin: 4px 0 0 3px;
+		position: absolute;
+		display: none;
+
+		&[data-zlux-draghover="true"] {
+			display: block;
+			border-color: #CFCFCF; // CFCFCF
+			background-color: white;
+			opacity: .7;
+		}
+
+		.zlux-upload-dropzone-msg {
+			display: none; // by default don't display
+			text-align: center;
+			left: 50%;
+			margin-left: -80px;
+			margin-top: -28px;
+			position: absolute;
+			top: 50%;
+			width: 160px;
+		}
+	}
+
+	// if zlux upload status = ''
+	&[data-zlux-upload-status=""] .zlux-upload-dropzone {
+		display: block;
+
+		.zlux-upload-dropzone-msg {
+			display: block;
+		}
+	}
+
+
+	// FILE LIST
+	.zlux-upload-filelist {
+
+		// file
+		.zlux-upload-file {
+			border-radius: 4px;
+			border: 1px solid #DDD;
+			margin: 2px -2px;
+			line-height: 20px;
+			padding: 8px;
+			text-align: left;
+			vertical-align: top;
+
+			// buttons
+			[class^="icon-"],
+			[class*=" icon-"] {
+				cursor: pointer;
+				float: right;
+				margin: 3px 0 0 4px;
+				font-size: 14px;
+			}
+
+			// file details
+			.zlux-upload-file-details {
+				.zlux-upload-file-details-error,
+				.zlux-upload-file-details-list {
+					border-top: 1px dashed #DDD;
+					margin-top: 8px;
+					padding-top: 8px;
+				}
+
+				.zlux-upload-file-details-error {
+					border: none;
+					color: #b94a48;
+					text-align: center;
+					display: none;
+				}
+			}
+
+			// file upload progress
+			.zlux-upload-file-progress {
+				display: none;
+				float: right;
+			}
+
+			// if status = started / uploading
+			&[data-zlux-upload-status="started"],
+			&[data-zlux-upload-status="uploading"] {
+				border-color: #CFCFCF;
+
+				// set the loading icon
+				.zlux-upload-file-btn-remove {
+					cursor: default;
+					background: url(img/loader-btn.gif) no-repeat scroll 0 0 transparent;
+					height: 14px;
+
+					&:before {
+						content: "";
+					}
+				}
+
+				// show progress
+				.zlux-upload-file-progress {
+					display: block;
+				}
+			}
+
+			// if status = done
+			&[data-zlux-upload-status="error"] {
+
+				// show the error
+				.zlux-upload-file-details-error {
+					display: block;
+				}
+
+				// set icon color
+				.zlux-upload-file-btn-details {
+					color: #b94a48;
+				}
+			}
+
+			// if status = done
+			&[data-zlux-upload-status="done"] {
+
+				// remove icon
+				.zlux-upload-file-btn-remove {
+					color: #468847;
+				}
+
+				// show the progress
+				.zlux-upload-file-progress {
+					display: block;
+				}
+			}
+		}
+	}
+
+	// if zlux upload status = ''
+	&[data-zlux-upload-status=""] .zlux-upload-filelist {
+		display: none;
+	}
+}
+
+/* ZLUX Dialog
+----------------------------------------------------------------------------------------------------*/
+.zlux-dialog {
+
+	// widget adaption
+	&.ui-dialog {
+		min-height: 452px;
+		border: 1px solid #999;
+		border: 1px solid rgba(0, 0, 0, 0.3);
+		overflow: hidden;
+		*border: 1px solid #999;
+		-webkit-border-radius: 6px;
+		 -moz-border-radius: 6px;
+			  border-radius: 6px;
+		-webkit-box-shadow: 0 3px 7px rgba(0, 0, 0, 0.3);
+		 -moz-box-shadow: 0 3px 7px rgba(0, 0, 0, 0.3);
+			  box-shadow: 0 3px 7px rgba(0, 0, 0, 0.3);
+		-webkit-background-clip: padding-box;
+		 -moz-background-clip: padding-box;
+			  background-clip: padding-box;
+	}
+
+	&.ui-dialog .ui-dialog-titlebar {
+		background: none;
+		border: none;
+		padding: 9px 15px;
+		border-bottom: 1px solid #eee;
+	}
+
+	&.ui-dialog .ui-dialog-titlebar .ui-dialog-title {
+		font-size: 24px;
+		margin: 0;
+		line-height: 30px;
+	}
+
+	&.ui-dialog .ui-dialog-content .zlux-loader-horiz {
+		margin: 50px auto 0;
+		display: block;
+	}
+
+	// spinner
+	.zlux-loader-circle-big {
+		position: absolute;
+		top: 50%;
+		left: 50%;
+		width: 60px;
+		height: 60px;
+		margin-left: -30px;
+		margin-top: -30px;
+		z-index: 1;
+	}
+
+	// TOOLBAR
+	.zlux-dialog-toolbar {
+		position: relative;
+		text-align: center;
+		border-bottom: 1px solid #EEE;
+		border-radius: 2px;
+		padding: 4px 0;
+
+		// tools
+		[class^="icon-"] {
+			cursor: pointer;
+			position: relative;
+
+			&:hover {
+				border-color: #CFCFCF;
+			}
+
+			&.disabled {
+				border-color: #EEEEEE;
+				color: #C0C0C0;
+				cursor: default;
+			}
+
+			&.zlux-ui-tool-enabled {
+				border-color: #CFCFCF;
+			}
+		}
+
+		// all toolbars
+		ul[class^="zlux-dialog-toolbar-"] {
+			display: none;
+			margin-bottom: 0;
+		}
+
+		// main toolbar
+		ul[class^="zlux-dialog-toolbar-main"] {
+			display: block;
+		}
+
+		// back to main menu btn
+		.zlux-dialog-toolbar-backtomain {
+			display: none;
+			cursor: pointer;
+			font-size: 17px;
+			top: 5px;
+			left: 4px;
+			position: absolute;
+			border-color: transparent;
+
+			&:hover {
+				border-color: #CFCFCF;
+			}
+		}
+	}
+}
+
+
+/* ZLUX Dialog - LESS Mixtins
+----------------------------------------------------------------------------------------------------*/
+.zlux-datatables-wrapper(@height) {
+	.ui-dialog-content,
+	.dataTables_wrapper {
+		min-height: @height !important;
+	}
+}
+
+.zlux-datatables-dialog-tmpl(){
+
+	// global entry style. User for Items, files or general entries
+	.zlux-global-entry {
+
+		// icons
+		[class^="icon-"],
+		[class*=" icon-"] {
+			float: right;
+			margin: 3px 0 0 4px;
+			cursor: pointer;
+			font-size: 14px;
+			display: inline-block;
+			text-align: center;
+			width: 1.25em;
+		}
+
+		// details
+		.zlux-global-entry-details {
+			display: none;
+
+			ul.unstyled {
+				border-top: 1px dashed #DDD;
+				margin-top: 8px;
+				padding-top: 8px;
+				margin-bottom: 0;
+			}
+		}
+	}
+
+	// wrapper
+	.zlux-datatables-wrapper(349px);
+
+	.ui-dialog-content {
+		height: 349px !important;
+		overflow: hidden;
+		position: relative;
+		margin-top: 5px;
+		opacity: 0; // init visibility
+	}
+
+	// perfect scroll integration
+	.ps-scrollbar-x {display: none}
+	.ps-scrollbar-y {
+		right: 0 !important;
+		margin-top: 10px;
+	}
+
+	&.noscroll {
+		.ps-scrollbar-x,
+		.ps-scrollbar-y {display: none}
+	}
+
+	// bootstrap rows
+	.row-fluid {
+		margin-bottom: 5px;
+	}
+
+	// min mode
+	&.zlux-dialog-mini {
+		// pagination adaption
+		.dataTables_paginate {
+			li {
+				display: none;
+
+				a.prev {
+					float: left;
+					width: 112px;
+				}
+				a.next {
+					float: right;
+					width: 111px;
+				}
+			}
+
+			li.prev,
+			li.next {
+				display: inline;
+			}
+		}
+	}
+
+	// full mode
+	&.zlux-dialog-full {
+		.zlux-datatables-wrapper(495px);
+
+		table.table {
+			margin-top: 6px !important;
+			margin-bottom: 6px !important;
+		}
+
+		// rows
+		.row-fluid {
+			margin-bottom: 0;
+		}
+
+		// search input
+		div.dataTables_filter {
+			input {
+				width: 200px;
+			}
+
+			label {
+				float: right;
+			}
+		}
+
+		// footer
+		.row-footer {
+			position: absolute;
+			bottom: 0;
+			left: 0;
+		}
+
+		// pagination adaption
+		.dataTables_paginate {
+			li {display: inline}
+		}
+	}
+}
+
+/* ZLUX Items Manager
+----------------------------------------------------------------------------------------------------*/
+.zlux-itemsmanager-dialog {
+	.zlux-datatables-dialog-tmpl();
+
+	// items
+	[data-zlux-global-entry-status="true"] .zlux-global-entry {
+
+		.zlux-global-entry-name a {
+			color: #444;
+			cursor: default;
+
+			&:hover,
+			&:focus {
+				text-decoration: none;
+			}
+		}
+	}
+
+	.zlux-dialog-subtoolbar-filter {
+		border-top: 1px solid #EEE;
+		margin: 4px 2px 0;
+
+		// dropdowns
+		.btn-group {
+			display: block;
+			width: 276px;
+			margin: 5px auto;
+
+			// menu triggerer
+			a.dropdown-toggle {
+				display: block;
+				background-color: white;
+				background-image: none;
+				border-radius: 4px;
+				box-shadow: none;
+				text-shadow: none;
+				color: #444;
+				border: 1px solid #CCC;
+
+				&:focus {
+					box-shadow: 0 1px 1px rgba(0, 0, 0, 0.075) inset, 0 0 8px rgba(82, 168, 236, 0.6);
+					border-color: rgba(82, 168, 236, 0.8);
+					outline: 0 none;
+				}
+
+				// if disabled
+				&.disabled {
+					font-weight: normal;
+					
+					&:focus {
+						box-shadow: none;
+						border-color: #CCC;
+					}
+				}
+			}
+
+			&.open a.dropdown-toggle {
+				background-color: white;
+			}
+
+			// remove icon
+			.zlux-ui-dropdown-unselect {
+				font-size: 13px;
+				padding: 9px 10px 7px;
+				position: absolute;
+				right: 0;
+				top: -1px;
+				z-index: 3;
+			}
+
+			// menu list
+			.dropdown-menu {
+				min-width: 275px;
+				max-height: 300px;
+				border: 1px solid #CCC;
+				text-align: left;
+    			overflow: auto;
+
+				a[data-value="0"] {
+					text-align: center;
+				}
+			}
+		}
+
+
+		// search input
+		.dataTables_filter {
+			position: relative;
+			margin: 5px auto 0;
+			width: 276px;
+
+			input[aria-controls^="DataTables_Table"] {
+				width: 262px;
+				margin: 0;
+				text-indent: 20px;	
+			}
+
+			label {
+				cursor: default;
+				margin-bottom: 0;
+			}
+
+			[class^="icon-"] {
+				position: absolute;
+				cursor: default;
+				left: 7px;
+				top: 8px;
+			}
+
+			.zlux-ui-dropdown-unselect {
+				cursor: pointer;
+				font-size: 13px;
+				left: auto;
+				right: 10px;
+			}
+		}
+	}
+}
+   
+.zlux-itemsmanager {
+	margin: 0;
+}
+
+/* ZLUX Files Manager
+----------------------------------------------------------------------------------------------------*/
+.zlux-filesmanager-dialog {
+	.zlux-datatables-dialog-tmpl();
+
+	// TOOLBAR
+	&.zlux-dialog .zlux-dialog-toolbar {
+		[class^="icon-"] {
+
+			font-size: 20px;
+
+			// new folder plus icon
+			[class="icon-plus-sign"] {
+				font-size: 10px;
+				top: 1px;
+				right: 2px;
+				position: absolute;
+			}
+		}
+	}
+
+	// Actions Tools
+	ul.action_tools {
+		text-align: center;
+
+		[class^="icon-"],
+		[class*=" icon-"] {
+			cursor: pointer;
+			position: relative;
+
+			// new folder plus icon
+			[class^="icon-"],
+			[class*=" icon-"] {
+				font-size: 10px;
+				left: 28px;
+				top: 3px;
+				position: absolute;
+			}
+		}
+	}
+}
+
+.zlux-filesmanager,
+.zlux-filesmanager-dialog {
+
+	// bredcrumb
+	ul.breadcrumb {
+		margin: 0;
+	}
+
+	table.dataTable {
+
+		// icon column ordering img fix
+		thead th:nth-child(1) {
+			background-position: center center;
+		}
+
+		tr[data-type="file"] td.column-icon {
+			padding-left: 10px;
+		}
+	}
+}
+
+
+/* ZLUX DataTable
+----------------------------------------------------------------------------------------------------*/
+.zlux-itemsmanager,
+.zlux-filesmanager {
+
+	.dataTables_wrapper {
+		position: relative;
+		clear: both;
+		zoom: 1;
+		min-height: 225px;
+
+		a:focus {
+			outline: none;
+		}
+	}
+
+	table.dataTable {
+
+		td.right {
+			text-align: left;
+		}
+
+		td.center {
+			text-align: center;
+		}
+
+		td.right {
+			text-align: right;
+		}
+
+		// icon column
+		td.column-icon {
+			font-size: 14px;
+			padding-top: 12px;
+		}
+
+		// name column
+		td.column-name {
+			max-width: 229px;
+			word-wrap: break-word;
+		}
+	}
+/**/
+
+	div.dataTables_length label {
+		float: left;
+		text-align: left;
+	}
+
+	div.dataTables_length select {
+		width: 75px;
+	}
+
+	div.dataTables_info {
+		padding-top: 8px;
+		margin-left: 4px;
+	}
+
+	div.dataTables_paginate {
+		float: right;
+		margin: 0;
+	}
+
+	table.table {
+		clear: both;
+		margin-bottom: 0 !important;
+		max-width: none !important;
+	}
+
+	table.table thead .sorting,
+	table.table thead .sorting_asc,
+	table.table thead .sorting_desc,
+	table.table thead .sorting_asc_disabled,
+	table.table thead .sorting_desc_disabled {
+		cursor: pointer;
+		*cursor: hand;
+	}
+
+	table.table thead .sorting { background: url('img/datatable/sort_both.png') no-repeat center right; }
+	table.table thead .sorting_asc { background: url('img/datatable/sort_asc.png') no-repeat center right; }
+	table.table thead .sorting_desc { background: url('img/datatable/sort_desc.png') no-repeat center right; }
+
+	table.table thead .sorting_asc_disabled { background: url('img/datatable/sort_asc_disabled.png') no-repeat center right; }
+	table.table thead .sorting_desc_disabled { background: url('img/datatable/sort_desc_disabled.png') no-repeat center right; }
+
+	table.dataTable th:active {
+		outline: none;
+	}
+
+	/* Scrolling */
+	div.dataTables_scrollHead table {
+		margin-bottom: 0 !important;
+		border-bottom-left-radius: 0;
+		border-bottom-right-radius: 0;
+	}
+
+	div.dataTables_scrollHead table thead tr:last-child th:first-child,
+	div.dataTables_scrollHead table thead tr:last-child td:first-child {
+		border-bottom-left-radius: 0 !important;
+		border-bottom-right-radius: 0 !important;
+	}
+
+	div.dataTables_scrollBody table {
+		border-top: none;
+		margin-bottom: 0 !important;
+	}
+
+	div.dataTables_scrollBody tbody tr:first-child th,
+	div.dataTables_scrollBody tbody tr:first-child td {
+		border-top: none;
+	}
+
+	div.dataTables_scrollFoot table {
+		border-top: none;
+	}
+
+	/*
+	 * FixedColumns styles
+	 */
+	div.DTFC_LeftHeadWrapper table,
+	div.DTFC_LeftFootWrapper table,
+	table.DTFC_Cloned tr.even {
+		background-color: white;
+	}
+
+	div.DTFC_LeftHeadWrapper table {
+		margin-bottom: 0 !important;
+		border-top-right-radius: 0 !important;
+		border-bottom-left-radius: 0 !important;
+		border-bottom-right-radius: 0 !important;
+	}
+
+	div.DTFC_LeftHeadWrapper table thead tr:last-child th:first-child,
+	div.DTFC_LeftHeadWrapper table thead tr:last-child td:first-child {
+		border-bottom-left-radius: 0 !important;
+		border-bottom-right-radius: 0 !important;
+	}
+
+	div.DTFC_LeftBodyWrapper table {
+		border-top: none;
+		margin-bottom: 0 !important;
+	}
+
+	div.DTFC_LeftBodyWrapper tbody tr:first-child th,
+	div.DTFC_LeftBodyWrapper tbody tr:first-child td {
+		border-top: none;
+	}
+
+	div.DTFC_LeftFootWrapper table {
+		border-top: none;
+	}
+}
