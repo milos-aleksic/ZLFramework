@@ -1,40 +1,7 @@
 /* Copyright (C) JOOlanders SL http://www.gnu.org/licenses/gpl-2.0.html GNU/GPLv2 only */
 
-/* Common
-----------------------------------------------------------------------------------------------------*/
-.zlux-loader-horiz {
-	background: url(img/loader-horiz.gif) no-repeat scroll 0 0 transparent;
-	width: 60px;
-	height: 6px;
-	display: inline-block;
-}
-
-.zlux-loader-circle-big {
-	background: url(img/loader-circe-big.gif) no-repeat scroll 0 0 transparent;
-	width: 60px;
-	height: 60px;
-	display: inline-block;
-}
-
-.zlux-loader {
-	background: url(img/loader.gif) no-repeat scroll 0 0 transparent;
-	width: 16px;
-	height: 16px;
-	display: inline-block;
-}
-
-.zlux-loader-raw {
-	background-image: url(img/loader.gif) !important;
-}
-
-.zlux-loader-horiz-raw {
-	background-image: url(img/loader-horiz.gif) !important;
-}
-
-
 /* ZL Bootstrap
 ----------------------------------------------------------------------------------------------------*/
-
 .zl-bootstrap {
 
 	.btn {
@@ -50,11 +17,6 @@
 
 		.caret {
 			margin-left: 6px;
-		}
-
-		&.btn-working [class^="icon-"],
-		&.btn-working [class*=" icon-"] {
-			background: url(img/loader-btn.gif) no-repeat scroll 0 0 transparent;
 		}
 
 		&.btn-mini [class^="icon-"],
@@ -73,12 +35,8 @@
 			margin-right: 0
 		}
 	}
-
-	[class^="icon-zlux-loading"],
-	[class*=" icon-zlux-loading"] {
-		background: url(img/loader-btn.gif) no-repeat scroll 0 0 transparent;
-	}
 }
+
 
 /* ZLUX Upload
 ----------------------------------------------------------------------------------------------------*/
@@ -178,7 +136,7 @@
 				// set the loading icon
 				.zlux-upload-file-btn-remove {
 					cursor: default;
-					background: url(img/loader-btn.gif) no-repeat scroll 0 0 transparent;
+					// background: url(img/loader-btn.gif) no-repeat scroll 0 0 transparent;
 					height: 14px;
 
 					&:before {
@@ -228,6 +186,7 @@
 	}
 }
 
+
 /* ZLUX Dialog
 ----------------------------------------------------------------------------------------------------*/
 .zlux-dialog {
@@ -248,24 +207,24 @@
 		-webkit-background-clip: padding-box;
 		 -moz-background-clip: padding-box;
 			  background-clip: padding-box;
-	}
+	
+		.ui-dialog-titlebar {
+			background: none;
+			border: none;
+			padding: 9px 15px;
+			border-bottom: 1px solid #eee;
+			
+			.ui-dialog-title {
+				font-size: 24px;
+				margin: 0;
+				line-height: 30px;
+			}
+		}
 
-	&.ui-dialog .ui-dialog-titlebar {
-		background: none;
-		border: none;
-		padding: 9px 15px;
-		border-bottom: 1px solid #eee;
-	}
-
-	&.ui-dialog .ui-dialog-titlebar .ui-dialog-title {
-		font-size: 24px;
-		margin: 0;
-		line-height: 30px;
-	}
-
-	&.ui-dialog .ui-dialog-content .zlux-loader-horiz {
-		margin: 50px auto 0;
-		display: block;
+		.ui-dialog-content .zlux-loader-horiz {
+			margin: 50px auto 0;
+			display: block;
+		}
 	}
 
 	// spinner
@@ -273,11 +232,16 @@
 		position: absolute;
 		top: 50%;
 		left: 50%;
-		width: 60px;
-		height: 60px;
-		margin-left: -30px;
-		margin-top: -30px;
+		font-size: 80px;
+		margin-left: -40px !important;
+		margin-top: -40px !important;
 		z-index: 1;
+	}
+
+	&[data-zlux-status="ready"] {
+		.zlux-loader-circle-big {
+			margin-top: -5px !important;
+		}
 	}
 
 	// TOOLBAR
@@ -337,27 +301,213 @@
 }
 
 
-
-
 /* ZLUX Items Manager
 ----------------------------------------------------------------------------------------------------*/
-.zlux-itemsmanager-dialog {
-	.zlux-datatables-dialog-tmpl();
+.zlux-itemsmanager {
 
-	// items
-	[data-zlux-global-entry-status="true"] .zlux-global-entry {
+	&.zlux-dialog {
+		.zlux-datatables-dialog-tmpl();
 
-		.zlux-global-entry-name a {
-			color: #444;
-			cursor: default;
+		// items
+		[data-zlux-global-entry-status="true"] .zlux-global-entry {
 
-			&:hover,
-			&:focus {
-				text-decoration: none;
+			.zlux-global-entry-name a {
+				color: #444;
+				cursor: default;
+
+				&:hover,
+				&:focus {
+					text-decoration: none;
+				}
+			}
+		}
+	}
+}
+
+
+/* ZLUX Files Manager
+----------------------------------------------------------------------------------------------------*/
+.zlux-filesmanager {
+
+	// bredcrumb
+	ul.breadcrumb {
+		margin: 0;
+	}
+
+	table.dataTable {
+
+		// icon column ordering img fix
+		thead th:nth-child(1) {
+			background-position: center 7px;
+
+			&:after {
+				padding-left: 10px;
+				float: none;
+				padding: 4px;
 			}
 		}
 	}
 
+	// DIALOG
+	&.zlux-dialog {
+		.zlux-datatables-dialog-tmpl();
+
+		// TOOLBAR
+		&.zlux-dialog [class^="zlux-dialog-toolbar-"] {
+
+			[class^="icon-"] {
+				font-size: 20px;
+
+				// new folder plus icon
+				[class="icon-plus-sign"] {
+					font-size: 10px;
+					top: 1px;
+					right: 2px;
+					position: absolute;
+				}
+			}
+		}
+
+		// Actions Tools
+		ul.action_tools {
+			text-align: center;
+
+			[class^="icon-"],
+			[class*=" icon-"] {
+				cursor: pointer;
+				position: relative;
+
+				// new folder plus icon
+				[class^="icon-"],
+				[class*=" icon-"] {
+					font-size: 10px;
+					left: 28px;
+					top: 3px;
+					position: absolute;
+				}
+			}
+		}
+	}
+}
+
+
+/* ZLUX DataTables
+----------------------------------------------------------------------------------------------------*/
+.zlux-datatables {
+
+	// wrapper
+	.dataTables_wrapper {
+		position: relative;
+		clear: both;
+		zoom: 1;
+		min-height: 225px;
+
+		a:focus {
+			outline: none;
+		}
+	}
+
+	// table
+	table.dataTable {
+		clear: both;
+		margin-bottom: 0 !important;
+		max-width: none !important;
+
+		// TD
+		td {
+			&.right {
+				text-align: left;
+			}
+
+			&.center {
+				text-align: center;
+			}
+
+			&.right {
+				text-align: right;
+			}
+
+			// icon column
+			&.column-icon {
+				font-size: 14px;
+				padding-top: 12px;
+				text-align: center;
+			}
+
+			// name column
+			&.column-name {
+				max-width: 229px;
+				word-wrap: break-word;
+			}
+		}
+
+		// TH
+		th {
+			&:active {
+				outline: none;
+			}
+		}
+
+		// sorting
+		thead {
+			.sorting, // both
+			.sorting_asc,
+			.sorting_desc,
+			.sorting_asc_disabled,
+			.sorting_desc_disabled {
+				cursor: pointer;
+				*cursor: hand;
+				position: relative;
+
+				&:after {
+					font-family: FontAwesome;
+					font-style: normal;
+					font-weight: normal;
+					font-size: 14px;
+					float: right;
+				}
+			}
+
+			.sorting_asc:after,
+			.sorting_asc_disabled:after {
+				content: "\f0d8"; // icon-caret-up
+			}
+			
+			.sorting_desc:after,
+			.sorting_desc_disabled:after {
+				content: "\f0d7"; // icon-caret-down
+			}
+
+			.sorting {
+				background: url('assets/img/sort_both.png') no-repeat center right;
+			}
+
+			.sorting_asc_disabled:after,
+			.sorting_desc_disabled:after { 
+				color: #DCDCDC;
+			}
+		}
+	}
+}
+
+
+/* LESS Mixtins
+----------------------------------------------------------------------------------------------------*/
+// dialog datatables wrapper
+.zlux-datatables-wrapper(@height) {
+	.ui-dialog-content,
+	.dataTables_wrapper {
+		min-height: @height !important;
+	}
+}
+
+// dialog
+.zlux-datatables-dialog-tmpl(){
+
+	// datatables wrapper
+	.zlux-datatables-wrapper(349px);
+
+	// FILTER TOOLBAR
 	.zlux-dialog-subtoolbar-filter {
 		border-top: 1px solid #EEE;
 		margin: 4px 2px 0;
@@ -366,7 +516,7 @@
 		.btn-group {
 			display: block;
 			width: 276px;
-			margin: 5px auto;
+			margin: 5px auto !important;
 
 			// menu triggerer
 			a.dropdown-toggle {
@@ -394,6 +544,11 @@
 						border-color: #CCC;
 					}
 				}
+
+				// caret
+				.caret {
+					margin-left: 5px;
+				}
 			}
 
 			&.open a.dropdown-toggle {
@@ -416,7 +571,7 @@
 				max-height: 300px;
 				border: 1px solid #CCC;
 				text-align: left;
-    			overflow: auto;
+				overflow: auto;
 
 				a[data-value="0"] {
 					text-align: center;
@@ -424,8 +579,7 @@
 			}
 		}
 
-
-		// search input
+		// Input
 		.dataTables_filter {
 			position: relative;
 			margin: 5px auto 0;
@@ -457,93 +611,6 @@
 			}
 		}
 	}
-}
-   
-.zlux-itemsmanager {
-	margin: 0;
-}
-
-/* ZLUX Files Manager
-----------------------------------------------------------------------------------------------------*/
-.zlux-filesmanager-dialog {
-	.zlux-datatables-dialog-tmpl();
-
-	// TOOLBAR
-	&.zlux-dialog .zlux-dialog-toolbar {
-		[class^="icon-"] {
-
-			font-size: 20px;
-
-			// new folder plus icon
-			[class="icon-plus-sign"] {
-				font-size: 10px;
-				top: 1px;
-				right: 2px;
-				position: absolute;
-			}
-		}
-	}
-
-	// Actions Tools
-	ul.action_tools {
-		text-align: center;
-
-		[class^="icon-"],
-		[class*=" icon-"] {
-			cursor: pointer;
-			position: relative;
-
-			// new folder plus icon
-			[class^="icon-"],
-			[class*=" icon-"] {
-				font-size: 10px;
-				left: 28px;
-				top: 3px;
-				position: absolute;
-			}
-		}
-	}
-}
-
-.zlux-filesmanager,
-.zlux-filesmanager-dialog {
-
-	// bredcrumb
-	ul.breadcrumb {
-		margin: 0;
-	}
-
-	table.dataTable {
-
-		// icon column ordering img fix
-		thead th:nth-child(1) {
-			background-position: center 7px;
-
-			&:after {
-				padding-left: 10px;
-				float: none;
-				padding: 4px;
-			}
-		}
-	}
-}
-
-
-/* ZLUX - LESS Mixtins
-----------------------------------------------------------------------------------------------------*/
-// dialog datatables wrapper
-.zlux-datatables-wrapper(@height) {
-	.ui-dialog-content,
-	.dataTables_wrapper {
-		min-height: @height !important;
-	}
-}
-
-// dialog
-.zlux-datatables-dialog-tmpl(){
-
-	// datatables wrapper
-	.zlux-datatables-wrapper(349px);
 
 	// global entry style. User for Items, files or general entries
 	.zlux-global-entry {
@@ -657,108 +724,6 @@
 		// pagination adaption
 		.dataTables_paginate {
 			li {display: inline}
-		}
-	}
-}
-
-
-/* ZLUX DataTables
-----------------------------------------------------------------------------------------------------*/
-
-// datatables
-.zlux-datatables {
-
-	// wrapper
-	.dataTables_wrapper {
-		position: relative;
-		clear: both;
-		zoom: 1;
-		min-height: 225px;
-
-		a:focus {
-			outline: none;
-		}
-	}
-
-	// table
-	table.dataTable {
-		clear: both;
-		margin-bottom: 0 !important;
-		max-width: none !important;
-
-		// TD
-		td {
-			&.right {
-				text-align: left;
-			}
-
-			&.center {
-				text-align: center;
-			}
-
-			&.right {
-				text-align: right;
-			}
-
-			// icon column
-			&.column-icon {
-				font-size: 14px;
-				padding-top: 12px;
-				text-align: center;
-			}
-
-			// name column
-			&.column-name {
-				max-width: 229px;
-				word-wrap: break-word;
-			}
-		}
-
-		// TH
-		th {
-			&:active {
-				outline: none;
-			}
-		}
-
-		// sorting
-		thead {
-			.sorting, // both
-			.sorting_asc,
-			.sorting_desc,
-			.sorting_asc_disabled,
-			.sorting_desc_disabled {
-				cursor: pointer;
-				*cursor: hand;
-				position: relative;
-
-				&:after {
-					font-family: FontAwesome;
-					font-style: normal;
-					font-weight: normal;
-					font-size: 14px;
-					float: right;
-				}
-			}
-
-			.sorting_asc:after,
-			.sorting_asc_disabled:after {
-				content: "\f0d8"; // icon-caret-up
-			}
-			
-			.sorting_desc:after,
-			.sorting_desc_disabled:after {
-				content: "\f0d7"; // icon-caret-down
-			}
-
-			.sorting {
-				background: url('assets/img/sort_both.png') no-repeat center right;
-			}
-
-			.sorting_asc_disabled:after,
-			.sorting_desc_disabled:after { 
-				color: #DCDCDC;
-			}
 		}
 	}
 }
