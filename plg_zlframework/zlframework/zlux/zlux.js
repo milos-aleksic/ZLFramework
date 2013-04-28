@@ -13,7 +13,9 @@
 	Plugin.prototype = $.extend(Plugin.prototype, {
 		name: 'zluxMain',
 		options: {},
+		// var for internal events, must be reseted when expanding
 		events: {},
+		// save the Joomla Root url
 		JRoot: location.href.match(/^(.+)administrator\/index\.php.*/i)[1],
 		initialize: function(target, options) {
 			this.options = $.extend({}, this.options, options);
@@ -459,11 +461,6 @@
 		},
 		initDataTable: function(wrapper) {
 			var $this = this;
-
-			/* Default class modification */
-			$.extend( $.fn.dataTableExt.oStdClasses, {
-				"sWrapper": "dataTables_wrapper form-horizontal"
-			});
 
 			// set table
 			$('<table cellpadding="0" cellspacing="0" border="0" class="table table-striped table-bordered" />')
@@ -1032,18 +1029,12 @@
 			var $this = this,
 				source = $this.options.ajax_url+'&task=FilesManager&root='+$this.options.root;
 
-			/* Default class modification */
-			$.extend( $.fn.dataTableExt.oStdClasses, {
-				"sWrapper": "dataTables_wrapper form-horizontal"
-			});
-
 			// set table
 			$('<table cellpadding="0" cellspacing="0" border="0" class="table table-striped table-bordered" />')
 			.appendTo(wrapper);
 
 			// init dataTable
 			$this.oTable = $('table', wrapper).dataTable({
-				// "zluxSelector": $this.zluxSelector,
 				"sDom": "<'row-fluid'<'span12'B>><'row-fluid'<'span12'f>><'row-fluid'<'span12't>><'row-fluid row-footer'<'span6'i><'span6'p>>",
 				"oLanguage": {
 					"sSearch": "_INPUT_",

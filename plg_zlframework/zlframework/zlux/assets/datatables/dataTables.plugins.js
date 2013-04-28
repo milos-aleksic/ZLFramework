@@ -199,7 +199,12 @@ $.extend( true, $.fn.dataTable.defaults, {
 	},
 	"bProcessing": false, // the display processing will be managed externally
 	"bLengthChange": false
-} );
+});
+
+/* Default class modification */
+$.extend( $.fn.dataTableExt.oStdClasses, {
+	"sWrapper": "dataTables_wrapper form-horizontal zlux-datatables"
+});
 
 
 /* API method to get paging information */

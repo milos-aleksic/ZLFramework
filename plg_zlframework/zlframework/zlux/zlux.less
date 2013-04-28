@@ -1,8 +1,5 @@
 /* Copyright (C) JOOlanders SL http://www.gnu.org/licenses/gpl-2.0.html GNU/GPLv2 only */
 
-.col-left {width: 80% !important}
-.col-right {width: 40px !important}
-
 /* Common
 ----------------------------------------------------------------------------------------------------*/
 .zlux-loader-horiz {
@@ -34,32 +31,6 @@
 	background-image: url(img/loader-horiz.gif) !important;
 }
 
-/* ZLUX Sprite example
-----------------------------------------------------------------------------------------------------*/
-
-// .zlux-sprite-example {
-	// background: url(img/zlux-sprite.gif) no-repeat scroll 0 0 transparent;
-	// width: 60px;
-	// height: 60px;
-	// display: inline-block;
-// }
-
-/* ZLUX Icons
-----------------------------------------------------------------------------------------------------*/
-
-
-// .zlux [class^="zlux-icon-"],
-// .zlux [class*=" zlux-icon-"] {
-// 	background-image: url("img/zlux-icons.png");
-// 	background-position: 14px 14px;
-// 	background-repeat: no-repeat;
-// 	display: inline-block;
-// 	height: 14px;
-// 	line-height: 14px;
-// 	margin-top: 1px;
-// 	vertical-align: text-top;
-// 	width: 14px;
-// }
 
 /* ZL Bootstrap
 ----------------------------------------------------------------------------------------------------*/
@@ -366,135 +337,7 @@
 }
 
 
-/* ZLUX Dialog - LESS Mixtins
-----------------------------------------------------------------------------------------------------*/
-.zlux-datatables-wrapper(@height) {
-	.ui-dialog-content,
-	.dataTables_wrapper {
-		min-height: @height !important;
-	}
-}
 
-.zlux-datatables-dialog-tmpl(){
-
-	// global entry style. User for Items, files or general entries
-	.zlux-global-entry {
-
-		// icons
-		[class^="icon-"],
-		[class*=" icon-"] {
-			float: right;
-			margin: 3px 0 0 4px;
-			cursor: pointer;
-			font-size: 14px;
-			display: inline-block;
-			text-align: center;
-			width: 1.25em;
-		}
-
-		// details
-		.zlux-global-entry-details {
-			display: none;
-
-			ul.unstyled {
-				border-top: 1px dashed #DDD;
-				margin-top: 8px;
-				padding-top: 8px;
-				margin-bottom: 0;
-			}
-		}
-	}
-
-	// wrapper
-	.zlux-datatables-wrapper(349px);
-
-	.ui-dialog-content {
-		height: 349px !important;
-		overflow: hidden;
-		position: relative;
-		margin-top: 5px;
-		opacity: 0; // init visibility
-	}
-
-	// perfect scroll integration
-	.ps-scrollbar-x {display: none}
-	.ps-scrollbar-y {
-		right: 0 !important;
-		margin-top: 10px;
-	}
-
-	&.noscroll {
-		.ps-scrollbar-x,
-		.ps-scrollbar-y {display: none}
-	}
-
-	// bootstrap rows
-	.row-fluid {
-		margin-bottom: 5px;
-	}
-
-	// min mode
-	&.zlux-dialog-mini {
-		// pagination adaption
-		.dataTables_paginate {
-			li {
-				display: none;
-
-				a.prev {
-					float: left;
-					width: 112px;
-				}
-				a.next {
-					float: right;
-					width: 111px;
-				}
-			}
-
-			li.prev,
-			li.next {
-				display: inline;
-			}
-		}
-	}
-
-	// full mode
-	&.zlux-dialog-full {
-		.zlux-datatables-wrapper(495px);
-
-		table.table {
-			margin-top: 6px !important;
-			margin-bottom: 6px !important;
-		}
-
-		// rows
-		.row-fluid {
-			margin-bottom: 0;
-		}
-
-		// search input
-		div.dataTables_filter {
-			input {
-				width: 200px;
-			}
-
-			label {
-				float: right;
-			}
-		}
-
-		// footer
-		.row-footer {
-			position: absolute;
-			bottom: 0;
-			left: 0;
-		}
-
-		// pagination adaption
-		.dataTables_paginate {
-			li {display: inline}
-		}
-	}
-}
 
 /* ZLUX Items Manager
 ----------------------------------------------------------------------------------------------------*/
@@ -674,21 +517,158 @@
 
 		// icon column ordering img fix
 		thead th:nth-child(1) {
-			background-position: center center;
-		}
+			background-position: center 7px;
 
-		tr[data-type="file"] td.column-icon {
-			padding-left: 10px;
+			&:after {
+				padding-left: 10px;
+				float: none;
+				padding: 4px;
+			}
 		}
 	}
 }
 
 
-/* ZLUX DataTable
+/* ZLUX - LESS Mixtins
 ----------------------------------------------------------------------------------------------------*/
-.zlux-itemsmanager,
-.zlux-filesmanager {
+// dialog datatables wrapper
+.zlux-datatables-wrapper(@height) {
+	.ui-dialog-content,
+	.dataTables_wrapper {
+		min-height: @height !important;
+	}
+}
 
+// dialog
+.zlux-datatables-dialog-tmpl(){
+
+	// datatables wrapper
+	.zlux-datatables-wrapper(349px);
+
+	// global entry style. User for Items, files or general entries
+	.zlux-global-entry {
+
+		// icons
+		[class^="icon-"],
+		[class*=" icon-"] {
+			float: right;
+			margin: 3px 0 0 4px;
+			cursor: pointer;
+			font-size: 14px;
+			display: inline-block;
+			text-align: center;
+			width: 1.25em;
+		}
+
+		// details
+		.zlux-global-entry-details {
+			display: none;
+
+			ul.unstyled {
+				border-top: 1px dashed #DDD;
+				margin-top: 8px;
+				padding-top: 8px;
+				margin-bottom: 0;
+			}
+		}
+	}
+
+	.ui-dialog-content {
+		height: 349px !important;
+		overflow: hidden;
+		position: relative;
+		margin-top: 5px;
+		opacity: 0; // init visibility
+	}
+
+	// perfect scroll integration
+	.ps-scrollbar-x {display: none}
+	.ps-scrollbar-y {
+		right: 0 !important;
+		margin-top: 10px;
+	}
+
+	&.noscroll {
+		.ps-scrollbar-x,
+		.ps-scrollbar-y {display: none}
+	}
+
+	// bootstrap rows
+	.row-fluid {
+		margin-bottom: 5px;
+	}
+
+	// min mode
+	&.zlux-dialog-mini {
+		// pagination adaption
+		.dataTables_paginate {
+			li {
+				display: none;
+
+				a.prev {
+					float: left;
+					width: 112px;
+				}
+				a.next {
+					float: right;
+					width: 111px;
+				}
+			}
+
+			li.prev,
+			li.next {
+				display: inline;
+			}
+		}
+	}
+
+	// full mode
+	&.zlux-dialog-full {
+		.zlux-datatables-wrapper(495px);
+
+		table.table {
+			margin-top: 6px !important;
+			margin-bottom: 6px !important;
+		}
+
+		// rows
+		.row-fluid {
+			margin-bottom: 0;
+		}
+
+		// search input
+		div.dataTables_filter {
+			input {
+				width: 200px;
+			}
+
+			label {
+				float: right;
+			}
+		}
+
+		// footer
+		.row-footer {
+			position: absolute;
+			bottom: 0;
+			left: 0;
+		}
+
+		// pagination adaption
+		.dataTables_paginate {
+			li {display: inline}
+		}
+	}
+}
+
+
+/* ZLUX DataTables
+----------------------------------------------------------------------------------------------------*/
+
+// datatables
+.zlux-datatables {
+
+	// wrapper
 	.dataTables_wrapper {
 		position: relative;
 		clear: both;
@@ -700,139 +680,85 @@
 		}
 	}
 
+	// table
 	table.dataTable {
-
-		td.right {
-			text-align: left;
-		}
-
-		td.center {
-			text-align: center;
-		}
-
-		td.right {
-			text-align: right;
-		}
-
-		// icon column
-		td.column-icon {
-			font-size: 14px;
-			padding-top: 12px;
-		}
-
-		// name column
-		td.column-name {
-			max-width: 229px;
-			word-wrap: break-word;
-		}
-	}
-/**/
-
-	div.dataTables_length label {
-		float: left;
-		text-align: left;
-	}
-
-	div.dataTables_length select {
-		width: 75px;
-	}
-
-	div.dataTables_info {
-		padding-top: 8px;
-		margin-left: 4px;
-	}
-
-	div.dataTables_paginate {
-		float: right;
-		margin: 0;
-	}
-
-	table.table {
 		clear: both;
 		margin-bottom: 0 !important;
 		max-width: none !important;
-	}
 
-	table.table thead .sorting,
-	table.table thead .sorting_asc,
-	table.table thead .sorting_desc,
-	table.table thead .sorting_asc_disabled,
-	table.table thead .sorting_desc_disabled {
-		cursor: pointer;
-		*cursor: hand;
-	}
+		// TD
+		td {
+			&.right {
+				text-align: left;
+			}
 
-	table.table thead .sorting { background: url('img/datatable/sort_both.png') no-repeat center right; }
-	table.table thead .sorting_asc { background: url('img/datatable/sort_asc.png') no-repeat center right; }
-	table.table thead .sorting_desc { background: url('img/datatable/sort_desc.png') no-repeat center right; }
+			&.center {
+				text-align: center;
+			}
 
-	table.table thead .sorting_asc_disabled { background: url('img/datatable/sort_asc_disabled.png') no-repeat center right; }
-	table.table thead .sorting_desc_disabled { background: url('img/datatable/sort_desc_disabled.png') no-repeat center right; }
+			&.right {
+				text-align: right;
+			}
 
-	table.dataTable th:active {
-		outline: none;
-	}
+			// icon column
+			&.column-icon {
+				font-size: 14px;
+				padding-top: 12px;
+				text-align: center;
+			}
 
-	/* Scrolling */
-	div.dataTables_scrollHead table {
-		margin-bottom: 0 !important;
-		border-bottom-left-radius: 0;
-		border-bottom-right-radius: 0;
-	}
+			// name column
+			&.column-name {
+				max-width: 229px;
+				word-wrap: break-word;
+			}
+		}
 
-	div.dataTables_scrollHead table thead tr:last-child th:first-child,
-	div.dataTables_scrollHead table thead tr:last-child td:first-child {
-		border-bottom-left-radius: 0 !important;
-		border-bottom-right-radius: 0 !important;
-	}
+		// TH
+		th {
+			&:active {
+				outline: none;
+			}
+		}
 
-	div.dataTables_scrollBody table {
-		border-top: none;
-		margin-bottom: 0 !important;
-	}
+		// sorting
+		thead {
+			.sorting, // both
+			.sorting_asc,
+			.sorting_desc,
+			.sorting_asc_disabled,
+			.sorting_desc_disabled {
+				cursor: pointer;
+				*cursor: hand;
+				position: relative;
 
-	div.dataTables_scrollBody tbody tr:first-child th,
-	div.dataTables_scrollBody tbody tr:first-child td {
-		border-top: none;
-	}
+				&:after {
+					font-family: FontAwesome;
+					font-style: normal;
+					font-weight: normal;
+					font-size: 14px;
+					float: right;
+				}
+			}
 
-	div.dataTables_scrollFoot table {
-		border-top: none;
-	}
+			.sorting_asc:after,
+			.sorting_asc_disabled:after {
+				content: "\f0d8"; // icon-caret-up
+			}
+			
+			.sorting_desc:after,
+			.sorting_desc_disabled:after {
+				content: "\f0d7"; // icon-caret-down
+			}
 
-	/*
-	 * FixedColumns styles
-	 */
-	div.DTFC_LeftHeadWrapper table,
-	div.DTFC_LeftFootWrapper table,
-	table.DTFC_Cloned tr.even {
-		background-color: white;
-	}
+			.sorting {
+				background: url('assets/img/sort_both.png') no-repeat center right;
+			}
 
-	div.DTFC_LeftHeadWrapper table {
-		margin-bottom: 0 !important;
-		border-top-right-radius: 0 !important;
-		border-bottom-left-radius: 0 !important;
-		border-bottom-right-radius: 0 !important;
-	}
-
-	div.DTFC_LeftHeadWrapper table thead tr:last-child th:first-child,
-	div.DTFC_LeftHeadWrapper table thead tr:last-child td:first-child {
-		border-bottom-left-radius: 0 !important;
-		border-bottom-right-radius: 0 !important;
-	}
-
-	div.DTFC_LeftBodyWrapper table {
-		border-top: none;
-		margin-bottom: 0 !important;
-	}
-
-	div.DTFC_LeftBodyWrapper tbody tr:first-child th,
-	div.DTFC_LeftBodyWrapper tbody tr:first-child td {
-		border-top: none;
-	}
-
-	div.DTFC_LeftFootWrapper table {
-		border-top: none;
+			.sorting_asc_disabled:after,
+			.sorting_desc_disabled:after { 
+				color: #DCDCDC;
+			}
+		}
 	}
 }
