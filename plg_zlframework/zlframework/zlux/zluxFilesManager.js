@@ -141,7 +141,7 @@
 
 					// hide processing if root available
 					oSettings.sCurrentRoot &&
-					$this.zluxdialog.spinner('hide');
+						$this.zluxdialog.spinner('hide');
 				}
 			})
 
@@ -324,7 +324,7 @@
 			$this.wrapper = input.wrap($('<div class="zl-bootstrap" />'));
 
 			// set the trigger button after the input
-			var button = $('<a title="'+$this.options.title+'" class="btn btn-mini zlux-btn-edit" href="#"><i class="icon-edit"></i></a>')
+			$this.dialogTrigger = $('<a title="'+$this.options.title+'" class="btn btn-mini zlux-btn-edit" href="#"><i class="icon-edit"></i></a>')
 			.insertAfter(input)
 
 			// button events
@@ -349,7 +349,7 @@
 				width: $this.options.full_mode ? '75%' : 300,
 				dialogClass: 'zl-bootstrap zlux-filesmanager ' + ($this.options.full_mode ? 'zlux-dialog-full' : 'zlux-dialog-mini'),
 				position: ($this.options.full_mode == false ? {
-					of: button,
+					of: $this.dialogTrigger,
 					my: 'left top',
 					at: 'right bottom'
 				} : null)
@@ -357,163 +357,7 @@
 
 			// on dialog load
 			$this.zluxdialog.bind("InitComplete", function(dialog) {
-
-				// init filesmanager
-				$this.filesmanager = $('<div class="zlux-filesmanager" />').appendTo($this.zluxdialog.content);
-				$this.initDataTable($this.filesmanager);
-
-				// set global close event
-				$('html').on('mousedown', function(event) {
-					// close if target is not the trigger or the dialog it self
-					$this.zluxdialog.dialog('isOpen') && !button.is(event.target) && !button.find(event.target).length && !$this.zluxdialog.widget.find(event.target).length && $this.zluxdialog.dialog('close')
-				});
-
-				// init toolbar
-				$this.zluxdialog.setMainToolbar(
-					[{
-						title : "Apply Filters",
-						icon : "filter",
-						click : function(tool){
-							// toggle the subtoolbar visibility
-							$('.zlux-dialog-subtoolbar-filter', $this.zluxdialog.toolbar.wrapper).slideToggle('fast');
-
-							tool.toggleClass('zlux-ui-tool-enabled');
-						}
-					},{
-						title : "New folder",
-						icon : "folder-close",
-						subicon : "plus-sign",
-						click : function(){
-							console.log(1);
-							// $.ajax({
-							// 	"url": oDTSettings.oInit.sAjaxUrl+"&task=newFolder&path=images",
-							// 	"dataType": "json",
-							// 	"cache": false,
-							// 	"success": function (json) {
-									
-							// 	}
-							// })
-						}
-					},
-					{
-						title : "Upload files to current folder",
-						icon : "cloud-upload",
-						click : function(){
-							// show the associated toolbar
-							$this.zluxdialog.showToolbar(2);
-
-							// disable dialog scroll
-							$this.zluxdialog.scrollbar('hide');
-
-							$('.zlux-filesmanager', $this.zluxdialog.content).fadeOut('400', function(){
-
-								// init ZLUX Upload
-								$this.zluxupload.inited || $this.zluxupload.init();
-								
-								// show the upload view
-								$('.zlux-upload', $this.zluxdialog.content).fadeIn('400');
-							})
-						}
-					},
-					{
-						title : "Refresh",
-						icon : "refresh",
-						click : function(){
-							// reload the table data
-							$this.reload();
-						}
-					}]
-				);
-
-				// init subtoolbar
-				$this.zluxdialog.newSubToolbar('filter');
-
-				// set upload engine
-				$this.zluxupload = new $.zluxUpload({
-					url: $this.options.ajax_url+'&task=upload',
-					path: 'images',
-					wrapper: $this.zluxdialog.content,
-					signature: $this.options.signature,
-					policy: $this.options.policy
-				});
-
-				// when queue files changes
-				$this.zluxupload.bind('QueueChanged', function(up){
-
-					// refresh scroll
-					$this.zluxdialog.scrollbar('refresh');
-
-					// enable/disable upload button
-					if ($this.zluxupload.getQueuedFiles().length) {
-						$this.zluxdialog.toolbarBtnState(2, 'upload', 'enabled');
-					} else {
-						$this.zluxdialog.toolbarBtnState(2, 'upload', 'disabled');
-					}
-				});
-
-				// when uploader ready
-				$this.zluxupload.bind('Init', function(){
-
-					// toogle the buttons on upload events
-					$this.zluxupload.uploader.bind('BeforeUpload', function(up){
-						$this.zluxdialog.toolbarBtnState(2, 'ban-circle', 'enabled');
-						$this.zluxdialog.toolbarBtnState(2, 'upload', 'disabled');
-						$this.zluxdialog.toolbarBtnState(2, 'plus-sign', 'disabled');
-					})
-					$this.zluxupload.uploader.bind('UploadComplete', function(up){
-						$this.zluxdialog.toolbarBtnState(2, 'ban-circle', 'enabled');
-						$this.zluxdialog.toolbarBtnState(2, 'plus-sign', 'enabled');
-						$this.zluxdialog.toolbarBtnState(2, 'ban-circle', 'disabled');
-					})
-				})
-
-				// set Upload toolbar
-				$this.zluxdialog.newToolbar(
-					[{
-						title : "Add new files to upload",
-						icon : "plus-sign",
-						click : function(){
-							// find the upload browse input and trigger it
-							$('.zlux-upload-browse', $this.upload).siblings('.moxie-shim').children('input').trigger('click');
-						}
-					},
-					{
-						title : "Start uploading",
-						icon : "upload disabled",
-						click : function(){
-							$this.zluxupload.uploader.start();
-							return false;
-						}
-					},
-					{
-						title : "Cancel current upload",
-						icon : "ban-circle disabled",
-						click : function(){
-							// cancel current queue upload
-							$this.zluxupload.uploader.stop();
-
-							// disable the btn
-							$this.zluxdialog.toolbarBtnState(2, 'ban-circle', 'disabled');
-							$this.zluxdialog.toolbarBtnState(2, 'upload', 'enabled');
-							$this.zluxdialog.toolbarBtnState(2, 'plus-sign', 'enabled');
-						}
-					}],
-					2,
-					// back to main function
-					function(){
-						$('.zlux-upload', $this.zluxdialog.content).fadeOut('400', function(){
-
-							// empty possible upload queue
-							$this.zluxupload.emptyQueue();
-
-							// show the filesmanager view
-							$('.zlux-filesmanager', $this.zluxdialog.content).fadeIn('400');
-
-							// refresh dialog scroll
-							$this.zluxdialog.scrollbar('refresh');
-						})
-					}
-				)
+				$this.eventDialogLoaded();
 			});
 
 
@@ -529,12 +373,169 @@
 				// move the search field to the toolbar
 				$('.dataTables_filter', $this.oTable.fnSettings().nTableWrapper).appendTo(subtoolbar);
 
-				// stop dialog processing ui
-				$this.zluxdialog.spinner('hide');
-
-				// init dialog scrollbar
-				$this.zluxdialog.scrollbar('refresh');
+				// show the content
+				$this.zluxdialog.initContent();
 			});
+		},
+		eventDialogLoaded: function() {
+			var $this = this;
+
+			// init filesmanager
+			$this.filesmanager = $('<div class="zlux-filesmanager" />').appendTo($this.zluxdialog.content);
+			$this.initDataTable($this.filesmanager);
+
+			// set global close event
+			$('html').on('mousedown', function(event) {
+				// close if target is not the trigger or the dialog it self
+				$this.zluxdialog.dialog('isOpen') && !$this.dialogTrigger.is(event.target) && !$this.dialogTrigger.find(event.target).length && !$this.zluxdialog.widget.find(event.target).length && $this.zluxdialog.dialog('close')
+			});
+
+			// init toolbar
+			$this.zluxdialog.setMainToolbar(
+				[{
+					title : "Apply Filters",
+					icon : "filter",
+					click : function(tool){
+						// toggle the subtoolbar visibility
+						$('.zlux-dialog-subtoolbar-filter', $this.zluxdialog.toolbar.wrapper).slideToggle('fast');
+
+						tool.toggleClass('zlux-ui-tool-enabled');
+					}
+				},{
+					title : "New folder",
+					icon : "folder-close",
+					subicon : "plus-sign",
+					click : function(){
+						console.log(1);
+						// $.ajax({
+						// 	"url": oDTSettings.oInit.sAjaxUrl+"&task=newFolder&path=images",
+						// 	"dataType": "json",
+						// 	"cache": false,
+						// 	"success": function (json) {
+								
+						// 	}
+						// })
+					}
+				},
+				{
+					title : "Upload files to current folder",
+					icon : "cloud-upload",
+					click : function(){
+						// show the associated toolbar
+						$this.zluxdialog.showToolbar(2);
+
+						// disable dialog scroll
+						$this.zluxdialog.scrollbar('hide');
+
+						$('.zlux-filesmanager', $this.zluxdialog.content).fadeOut('400', function(){
+
+							// init ZLUX Upload
+							$this.zluxupload.inited || $this.zluxupload.init();
+							
+							// show the upload view
+							$('.zlux-upload', $this.zluxdialog.content).fadeIn('400');
+						})
+					}
+				},
+				{
+					title : "Refresh",
+					icon : "refresh",
+					click : function(){
+						// reload the table data
+						$this.reload();
+					}
+				}]
+			);
+
+			// init subtoolbar
+			$this.zluxdialog.newSubToolbar('filter');
+
+			// set upload engine
+			$this.zluxupload = new $.zluxUpload({
+				url: $this.options.ajax_url+'&task=upload',
+				path: 'images',
+				wrapper: $this.zluxdialog.content,
+				signature: $this.options.signature,
+				policy: $this.options.policy
+			});
+
+			// when queue files changes
+			$this.zluxupload.bind('QueueChanged', function(up){
+
+				// refresh scroll
+				$this.zluxdialog.scrollbar('refresh');
+
+				// enable/disable upload button
+				if ($this.zluxupload.getQueuedFiles().length) {
+					$this.zluxdialog.toolbarBtnState(2, 'upload', 'enabled');
+				} else {
+					$this.zluxdialog.toolbarBtnState(2, 'upload', 'disabled');
+				}
+			});
+
+			// when uploader ready
+			$this.zluxupload.bind('Init', function(){
+
+				// toogle the buttons on upload events
+				$this.zluxupload.uploader.bind('BeforeUpload', function(up){
+					$this.zluxdialog.toolbarBtnState(2, 'ban-circle', 'enabled');
+					$this.zluxdialog.toolbarBtnState(2, 'upload', 'disabled');
+					$this.zluxdialog.toolbarBtnState(2, 'plus-sign', 'disabled');
+				})
+				$this.zluxupload.uploader.bind('UploadComplete', function(up){
+					$this.zluxdialog.toolbarBtnState(2, 'ban-circle', 'enabled');
+					$this.zluxdialog.toolbarBtnState(2, 'plus-sign', 'enabled');
+					$this.zluxdialog.toolbarBtnState(2, 'ban-circle', 'disabled');
+				})
+			})
+
+			// set Upload toolbar
+			$this.zluxdialog.newToolbar(
+				[{
+					title : "Add new files to upload",
+					icon : "plus-sign",
+					click : function(){
+						// find the upload browse input and trigger it
+						$('.zlux-upload-browse', $this.upload).siblings('.moxie-shim').children('input').trigger('click');
+					}
+				},
+				{
+					title : "Start uploading",
+					icon : "upload disabled",
+					click : function(){
+						$this.zluxupload.uploader.start();
+						return false;
+					}
+				},
+				{
+					title : "Cancel current upload",
+					icon : "ban-circle disabled",
+					click : function(){
+						// cancel current queue upload
+						$this.zluxupload.uploader.stop();
+
+						// disable the btn
+						$this.zluxdialog.toolbarBtnState(2, 'ban-circle', 'disabled');
+						$this.zluxdialog.toolbarBtnState(2, 'upload', 'enabled');
+						$this.zluxdialog.toolbarBtnState(2, 'plus-sign', 'enabled');
+					}
+				}],
+				2,
+				// back to main function
+				function(){
+					$('.zlux-upload', $this.zluxdialog.content).fadeOut('400', function(){
+
+						// empty possible upload queue
+						$this.zluxupload.emptyQueue();
+
+						// show the filesmanager view
+						$('.zlux-filesmanager', $this.zluxdialog.content).fadeIn('400');
+
+						// refresh dialog scroll
+						$this.zluxdialog.scrollbar('refresh');
+					})
+				}
+			)
 		}
 	});
 	// Don't touch

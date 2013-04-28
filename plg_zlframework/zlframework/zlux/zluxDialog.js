@@ -35,6 +35,10 @@
 				height: 'auto'
 			}, $this.options));
 
+
+			// hide main so it's content is not accesible during initial loading
+			$this.main.hide();
+
 			// set the dialog content wrapper
 			$this.content = $('<div class="zlux-dialog-content" />').appendTo($this.main);
 
@@ -62,13 +66,32 @@
 			$this.toolbar = {};
 			$this.toolbar.wrapper = $('<div class="zlux-dialog-toolbar" />').hide().insertAfter($this.widget.children()[0]);
 
-			$this.widget.attr('data-zlux-status', 'ready');
-
 			// trigget init event
 			$this.trigger("InitComplete");
 
+			// not inited until the content is ready
+			$this.inited = false;
+		},
+		/**
+		 * Called from the outside when the content is ready to be shown
+		 */
+		initContent: function() {
+			var $this = this;
+
+			// show the main content
+			$this.main.show();
+			
+			// set the dom status
+			$this.widget.attr('data-zlux-status', 'ready');
+
+			// init dialog scrollbar
+			$this.scrollbar('refresh');
+
 			// set init state
 			$this.inited = true;
+
+			// hide the spinner, must go after the state
+			$this.spinner('hide');
 		},
 		toggle: function() {
 			this.dialog(this.dialog("isOpen") ? "close" : "open");
@@ -80,13 +103,16 @@
 			var $this = this;
 
 			if (action == 'refresh') {
-				$('.ps-scrollbar-y', $this.main).css('top', 0);
-				$('.ps-scrollbar-x', $this.main).css('left', 0);
+				var $scroll_y = $('.ps-scrollbar-y', $this.main),
+					$scroll_x = $('.ps-scrollbar-x', $this.main).remove();
+
+				$scroll_y.css('top', 0);
+				// $x.css('left', 0);
 				$this.scrollbar('show'); // let's be sure is visible
 				$this.scrollbar('update');
 
 				// if no scroll necesary, hide it
-				var margin = $this.content.width() - $('.ps-scrollbar-x', $this.main).width();
+				var margin = Math.round($this.main.height()) - Math.round($scroll_y.height());
 				if (margin >= 0 && margin <= 5) {
 					$this.scrollbar('hide');
 				}
@@ -105,14 +131,16 @@
 		spinner: function(action) {
 			var $this = this;
 
-			if (action == 'show') {
-				$this.inited && $this.main.fadeTo(0, 0.5);
-				$this._spinner.show();
+			if ($this.inited) {
+				if (action == 'show') {
+					$this.main.fadeTo(0, 0.5);
+					$this._spinner.show();
 
-			} else { // hide
+				} else { // hide
 
-				$this._spinner.hide();
-				$this.main.add($this.toolbar.wrapper).fadeTo('slow', 1);
+					$this._spinner.hide();
+					$this.main.add($this.toolbar.wrapper).fadeTo('slow', 1);
+				}
 			}
 		},
 		/**

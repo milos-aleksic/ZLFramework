@@ -39,6 +39,8 @@ class zlfwHelperZLUX extends AppHelper {
 
 			// dataTables
 			$this->app->document->addScript('zlfw:zlux/assets/datatables/dataTables.with.plugins.min.js');
+			// $this->app->document->addScript('zlfw:zlux/assets/datatables/dataTables.js'); // when developing
+			// $this->app->document->addScript('zlfw:zlux/assets/datatables/dataTables.plugins.js'); // when developing
 
 			// perfect scrollbar
 			$this->app->document->addStylesheet('zlfw:zlux/assets/perfect-scrollbar/perfect-scrollbar.min.css');
@@ -61,7 +63,13 @@ class zlfwHelperZLUX extends AppHelper {
 	public function loadZLUXcore()
 	{
 		$this->app->document->addStylesheet('zlfw:zlux/zlux.css');
-		$this->app->document->addScript('zlfw:zlux/zlux.min.js');
+		// $this->app->document->addScript('zlfw:zlux/zlux.all.min.js');
+
+		// when developing
+		$this->app->document->addScript('zlfw:zlux/zluxMain.js');
+		$this->app->document->addScript('zlfw:zlux/zluxDialog.js');
+		$this->app->document->addScript('zlfw:zlux/zluxFilesManager.js');
+		$this->app->document->addScript('zlfw:zlux/zluxItemsManager.js');
 	}
 
 	/**

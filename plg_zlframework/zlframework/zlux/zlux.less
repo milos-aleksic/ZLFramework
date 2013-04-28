@@ -220,11 +220,6 @@
 				line-height: 30px;
 			}
 		}
-
-		.ui-dialog-content .zlux-loader-horiz {
-			margin: 50px auto 0;
-			display: block;
-		}
 	}
 
 	// spinner
@@ -236,6 +231,7 @@
 		margin-left: -40px !important;
 		margin-top: -40px !important;
 		z-index: 1;
+		cursor: default;
 	}
 
 	&[data-zlux-status="ready"] {
@@ -396,15 +392,20 @@
 .zlux-datatables {
 
 	// wrapper
-	.dataTables_wrapper {
+	&.dataTables_wrapper {
 		position: relative;
 		clear: both;
-		zoom: 1;
-		min-height: 225px;
+		// min-height: 225px;
+		padding-bottom: 3px;
 
 		a:focus {
 			outline: none;
 		}
+	}
+
+	// pagination
+	div.dataTables_paginate {
+		margin: 0;
 	}
 
 	// table
@@ -493,19 +494,9 @@
 
 /* LESS Mixtins
 ----------------------------------------------------------------------------------------------------*/
-// dialog datatables wrapper
-.zlux-datatables-wrapper(@height) {
-	.ui-dialog-content,
-	.dataTables_wrapper {
-		min-height: @height !important;
-	}
-}
 
 // dialog
 .zlux-datatables-dialog-tmpl(){
-
-	// datatables wrapper
-	.zlux-datatables-wrapper(349px);
 
 	// FILTER TOOLBAR
 	.zlux-dialog-subtoolbar-filter {
@@ -641,7 +632,7 @@
 	}
 
 	.ui-dialog-content {
-		height: 349px !important;
+		height: 339px !important;
 		overflow: hidden;
 		position: relative;
 		margin-top: 5px;
@@ -691,7 +682,6 @@
 
 	// full mode
 	&.zlux-dialog-full {
-		.zlux-datatables-wrapper(495px);
 
 		table.table {
 			margin-top: 6px !important;
