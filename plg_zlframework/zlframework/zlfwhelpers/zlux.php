@@ -22,11 +22,13 @@ class zlfwHelperZLUX extends AppHelper {
 	 *
 	 * @since 3.0.14
 	 */
-	public function loadAssets($plugins = '')
+	public function loadAssets($plugins = array())
 	{
 		// prepare array of plugins
-		$plugins = str_replace(' ', '', $plugins);
-		$plugins = explode(',', $plugins);
+		if (!is_array($plugins)) {
+			$plugins = str_replace(' ', '', $plugins);
+			$plugins = explode(',', $plugins);
+		}
 
 		// Items/Files manager
 		if (in_array('ItemsManager', $plugins) || in_array('FilesManager', $plugins)) {
@@ -38,9 +40,13 @@ class zlfwHelperZLUX extends AppHelper {
 			$this->app->document->addScript('zlfw:zlux/assets/plupload/plupload.full.min.js');
 
 			// dataTables
-			$this->app->document->addScript('zlfw:zlux/assets/datatables/dataTables.with.plugins.min.js');
-			// $this->app->document->addScript('zlfw:zlux/assets/datatables/dataTables.js'); // when developing
-			// $this->app->document->addScript('zlfw:zlux/assets/datatables/dataTables.plugins.js'); // when developing
+			if(!JDEBUG){
+				$this->app->document->addScript('zlfw:zlux/assets/datatables/dataTables.with.plugins.min.js');
+			} else {
+				// Site in debug Mode
+				$this->app->document->addScript('zlfw:zlux/assets/datatables/dataTables.js'); // when developing
+				$this->app->document->addScript('zlfw:zlux/assets/datatables/dataTables.plugins.js'); // when developing
+			}
 
 			// perfect scrollbar
 			$this->app->document->addStylesheet('zlfw:zlux/assets/perfect-scrollbar/perfect-scrollbar.min.css');
@@ -64,6 +70,8 @@ class zlfwHelperZLUX extends AppHelper {
 	{
 		$this->app->document->addStylesheet('zlfw:zlux/zlux.css');
 		// $this->app->document->addScript('zlfw:zlux/zlux.all.min.js');
+		
+		// TODO: Do this as in loadAssets() with JDebug
 
 		// when developing
 		$this->app->document->addScript('zlfw:zlux/zluxMain.js');
