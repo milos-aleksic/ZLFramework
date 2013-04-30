@@ -850,7 +850,7 @@ class ZlfieldHelper extends AppHelper {
 			// prepare types and filter app group
 			$types = array();
 			foreach ($apps as $app){
-				if (empty($groups_filter) || in_array($app->getGroup(), $groups_filter)) {
+				if (empty($groups_filter) || in_array($app->getGroup(), $groups_filter) || in_array($app->id, $groups_filter)) {
 					$types = array_merge($types, $app->getTypes());
 				}
 			}

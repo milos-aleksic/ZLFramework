@@ -74,7 +74,10 @@ class ZLFieldHTMLHelper extends AppHelper {
 	 * @since  3.0.8
 	 */
 	public function info($id, $name, $value, $spec, $attrs, $returnRawValue){
-		return '<div class="info">'.$this->app->zlfield->replaceVars($spec->get('var'), JText::_($spec->get('text'))).'</div>';
+		$info = explode('||', $spec->get('text'));
+		$text = JText::_($info[0]);
+		unset($info[0]);
+		return '<div class="info">'.$this->app->zlfield->replaceVars($info, $text).'</div>';
 	}
 	
 	/*

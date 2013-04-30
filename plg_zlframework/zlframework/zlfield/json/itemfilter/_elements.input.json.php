@@ -17,8 +17,10 @@ defined('_JEXEC') or die('Restricted access');
 		"help":"PLG_ZLFRAMEWORK_IFT_FILTER_TYPE_DESC",
 		"specific":{
 			"options":{
-				"PLG_ZLFRAMEWORK_IFT_PARTIAL":"partial",
-				"PLG_ZLFRAMEWORK_IFT_EXACT":"exact",
+				"PLG_ZLFRAMEWORK_IFT_EXACT_MATCH":"exact",
+				"PLG_ZLFRAMEWORK_IFT_EXACT_PHRASE":"exact_phrase",
+				"PLG_ZLFRAMEWORK_IFT_ALL_WORDS":"all_words",
+				"PLG_ZLFRAMEWORK_IFT_ANY_WORD":"any_word",
 				"&gt;":"from",
 				"&lt;":"to",
 				"&gt;=":"fromequal",
@@ -29,7 +31,8 @@ defined('_JEXEC') or die('Restricted access');
 				"PLG_ZLFRAMEWORK_IFT_WITHIN_OUT_OF_RANGE":"outofrange"
 			}
 		},
-		"dependents":"convert !> partial | value_to > rangeequal OR range OR outofrangeequal OR outofrange"
+		"default": "exact",
+		"dependents":"convert !> partial OR exact_phrase OR all_words OR any_word | value_to > rangeequal OR range OR outofrangeequal OR outofrange"
 	},
 	"convert":{
 		"type": "select",
