@@ -827,7 +827,7 @@ class ZLModelItem extends ZLModel
 		$type = $name->get('type', 'exact_phrase');
 
 		// backward compatibility
-		if($type == 'partial') $name->set('type', 'exact_phrase');
+		if($type == 'partial') $type = 'exact_phrase';
 			
 		switch($type) {
 			case 'exact_phrase':
