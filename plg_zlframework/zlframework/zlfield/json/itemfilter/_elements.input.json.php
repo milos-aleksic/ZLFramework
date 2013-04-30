@@ -17,10 +17,10 @@ defined('_JEXEC') or die('Restricted access');
 		"help":"PLG_ZLFRAMEWORK_IFT_FILTER_TYPE_DESC",
 		"specific":{
 			"options":{
-				"PLG_ZOOFILTER_FIELD_EXACT_MATCH":"exact",
-				"PLG_ZOOFILTER_FIELD_EXACT_PHRASE":"exact_phrase",
-				"PLG_ZOOFILTER_FIELD_ALL_WORDS":"all_words",
-				"PLG_ZOOFILTER_FIELD_ANY_WORD":"any_word",
+				"PLG_ZLFRAMEWORK_IFT_EXACT_MATCH":"exact",
+				"PLG_ZLFRAMEWORK_IFT_EXACT_PHRASE":"exact_phrase",
+				"PLG_ZLFRAMEWORK_IFT_ALL_WORDS":"all_words",
+				"PLG_ZLFRAMEWORK_IFT_ANY_WORD":"any_word",
 				"&gt;":"from",
 				"&lt;":"to",
 				"&gt;=":"fromequal",
