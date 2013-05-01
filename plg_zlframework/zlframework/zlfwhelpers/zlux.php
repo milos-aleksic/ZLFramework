@@ -16,68 +16,77 @@ defined('_JEXEC') or die('Restricted access');
 class zlfwHelperZLUX extends AppHelper {
 
 	/**
-	 * Load ZLUX related Assets
-	 *
-	 * @param string $plugins	Comma separated list of extra plugins to load
+	 * Load ZLUX Items Manager assets
 	 *
 	 * @since 3.0.14
 	 */
-	public function loadAssets($plugins = array())
+	public function loadItemsManagerAssets()
 	{
-		// prepare array of plugins
-		if (!is_array($plugins)) {
-			$plugins = str_replace(' ', '', $plugins);
-			$plugins = explode(',', $plugins);
+		// ZLUX Main
+		$this->loadMainAssets();
+
+		// dataTables
+		if(!JDEBUG){
+			$this->app->document->addScript('zlfw:zlux/assets/datatables/dataTables.with.plugins.min.js');
+		} else {
+			// Site in debug Mode
+			$this->app->document->addScript('zlfw:zlux/assets/datatables/dataTables.js');
+			$this->app->document->addScript('zlfw:zlux/assets/datatables/dataTables.plugins.js');
 		}
 
-		// Items/Files manager
-		if (in_array('ItemsManager', $plugins) || in_array('FilesManager', $plugins)) {
-
-			// ZLUX Core
-			$this->loadZLUXcore();
-
-			// plupload
-			$this->app->document->addScript('zlfw:zlux/assets/plupload/plupload.full.min.js');
-
-			// dataTables
-			if(!JDEBUG){
-				$this->app->document->addScript('zlfw:zlux/assets/datatables/dataTables.with.plugins.min.js');
-			} else {
-				// Site in debug Mode
-				$this->app->document->addScript('zlfw:zlux/assets/datatables/dataTables.js'); // when developing
-				$this->app->document->addScript('zlfw:zlux/assets/datatables/dataTables.plugins.js'); // when developing
-			}
-
-			// perfect scrollbar
-			$this->app->document->addStylesheet('zlfw:zlux/assets/perfect-scrollbar/perfect-scrollbar.min.css');
-			$this->app->document->addScript('zlfw:zlux/assets/perfect-scrollbar/perfect-scrollbar.with-mousewheel.min.js');
-
-			// ZL Bootstrap
-			$this->loadBootstrap(true);
-		}
-
-		// ZL Bootstrap
-		if (in_array('Bootstrap', $plugins)) 
-			$this->loadBootstrap();
+		// perfect scrollbar
+		$this->app->document->addStylesheet('zlfw:zlux/assets/perfect-scrollbar/perfect-scrollbar.min.css');
+		$this->app->document->addScript('zlfw:zlux/assets/perfect-scrollbar/perfect-scrollbar.with-mousewheel.min.js');
 	}
 
 	/**
-	 * Load ZLUX core assets
+	 * Load ZLUX Files Manager assets
 	 *
 	 * @since 3.0.14
 	 */
-	public function loadZLUXcore()
+	public function loadFilesManagerAssets()
 	{
-		$this->app->document->addStylesheet('zlfw:zlux/zlux.css');
-		// $this->app->document->addScript('zlfw:zlux/zlux.all.min.js');
-		
-		// TODO: Do this as in loadAssets() with JDebug
+		// ZLUX Core
+		$this->loadMainAssets();
 
-		// when developing
-		$this->app->document->addScript('zlfw:zlux/zluxMain.js');
-		$this->app->document->addScript('zlfw:zlux/zluxDialog.js');
-		$this->app->document->addScript('zlfw:zlux/zluxFilesManager.js');
-		$this->app->document->addScript('zlfw:zlux/zluxItemsManager.js');
+		// dataTables
+		if(!JDEBUG) {
+			$this->app->document->addScript('zlfw:zlux/assets/datatables/dataTables.with.plugins.min.js');
+		} else {
+			// Site in debug Mode
+			$this->app->document->addScript('zlfw:zlux/assets/datatables/dataTables.js');
+			$this->app->document->addScript('zlfw:zlux/assets/datatables/dataTables.plugins.js');
+		}
+
+		// plupload
+		$this->app->document->addScript('zlfw:zlux/assets/plupload/plupload.full.min.js');
+
+		// perfect scrollbar
+		$this->app->document->addStylesheet('zlfw:zlux/assets/perfect-scrollbar/perfect-scrollbar.min.css');
+		$this->app->document->addScript('zlfw:zlux/assets/perfect-scrollbar/perfect-scrollbar.with-mousewheel.min.js');
+	}
+
+	/**
+	 * Load ZLUX Main assets
+	 *
+	 * @since 3.0.14
+	 */
+	public function loadMainAssets()
+	{
+		if(!JDEBUG) {
+			$this->app->document->addStylesheet('zlfw:zlux/zlux.css');
+			$this->app->document->addScript('zlfw:zlux/zlux.all.min.js');
+		} else {
+			// Site in debug Mode
+			$this->app->document->addStylesheet('zlfw:zlux/zlux.css');
+			$this->app->document->addScript('zlfw:zlux/zluxMain.js');
+			$this->app->document->addScript('zlfw:zlux/zluxDialog.js');
+			$this->app->document->addScript('zlfw:zlux/zluxFilesManager.js');
+			$this->app->document->addScript('zlfw:zlux/zluxItemsManager.js');
+		}
+
+		// ZL Bootstrap
+		$this->loadBootstrap(true);
 	}
 
 	/**
