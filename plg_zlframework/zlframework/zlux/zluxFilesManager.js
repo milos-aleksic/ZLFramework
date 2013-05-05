@@ -43,7 +43,7 @@
 
 			// init dataTable
 			$this.oTable = $('table', wrapper).dataTable({
-				"sDom": "f<'row-fluid'<'span12'B>><'row-fluid'<'span12't>><'row-fluid row-footer'<'span6'i><'span6'p>>",
+				"sDom": "f<'row-fluid'<'span12'B>><'row-fluid'<'span12't>><'row-fluid row-footer'<'span12'i>>",
 				"oLanguage": {
 					"sSearch": "_INPUT_",
 					"sEmptyTable": "No Files found",
@@ -55,7 +55,7 @@
 				"sServerMethod": "POST",
 				"sStartRoot": $this.options.root,
 				// "bServerSide": true,
-				"iDisplayLength": 9,
+				"bPaginate": false,
 				"aoColumns": [
 					{ 
 						"sTitle": "", "mData": "type", "bSearchable": false, "sWidth": "14px", "sClass": "column-icon",
@@ -452,11 +452,11 @@
 
 			// set upload engine
 			$this.zluxupload = new $.zluxUpload({
-				url: $this.options.ajax_url+'&task=upload',
+				url: $this.options.ajax_url,
 				path: 'images',
 				wrapper: $this.zluxdialog.content,
-				signature: $this.options.signature,
-				policy: $this.options.policy
+				storage: $this.options.storage,
+				storage_params: $this.options.storage_params
 			});
 
 			// when queue files changes
@@ -580,7 +580,9 @@
 			path: null,
 			fileMode: 'files',
 			max_file_size: '1024kb',
-			wrapper: null
+			wrapper: null,
+			storage: 'local', // local, s3, dropbox
+			storage_params: {}
 		},
 		init: function() {
 			var $this = this;
@@ -676,36 +678,48 @@
 		 * Init the Plupload plugin
 		 */
 		initPlupload: function() {
-			var $this = this;
+			var $this = this,
+				params;
 
-			// init the Plupload uploader
-			$this.uploader = new plupload.Uploader({
+			// set basics params
+			params = {
 				runtimes: 'html5',
 				browse_button: $('.zlux-upload-browse', $this.upload)[0],
 				drop_element: $this.dropzone[0], 
 				max_file_size: '1mb',
-				// url: $this.options.url,
-				url: 'http://milcom.testing.s3.amazonaws.com/',
+				url: $this.options.url + '&task=upload',
 
-				// S3
-				multipart: true,
-				multipart_params: {
-					'key': '${filename}', // use filename as a key
-					'Filename': '${filename}', // adding this to keep consistency across the runtimes
-					'acl': 'public-read',
-					'Content-Type': 'image/jpeg',
-					'success_action_status': '201',
-					'AWSAccessKeyId' : 'AKIAJBGAQYDO6Z76KIGQ',		
-					'policy': $this.options.policy,
-					'signature': $this.options.signature
-				},
-				file_data_name: 'file', // optional, but better be specified directly
+				// flash runtime settings
+				flash_swf_url : $this.JRoot + 'media/zoo/applications/docs/elements/contentarea/assets/plupload/Moxie.swf'
+			};
 
-				// Flash settings
-				flash_swf_url : $this.JRoot + 'media/zoo/applications/docs/elements/contentarea/assets/plupload/Moxie.swf',
 
-				// Post init events, bound after the internal events
+			// if storage is S3
+			if($this.options.storage == 's3') {
+				params = $.extend(params, {
+					url: 'http://' + $this.options.storage_params.bucket + '.s3.amazonaws.com',
+					multipart: true,
+					multipart_params: {
+						'key': '${filename}', // use filename as a key
+						'Filename': '${filename}', // adding this to keep consistency across the runtimes
+						'acl': 'public-read',
+						'Content-Type': 'image/jpeg',
+						'success_action_status': '201',
+						'AWSAccessKeyId': $this.options.storage_params.accesskey,
+						'policy': $this.options.storage_params.policy,
+						'signature': $this.options.storage_params.signature
+					},
+					file_data_name: 'file', // optional, but better be specified directly
+				});
+			}
+
+
+			// Post init events, bound after the internal events
+			params = $.extend(params, {
 				init : {
+					Init: function() {
+						$this.trigger('Init');
+					},
 					FilesAdded: function(up, files) {
 						$this.eventFilesAdded(files);
 					},
@@ -730,10 +744,9 @@
 				}
 			});
 
-			// trigger the init event
-			$this.uploader.bind('Init', function(){
-				$this.trigger('Init');
-			})
+
+			// set the Plupload uploader
+			$this.uploader = new plupload.Uploader(params);
 
 			// init the uploader
 			$this.uploader.init();
@@ -831,6 +844,13 @@
 			// set the upload path
 			// $this.uploader.settings.url = $this.uploader.settings.url+'&path='+$this.options.path;
 
+			// if storage is S3
+			if($this.options.storage == 's3') {
+				// upload multi-part data
+				$this.uploader.settings.multipart_params.key = file.name;
+				$this.uploader.settings.multipart_params['Content-Type'] = file.type;
+			}
+
 			// set progress to 0
 			$('.zlux-upload-file-progress', $file).html('0%');
 
@@ -860,13 +880,13 @@
 		 * Fires when a file is successfully uploaded.
 		 */
 		eventFileUploaded: function(file, info) {
-			var $this = this,
-				response = $.parseJSON(info.response);
+			var $this = this;
+				// response = $.parseJSON(info.response);
 
-			// upload the name
-			$('#' + file.id + ' .zlux-upload-file-name', $this.filelist).html(response.name);
+			// update the name
+			// $('#' + file.id + ' .zlux-upload-file-name', $this.filelist).html(response.name);
 
-			// upload the progress
+			// update progress
 			$('#' + file.id + ' .zlux-upload-file-progress', $this.filelist).html('100%').fadeOut();
 
 			// change the buttons/icons
@@ -880,10 +900,37 @@
 		 */
 		eventFilesAdded: function(files) {
 			var $this = this;
-			
+
 			// add the file preview
 			$.each(files, function(index, file) {
-				$this._renderFilePreview(file);
+
+				// render file dom
+				var file_dom = $this._renderFilePreview(file);
+
+				// add file spinner
+				$('.zlux-upload-file-btn-details', file_dom).addClass('icon-spinner icon-spin');
+
+				// validate file name
+				$.ajax({
+					"url": $this.options.url + '&task=validateFileName',
+					"data":{
+						name: file.name
+					},
+					"dataType": "json",
+					"cache": false,
+					"success": function (json) {
+						// update name
+						$('.zlux-upload-file-name', file_dom).html(json.result);
+
+						// 
+						var new_file = $this.uploader.getFile(file.id);
+						file.name = json.result;
+						// $this.uploader.addFile(new_file);
+
+						// remove spinner
+						$('.zlux-upload-file-btn-details', file_dom).removeClass('icon-spinner icon-spin');
+					}
+				})				
 			})
 		},
 		/*
@@ -979,9 +1026,9 @@
 			$this.trigger('QueueChanged');
 		},
 		_renderFilePreview: function(file) {
-			var $this = this;
+			var $this = this,
 			
-			$('<li id="' + file.id + '" class="zlux-upload-file" />').append(
+			file_dom = $('<li id="' + file.id + '" class="zlux-upload-file" />').append(
 
 				// buttons / icons
 				$('<i class="zlux-upload-file-btn-remove icon-remove" />'),
@@ -1007,6 +1054,8 @@
 
 			// append to the file list
 			.appendTo($this.filelist);
+
+			return file_dom;
 		},
 		_handleFileStatus: function(file) {
 			var $this = this,
