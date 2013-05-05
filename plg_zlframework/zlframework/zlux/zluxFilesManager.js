@@ -96,6 +96,14 @@
 				},
 				"fnServerParams": function (aoData) {
 					aoData.push({ "name": "extensions", "value": $this.options.extensions });
+
+					// if S3 storage
+					if($this.options.storage == 's3') {
+						aoData.push({ "name": "storage", "value": 's3' });
+						aoData.push({ "name": "accesskey", "value": $this.options.storage_params.accesskey });
+						aoData.push({ "name": "secretkey", "value": $this.options.storage_params.secretkey });
+						aoData.push({ "name": "bucket", "value": $this.options.storage_params.bucket });
+					}
 				},
 				"fnRowCallback": function( nRow, aData, iDisplayIndex, iDisplayIndexFull ) {
 					$(nRow).attr('data-type', aData.type);
@@ -694,7 +702,7 @@
 			};
 
 
-			// if storage is S3
+			// if S3 storage
 			if($this.options.storage == 's3') {
 				params = $.extend(params, {
 					url: 'http://' + $this.options.storage_params.bucket + '.s3.amazonaws.com',
@@ -844,7 +852,7 @@
 			// set the upload path
 			// $this.uploader.settings.url = $this.uploader.settings.url+'&path='+$this.options.path;
 
-			// if storage is S3
+			// if S3 storage
 			if($this.options.storage == 's3') {
 				// upload multi-part data
 				$this.uploader.settings.multipart_params.key = file.name;

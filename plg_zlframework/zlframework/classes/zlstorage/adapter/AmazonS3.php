@@ -10,17 +10,48 @@
 defined('_JEXEC') or die('Restricted access');
 
 // register necesary classes
-App::getInstance('zoo')->loader->register('ZLUtilAmazons3', 'classes:amazons3.php');
+App::getInstance('zoo')->loader->register('AEUtilAmazons3', 'classes:amazons3.php');
 
 /**
  * ZLStorage Amazon S3 Adapter class
  */
 class ZLStorageAdapterAmazonS3 extends ZLStorageAdapterBase implements ZLStorageAdapter {
 
+	/**
+	 * A reference to the global App object
+	 *
+	 * @var App
+	 */
+	public $app;
 
-	// Create an S3 instance with the required credentials
-		
+	/**
+	 * A reference to the Amazon S3 Utility class
+	 *
+	 * @var s3
+	 */
+	protected $s3;
 
+	/**
+	 * A reference to the Amazon S3 Bucket
+	 *
+	 * @var Bucket
+	 */
+	protected $bucket;
+
+	/**
+	 * Class Constructor
+	 */
+	public function __construct($options) {
+
+		// init vars
+		$this->app = App::getInstance('zoo');
+
+		// init S3 Utility
+		$this->s3 = AEUtilAmazons3::getInstance($options['accesskey'], $options['secretkey'], false);
+
+		// store bucket reference
+		$this->bucket = $options['bucket'];
+	}
 
 	/**
 	 * Writes a file to the filesystem selected
@@ -73,15 +104,12 @@ class ZLStorageAdapterAmazonS3 extends ZLStorageAdapterBase implements ZLStorage
 	 * @param   string   $file         The name of the php (temporary) uploaded file
 	 * @param   string   $dest         The path (including filename) to move the uploaded file to
 	 */
-	public function upload($file, $dest) {
-		
-		$s3 = AEUtilAmazons3::getInstance('AKIAJBGAQYDO6Z76KIGQ', '014/6Ig4f2MTXmZWvFndZYJkhKdRW2DY3L+qqh+c', false);
-
-		
+	public function upload($file, $dest)
+	{
 		$rrs = false;
 		$absolute_filename = $this->app->path->path('zlfw:changelog.txt');
 		// Legacy single part uploads
-		$result = $s3->putObject(
+		$result = $this->s3->putObject(
 			AEUtilAmazons3::inputFile( $absolute_filename, false ),		// File to read from
 			'milcom.testing',													// Bucket name
 			'changelog.txt',													// Remote relative filename, including directory
@@ -94,6 +122,61 @@ class ZLStorageAdapterAmazonS3 extends ZLStorageAdapterBase implements ZLStorage
 			)
 		);
 
-		// $s3->setError('You have not set up your Amazon S3 Access Key');
+		// $this->s3->setError('You have not set up your Amazon S3 Access Key');
+	}
+
+	/**
+	 * Get a Folder/File tree list
+	 * 
+	 * @param string $path		The path to the root folder
+	 * 
+	 * @return boolean			The success of the operation
+	 */
+	public function getTree($root, $legalExt)
+	{
+		// init vars
+		$rows = array();
+		$prefix = $root ? $root . '/' : '';
+
+		// get range of objects
+		$objects = $this->s3->getBucket($this->bucket, $prefix, null, null, '/', true);
+
+		// folders
+		foreach ($objects as $name => $obj) 
+		{
+			// skip root folder
+			if(!isset($obj['prefix']) && $obj['size'] == 0) {
+				unset($objects[$name]);
+				continue;
+			}
+
+			// if folder
+			if(isset($obj['prefix'])) {
+				$row = array('type' => 'folder');
+				$row['name'] = basename($name);
+				$row['path'] = $obj['prefix'];
+				// $row['size']['value'] = $this->app->zlfilesystem->getSourceSize($row['path'], false);
+				// $row['size']['display'] = $this->app->zlfilesystem->formatFilesize($row['size']['value'], 'KB');
+
+				$rows[] = $row;
+
+				unset($objects[$name]);
+			}
+		}
+
+		// files
+		foreach ($objects as $name => $obj) 
+		{
+			$row = array('type' => 'file');
+			$row['name'] = basename($name);
+			$row['path'] = $name;
+			$row['size']['value'] = $obj['size'];
+			$row['size']['display'] = $this->app->zlfilesystem->formatFilesize($row['size']['value'], 'KB');
+
+			$rows[] = $row;
+		}
+		
+		// return list
+		return $rows;
 	}
 }

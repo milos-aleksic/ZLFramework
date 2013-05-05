@@ -133,7 +133,7 @@ class ZLStorage {
 	 * 
 	 * @return boolean             The success of the operation
 	 */
-	public function getTree($root, $legalExt) {
+	public function getTree($root, $legalExt = '') {
 		return $this->adapter->getTree($root, $legalExt);
 	}
 

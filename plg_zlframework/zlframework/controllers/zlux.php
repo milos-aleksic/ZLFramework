@@ -289,10 +289,22 @@ class ZluxController extends AppController {
 		// init vars
 		$root = trim($this->app->request->get('root', 'string'), '/');
 		$legalExt = str_replace(array(' ', ','), array('', '|'), $this->app->request->get('extensions', 'string'));
+		$storage = $this->app->request->get('storage', 'string');
 
 		// init storage
-		$storage = new ZLStorage('Local', array('s3' => 'options'));
+		switch($storage) {
+			case 's3':
+				$bucket 	= $this->app->request->get('bucket', 'string');
+				$accesskey 	= $this->app->request->get('accesskey', 'string');
+				$secretkey 	= $this->app->zlfw->crypt($this->app->request->get('secretkey', 'string'), 'decrypt');
+				$storage = new ZLStorage('AmazonS3', array('secretkey' => $secretkey, 'accesskey' => $accesskey, 'bucket' => $bucket));
+				break;
 
+			default:
+				$storage = new ZLStorage('Local');
+				break;
+		}
+		
 		// retrieve tree
 		$tree = $storage->getTree($root, $legalExt);
 		
