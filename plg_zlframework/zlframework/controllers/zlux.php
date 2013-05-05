@@ -286,47 +286,27 @@ class ZluxController extends AppController {
 	*/
 	public function FilesManager()
 	{
-		$legalExt	= str_replace(array(' ', ','), array('', '|'), $this->app->request->get('extensions', 'string'));
-		$root		= trim($this->app->request->get('root', 'string'), '/');
-		$root		= $this->app->zlpath->getDirectory($root); // if empty, will return joomla image folder
-		$sEcho		= $this->app->request->get('sEcho', 'string', '');
-		$rows		= array();
+		// init vars
+		$root = trim($this->app->request->get('root', 'string'), '/');
+		$legalExt = str_replace(array(' ', ','), array('', '|'), $this->app->request->get('extensions', 'string'));
 
+		// init storage
+		$storage = new ZLStorage('Local', array('s3' => 'options'));
+
+		// retrieve tree
+		$tree = $storage->getTree($root, $legalExt);
+		
 		/* Array of database columns which should be read and sent back to DataTables. Use a space where
 		   you want to insert a non-database field (for example a counter or static image) */
 		$aColumns = array('type', 'name', 'size', 'path');
 
-		// dirs
-		foreach ($this->app->path->dirs("root:$root") as $dir) {
-			$row = array();
-			$row['name'] = basename($dir);
-			$row['type'] = 'folder';
-			$row['path'] = $dir;
-			$row['size']['value'] = $this->app->zlfilesystem->getSourceSize($row['path'], false);
-			$row['size']['display'] = $this->app->zlfilesystem->formatFilesize($row['size']['value'], 'KB');
-
-			$rows[] = $row;
-		}
-
-		// files
-		foreach ($this->app->path->files("root:$root", false, '/^.*('.$legalExt.')$/i') as $file) {
-			$row = array();
-			$row['name'] = basename($file);
-			$row['type'] = 'file';
-			$row['path'] = $file;
-			$row['size']['value'] = $this->app->zlfilesystem->getSourceSize($row['path'], false);
-			$row['size']['display'] = $this->app->zlfilesystem->formatFilesize($row['size']['value'], 'KB');
-
-			$rows[] = $row;
-		}
-		
+		// JSON
 		$JSON = array(
-			// 'sEcho' => $sEcho,
 			'iTotalRecords' => 40,
 			'iTotalDisplayRecords' => 40,
 			'sColumns' => implode(', ', $aColumns),
 			'root' => $root,
-			'aaData' => $rows
+			'aaData' => $tree
 		);
 
 		echo json_encode($JSON);
@@ -369,6 +349,28 @@ class ZluxController extends AppController {
 		// if does not exist, create
 		if (!JFolder::exists($path)) $result = JFolder::create($path);
 
+		echo json_encode(compact('result'));
+	}
+
+	/*
+		Function: validateFileName
+			Validate the name for uploading
+			
+		Parameters:
+			$name: file name
+	*/
+	public function validateFileName()
+	{
+		// init vars
+		$name = $this->app->request->get('name', 'string', '');
+
+		// convert to ASCII		
+		$result = $this->app->zlfilesystem->makeSafe($name, 'ascii');
+
+		// lowercase the extension
+		$result = JFile::stripExt($result) . '.' . strtolower( JFile::getExt($result) );
+
+		// return result
 		echo json_encode(compact('result'));
 	}
 
