@@ -10,12 +10,12 @@
 defined('_JEXEC') or die('Restricted access');
 
 // register necesary classes
-App::getInstance('zoo')->loader->register('AEUtilAmazons3', 'classes:amazons3.php');
+App::getInstance('zoo')->loader->register('AEUtilDropbox', 'classes:dropbox.php');
 
 /**
- * ZLStorage Amazon S3 Adapter class
+ * ZLStorage Dropbox Adapter class
  */
-class ZLStorageAdapterAmazonS3 extends ZLStorageAdapterBase implements ZLStorageAdapter {
+class ZLStorageAdapterDropbox extends ZLStorageAdapterBase implements ZLStorageAdapter {
 
 	/**
 	 * A reference to the global App object
@@ -25,18 +25,11 @@ class ZLStorageAdapterAmazonS3 extends ZLStorageAdapterBase implements ZLStorage
 	public $app;
 
 	/**
-	 * A reference to the Amazon S3 Utility class
+	 * A reference to the Dropbox Utility class
 	 *
-	 * @var s3
+	 * @var dropbox
 	 */
-	protected $s3;
-
-	/**
-	 * A reference to the Amazon S3 Bucket
-	 *
-	 * @var Bucket
-	 */
-	protected $bucket;
+	protected $dropbox;
 
 	/**
 	 * Class Constructor
@@ -46,11 +39,17 @@ class ZLStorageAdapterAmazonS3 extends ZLStorageAdapterBase implements ZLStorage
 		// init vars
 		$this->app = App::getInstance('zoo');
 
-		// init S3 Utility
-		$this->s3 = AEUtilAmazons3::getInstance($options['accesskey'], $options['secretkey'], false);
+		// init Dropbox Utility
+		$this->dropbox = new AEUtilDropbox();
+		$this->dropbox->setAppKeys(json_decode(base64_decode('eyJhcHAiOiJqZng4enFwdGwyYXc1NGQiLCJzZWNyZXQiOiJuZ2prZmxkY2R3ZDhnd3EifQ==')));
 
-		// store bucket reference
-		$this->bucket = $options['bucket'];
+		$token = (object)array(
+			'oauth_token_secret'	=> $token_secret,
+			'oauth_token'			=> $token,
+			'uid'					=> $token_uid,
+		);
+		
+		$this->dropbox->setToken($token);
 	}
 
 	/**

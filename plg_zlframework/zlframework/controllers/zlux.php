@@ -296,7 +296,7 @@ class ZluxController extends AppController {
 			case 's3':
 				$bucket 	= $this->app->request->get('bucket', 'string');
 				$accesskey 	= $this->app->request->get('accesskey', 'string');
-				$secretkey 	= $this->app->zlfw->crypt($this->app->request->get('secretkey', 'string'), 'decrypt');
+				$secretkey 	= $this->app->zlfw->crypt($this->app->request->get('key', 'string'), 'decrypt');
 				$storage = new ZLStorage('AmazonS3', array('secretkey' => $secretkey, 'accesskey' => $accesskey, 'bucket' => $bucket));
 				break;
 
@@ -317,8 +317,8 @@ class ZluxController extends AppController {
 			'iTotalRecords' => 40,
 			'iTotalDisplayRecords' => 40,
 			'sColumns' => implode(', ', $aColumns),
-			'root' => $root,
-			'aaData' => $tree
+			'root' => $tree['root'],
+			'aaData' => $tree['rows']
 		);
 
 		echo json_encode($JSON);

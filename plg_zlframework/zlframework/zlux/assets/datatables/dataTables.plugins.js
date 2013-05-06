@@ -137,44 +137,57 @@ var DT_Breadcrumb = function ( oDTSettings )
 {
 	oDTSettings.aoDrawCallback.push({
 		"fn": function () {
-			var brcb = $(oDTSettings.nTableWrapper).find('.breadcrumb'),
-				root = oDTSettings.oInit.sStartRoot,
-				new_brcb = '';
+			var $breadcrumb = $(oDTSettings.nTableWrapper).find('.breadcrumb'),
+				root = oDTSettings.oInit.sStartRoot, // relative root path
+				path = oDTSettings.sCurrentPath ? oDTSettings.sCurrentPath : '', // current browsed path
+				brcb = [],
+				paths;
 
-			// prepare the final path
-			var hidden_root = new RegExp('^'+root), // remove the root from the breadcrumb
-				path = oDTSettings.sCurrentRoot,
-				path = path ? path.replace(hidden_root, '').replace(/^\//, '').replace(/\/$/, '') : false,
-				paths = path ? path.split('/') : [];
+			// remove the root, is confidential data
+			path = path.replace(new RegExp('^'+root), '');
 
-			// add to breadcrumb the root last folder
-			var root = root.split('/').pop();
-			if(paths.length){
-				new_brcb += '<li><a href="#" data-path="">'+root+'</a><span class="divider">/</span></li>';
-			} else {
-				new_brcb += '<li class="active">'+root+'</li>';
-			}
+			// clean the path
+			path = path.replace(/(^\/|\/$)/, '');
 
-			// add the other paths
+			// split the path in folders
+			paths = path.length ? path.split('/') : [];
+
+			// if active path is the root
+			if (!paths.length) brcb.push('<li class="active">root</li>');
+
+			// if not
+			else brcb.push('<li><a href="#" data-path="">root</a><span class="divider">/</span></li>');
+
+			// populate with the other paths
 			path = [];
 			$.each(paths, function(i, v){
 				path.push(v);
 				if (paths.length == i+1 ) {
-					new_brcb += '<li class="active">'+v+'</li>';
+					brcb.push('<li class="active">' + v + '</li>');
 				} else {
-					new_brcb += '<li><a href="#" data-path="'+path.join('/')+'">'+v+'</a><span class="divider">/</span></li>';
+					brcb.push('<li><a href="#" data-path="' + path.join('/') + '">' + v + '</a><span class="divider">/</span></li>');
 				}
 			})
 
 			// update breadcrumb
-			brcb.html(new_brcb);
+			$breadcrumb.html(brcb.join(''));
 		},
 		"sName": "Breadcrumb"
 	});
 
-	var breadcrumb = $('<ul class="breadcrumb" />').on('click', 'a', function(e){
-		var sUrl = oDTSettings.sAjaxSource.replace(/\&root=.+/, '');
-		oDTSettings.oInstance.fnReloadAjax(sUrl+'&root='+oDTSettings.oInit.sStartRoot+'/'+$(this).data('path'));
+	// create the breadcrumb wrapper
+	var breadcrumb = $('<ul class="breadcrumb" />')
+
+	// assign events
+	.on('click', 'a', function(e){
+		var sUrl = oDTSettings.sAjaxSource;
+
+		// update root values
+		oDTSettings.sCurrentPath = oDTSettings.oInit.sStartRoot;
+		oDTSettings.sGoToPath = $(this).data('path');
+
+		// reload
+		oDTSettings.oInstance.fnReloadAjax(sUrl);
 		return false;
 	})
 

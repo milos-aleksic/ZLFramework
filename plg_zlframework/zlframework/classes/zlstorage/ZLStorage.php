@@ -34,7 +34,7 @@ class ZLStorage {
 	/**
 	 * Class Constructor
 	 */
-	public function __construct($adapter, $options) {
+	public function __construct($adapter, $options = array()) {
 
 		// init vars
 		$this->app = App::getInstance('zoo');

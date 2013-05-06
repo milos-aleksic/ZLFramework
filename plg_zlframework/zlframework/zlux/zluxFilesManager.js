@@ -35,7 +35,7 @@
 		},
 		initDataTable: function(wrapper) {
 			var $this = this,
-				source = $this.options.ajax_url+'&task=FilesManager&root='+$this.options.root;
+				source = $this.options.ajax_url + '&task=FilesManager';
 
 			// set table
 			$('<table cellpadding="0" cellspacing="0" border="0" class="table table-striped table-bordered" />')
@@ -53,7 +53,7 @@
 				"sAjaxUrl": $this.options.ajax_url,
 				"sAjaxSource": source,
 				"sServerMethod": "POST",
-				"sStartRoot": $this.options.root,
+				"sStartRoot": $this.cleanPath($this.options.root),
 				// "bServerSide": true,
 				"bPaginate": false,
 				"aoColumns": [
@@ -61,7 +61,7 @@
 						"sTitle": "", "mData": "type", "bSearchable": false, "sWidth": "14px", "sClass": "column-icon",
 						"mRender": function ( data, type, full ) {
 							if (type == 'display') {
-								return '<i class="icon-'+(data == 'folder' ? 'folder-close' : 'file-alt')+'"></i>';
+								return '<i class="icon-' + (data == 'folder' ? 'folder-close' : 'file-alt') + '"></i>';
 							} else {
 								return data;
 							}
@@ -71,13 +71,16 @@
 						"sTitle": "Name", "mData": "name", "sClass": "column-name",
 						"mRender": function ( data, type, full ) {
 							if (type == 'display') {
-								return '<a href="#">'+data+'</a>';
+								return '<a href="#">' + data + '</a>';
 							} else {
 								return data;
 							}
 						},
 						"fnCreatedCell": function (nTd, sData, oData, iRow, iCol) {
-							$(nTd).parent('tr').attr('data-path', oData.path)
+							// remove possible first and finall /
+							var path = oData.path.replace(/(^\/|\/$)/, '');
+							// store path in data
+							$(nTd).parent('tr').attr('data-path', path)
 						}
 					}
 					// {
@@ -101,7 +104,7 @@
 					if($this.options.storage == 's3') {
 						aoData.push({ "name": "storage", "value": 's3' });
 						aoData.push({ "name": "accesskey", "value": $this.options.storage_params.accesskey });
-						aoData.push({ "name": "secretkey", "value": $this.options.storage_params.secretkey });
+						aoData.push({ "name": "key", "value": $this.options.storage_params.secretkey });
 						aoData.push({ "name": "bucket", "value": $this.options.storage_params.bucket });
 					}
 				},
@@ -147,18 +150,20 @@
 					// update dialog scrollbar
 					$this.zluxdialog.scrollbar('refresh');
 
-					// hide processing if root available
-					oSettings.sCurrentRoot &&
-						$this.zluxdialog.spinner('hide');
+					// hide spinner
+					$this.zluxdialog.spinner('hide');
 				}
 			})
 
-			/* Add a click handler to the rows */
+			// when folder clicked
 			.on('click', 'tbody [data-type=folder] a', function(e) {
 				var row = $(this).closest('tr'),
-					oSettings = $this.oTable.fnSettings(),
-					sUrl = oSettings.sAjaxSource.replace(/\&root=.+/, '');
-				$this.oTable.fnReloadAjax(sUrl+'&root='+oSettings.sCurrentRoot+'/'+row.data('path'));
+					oSettings = $this.oTable.fnSettings();
+
+				// update paths
+				oSettings.sGoToPath = row.data('path');
+
+				$this.oTable.fnReloadAjax(oSettings.sAjaxSource);
 				return false;
 			})
 
@@ -172,7 +177,7 @@
 				// if input
 				// if ($this.target[0].tagName == 'INPUT'){
 				// 	row.siblings('[data-checked]').removeAttr('data-checked');
-				// 	var value = oSettings.sCurrentRoot+'/'+row.data('path')
+				// 	var value = oSettings.sCurrentPath+'/'+row.data('path')
 				// 	$this.target.val(value).trigger('change');
 				// } else {}
 				
@@ -203,19 +208,28 @@
 			$this.oTable.fnReloadAjax($this.oTable.fnSettings().sAjaxSource);
 		},
 		_fnServerData: function( sUrl, aoData, fnCallback, oSettings ) {
-			$this = this;
+			var $this = this,
+				root;
 
 			// create cache object
 			oSettings.aAjaxDataCache = oSettings.aAjaxDataCache ? oSettings.aAjaxDataCache : [];
-			
+
+			// if first time, set start root as current path
+			if (!oSettings.aAjaxDataCache.length) oSettings.sCurrentPath = oSettings.oInit.sStartRoot;
+
+			// set the root
+			root = $this.cleanPath(oSettings.sCurrentPath + '/' + oSettings.sGoToPath);
+
+			// send root with post data
+			aoData.push({ "name": "root", "value": root });
+
+			// ajax
 			oSettings.jqXHR = $.ajax({
 				"url": sUrl,
 				"data": aoData,
 				"beforeSend": function(jqXHR, settings){
 					// check if the data is cached
-					var cached = false,
-						root = sUrl.match(/\&root=.+/),
-						root = root ? root.pop().replace(/\&root=/, '').replace(/\/$/, '') : '';
+					var cached = false;
 
 					if (!oSettings.bReloading){
 						$.each(oSettings.aAjaxDataCache, function(i, v){
@@ -223,9 +237,9 @@
 								var json = v.data;
 
 								// save root
-								oSettings.sCurrentRoot = v.root;
+								oSettings.sCurrentPath = v.root;
 
-								// trigger events
+								// emulate the xhr events
 								$(oSettings.oInstance).trigger('xhr', [oSettings, json]);
 								fnCallback( json );
 
@@ -235,18 +249,22 @@
 						})
 					}
 
-					if (cached) return false; else {
-						// show processing
-						$this.zluxdialog.spinner('show');
-					}
+					// if cached abort ajax
+					if (cached) return false;
+
+					// else, the ajax proceeds, show the spinner
+					$this.zluxdialog.spinner('show');
 				},
 				"success": function (json) {
 					if ( json.sError ) {
 						oSettings.oApi._fnLog( oSettings, 0, json.sError );
 					}
 
-					// save directory root
-					oSettings.sCurrentRoot = json.root;
+					// if first time, save real root path, as it can be changed for security reasons by the server
+					if (!oSettings.aAjaxDataCache.length) oSettings.oInit.sStartRoot = json.root;
+
+					// save new path
+					oSettings.sCurrentPath = json.root;
 
 					// reset cache to 0 if reloading
 					if (oSettings.bReloading) oSettings.aAjaxDataCache = [];

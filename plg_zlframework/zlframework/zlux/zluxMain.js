@@ -22,6 +22,25 @@
 			var $this = this;
 		},
 		/**
+		 * Clean a path from double / and others
+		 *
+		 * @method cleanPath
+		 * @param {String} path The path to be cleaned
+		 */
+		cleanPath : function(path) {
+			// return path and
+			return path
+
+			// remove undefined
+			.replace(/undefined/g, '')
+
+			// remove double /
+			.replace(/\/\//g, '/')
+
+			// remove / from start and begining
+			.replace(/(^\/|\/$)/g, '');
+		},
+		/**
 		 * Dispatches the specified event name and it's arguments to all listeners.
 		 *
 		 * @method trigger

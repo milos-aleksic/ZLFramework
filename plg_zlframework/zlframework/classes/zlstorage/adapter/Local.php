@@ -142,6 +142,6 @@ class ZLStorageAdapterLocal extends ZLStorageAdapterBase implements ZLStorageAda
 		}
 
 		// return list
-		return $rows;
+		return compact('root', 'rows');
 	}
 }
