@@ -2,6 +2,10 @@
 
 /* ZL Bootstrap
 ----------------------------------------------------------------------------------------------------*/
+
+@red: #b94a48;
+
+
 .zl-bootstrap {
 
 	.btn {
@@ -116,7 +120,7 @@
 
 				.zlux-upload-file-details-error {
 					border: none;
-					color: #b94a48;
+					color: @red;
 					text-align: center;
 					display: none;
 				}
@@ -136,12 +140,6 @@
 				// set the loading icon
 				.zlux-upload-file-btn-remove {
 					cursor: default;
-					// background: url(img/loader-btn.gif) no-repeat scroll 0 0 transparent;
-					height: 14px;
-
-					&:before {
-						content: "";
-					}
 				}
 
 				// show progress
@@ -150,7 +148,7 @@
 				}
 			}
 
-			// if status = done
+			// if status = error
 			&[data-zlux-upload-status="error"] {
 
 				// show the error
@@ -160,7 +158,7 @@
 
 				// set icon color
 				.zlux-upload-file-btn-details {
-					color: #b94a48;
+					color: @red;					
 				}
 			}
 
@@ -175,6 +173,18 @@
 				// show the progress
 				.zlux-upload-file-progress {
 					display: block;
+				}
+			}
+
+			// if status = validating
+			&[data-zlux-upload-status="validating"] {
+
+				.zlux-upload-file-name {
+					min-height: 20px;
+
+					i.icon-spinner {
+						float: left;
+					}
 				}
 			}
 		}
@@ -383,6 +393,18 @@
 				}
 			}
 		}
+
+		// entry, folder/file
+		.zlux-global-entry-remove {
+			visibility: hidden;
+		}
+		.zlux-global-entry.zlux-ui-open {
+
+			.zlux-global-entry-remove {
+				visibility: visible;
+				color: @red;
+			}
+		}
 	}
 }
 
@@ -433,6 +455,7 @@
 				font-size: 14px;
 				padding-top: 12px;
 				text-align: center;
+				cursor: default;
 			}
 
 			// name column
@@ -471,16 +494,17 @@
 
 			.sorting_asc:after,
 			.sorting_asc_disabled:after {
-				content: "\f0d8"; // icon-caret-up
+				content: "\f0de"; // icon-sort-up
 			}
 			
 			.sorting_desc:after,
 			.sorting_desc_disabled:after {
-				content: "\f0d7"; // icon-caret-down
+				content: "\f0dd"; // icon-sort-down
 			}
 
-			.sorting {
-				background: url('assets/img/sort_both.png') no-repeat center right;
+			.sorting:after {
+				content: "\f0dc"; // icon-sort
+				color: #DCDCDC;
 			}
 
 			.sorting_asc_disabled:after,

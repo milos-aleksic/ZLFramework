@@ -104,12 +104,7 @@
  * Contributing: http://www.plupload.com/contributing
  */
 
-/*jshint smarttabs:true, undef:true, unused:true, latedef:true, curly:true, bitwise:false, scripturl:true, browser:true */
-/*global define:true */
-
 define('moxie/core/utils/Basic', [], function() {
-	var undefined;
-
 	/**
 	Gets the true type of the built-in object (better version of typeof).
 	@author Angus Croll (http://javascriptweblog.wordpress.com/)
@@ -121,7 +116,9 @@ define('moxie/core/utils/Basic', [], function() {
 	@return {String} Object [[Class]]
 	*/
 	var typeOf = function(o) {
-		if (o === undefined) {
+		var undef;
+
+		if (o === undef) {
 			return 'undefined';
 		} else if (o === null) {
 			return 'null';
@@ -143,10 +140,12 @@ define('moxie/core/utils/Basic', [], function() {
 	@return {Object} Same as target, the extended object.
 	*/
 	var extend = function(target) {
+		var undef;
+
 		each(arguments, function(arg, i) {
 			if (i > 0) {
 				each(arg, function(value, key) {
-					if (value !== undefined) {
+					if (value !== undef) {
 						if (typeOf(target[key]) === typeOf(value) && !!~inArray(typeOf(value), ['array', 'object'])) {
 							extend(target[key], value);
 						} else {
@@ -169,16 +168,16 @@ define('moxie/core/utils/Basic', [], function() {
 	@param {function} callback Callback function to execute for each item.
 	*/
 	var each = function(obj, callback) {
-		var length, key, i;
+		var length, key, i, undef;
 
 		if (obj) {
 			try {
 				length = obj.length;
 			} catch(ex) {
-				length = undefined;
+				length = undef;
 			}
 
-			if (length === undefined) {
+			if (length === undef) {
 				// Loop object items
 				for (key in obj) {
 					if (obj.hasOwnProperty(key)) {
@@ -430,9 +429,6 @@ define('moxie/core/utils/Basic', [], function() {
  * Contributing: http://www.plupload.com/contributing
  */
 
-/*jshint smarttabs:true, undef:true, unused:true, latedef:true, curly:true, bitwise:true, scripturl:true, browser:true */
-/*global define:true */
-
 define("moxie/core/I18n", [
 	"moxie/core/utils/Basic"
 ], function(Basic) {
@@ -467,6 +463,24 @@ define("moxie/core/I18n", [
 		 */
 		_: function(str) {
 			return this.translate(str);
+		},
+
+		/**
+		 * Pseudo sprintf implementation - simple way to replace tokens with specified values.
+		 *
+		 * @param {String} str String with tokens
+		 * @return {String} String with replaced tokens
+		 */
+		sprintf: function(str) {
+			var args = [].slice.call(arguments, 1), reStr = '';
+
+			str.split(/%[sdf]/).forEach(function(part) {
+				reStr += part;
+				if (args.length) {
+					reStr += args.shift();
+				}
+			});
+			return reStr;
 		}
 	};
 });
@@ -482,9 +496,6 @@ define("moxie/core/I18n", [
  * License: http://www.plupload.com/license
  * Contributing: http://www.plupload.com/contributing
  */
-
-/*jshint smarttabs:true, undef:true, unused:true, latedef:true, curly:true, bitwise:false, scripturl:true, browser:true */
-/*global define:true */
 
 define("moxie/core/utils/Mime", [
 	"moxie/core/utils/Basic",
@@ -643,9 +654,6 @@ define("moxie/core/utils/Mime", [
  * License: http://www.plupload.com/license
  * Contributing: http://www.plupload.com/contributing
  */
-
-/*jshint smarttabs:true, undef:true, unused:true, latedef:true, curly:true, bitwise:false, scripturl:true, browser:true, laxcomma:true */
-/*global define:true, modules:true */
 
 define("moxie/core/utils/Env", [
 	"moxie/core/utils/Basic"
@@ -863,9 +871,6 @@ define("moxie/core/utils/Env", [
  * Contributing: http://www.plupload.com/contributing
  */
 
-/*jshint smarttabs:true, undef:true, unused:true, latedef:true, curly:true, bitwise:true, scripturl:true, browser:true */
-/*global define:true */
-
 define('moxie/core/utils/Dom', ['moxie/core/utils/Env'], function(Env) {
 
 	/**
@@ -1051,9 +1056,6 @@ define('moxie/core/utils/Dom', ['moxie/core/utils/Env'], function(Env) {
  * Contributing: http://www.plupload.com/contributing
  */
 
-/*jshint smarttabs:true, undef:true, unused:true, latedef:true, curly:true, bitwise:true, scripturl:true, browser:true */
-/*global define:true */
-
 define('moxie/core/Exceptions', [
 	'moxie/core/utils/Basic'
 ], function(Basic) {
@@ -1210,9 +1212,6 @@ define('moxie/core/Exceptions', [
  * License: http://www.plupload.com/license
  * Contributing: http://www.plupload.com/contributing
  */
-
-/*jshint smarttabs:true, undef:true, unused:true, latedef:true, curly:true, bitwise:true, scripturl:true, browser:true */
-/*global define:true */
 
 define('moxie/core/EventTarget', [
 	'moxie/core/Exceptions',
@@ -1504,9 +1503,6 @@ define('moxie/core/EventTarget', [
  * Contributing: http://www.plupload.com/contributing
  */
 
-/*jshint smarttabs:true, undef:true, unused:true, latedef:true, curly:true, bitwise:false, scripturl:true, browser:true */
-/*global define:true, escape: true, unescape: true */
-
 define('moxie/core/utils/Encode', [], function() {
 
 	/**
@@ -1542,9 +1538,9 @@ define('moxie/core/utils/Encode', [], function() {
 	@param {String} data String to decode
 	@return {String} Decoded string
 	*/
-	var atob = function(data) {
+	var atob = function(data, utf8) {
 		if (typeof(window.atob) === 'function') {
-			return window.atob(data);
+			return utf8 ? utf8_decode(window.atob(data)) : window.atob(data);
 		}
 
 		// http://kevin.vanzonneveld.net
@@ -1599,7 +1595,7 @@ define('moxie/core/utils/Encode', [], function() {
 
 		dec = tmp_arr.join('');
 
-		return dec;
+		return utf8 ? utf8_decode(dec) : dec;
 	};
 	
 	/**
@@ -1611,7 +1607,11 @@ define('moxie/core/utils/Encode', [], function() {
 	@param {String} data String to encode
 	@return {String} Base64 encoded string
 	*/
-	var btoa = function(data) {
+	var btoa = function(data, utf8) {
+		if (utf8) {
+			utf8_encode(data);
+		}
+
 		if (typeof(window.btoa) === 'function') {
 			return window.btoa(data);
 		}
@@ -1682,9 +1682,6 @@ define('moxie/core/utils/Encode', [], function() {
  * Contributing: http://www.plupload.com/contributing
  */
 
-/*jshint smarttabs:true, undef:true, unused:true, latedef:true, curly:true, bitwise:true, scripturl:true, browser:true, laxcomma:true */
-/*global define:true */
-
 define('moxie/runtime/Runtime', [
 	"moxie/core/utils/Basic",
 	"moxie/core/utils/Dom",
@@ -1696,8 +1693,14 @@ define('moxie/runtime/Runtime', [
 	Common set of methods and properties for every runtime instance
 
 	@class Runtime
+
+	@param {Object} options
+	@param {String} type Sanitized name of the runtime
+	@param {Object} [caps] Set of capabilities that differentiate specified runtime
+	@param {Object} [clientCaps] Set of capabilities that implicitly switch the runtime to 'client' mode
+	@param {String} [defaultMode='browser'] Default operational mode to choose if no required capabilities were requested
 	*/
-	function Runtime(type, options, caps) {
+	function Runtime(options, type, caps, clientCaps, defaultMode) {
 		/**
 		Dispatched when runtime is initialized and ready.
 		Results in RuntimeInit on a connected component.
@@ -1712,10 +1715,58 @@ define('moxie/runtime/Runtime', [
 		@event Error
 		*/
 
-		var self = this, uid = Basic.guid(type + '_');
+		var self = this
+		, _shim
+		, _uid = Basic.guid(type + '_')
+		, _mode = null
+		;
+
+		/**
+		Runtime (not native one) may operate in browser or client mode.
+		
+		@method _setMode
+		@private
+		@param {Object} [clientCaps] Set of capabilities that require client mode
+		@param {Object} [defaultMode] The mode to switch to if clientCaps or requiredCaps are empty
+		*/
+		function _setMode(clientCaps, defaultMode) {
+			var self = this
+			, rc = options && options.required_caps
+			;
+
+			// mode can be effectively set only once
+			if (_mode !== null) {
+				return _mode;
+			}
+
+			if (rc && !Basic.isEmptyObj(clientCaps)) {
+				// loop over required caps and check if they do require the same mode
+				Basic.each(rc, function(value, cap) {
+					if (clientCaps.hasOwnProperty(cap)) {
+						var capMode = self.can(cap, value, clientCaps) ? 'client' : 'browser';
+						// if cap requires conflicting mode - runtime cannot fulfill required caps
+						if (_mode && _mode !== capMode) {
+							return (_mode = false);
+						} else {
+							_mode = capMode;
+						}
+					}
+				});
+			} 
+
+			// if mode still not defined
+			if (_mode === null) {
+				_mode = defaultMode || 'browser';
+			}
+
+			// once we got the mode, test against all caps
+			if (_mode && rc && !this.can(rc)) {
+				_mode = false;
+			}	
+		}
 
 		// register runtime in private hash
-		runtimes[uid] = this;
+		runtimes[_uid] = this;
 
 		/**
 		Default set of capabilities, which can be redifined later by specific runtime
@@ -1731,6 +1782,8 @@ define('moxie/runtime/Runtime', [
 			access_image_binary: false,
 			// ... display binary data as thumbs for example
 			display_media: false,
+			// ... make cross-domain requests
+			do_cors: false,
 			// ... accept files dragged and dropped from the desktop
 			drag_and_drop: false,
 			// ... resize image (and manipulate it raw data of any file in general)
@@ -1738,7 +1791,7 @@ define('moxie/runtime/Runtime', [
 			// ... periodically report how many bytes of total in the file were uploaded (loaded)
 			report_upload_progress: false,
 			// ... provide access to the headers of http response 
-			return_response_headers: true,
+			return_response_headers: false,
 			// ... support response of specific type, which should be passed as an argument
 			// e.g. runtime.can('return_response_type', 'blob')
 			return_response_type: false,
@@ -1769,6 +1822,43 @@ define('moxie/runtime/Runtime', [
 			// e.g. runtime.can('use_http_method', 'put')
 			use_http_method: true
 		}, caps);
+		
+		// small extension factory here (is meant to be extended with actual extensions constructors)
+		_shim = (function() {
+			var objpool = {};
+
+			return {
+				exec: function(uid, comp, fn, args) {
+					if (_shim[comp]) {
+						if (!objpool[uid]) {
+							objpool[uid] = {
+								context: this,
+								instance: new _shim[comp]()
+							};
+						}
+
+						if (objpool[uid].instance[fn]) {
+							return objpool[uid].instance[fn].apply(this, args);
+						}
+					}
+				},
+
+				removeInstance: function(uid) {
+					delete objpool[uid];
+				},
+
+				removeAllInstances: function() {
+					var self = this;
+					
+					Basic.each(objpool, function(obj, uid) {
+						if (Basic.typeOf(obj.instance.destroy) === 'function') {
+							obj.instance.destroy.call(obj.context);
+						}
+						self.removeInstance(uid);
+					});
+				}
+			};
+		}());
 
 
 		// public methods
@@ -1788,7 +1878,7 @@ define('moxie/runtime/Runtime', [
 			@property uid
 			@type {String}
 			*/
-			uid: uid,
+			uid: _uid,
 
 			/**
 			Runtime type (e.g. flash, html5, etc)
@@ -1804,7 +1894,7 @@ define('moxie/runtime/Runtime', [
 			@property shimid
 			@type {String}
 			*/
-			shimid: uid + '_container',
+			shimid: _uid + '_container',
 
 			/**
 			Number of connected clients. If equal to zero, runtime can be destroyed
@@ -1828,9 +1918,12 @@ define('moxie/runtime/Runtime', [
 			@method can
 			@param {String} cap Name of capability to check
 			@param {Mixed} [value] If passed, capability should somehow correlate to the value
+			@param {Object} [refCaps] Set of capabilities to check the specified cap against (defaults to internal set)
 			@return {Boolean} true if runtime has such capability and false, if - not
 			*/
 			can: function(cap, value) {
+				var refCaps = arguments[2] || caps;
+
 				// if cap var is a comma-separated list of caps, convert it to object (key/value)
 				if (Basic.typeOf(cap) === 'string' && Basic.typeOf(value) === 'undefined') {
 					cap = (function(arr) {
@@ -1846,7 +1939,7 @@ define('moxie/runtime/Runtime', [
 
 				if (Basic.typeOf(cap) === 'object') {
 					for (var key in cap) {
-						if (!this.can(key, cap[key])) {
+						if (!this.can(key, cap[key], refCaps)) {
 							return false;
 						}
 					}
@@ -1854,12 +1947,28 @@ define('moxie/runtime/Runtime', [
 				}
 
 				// check the individual cap
-				if (Basic.typeOf(caps[cap]) === 'function') {
-					return caps[cap].call(this, value);
+				var result;
+				if (Basic.typeOf(refCaps[cap]) === 'function') {
+					result = refCaps[cap].call(this, value);
+				} else {
+					result = refCaps[cap];
 				}
 
-				return caps[cap] || false;
+				// for boolean values check absolute equality
+				return Basic.typeOf(value) === 'boolean' ? result === value : result;
 			},
+
+
+			/**
+			Runtime (not native one) may operate in browser or client mode.
+
+			@method getMode
+			@return {String|Boolean} current mode or false, if none possible
+			*/
+			getMode: function() {
+				return _mode || false;
+			},
+
 
 			/**
 			Returns container for the runtime as DOM element
@@ -1902,7 +2011,20 @@ define('moxie/runtime/Runtime', [
 			@return {DOMElement}
 			*/
 			getShim: function() {
-				return Dom.get(this.uid);
+				return _shim;
+			},
+
+			/**
+			Invokes a method within the runtime itself (might differ across the runtimes)
+
+			@method shimExec
+			@param {Mixed} []
+			@protected
+			@return {Mixed} Depends on the action and component
+			*/
+			shimExec: function(component, action) {
+				var args = [].slice.call(arguments, 2);
+				return self.getShim().exec.call(this, this.uid, component, action, args);
 			},
 
 			/**
@@ -1924,35 +2046,27 @@ define('moxie/runtime/Runtime', [
 			},
 
 			/**
-			Invokes a method within the runtime itself (might differ across the runtimes)
-
-			@method shimExec
-			@param {Mixed} []
-			@protected
-			@return {Mixed} Depends on the action and component
-			*/
-			shimExec: function(component, action) {
-				var args = [].slice.call(arguments, 2);
-				return self.getShim().exec(this.uid, component, action, args);
-			},
-
-			/**
 			Destroys the runtime (removes all events and deletes DOM structures)
 
 			@method destroy
 			*/
 			destroy: function() {
-				var shimContainer = this.getShimContainer();
+				var shimContainer = Dom.get(this.shimid);
 				if (shimContainer) {
 					shimContainer.parentNode.removeChild(shimContainer);
-					shimContainer = null;
+				}
+
+				if (_shim) {
+					_shim.removeAllInstances();
 				}
 
 				this.unbindAll();
 				delete runtimes[this.uid];
-				uid = self = null;
+				_uid = self = _shim = _mode = shimContainer = null;
 			}
 		});
+
+		_setMode.call(this, clientCaps, defaultMode);
 	}
 
 	/**
@@ -2032,9 +2146,6 @@ define('moxie/runtime/Runtime', [
  * Contributing: http://www.plupload.com/contributing
  */
 
-/*jshint smarttabs:true, undef:true, unused:true, latedef:true, curly:true, bitwise:true, scripturl:true, browser:true, loopfunc:true */
-/*global define:true */
-
 define('moxie/runtime/RuntimeClient', [
 	'moxie/core/Exceptions',
 	'moxie/core/utils/Basic',
@@ -2079,12 +2190,6 @@ define('moxie/runtime/RuntimeClient', [
 					// try initializing the runtime
 					runtime = new constructor(options);
 
-					// if any capabilities required, check if the runtime has them
-					if (options.required_caps && !runtime.can(options.required_caps)) {
-						initialize(items);
-						return;
-					}
-
 					runtime.bind('Init', function() {
 						// mark runtime as initialized
 						runtime.initialized = true;
@@ -2097,12 +2202,18 @@ define('moxie/runtime/RuntimeClient', [
 						}, 1);
 					});
 
-					runtime.bind('Error', function(e, err) {
+					runtime.bind('Error', function() {
 						runtime.destroy(); // runtime cannot destroy itself from inside at a right moment, thus we do it here
 						initialize(items);
 					});
 
 					/*runtime.bind('Exception', function() { });*/
+
+					// check if runtime managed to pick-up operational mode
+					if (!runtime.getMode()) {
+						runtime.trigger('Error');
+						return;
+					}
 
 					runtime.init();
 				}
@@ -2169,9 +2280,6 @@ define('moxie/runtime/RuntimeClient', [
  * Contributing: http://www.plupload.com/contributing
  */
 
-/*jshint smarttabs:true, undef:true, unused:true, latedef:true, curly:true, bitwise:true, scripturl:true, browser:true */
-/*global define:true */
-
 define('moxie/file/Blob', [
 	'moxie/core/utils/Basic',
 	'moxie/core/utils/Encode',
@@ -2204,13 +2312,10 @@ define('moxie/file/Blob', [
 			return blob;
 		}
 
-		function _getRuntime() {
-			if (Basic.typeOf(this.connectRuntime) !== 'function') {		
-				RuntimeClient.call(this);
-			}
-			return this.connectRuntime(this.ruid);
+		if (ruid) {
+			RuntimeClient.call(this);
+			this.connectRuntime(ruid);
 		}
-
 
 		if (!blob) {
 			blob = {};
@@ -2263,7 +2368,7 @@ define('moxie/file/Blob', [
 				if (this.isDetached()) {
 					return _sliceDetached.apply(this, arguments);
 				}
-				return _getRuntime.call(this).exec.call(this, 'Blob', 'slice', this.getSource(), start, end, type);
+				return this.getRuntime().exec.call(this, 'Blob', 'slice', this.getSource(), start, end, type);
 			},
 
 			/**
@@ -2288,7 +2393,7 @@ define('moxie/file/Blob', [
 			*/
 			detach: function(data) {
 				if (this.ruid) {
-					_getRuntime.call(this).exec.call(this, 'Blob', 'destroy', blobpool[this.uid]);
+					this.getRuntime().exec.call(this, 'Blob', 'destroy', blobpool[this.uid]);
 					this.disconnectRuntime();
 					this.ruid = null;
 				}
@@ -2351,9 +2456,6 @@ define('moxie/file/Blob', [
  * License: http://www.plupload.com/license
  * Contributing: http://www.plupload.com/contributing
  */
-
-/*jshint smarttabs:true, undef:true, unused:true, latedef:true, curly:true, bitwise:true, scripturl:true, browser:true */
-/*global define:true */
 
 define('moxie/file/File', [
 	'moxie/core/utils/Basic',
@@ -2435,9 +2537,6 @@ define('moxie/file/File', [
  * License: http://www.plupload.com/license
  * Contributing: http://www.plupload.com/contributing
  */
-
-/*jshint smarttabs:true, undef:true, unused:true, latedef:true, curly:true, bitwise:true, scripturl:true, browser:true */
-/*global define:true */
 
 define('moxie/file/FileInput', [
 	'moxie/core/utils/Basic',
@@ -2635,41 +2734,44 @@ define('moxie/file/FileInput', [
 				self.bind('RuntimeInit', function(e, runtime) {
 					self.ruid = runtime.uid;
 
+					self.bind("Ready", function() {
+						self.trigger("Refresh");
+					}, 999);
+
 					self.bind("Change", function() {
 						var files = runtime.exec.call(self, 'FileInput', 'getFiles');
 
 						self.files = [];
 
 						Basic.each(files, function(file) {
-							runtime.clients++;
 							self.files.push(new File(self.ruid, file));
 						});
 					}, 999);
-					
-					runtime.exec.call(self, 'FileInput', 'init', options);
 
 					// re-position and resize shim container
 					self.bind('Refresh', function() {
-						var pos, size, browseButton;
+						var pos, size, browseButton, shimContainer;
 						
 						browseButton = Dom.get(options.browse_button);
+						shimContainer = Dom.get(runtime.shimid); // do not use runtime.getShimContainer(), since it will create container if it doesn't exist
 
 						if (browseButton) {
 							pos = Dom.getPos(browseButton, Dom.get(options.container));
 							size = Dom.getSize(browseButton);
 
-							Basic.extend(runtime.getShimContainer().style, {
-								top     : pos.y + 'px',
-								left    : pos.x + 'px',
-								width   : size.w + 'px',
-								height  : size.h + 'px'
-							});
-							browseButton = null;
+							if (shimContainer) {
+								Basic.extend(shimContainer.style, {
+									top     : pos.y + 'px',
+									left    : pos.x + 'px',
+									width   : size.w + 'px',
+									height  : size.h + 'px'
+								});
+							}
 						}
+						shimContainer = browseButton = null;
 					});
-
-					self.trigger('Refresh');
-					self.dispatchEvent('ready');
+					
+					runtime.exec.call(self, 'FileInput', 'init', options);
 				});
 
 				// runtime needs: options.required_features, options.runtime_order and options.container
@@ -2707,9 +2809,6 @@ define('moxie/file/FileInput', [
  * License: http://www.plupload.com/license
  * Contributing: http://www.plupload.com/contributing
  */
-
-/*jshint smarttabs:true, undef:true, unused:true, latedef:true, curly:true, bitwise:true, scripturl:true, browser:true */
-/*global define:true */
 
 define('moxie/file/FileDrop', [
 	'moxie/core/I18n',
@@ -2883,9 +2982,6 @@ define('moxie/file/FileDrop', [
  * License: http://www.plupload.com/license
  * Contributing: http://www.plupload.com/contributing
  */
-
-/*jshint smarttabs:true, undef:true, unused:true, latedef:true, curly:true, bitwise:false, scripturl:true, browser:true, sub:false */
-/*global define:true */
 
 define('moxie/file/FileReader', [
 	'moxie/core/utils/Basic',
@@ -3082,9 +3178,6 @@ define('moxie/file/FileReader', [
  * Contributing: http://www.plupload.com/contributing
  */
 
-/*jshint smarttabs:true, undef:true, unused:true, latedef:true, curly:true, bitwise:true, scripturl:true, browser:true, laxcomma:true */
-/*global define:true */
-
 define('moxie/core/utils/Url', [], function() {
 	/**
 	Parse url into separate components and fill in absent parts with parts from current url,
@@ -3109,7 +3202,7 @@ define('moxie/core/utils/Url', [], function() {
 					
 		while (i--) {
 			if (m[i]) {
-			  uri[key[i]] = m[i];
+				uri[key[i]] = m[i];
 			}
 		}
 
@@ -3201,9 +3294,6 @@ define('moxie/core/utils/Url', [], function() {
  * Contributing: http://www.plupload.com/contributing
  */
 
-/*jshint smarttabs:true, undef:true, unused:true, latedef:true, curly:true, bitwise:true, scripturl:true, browser:true */
-/*global define:true */
-
 define('moxie/runtime/RuntimeTarget', [
 	'moxie/core/utils/Basic',
 	'moxie/runtime/RuntimeClient',
@@ -3234,6 +3324,79 @@ define('moxie/runtime/RuntimeTarget', [
 	return RuntimeTarget;
 });
 
+// Included from: src/javascript/file/FileReaderSync.js
+
+/**
+ * FileReaderSync.js
+ *
+ * Copyright 2013, Moxiecode Systems AB
+ * Released under GPL License.
+ *
+ * License: http://www.plupload.com/license
+ * Contributing: http://www.plupload.com/contributing
+ */
+
+define('moxie/file/FileReaderSync', [
+	'moxie/core/utils/Basic',
+	'moxie/runtime/RuntimeClient',
+	'moxie/core/utils/Encode'
+], function(Basic, RuntimeClient, Encode) {
+	/**
+	Synchronous FileReader implementation. Something like this is available in WebWorkers environment, here
+	it can be used to read only preloaded blobs/files and only below certain size (not yet sure what that'd be,
+	but probably < 1mb). Not meant to be used directly by user.
+
+	@class FileReaderSync
+	@private
+	@constructor
+	*/
+	return function() {
+		RuntimeClient.call(this);
+
+		Basic.extend(this, {
+			uid: Basic.guid('uid_'),
+
+			readAsBinaryString: function(blob) {
+				return _read.call(this, 'readAsBinaryString', blob);
+			},
+			
+			readAsDataURL: function(blob) {
+				return _read.call(this, 'readAsDataURL', blob);
+			},
+			
+			/*readAsArrayBuffer: function(blob) {
+				return _read.call(this, 'readAsArrayBuffer', blob);
+			},*/
+			
+			readAsText: function(blob) {
+				return _read.call(this, 'readAsText', blob);
+			}
+		});
+
+		function _read(op, blob) {
+			if (blob.isDetached()) {
+				var src = blob.getSource();
+				switch (op) {
+					case 'readAsBinaryString':
+						return src;
+					case 'readAsDataURL':
+						return 'data:' + blob.type + ';base64,' + Encode.btoa(src);
+					case 'readAsText':
+						var txt = '';
+						for (var i = 0, length = src.length; i < length; i++) {
+							txt += String.fromCharCode(src[i]);
+						}
+						return txt;
+				}
+			} else {
+				var result = this.connectRuntime(blob.ruid).exec.call(this, 'FileReaderSync', 'read', op, blob);
+				this.disconnectRuntime();
+				return result;
+			}
+		}
+	};
+});
+
 // Included from: src/javascript/xhr/FormData.js
 
 /**
@@ -3245,9 +3408,6 @@ define('moxie/runtime/RuntimeTarget', [
  * License: http://www.plupload.com/license
  * Contributing: http://www.plupload.com/contributing
  */
-
-/*jshint smarttabs:true, undef:true, unused:true, latedef:true, curly:true, bitwise:false, scripturl:true, browser:true */
-/*global define:true */
 
 define("moxie/xhr/FormData", [
 	"moxie/core/Exceptions",
@@ -3337,8 +3497,6 @@ define("moxie/xhr/FormData", [
 			@param {Function} cb Callback to call for each field
 			*/
 			each: function(cb) {
-				var self = this;
-
 				Basic.each(_fields, function(value, name) {
 					Basic.each(value, function(value) {
 						cb(value, name);
@@ -3369,8 +3527,7 @@ define("moxie/xhr/FormData", [
  * Contributing: http://www.plupload.com/contributing
  */
 
-/*jshint smarttabs:true, undef:true, unused:true, latedef:true, curly:true, bitwise:false, scripturl:true, browser:true, evil:false */
-/*global define:true, ActiveXObject:true */
+/*global ActiveXObject:true */
 
 define("moxie/xhr/XMLHttpRequest", [
 	"moxie/core/utils/Basic",
@@ -3380,11 +3537,11 @@ define("moxie/xhr/XMLHttpRequest", [
 	"moxie/core/utils/Url",
 	"moxie/runtime/RuntimeTarget",
 	"moxie/file/Blob",
+	"moxie/file/FileReaderSync",
 	"moxie/xhr/FormData",
 	"moxie/core/utils/Env",
 	"moxie/core/utils/Mime"
-], function(Basic, x, EventTarget, Encode, Url, RuntimeTarget, Blob, FormData, Env, Mime) {
-	var undef;
+], function(Basic, x, EventTarget, Encode, Url, RuntimeTarget, Blob, FileReaderSync, FormData, Env, Mime) {
 
 	var httpCode = {
 		100: 'Continue',
@@ -3589,7 +3746,10 @@ define("moxie/xhr/XMLHttpRequest", [
 
 			_options = {},
 			_xhr,
-			_mode = NATIVE;
+			_responseHeaders = '',
+			_responseHeadersBag,
+			_mode = NATIVE
+			;
 
 		
 		Basic.extend(this, props, {
@@ -3774,6 +3934,53 @@ define("moxie/xhr/XMLHttpRequest", [
 				}
 				return true;
 			},
+
+			/**
+			Returns all headers from the response, with the exception of those whose field name is Set-Cookie or Set-Cookie2.
+
+			@method getAllResponseHeaders
+			@return {String} reponse headers or empty string
+			*/
+			getAllResponseHeaders: function() {
+				return _responseHeaders || '';
+			},
+
+			/**
+			Returns the header field value from the response of which the field name matches header, 
+			unless the field name is Set-Cookie or Set-Cookie2.
+
+			@method getResponseHeader
+			@param {String} header
+			@return {String} value(s) for the specified header or null
+			*/
+			getResponseHeader: function(header) {
+				header = header.toLowerCase();
+
+				if (_error_flag || !!~Basic.inArray(header, ['set-cookie', 'set-cookie2'])) {
+					return null;
+				}
+
+				if (_responseHeaders && _responseHeaders !== '') {
+					// if we didn't parse response headers until now, do it and keep for later
+					if (!_responseHeadersBag) {
+						_responseHeadersBag = {};
+						Basic.each(_responseHeaders.split(/\r\n/), function(line) {
+							var pair = line.split(/:\s+/);
+							if (pair.length === 2) { // last line might be empty, omit
+								pair[0] = Basic.trim(pair[0]); // just in case
+								_responseHeadersBag[pair[0].toLowerCase()] = { // simply to retain header name in original form
+									header: pair[0],
+									value: Basic.trim(pair[1])
+								};
+							}
+						});
+					}
+					if (_responseHeadersBag.hasOwnProperty(header)) {
+						return _responseHeadersBag[header].header + ': ' + _responseHeadersBag[header].value;
+					}
+				}
+				return null;
+			},
 			
 			/**
 			Sets the Content-Type header for the response to mime.
@@ -3820,9 +4027,7 @@ define("moxie/xhr/XMLHttpRequest", [
 			@param {Blob|Document|String|FormData} [data] Request entity body
 			@param {Object} [options] Set of requirements and pre-requisities for runtime initialization
 			*/
-			send: function(data, options) {
-				var self = this;
-					
+			send: function(data, options) {					
 				if (Basic.typeOf(options) === 'string') {
 					_options = { ruid: options };
 				} else if (!options) {
@@ -3867,6 +4072,11 @@ define("moxie/xhr/XMLHttpRequest", [
 					}
 				}
 
+				// if withCredentials not set, but requested, set it automatically
+				if (!this.withCredentials) {
+					this.withCredentials = (_options.required_caps && _options.required_caps.send_browser_cookies) && !_same_origin_flag;
+				}
+
 				// 4 - storage mutex
 				// 5
 				_upload_events_flag = (!_sync_flag && this.upload.hasEventListener()); // DSAP
@@ -3879,16 +4089,14 @@ define("moxie/xhr/XMLHttpRequest", [
 					// 8.1
 					_send_flag = true;
 					// 8.2
-					this.dispatchEvent('readystatechange'); // for historical reasons
-					// 8.3
 					// this.dispatchEvent('loadstart'); // will be dispatched either by native or runtime xhr
-					// 8.4
+					// 8.3
 					if (!_upload_complete_flag) {
 						// this.upload.dispatchEvent('loadstart');	// will be dispatched either by native or runtime xhr
 					}
 				}
 				// 8.5 - Return the send() method call, but continue running the steps in this algorithm.
-				_doXHR.call(self, data);
+				_doXHR.call(this, data);
 			},
 			
 			/**
@@ -4171,15 +4379,17 @@ define("moxie/xhr/XMLHttpRequest", [
 				}
 				
 				_p('readyState', _xhr.readyState);
-												
-				self.dispatchEvent('readystatechange');
+
+				if (_xhr.readyState !== XMLHttpRequest.OPENED) { // readystatechange for OPENED already fired in open()							
+					self.dispatchEvent('readystatechange');
+				}
 				
 				// fake Level 2 events
 				switch (_p('readyState')) {
 					
 					case XMLHttpRequest.OPENED:
 						// readystatechanged is fired twice for OPENED state (in IE and Mozilla), but only the second one signals that request has been sent
-						if (onRSC.loadstartDispatched === undef) {
+						if (!onRSC.loadstartDispatched) {
 							self.dispatchEvent('loadstart');
 							onRSC.loadstartDispatched = true;
 						}
@@ -4188,7 +4398,9 @@ define("moxie/xhr/XMLHttpRequest", [
 					// looks like HEADERS_RECEIVED (state 2) is not reported in Opera (or it's old versions), hence we can't really use it
 					case XMLHttpRequest.HEADERS_RECEIVED:
 						try {
-							total = _xhr.getResponseHeader('Content-Length') || 0; // old Safari throws an exception here
+							if (_same_origin_flag) { // Content-Length not accessible for cross-domain on some browsers
+								total = _xhr.getResponseHeader('Content-Length') || 0; // old Safari throws an exception here
+							}
 						} catch(ex) {}
 						break;
 						
@@ -4223,6 +4435,7 @@ define("moxie/xhr/XMLHttpRequest", [
 							_p('responseText', _xhr.responseText);
 							_p('responseXML', _getDocument(_xhr));
 							_p('response', (_p('responseType') === 'document' ? _p('responseXML') : _p('responseText')));
+							_responseHeaders = _xhr.getAllResponseHeaders();
 							self.dispatchEvent('load');
 						}
 						
@@ -4271,6 +4484,7 @@ define("moxie/xhr/XMLHttpRequest", [
 				
 				_xhr.bind('Progress', function(e) {
 					_p('readyState', XMLHttpRequest.LOADING); // LoadStart unreliable (in Flash for example)
+					self.dispatchEvent('readystatechange');
 					self.dispatchEvent(e);
 				});
 				
@@ -4297,6 +4511,10 @@ define("moxie/xhr/XMLHttpRequest", [
 					} else if (_p('responseType') === 'document') {
 						_p('responseXML', _p('response'));
 					}
+
+					_responseHeaders = runtime.exec.call(_xhr, 'XMLHttpRequest', 'getAllResponseHeaders');
+
+					self.dispatchEvent('readystatechange');
 					
 					if (_p('status') > 0) { // status 0 usually means that server is unreachable
 						if (_upload_events_flag) {
@@ -4334,6 +4552,7 @@ define("moxie/xhr/XMLHttpRequest", [
 					mimeType: _mimeType,
 					encoding: _encoding,
 					responseType: self.responseType,
+					withCredentials: self.withCredentials,
 					options: _options
 				}, data);
 			}
@@ -4369,9 +4588,10 @@ define("moxie/xhr/XMLHttpRequest", [
 		}
 
 		function _canUseNativeXHR() {
-			return _method === 'HEAD' ||
-					(_method === 'GET' && !!~Basic.inArray(_p('responseType'), ["", "text", "document"])) ||
-					(_method === 'POST' && _headers['Content-Type'] === 'application/x-www-form-urlencoded');
+			return _same_origin_flag && 
+				(_method === 'HEAD' ||
+				(_method === 'GET' && !!~Basic.inArray(_p('responseType'), ["", "text", "document"])) ||
+				(_method === 'POST' && _headers['Content-Type'] === 'application/x-www-form-urlencoded'));
 		}
 		
 		function _reset() {
@@ -4380,8 +4600,7 @@ define("moxie/xhr/XMLHttpRequest", [
 			_p('response', null);
 			_p('status', 0);
 			_p('statusText', "");
-			_start_time = undef;
-			_timeoutset_time = undef;
+			_start_time = _timeoutset_time = null;
 		}
 	}
 
@@ -4396,82 +4615,6 @@ define("moxie/xhr/XMLHttpRequest", [
 	return XMLHttpRequest;
 });
 
-// Included from: src/javascript/file/FileReaderSync.js
-
-/**
- * FileReaderSync.js
- *
- * Copyright 2013, Moxiecode Systems AB
- * Released under GPL License.
- *
- * License: http://www.plupload.com/license
- * Contributing: http://www.plupload.com/contributing
- */
-
-/*jshint smarttabs:true, undef:true, unused:true, latedef:true, curly:true, bitwise:true, scripturl:true, browser:true */
-/*global define:true */
-
-define('moxie/file/FileReaderSync', [
-	'moxie/core/utils/Basic',
-	'moxie/runtime/RuntimeClient',
-	'moxie/core/utils/Encode'
-], function(Basic, RuntimeClient, Encode) {
-	/**
-	Synchronous FileReader implementation. Something like this is available in WebWorkers environment, here
-	it can be used to read only preloaded blobs/files and only below certain size (not yet sure what that'd be,
-	but probably < 1mb). Not meant to be used directly by user.
-
-	@class FileReaderSync
-	@private
-	@constructor
-	*/
-	return function() {
-		RuntimeClient.call(this);
-
-		Basic.extend(this, {
-			uid: Basic.guid('uid_'),
-
-			readAsBinaryString: function(blob) {
-				return _read.call(this, 'readAsBinaryString', blob);
-			},
-			
-			readAsDataURL: function(blob) {
-				return _read.call(this, 'readAsDataURL', blob);
-			},
-			
-			/*readAsArrayBuffer: function(blob) {
-				return _read.call(this, 'readAsArrayBuffer', blob);
-			},*/
-			
-			readAsText: function(blob) {
-				return _read.call(this, 'readAsText', blob);
-			}
-		});
-
-		function _read(op, blob) {
-			if (blob.isDetached()) {
-				var src = blob.getSource();
-				switch (op) {
-					case 'readAsBinaryString':
-						return src;
-					case 'readAsDataURL':
-						return 'data:' + blob.type + ';base64,' + Encode.btoa(src);
-					case 'readAsText':
-						var txt = '';
-						for (var i = 0, length = src.length; i < length; i++) {
-							txt += String.fromCharCode(src[i]);
-						}
-						return txt;
-				}
-			} else {
-				var result = this.connectRuntime(blob.ruid).exec.call(this, 'FileReaderSync', 'read', op, blob);
-				this.disconnectRuntime();
-				return result;
-			}
-		}
-	};
-});
-
 // Included from: src/javascript/runtime/Transporter.js
 
 /**
@@ -4483,9 +4626,6 @@ define('moxie/file/FileReaderSync', [
  * License: http://www.plupload.com/license
  * Contributing: http://www.plupload.com/contributing
  */
-
-/*jshint smarttabs:true, undef:true, unused:true, latedef:true, curly:true, bitwise:true, scripturl:true, browser:true */
-/*global define:true */
 
 define("moxie/runtime/Transporter", [
 	"moxie/core/utils/Basic",
@@ -4624,8 +4764,7 @@ define("moxie/runtime/Transporter", [
  * Contributing: http://www.plupload.com/contributing
  */
 
-/*jshint smarttabs:true, undef:true, unused:true, latedef:true, curly:true, bitwise:true, scripturl:true, browser:true */
-/*global define:true */
+/*jshint smarttabs:true */
 
 define("moxie/core/JSON", [], function() {
 	/**
@@ -4647,8 +4786,8 @@ define("moxie/core/JSON", [], function() {
 	// eval or regular expressions, so it can be used as a model for implementing
 	// a JSON parser in other languages.
 
-	// We are defining the function inside of another function to avoid creating
-	// global variables.
+	// We are defining the function inside of another function to avoid 
+	// creating global variables.
 
 	    var at,     // The index of the current character
 	        ch,     // The current character
@@ -4948,9 +5087,6 @@ define("moxie/core/JSON", [], function() {
  * Contributing: http://www.plupload.com/contributing
  */
 
-/*jshint smarttabs:true, undef:true, unused:true, latedef:true, curly:true, bitwise:false, scripturl:true, browser:true, laxcomma:true */
-/*global define:true */
-
 define("moxie/image/Image", [
 	"moxie/core/utils/Basic",
 	"moxie/core/utils/Dom",
@@ -5003,11 +5139,10 @@ define("moxie/image/Image", [
 		*/
 		'embedded'
 	];
-	
+
 	function Image() {
-			
 		RuntimeClient.call(this);
-		
+
 		Basic.extend(this, {
 			/**
 			Unique id of the component
@@ -5024,7 +5159,7 @@ define("moxie/image/Image", [
 			@type {String}
 			*/
 			ruid: null,
-			
+
 			/**
 			Name of the file, that was used to create an image, if available. If not equals to empty string.
 
@@ -5033,7 +5168,7 @@ define("moxie/image/Image", [
 			@default ""
 			*/
 			name: "",
-			
+
 			/**
 			Size of the image in bytes. Actual value is set only after image is preloaded.
 
@@ -5060,7 +5195,7 @@ define("moxie/image/Image", [
 			@default 0
 			*/
 			height: 0,
-			
+
 			/**
 			Mime type of the image. Currently only image/jpeg and image/png are supported. Actual value is set only after image is preloaded.
 
@@ -5117,9 +5252,9 @@ define("moxie/image/Image", [
 			@param {Image|Blob|File|String} src Source for the image
 			@param {Boolean|Object} [mixed]
 			*/
-			load: function(src) {
+			load: function() {
 				// this is here because to bind properly we need an uid first, which is created above
-				this.bind('Load Resize', function(e) {
+				this.bind('Load Resize', function() {
 					_updateInfo.call(this);
 				}, 999);
 
@@ -5138,25 +5273,21 @@ define("moxie/image/Image", [
 			@param {Boolean} [preserveHeaders=true] Whether to preserve meta headers (on JPEGs after resize)
 			*/
 			resize: function(width, height, crop, preserveHeaders) {
-				var runtime;
 
 				if (!this.size) { // only preloaded image objects can be used as source
 					throw new x.DOMException(x.DOMException.INVALID_STATE_ERR);
 				}
 
-				if (!width) {
-					throw new x.DOMException(x.DOMException.SYNTAX_ERR);
+				if (!width && !height || Basic.typeOf(crop) === 'undefined') {
+					crop = false;
 				}
 
-				if (!height) {
-					height = width;
-				}
+				width = width || this.width;
+				height = height || this.height;
 
-				crop = (crop === undefined ? false : !!crop);
 				preserveHeaders = (Basic.typeOf(preserveHeaders) === 'undefined' ? true : !!preserveHeaders);
 
-				runtime = this.getRuntime();
-				runtime.exec.call(this, 'Image', 'resize', width, height, crop, preserveHeaders);
+				this.getRuntime().exec.call(this, 'Image', 'resize', width, height, crop, preserveHeaders);
 			},
 
 			/**
@@ -5190,8 +5321,6 @@ define("moxie/image/Image", [
 			@return {Blob} Image as Blob
 			*/
 			getAsBlob: function(type, quality) {
-				var blob;
-
 				if (!this.size) {
 					throw new x.DOMException(x.DOMException.INVALID_STATE_ERR);
 				}
@@ -5217,8 +5346,6 @@ define("moxie/image/Image", [
 			@return {String} Image as dataURL string
 			*/
 			getAsDataURL: function(type, quality) {
-				var dataUrl;
-
 				if (!this.size) {
 					throw new x.DOMException(x.DOMException.INVALID_STATE_ERR);
 				}
@@ -5286,7 +5413,7 @@ define("moxie/image/Image", [
 
 						tr.bind("TransportingComplete", function() {
 							runtime = self.connectRuntime(this.result.ruid);
-						
+
 							self.bind("Embedded", function() {
 								// position and size properly
 								Basic.extend(runtime.getShimContainer().style, {
@@ -5348,7 +5475,7 @@ define("moxie/image/Image", [
 						height = dimensions.h;
 					}
 				}
-				
+
 				imgCopy = new Image();
 
 				imgCopy.bind("Resize", function() {
@@ -5359,7 +5486,7 @@ define("moxie/image/Image", [
 					imgCopy.resize(width, height, crop, false);
 				});
 
-				imgCopy.clone(this);
+				imgCopy.clone(this, false);
 
 				return imgCopy;
 			},
@@ -5427,13 +5554,13 @@ define("moxie/image/Image", [
 				}
 				// if native blob/file
 				else if (Basic.inArray(srcType, ['blob', 'file']) !== -1) {
-					_load.call(this, new o.File(null, src), arguments[1]);
+					_load.call(this, new File(null, src), arguments[1]);
 				}
 				// if String
 				else if (srcType === 'string') {
 					// if dataUrl String
 					if (/^data:[^;]*;base64,/.test(src)) {
-						_load.call(this, new o.Blob(null, { data: src }), arguments[1]);
+						_load.call(this, new Blob(null, { data: src }), arguments[1]);
 					}
 					// else assume Url, either relative or absolute
 					else {
@@ -5518,7 +5645,7 @@ define("moxie/image/Image", [
 			xhr.send(null, options);
 		}
 	}
-	
+
 	Image.prototype = EventTarget.instance;
 
 	return Image;
@@ -5536,8 +5663,7 @@ define("moxie/image/Image", [
  * Contributing: http://www.plupload.com/contributing
  */
 
-/*jshint smarttabs:true, undef:true, unused:true, latedef:true, curly:true, bitwise:false, scripturl:true, browser:true */
-/*global define:true, File:true */
+/*global File:true */
 
 /**
 Defines constructor for HTML5 runtime.
@@ -5555,53 +5681,60 @@ define("moxie/runtime/html5/Runtime", [
 	var type = "html5", extensions = {};
 	
 	function Html5Runtime(options) {
-		var I = this, shim;
+		var I = this;
 
-		Runtime.call(this, type, options, {
-			access_binary: !!(window.FileReader || window.File && window.File.getAsDataURL),
-			access_image_binary: function() {
-				return I.can('access_binary') && !!extensions.Image;
-			},
-			display_media: Env.can('create_canvas') || Env.can('use_data_uri_over32kb'),
-			drag_and_drop: (function() {
-				// this comes directly from Modernizr: http://www.modernizr.com/
-				var div = document.createElement('div');
-				// IE has support for drag and drop since version 5, but doesn't support dropping files from desktop
-				return (('draggable' in div) || ('ondragstart' in div && 'ondrop' in div)) && (Env.browser !== 'IE' || Env.version > 9);
-			}()),
-			return_response_type: function(responseType) {
-				if (responseType === 'json') {
-					return true; // we can fake this one even if it's not supported
-				} else {
-					return Env.can('return_response_type', responseType);
-				}
-			},
-			report_upload_progress: function() {
-				return !!(window.XMLHttpRequest && new XMLHttpRequest().upload);
-			},
-			resize_image: function() {
-				return I.can('access_binary') && Env.can('create_canvas');
-			},
-			select_folder: Env.browser === 'Chrome' && Env.version >= 21,
-			select_multiple: !(Env.browser === 'Safari' && Env.OS === 'Windows'),
-			send_binary_string:
-				!!(window.XMLHttpRequest && (new XMLHttpRequest().sendAsBinary || (window.Uint8Array && window.ArrayBuffer))),
-			send_custom_headers: !!window.XMLHttpRequest,
-			send_multipart: function() {
-				return !!(window.XMLHttpRequest && new XMLHttpRequest().upload && window.FormData) || can('send_binary_string');
-			},
-			slice_blob: !!(window.File && (File.prototype.mozSlice || File.prototype.webkitSlice || File.prototype.slice)),
-			stream_upload: function() {
-				return I.can('slice_blob') && I.can('send_multipart');
-			},
-			summon_file_dialog: (function() { // yeah... some dirty sniffing here...
-				return  (Env.browser === 'Firefox' && Env.version >= 4)	||
-						(Env.browser === 'Opera' && Env.version >= 12)	||
-						!!~Basic.inArray(Env.browser, ['Chrome', 'Safari']);
-			}()),
-			upload_filesize: true
-		});
+		var caps = Basic.extend({
+				access_binary: !!(window.FileReader || window.File && window.File.getAsDataURL),
+				access_image_binary: function() {
+					return I.can('access_binary') && !!extensions.Image;
+				},
+				display_media: Env.can('create_canvas') || Env.can('use_data_uri_over32kb'),
+				do_cors: function() {
+					return !!(window.XMLHttpRequest && 'withCredentials' in new XMLHttpRequest());
+				},
+				drag_and_drop: (function() {
+					// this comes directly from Modernizr: http://www.modernizr.com/
+					var div = document.createElement('div');
+					// IE has support for drag and drop since version 5, but doesn't support dropping files from desktop
+					return (('draggable' in div) || ('ondragstart' in div && 'ondrop' in div)) && (Env.browser !== 'IE' || Env.version > 9);
+				}()),
+				return_response_headers: true,
+				return_response_type: function(responseType) {
+					if (responseType === 'json') {
+						return true; // we can fake this one even if it's not supported
+					} else {
+						return Env.can('return_response_type', responseType);
+					}
+				},
+				report_upload_progress: function() {
+					return !!(window.XMLHttpRequest && new XMLHttpRequest().upload);
+				},
+				resize_image: function() {
+					return I.can('access_binary') && Env.can('create_canvas');
+				},
+				select_folder: Env.browser === 'Chrome' && Env.version >= 21,
+				select_multiple: !(Env.browser === 'Safari' && Env.OS === 'Windows'),
+				send_binary_string:
+					!!(window.XMLHttpRequest && (new XMLHttpRequest().sendAsBinary || (window.Uint8Array && window.ArrayBuffer))),
+				send_custom_headers: !!window.XMLHttpRequest,
+				send_multipart: function() {
+					return !!(window.XMLHttpRequest && new XMLHttpRequest().upload && window.FormData) || I.can('send_binary_string');
+				},
+				slice_blob: !!(window.File && (File.prototype.mozSlice || File.prototype.webkitSlice || File.prototype.slice)),
+				stream_upload: function() {
+					return I.can('slice_blob') && I.can('send_multipart');
+				},
+				summon_file_dialog: (function() { // yeah... some dirty sniffing here...
+					return  (Env.browser === 'Firefox' && Env.version >= 4)	||
+							(Env.browser === 'Opera' && Env.version >= 12)	||
+							!!~Basic.inArray(Env.browser, ['Chrome', 'Safari']);
+				}()),
+				upload_filesize: true
+			}, 
+			arguments[2]
+		);
 
+		Runtime.call(this, options, (arguments[1] || type), caps);
 
 		Basic.extend(this, {
 
@@ -5613,62 +5746,15 @@ define("moxie/runtime/html5/Runtime", [
 				this.trigger("Init");
 			},
 
-			getShim: function() {
-				return shim;
-			},
-
-			shimExec: function(component, action) {
-				var args = [].slice.call(arguments, 2);
-				return I.getShim().exec.call(this, this.uid, component, action, args);
-			},
-
 			destroy: (function(destroy) { // extend default destroy method
 				return function() {
-					if (shim) {
-						shim.removeAllInstances(I);
-					}
 					destroy.call(I);
-					destroy = shim = I = null;
+					destroy = I = null;
 				};
 			}(this.destroy))
-
 		});
 
-		shim = Basic.extend((function() {
-			var objpool = {};
-
-			return {
-				exec: function(uid, comp, fn, args) {
-					if (shim[comp]) {
-						if (!objpool[uid]) {
-							objpool[uid] = {
-								context: this,
-								instance: new shim[comp]()
-							}
-						}
-
-						if (objpool[uid].instance[fn]) {
-							return objpool[uid].instance[fn].apply(this, args);
-						}
-					}
-				},
-
-				removeInstance: function(uid) {
-					delete objpool[uid];
-				},
-
-				removeAllInstances: function() {
-					var self = this;
-					
-					Basic.each(objpool, function(obj, uid) {
-						if (Basic.typeOf(obj.instance.destroy) === 'function') {
-							obj.instance.destroy.call(obj.context);
-						}
-						self.removeInstance(uid);
-					});
-				}
-			};
-		}()), extensions);
+		Basic.extend(this.getShim(), extensions);
 	}
 
 	Runtime.addConstructor(type, Html5Runtime);
@@ -5687,9 +5773,6 @@ define("moxie/runtime/html5/Runtime", [
  * License: http://www.plupload.com/license
  * Contributing: http://www.plupload.com/contributing
  */
-
-/*jshint smarttabs:true, undef:true, unused:true, latedef:true, curly:true, bitwise:true, scripturl:true, browser:true */
-/*global define:true */
 
 /**
 @class moxie/runtime/html5/file/Blob
@@ -5739,9 +5822,6 @@ define("moxie/runtime/html5/file/Blob", [
  * License: http://www.plupload.com/license
  * Contributing: http://www.plupload.com/contributing
  */
-
-/*jshint smarttabs:true, undef:true, unused:true, latedef:true, curly:true, bitwise:true, scripturl:true, browser:true */
-/*global define:true */
 
 define('moxie/core/utils/Events', [
 	'moxie/core/utils/Basic'
@@ -5930,9 +6010,6 @@ define('moxie/core/utils/Events', [
  * Contributing: http://www.plupload.com/contributing
  */
 
-/*jshint smarttabs:true, undef:true, unused:true, latedef:true, curly:true, bitwise:true, scripturl:true, browser:true */
-/*global define:true */
-
 /**
 @class moxie/runtime/html5/file/FileInput
 @private
@@ -6040,6 +6117,8 @@ define("moxie/runtime/html5/file/FileInput", [
 					this.value = '';
 					comp.trigger('change');
 				};
+
+				comp.trigger('ready');
 			},
 
 			getFiles: function() {
@@ -6082,9 +6161,6 @@ define("moxie/runtime/html5/file/FileInput", [
  * License: http://www.plupload.com/license
  * Contributing: http://www.plupload.com/contributing
  */
-
-/*jshint smarttabs:true, undef:true, unused:true, latedef:true, curly:true, bitwise:true, scripturl:true, browser:true */
-/*global define:true */
 
 /**
 @class moxie/runtime/html5/file/FileDrop
@@ -6175,7 +6251,7 @@ define("moxie/runtime/html5/file/FileDrop", [
 					_readEntry(entry, cbcb);
 				});
 			});
-			Basic.inSeries(queue, function(err) {
+			Basic.inSeries(queue, function() {
 				cb();
 			});
 		}
@@ -6187,7 +6263,7 @@ define("moxie/runtime/html5/file/FileDrop", [
 						_files.push(file);
 					}
 					cb();
-				}, function(err) {
+				}, function() {
 					// fire an error event maybe
 					cb();
 				});
@@ -6211,7 +6287,7 @@ define("moxie/runtime/html5/file/FileDrop", [
 						cbcb();
 					}
 				}, cbcb);
-			};
+			}
 
 			// ...and you thought FileReader was crazy...
 			getEntries(function() {
@@ -6234,9 +6310,6 @@ define("moxie/runtime/html5/file/FileDrop", [
  * License: http://www.plupload.com/license
  * Contributing: http://www.plupload.com/contributing
  */
-
-/*jshint smarttabs:true, undef:true, unused:true, latedef:true, curly:true, bitwise:false, scripturl:true, browser:true */
-/*global define:true */
 
 /**
 @class moxie/runtime/html5/file/FileReader
@@ -6296,9 +6369,6 @@ define("moxie/runtime/html5/file/FileReader", [
  * Contributing: http://www.plupload.com/contributing
  */
 
-/*jshint smarttabs:true, undef:true, unused:true, latedef:true, curly:true, bitwise:false, scripturl:true, browser:true, laxcomma:true */
-/*global define:true, unescape:true */
-
 /**
 @class moxie/runtime/html5/xhr/XMLHttpRequest
 @private
@@ -6315,7 +6385,7 @@ define("moxie/runtime/html5/xhr/XMLHttpRequest", [
 ], function(extensions, Basic, File, Blob, FormData, x, Env, parseJSON) {
 	
 	function XMLHttpRequest() {
-		var self = this, _xhr2, filename;
+		var self = this, _xhr2, _filename;
 
 		Basic.extend(this, {
 			send: function(meta, data) {
@@ -6355,7 +6425,7 @@ define("moxie/runtime/html5/xhr/XMLHttpRequest", [
 				_xhr2 = new window.XMLHttpRequest();
 
 				// extract file name
-				filename = meta.url.replace(/^.+?\/([\w\-\.]+)$/, '$1').toLowerCase();
+				_filename = meta.url.replace(/^.+?\/([\w\-\.]+)$/, '$1').toLowerCase();
 
 				_xhr2.open(meta.method, meta.url, meta.async, meta.user, meta.password);
 
@@ -6373,6 +6443,10 @@ define("moxie/runtime/html5/xhr/XMLHttpRequest", [
 					} else {
 						_xhr2.responseType = meta.responseType;
 					}
+				}
+
+				if (meta.withCredentials) {
+					_xhr2.withCredentials = true;
 				}
 
 				// attach event handlers
@@ -6475,7 +6549,19 @@ define("moxie/runtime/html5/xhr/XMLHttpRequest", [
 					if (_xhr2) {
 						if ('blob' === responseType) {
 							var file = new File(I.uid, _xhr2.response);
-							file.name = filename;
+							
+							try { // it might be not allowed to access Content-Disposition (during CORS for example)
+								var disposition = _xhr2.getResponseHeader('Content-Disposition');
+								if (disposition) {
+									// extract filename from response header if available
+									var match = disposition.match(/filename=([\'\"'])([^\1]+)\1/);
+									if (match) {
+										_filename = match[2];
+									}
+								}
+							} catch(ex) {}
+
+							file.name = _filename;
 							return file;
 						} else if ('json' === responseType && !Env.can('return_response_type', 'json')) {
 							if (_xhr2.status === 200) {
@@ -6489,6 +6575,13 @@ define("moxie/runtime/html5/xhr/XMLHttpRequest", [
 				} catch(ex) {}
 			},
 
+			getAllResponseHeaders: function() {
+				try {
+					return _xhr2.getAllResponseHeaders();
+				} catch(ex) {}
+				return '';
+			},
+
 			abort: function() {
 				if (_xhr2) {
 					_xhr2.abort();
@@ -6496,7 +6589,7 @@ define("moxie/runtime/html5/xhr/XMLHttpRequest", [
 			},
 
 			destroy: function() {
-				self = filename = null;
+				self = _filename = null;
 			}
 		});
 
@@ -6551,9 +6644,6 @@ define("moxie/runtime/html5/xhr/XMLHttpRequest", [
  * License: http://www.plupload.com/license
  * Contributing: http://www.plupload.com/contributing
  */
-
-/*jshint smarttabs:true, undef:true, unused:true, latedef:true, curly:true, bitwise:false, scripturl:true, browser:true */
-/*global define:true */
 
 /**
 @class moxie/runtime/html5/utils/BinaryReader
@@ -6663,10 +6753,7 @@ define("moxie/runtime/html5/utils/BinaryReader", [], function() {
  * License: http://www.plupload.com/license
  * Contributing: http://www.plupload.com/contributing
  */
-
-/*jshint smarttabs:true, undef:true, unused:true, latedef:true, curly:true, bitwise:true, scripturl:true, browser:true, sub:false */
-/*global define:true */
-
+ 
 /**
 @class moxie/runtime/html5/image/JPEGHeaders
 @private
@@ -6823,9 +6910,6 @@ define("moxie/runtime/html5/image/JPEGHeaders", [
  * License: http://www.plupload.com/license
  * Contributing: http://www.plupload.com/contributing
  */
-
-/*jshint smarttabs:true, undef:true, unused:true, latedef:true, curly:true, bitwise:true, scripturl:true, browser:true, sub:false */
-/*global define:true */
 
 /**
 @class moxie/runtime/html5/image/ExifParser
@@ -7265,9 +7349,6 @@ define("moxie/runtime/html5/image/ExifParser", [
  * Contributing: http://www.plupload.com/contributing
  */
 
-/*jshint smarttabs:true, undef:true, unused:true, latedef:true, curly:true, bitwise:true, scripturl:true, browser:true */
-/*global define:true */
-
 /**
 @class moxie/runtime/html5/image/JPEG
 @private
@@ -7396,9 +7477,6 @@ define("moxie/runtime/html5/image/JPEG", [
  * Contributing: http://www.plupload.com/contributing
  */
 
-/*jshint smarttabs:true, undef:true, unused:true, latedef:true, curly:true, bitwise:true, scripturl:true, browser:true */
-/*global define:true */
-
 /**
 @class moxie/runtime/html5/image/PNG
 @private
@@ -7419,8 +7497,9 @@ define("moxie/runtime/html5/image/PNG", [
 
 		// check if it's png
 		(function() {
-			var idx = 0, i = 0,
-			    signature = [0x8950, 0x4E47, 0x0D0A, 0x1A0A];
+			var idx = 0, i = 0
+			, signature = [0x8950, 0x4E47, 0x0D0A, 0x1A0A]
+			;
 
 			for (i = 0; i < signature.length; i++, idx += 2) {
 				if (signature[i] != _br.SHORT(idx)) {
@@ -7503,9 +7582,6 @@ define("moxie/runtime/html5/image/PNG", [
  * Contributing: http://www.plupload.com/contributing
  */
 
-/*jshint smarttabs:true, undef:true, unused:true, latedef:true, curly:true, bitwise:true, scripturl:true, browser:true */
-/*global define:true */
-
 /**
 @class moxie/runtime/html5/image/ImageInfo
 @private
@@ -7518,11 +7594,11 @@ define("moxie/runtime/html5/image/ImageInfo", [
 ], function(Basic, x, JPEG, PNG) {
 	/**
 	Optional image investigation tool for HTML5 runtime. Provides the following features:
-	 - ability to distinguish image type (JPEG or PNG) by signature
-	 - ability to extract image width/height directly from it's internals, without preloading in memory (fast)
-	 - ability to extract APP headers from JPEGs (Exif, GPS, etc)
-	 - ability to replace width/height tags in extracted JPEG headers
-	 - ability to restore APP headers, that were for example stripped during image manipulation
+	- ability to distinguish image type (JPEG or PNG) by signature
+	- ability to extract image width/height directly from it's internals, without preloading in memory (fast)
+	- ability to extract APP headers from JPEGs (Exif, GPS, etc)
+	- ability to replace width/height tags in extracted JPEG headers
+	- ability to restore APP headers, that were for example stripped during image manipulation
 
 	@class ImageInfo
 	@constructor
@@ -7766,9 +7842,6 @@ define("moxie/runtime/html5/image/MegaPixel", [], function() {
  * Contributing: http://www.plupload.com/contributing
  */
 
-/*jshint smarttabs:true, undef:true, unused:true, latedef:true, curly:true, bitwise:false, scripturl:true, browser:true, laxcomma:true */
-/*global define:true */
-
 /**
 @class moxie/runtime/html5/image/Image
 @private
@@ -7808,20 +7881,17 @@ define("moxie/runtime/html5/image/Image", [
 						size: blob.size,
 						type: blob.type
 					};
-					_loadFromBinaryString.call(this, blob.getSource());
+					_binStr = blob.getSource();
+					_preload.call(this, _binStr);
 					return;
 				} else {
 					_srcBlob = blob.getSource();
-
-					if (asBinary) { // this will let us to hack the file internals
-						_readAsBinaryString(_srcBlob, function(data) {
-							_loadFromBinaryString.call(comp, data);
-						});
-					} else { // ... but this is faster
-						_readAsDataUrl(_srcBlob, function(data) {
-							_loadFromDataUrl.call(comp, data);
-						});
-					}
+					_readAsDataUrl(_srcBlob, function(dataUrl) {
+						if (asBinary) {
+							_binStr = _toBinary(dataUrl);
+						}
+						_preload.call(comp, dataUrl);
+					});
 				}
 			},
 
@@ -7834,11 +7904,7 @@ define("moxie/runtime/html5/image/Image", [
 					type: img.type
 				};
 
-				if (exact) {
-					_loadFromBinaryString.call(this, img.getAsBinaryString());
-				} else {
-					_loadFromDataUrl.call(this, img.getAsDataURL());
-				}
+				_preload.call(this, exact ? (_binStr = img.getAsBinaryString()) : img.getAsDataURL());
 			},
 
 			getInfo: function() {
@@ -7876,7 +7942,10 @@ define("moxie/runtime/html5/image/Image", [
 					// if different mime type requested prepare image for conversion
 					_resize.call(this, this.width, this.height, false);
 				}
-				return new Blob(null, me.getAsDataURL.call(this, type, quality));
+				return new Blob(null, {
+					type: type,
+					data: me.getAsBinaryString.call(this, type, quality)
+				});
 			},
 
 			getAsDataURL: function(type) {
@@ -7904,13 +7973,13 @@ define("moxie/runtime/html5/image/Image", [
 				if (!_modified) {
 					// if image was not loaded from binary string
 					if (!_binStr) {
-						_binStr = _convertToBinary(me.getAsDataURL(type, quality));
+						_binStr = _toBinary(me.getAsDataURL(type, quality));
 					}
 					return _binStr;
 				}
 
 				if ('image/jpeg' !== type) {
-					_binStr = _convertToBinary(me.getAsDataURL(type, quality));
+					_binStr = _toBinary(me.getAsDataURL(type, quality));
 				} else {
 					var dataUrl;
 
@@ -7926,7 +7995,7 @@ define("moxie/runtime/html5/image/Image", [
 						dataUrl = _canvas.toDataURL('image/jpeg');
 					}
 
-					_binStr = _convertToBinary(dataUrl);
+					_binStr = _toBinary(dataUrl);
 
 					if (_imgInfo && _preserveHeaders) {
 						// update dimensions info in exif
@@ -7967,30 +8036,17 @@ define("moxie/runtime/html5/image/Image", [
 		}
 
 
-		function _convertToBinary(dataUrl) {
-			return Encode.atob(dataUrl.substring(dataUrl.indexOf('base64,') + 7));
+		function _toBinary(str) {
+			return Encode.atob(str.substring(str.indexOf('base64,') + 7));
 		}
 
 
-		function _loadFromBinaryString(binStr) {
-			var comp = this;
-
-			_purge.call(this);
-
-			_img = new Image();
-			_img.onerror = function() {
-				_purge.call(this);
-				throw new x.ImageError(x.ImageError.WRONG_FORMAT);
-			};
-			_img.onload = function() {
-				_binStr = binStr;
-				comp.trigger('load');
-			};
-
-			_img.src = 'data:' + (_srcBlob.type || '') + ';base64,' + Encode.btoa(binStr);
+		function _toDataUrl(str, type) {
+			return 'data:' + (type || '') + ';base64,' + Encode.btoa(str);
 		}
 
-		function _loadFromDataUrl(dataUrl) {
+
+		function _preload(str) {
 			var comp = this;
 
 			_img = new Image();
@@ -8001,23 +8057,10 @@ define("moxie/runtime/html5/image/Image", [
 			_img.onload = function() {
 				comp.trigger('load');
 			};
-			_img.src = dataUrl;
+
+			_img.src = /^data:[^;]*;base64,/.test(str) ? str : _toDataUrl(str, _srcBlob.type);
 		}
 
-		function _readAsBinaryString(file, callback) {
-			var fr;
-
-			// use FileReader if it's available
-			if (window.FileReader) {
-				fr = new FileReader();
-				fr.onload = function() {
-					callback(this.result);
-				};
-				fr.readAsBinaryString(file);
-			} else {
-				return callback(file.getAsBinary());
-			}
-		}
 
 		function _readAsDataUrl(file, callback) {
 			var fr;
@@ -8206,8 +8249,7 @@ define("moxie/runtime/html5/image/Image", [
  * Contributing: http://www.plupload.com/contributing
  */
 
-/*jshint smarttabs:true, undef:true, unused:true, latedef:true, curly:true, bitwise:false, scripturl:true, browser:true */
-/*global define:true, escape:true, ActiveXObject:true */
+/*global ActiveXObject:true */
 
 /**
 Defines constructor for Flash runtime.
@@ -8218,9 +8260,10 @@ Defines constructor for Flash runtime.
 define("moxie/runtime/flash/Runtime", [
 	"moxie/core/utils/Basic",
 	"moxie/core/utils/Env",
+	"moxie/core/utils/Dom",
 	"moxie/core/Exceptions",
 	"moxie/runtime/Runtime"
-], function(Basic, Env, x, Runtime) {
+], function(Basic, Env, Dom, x, Runtime) {
 	
 	var type = 'flash', extensions = {};
 
@@ -8235,50 +8278,66 @@ define("moxie/runtime/flash/Runtime", [
 
 		options = Basic.extend({ swf_url: Env.swf_url }, options);
 
-		Runtime.call(this, type, options, (function() {
-			function use_urlstream() {
-				var rc = options.required_features || {};
-				return rc.access_binary || rc.send_custom_headers || rc.send_browser_cookies;
+		Runtime.call(this, options, type, {
+			access_binary: true,
+			access_image_binary: true,
+			display_media: true,
+			do_cors: true,
+			drag_and_drop: false,
+			report_upload_progress: true,
+			resize_image: true,
+			return_response_headers: false,
+			return_response_type: function(responseType) {
+				return !Basic.arrayDiff(responseType, ['', 'text', 'json', 'document']) || this.getMode() === 'browser';
+			},
+			return_status_code: true,
+			select_multiple: true,
+			send_binary_string: function() {
+				return this.getMode() === 'browser';
+			},
+			send_browser_cookies: function() {
+				return this.getMode() === 'browser';
+			},
+			send_custom_headers: function() {
+				return this.getMode() === 'browser';
+			},
+			send_multipart: true,
+			slice_blob: true,
+			stream_upload: function() {
+				return this.getMode() === 'browser';
+			},
+			summon_file_dialog: false,
+			upload_filesize: function(size) {
+				return Basic.parseSizeStr(size) <= 2097152 || this.getMode() === 'client';
+			},
+			use_http_method: function(methods) {
+				return !Basic.arrayDiff(methods, ['GET', 'POST']);
 			}
+		}, { 
+			// capabilities that implicitly switch the runtime into client mode
+			return_response_type: function(responseType) {
+				return !Basic.arrayDiff(responseType, ['', 'text', 'json', 'document']);
+			},
+			send_binary_string: false,
+			send_browser_cookies: false,
+			send_custom_headers: false,
+			stream_upload: true,
+			upload_filesize: function(size) {
+				return Basic.parseSizeStr(size) >= 2097152;
+			}
+		}, 'client');
 
-			return {
-				access_binary: true,
-				access_image_binary: true,
-				display_media: true,
-				drag_and_drop: false,
-				report_upload_progress: true,
-				resize_image: true,
-				return_response_headers: false,
-				return_response_type: true,
-				return_status_code: true,
-				select_multiple: true,
-				send_binary_string: true,
-				send_browser_cookies: function() {
-					return use_urlstream();
-				},
-				send_custom_headers: function() {
-					return use_urlstream();
-				},
-				send_multipart: true,
-				slice_blob: true,
-				stream_upload: function(value) {
-					return !!value && !use_urlstream();
-				},
-				summon_file_dialog: false,
-				upload_filesize: function(size) {
-					var maxSize = use_urlstream() ? 2097152 : -1; // 200mb || unlimited
-					if (!~maxSize || Basic.parseSizeStr(size) <= maxSize) {
-						return true;
-					}
-					return false;
-				},
-				use_http_method: function(methods) {
-					return !Basic.arrayDiff(methods, ['GET', 'POST']);
-				}
-			};
-		}()));
 
 		Basic.extend(this, {
+
+			getShim: function() {
+				return Dom.get(this.uid);
+			},
+
+			shimExec: function(component, action) {
+				var args = [].slice.call(arguments, 2);
+				return I.getShim().exec(this.uid, component, action, args);
+			},
 
 			init: function() {
 				var html, el, container;
@@ -8384,9 +8443,6 @@ define("moxie/runtime/flash/Runtime", [
  * Contributing: http://www.plupload.com/contributing
  */
 
-/*jshint smarttabs:true, undef:true, unused:true, latedef:true, curly:true, bitwise:true, scripturl:true, browser:true */
-/*global define:true */
-
 /**
 @class moxie/runtime/flash/file/Blob
 @private
@@ -8436,9 +8492,6 @@ define("moxie/runtime/flash/file/Blob", [
  * Contributing: http://www.plupload.com/contributing
  */
 
-/*jshint smarttabs:true, undef:true, unused:true, latedef:true, curly:true, bitwise:true, scripturl:true, browser:true */
-/*global define:true */
-
 /**
 @class moxie/runtime/flash/file/FileInput
 @private
@@ -8449,11 +8502,12 @@ define("moxie/runtime/flash/file/FileInput", [
 	
 	var FileInput = {		
 		init: function(options) {
-			return this.getRuntime().shimExec.call(this, 'FileInput', 'init', {
+			this.getRuntime().shimExec.call(this, 'FileInput', 'init', {
 				name: options.name,
 				accept: options.accept,
 				multiple: options.multiple
 			});
+			this.trigger('ready');
 		}
 	};
 
@@ -8472,9 +8526,6 @@ define("moxie/runtime/flash/file/FileInput", [
  * Contributing: http://www.plupload.com/contributing
  */
 
-/*jshint smarttabs:true, undef:true, unused:true, latedef:true, curly:true, bitwise:true, scripturl:true, browser:true */
-/*global define:true */
-
 /**
 @class moxie/runtime/flash/file/FileReader
 @private
@@ -8487,12 +8538,11 @@ define("moxie/runtime/flash/file/FileReader", [
 	function _formatData(data, op) {
 		switch (op) {
 			case 'readAsText':
+				return Encode.atob(data, 'utf8');
 			case 'readAsBinaryString':
 				return Encode.atob(data);
-
 			case 'readAsDataURL':
 				return data;
-
 		}
 		return null;
 	}
@@ -8519,6 +8569,60 @@ define("moxie/runtime/flash/file/FileReader", [
 	return (extensions.FileReader = FileReader);
 });
 
+// Included from: src/javascript/runtime/flash/file/FileReaderSync.js
+
+/**
+ * FileReaderSync.js
+ *
+ * Copyright 2013, Moxiecode Systems AB
+ * Released under GPL License.
+ *
+ * License: http://www.plupload.com/license
+ * Contributing: http://www.plupload.com/contributing
+ */
+
+/**
+@class moxie/runtime/flash/file/FileReaderSync
+@private
+*/
+define("moxie/runtime/flash/file/FileReaderSync", [
+	"moxie/runtime/flash/Runtime",
+	"moxie/core/utils/Encode"
+], function(extensions, Encode) {
+	
+	function _formatData(data, op) {
+		switch (op) {
+			case 'readAsText':
+				return Encode.atob(data, 'utf8');
+			case 'readAsBinaryString':
+				return Encode.atob(data);
+			case 'readAsDataURL':
+				return data;
+		}
+		return null;
+	}
+
+	var FileReaderSync = {
+		read: function(op, blob) {
+			var result, self = this.getRuntime();
+
+			result = self.shimExec.call(this, 'FileReaderSync', 'readAsBase64', blob.uid);
+			if (!result) {
+				return null; // or throw ex
+			}
+
+			// special prefix for DataURL read mode
+			if (op === 'readAsDataURL') {
+				result = 'data:' + (blob.type || '') + ';base64,' + result;
+			}
+
+			return _formatData(result, op, blob.type);
+		}
+	};
+
+	return (extensions.FileReaderSync = FileReaderSync);
+});
+
 // Included from: src/javascript/runtime/flash/xhr/XMLHttpRequest.js
 
 /**
@@ -8530,9 +8634,6 @@ define("moxie/runtime/flash/file/FileReader", [
  * License: http://www.plupload.com/license
  * Contributing: http://www.plupload.com/contributing
  */
-
-/*jshint smarttabs:true, undef:true, unused:true, latedef:true, curly:true, bitwise:false, scripturl:true, browser:true */
-/*global define:true */
 
 /**
 @class moxie/runtime/flash/xhr/XMLHttpRequest
@@ -8555,7 +8656,7 @@ define("moxie/runtime/flash/xhr/XMLHttpRequest", [
 			var target = this, self = target.getRuntime();
 
 			function send() {
-				meta.transport = self.can('send_browser_cookies') ? 'browser' : 'client';
+				meta.transport = self.getMode();
 				self.shimExec.call(target, 'XMLHttpRequest', 'send', meta, data);
 			}
 
@@ -8663,64 +8764,6 @@ define("moxie/runtime/flash/xhr/XMLHttpRequest", [
 	return (extensions.XMLHttpRequest = XMLHttpRequest);
 });
 
-// Included from: src/javascript/runtime/flash/file/FileReaderSync.js
-
-/**
- * FileReaderSync.js
- *
- * Copyright 2013, Moxiecode Systems AB
- * Released under GPL License.
- *
- * License: http://www.plupload.com/license
- * Contributing: http://www.plupload.com/contributing
- */
-
-/*jshint smarttabs:true, undef:true, unused:true, latedef:true, curly:true, bitwise:true, scripturl:true, browser:true */
-/*global define:true */
-
-/**
-@class moxie/runtime/flash/file/FileReaderSync
-@private
-*/
-define("moxie/runtime/flash/file/FileReaderSync", [
-	"moxie/runtime/flash/Runtime",
-	"moxie/core/utils/Encode"
-], function(extensions, Encode) {
-	
-	function _formatData(data, op) {
-		switch (op) {
-			case 'readAsText':
-			case 'readAsBinaryString':
-				return Encode.atob(data);
-
-			case 'readAsDataURL':
-				return data;
-
-		}
-		return null;
-	}
-
-	var FileReaderSync = {
-		read: function(op, blob) {
-			var result, self = this.getRuntime();
-
-			result = self.shimExec.call(this, 'FileReaderSync', 'readAsBase64', blob.uid);
-			if (!result) {
-				return null; // or throw ex
-			}
-
-			// special prefix for DataURL read mode
-			if (op === 'readAsDataURL') {
-				result = 'data:' + (blob.type || '') + ';base64,' + result;
-			}
-
-			return _formatData(result, op, blob.type);
-		}
-	};
-
-	return (extensions.FileReaderSync = FileReaderSync);
-});
-
 // Included from: src/javascript/runtime/flash/runtime/Transporter.js
 
 /**
@@ -8732,9 +8775,6 @@ define("moxie/runtime/flash/file/FileReaderSync", [
  * License: http://www.plupload.com/license
  * Contributing: http://www.plupload.com/contributing
  */
-
-/*jshint smarttabs:true, undef:true, unused:true, latedef:true, curly:true, bitwise:true, scripturl:true, browser:true, laxcomma:true */
-/*global define:true */
 
 /**
 @class moxie/runtime/flash/runtime/Transporter
@@ -8771,9 +8811,6 @@ define("moxie/runtime/flash/runtime/Transporter", [
  * License: http://www.plupload.com/license
  * Contributing: http://www.plupload.com/contributing
  */
-
-/*jshint smarttabs:true, undef:true, unused:true, latedef:true, curly:true, bitwise:true, scripturl:true, browser:true, laxcomma:true */
-/*global define:true */
 
 /**
 @class moxie/runtime/flash/image/Image
@@ -8850,8 +8887,7 @@ define("moxie/runtime/flash/image/Image", [
  * Contributing: http://www.plupload.com/contributing
  */
 
-/*jshint smarttabs:true, undef:true, unused:true, latedef:true, curly:true, bitwise:true, scripturl:true, browser:true */
-/*global define:true, ActiveXObject:true */
+/*global ActiveXObject:true */
 
 /**
 Defines constructor for Silverlight runtime.
@@ -8880,52 +8916,59 @@ define("moxie/runtime/silverlight/Runtime", [
 
 		options = Basic.extend({ xap_url: Env.xap_url }, options);
 
-		Runtime.call(this, type, options, (function() {			
-			function use_clienthttp() {
-				var rc = options.required_caps || {};
-				return  rc.send_custom_headers || 
-					rc.return_status_code && Basic.arrayDiff(rc.return_status_code, [200, 404]) ||
-					rc.use_http_method && Basic.arrayDiff(rc.use_http_method, ['GET', 'POST']); 
+		Runtime.call(this, options, type, {
+			access_binary: true,
+			access_image_binary: true,
+			display_media: true,
+			do_cors: true,
+			drag_and_drop: false,
+			report_upload_progress: true,
+			resize_image: true,
+			return_response_headers: function() {
+				return this.getMode() === 'client';
+			},
+			return_response_type: true,
+			return_status_code: function(code) {
+				return this.getMode() === 'client' || !Basic.arrayDiff(code, [200, 404]);
+			},
+			select_multiple: true,
+			send_binary_string: true,
+			send_browser_cookies: function() {
+				return this.getMode() === 'browser';
+			},
+			send_custom_headers: function() {
+				return this.getMode() === 'client';
+			},
+			send_multipart: true,
+			slice_blob: true,
+			stream_upload: true,
+			summon_file_dialog: false,
+			upload_filesize: true,
+			use_http_method: function(methods) {
+				return this.getMode() === 'client' || !Basic.arrayDiff(methods, ['GET', 'POST']);
 			}
-
-			return {
-				access_binary: true,
-				access_image_binary: true,
-				display_media: true,
-				drag_and_drop: false,
-				report_upload_progress: true,
-				resize_image: true,
-				return_response_headers: function() {
-					return use_clienthttp();
-				},
-				return_response_type: true,
-				return_status_code: function(code) {
-					return use_clienthttp() || !Basic.arrayDiff(code, [200, 404]);
-				},
-				select_multiple: true,
-				send_binary_string: true,
-				send_browser_cookies: function() {
-					return !use_clienthttp();
-				},
-				send_custom_headers: function() {
-					return use_clienthttp();
-				},
-				send_multipart: true,
-				slice_blob: true,
-				stream_upload: true,
-				summon_file_dialog: false,
-				upload_filesize: true,
-				use_http_method: function(methods) {
-					return use_clienthttp() || !Basic.arrayDiff(methods, ['GET', 'POST']);
-				}
-			};
-		}()));
+		}, { 
+			// capabilities that implicitly switch the runtime into client mode
+			return_response_headers: true,
+			return_status_code: function(code) {
+				return Basic.arrayDiff(code, [200, 404]);
+			},
+			send_browser_cookies: false,
+			send_custom_headers: true,
+			use_http_method: function(methods) {
+				return Basic.arrayDiff(methods, ['GET', 'POST']);
+			}
+		});
 
 
 		Basic.extend(this, {
-
 			getShim: function() {
 				return Dom.get(this.uid).content.Moxie;
+			},
+
+			shimExec: function(component, action) {
+				var args = [].slice.call(arguments, 2);
+				return I.getShim().exec(this.uid, component, action, args);
 			},
 
 			init : function() {
@@ -9041,9 +9084,6 @@ define("moxie/runtime/silverlight/Runtime", [
  * Contributing: http://www.plupload.com/contributing
  */
 
-/*jshint smarttabs:true, undef:true, unused:true, latedef:true, curly:true, bitwise:true, scripturl:true, browser:true */
-/*global define:true */
-
 /**
 @class moxie/runtime/silverlight/file/Blob
 @private
@@ -9068,9 +9108,6 @@ define("moxie/runtime/silverlight/file/Blob", [
  * Contributing: http://www.plupload.com/contributing
  */
 
-/*jshint smarttabs:true, undef:true, unused:true, latedef:true, curly:true, bitwise:true, scripturl:true, browser:true */
-/*global define:true */
-
 /**
 @class moxie/runtime/silverlight/file/FileInput
 @private
@@ -9081,7 +9118,6 @@ define("moxie/runtime/silverlight/file/FileInput", [
 	
 	var FileInput = {
 		init: function(options) {
-			var self = this.getRuntime();
 
 			function toFilters(accept) {
 				var filter = '';
@@ -9090,7 +9126,9 @@ define("moxie/runtime/silverlight/file/FileInput", [
 				}
 				return filter;
 			}
-			return self.shimExec.call(this, 'FileInput', 'init', toFilters(options.accept), options.name, options.multiple);
+			
+			this.getRuntime().shimExec.call(this, 'FileInput', 'init', toFilters(options.accept), options.name, options.multiple);
+			this.trigger('ready');
 		}
 	};
 
@@ -9108,9 +9146,6 @@ define("moxie/runtime/silverlight/file/FileInput", [
  * License: http://www.plupload.com/license
  * Contributing: http://www.plupload.com/contributing
  */
-
-/*jshint smarttabs:true, undef:true, unused:true, latedef:true, curly:true, bitwise:true, scripturl:true, browser:true */
-/*global define:true */
 
 /**
 @class moxie/runtime/silverlight/file/FileDrop
@@ -9138,15 +9173,19 @@ define("moxie/runtime/silverlight/file/FileDrop", [
 			Events.addEvent(dropZone, 'dragenter', function(e) {
 				e.preventDefault();
 				var flag = Dom.get(self.uid).dragEnter(e);
-			    // If handled, then stop propagation of event in DOM
-			    if (flag) {e.stopPropagation();}
+				// If handled, then stop propagation of event in DOM
+				if (flag) {
+					e.stopPropagation();
+				}
 			}, comp.uid);
 
 			Events.addEvent(dropZone, 'drop', function(e) {
 				e.preventDefault();
 				var flag = Dom.get(self.uid).dragDrop(e);
-			    // If handled, then stop propagation of event in DOM
-			    if (flag) {e.stopPropagation();}
+				// If handled, then stop propagation of event in DOM
+				if (flag) {
+					e.stopPropagation();
+				}
 			}, comp.uid);
 
 			return self.shimExec.call(this, 'FileDrop', 'init');
@@ -9168,9 +9207,6 @@ define("moxie/runtime/silverlight/file/FileDrop", [
  * Contributing: http://www.plupload.com/contributing
  */
 
-/*jshint smarttabs:true, undef:true, unused:true, latedef:true, curly:true, bitwise:true, scripturl:true, browser:true */
-/*global define:true */
-
 /**
 @class moxie/runtime/silverlight/file/FileReader
 @private
@@ -9181,33 +9217,6 @@ define("moxie/runtime/silverlight/file/FileReader", [
 	"moxie/runtime/flash/file/FileReader"
 ], function(extensions, Basic, FileReader) {
 	return (extensions.FileReader = Basic.extend({}, FileReader));
-});
-
-// Included from: src/javascript/runtime/silverlight/xhr/XMLHttpRequest.js
-
-/**
- * XMLHttpRequest.js
- *
- * Copyright 2013, Moxiecode Systems AB
- * Released under GPL License.
- *
- * License: http://www.plupload.com/license
- * Contributing: http://www.plupload.com/contributing
- */
-
-/*jshint smarttabs:true, undef:true, unused:true, latedef:true, curly:true, bitwise:true, scripturl:true, browser:true */
-/*global define:true */
-
-/**
-@class moxie/runtime/silverlight/xhr/XMLHttpRequest
-@private
-*/
-define("moxie/runtime/silverlight/xhr/XMLHttpRequest", [
-	"moxie/runtime/silverlight/Runtime",
-	"moxie/core/utils/Basic",
-	"moxie/runtime/flash/xhr/XMLHttpRequest"
-], function(extensions, Basic, XMLHttpRequest) {
-	return (extensions.XMLHttpRequest = Basic.extend({}, XMLHttpRequest));
 });
 
 // Included from: src/javascript/runtime/silverlight/file/FileReaderSync.js
@@ -9222,9 +9231,6 @@ define("moxie/runtime/silverlight/xhr/XMLHttpRequest", [
  * Contributing: http://www.plupload.com/contributing
  */
 
-/*jshint smarttabs:true, undef:true, unused:true, latedef:true, curly:true, bitwise:true, scripturl:true, browser:true */
-/*global define:true */
-
 /**
 @class moxie/runtime/silverlight/file/FileReaderSync
 @private
@@ -9235,6 +9241,30 @@ define("moxie/runtime/silverlight/file/FileReaderSync", [
 	"moxie/runtime/flash/file/FileReaderSync"
 ], function(extensions, Basic, FileReaderSync) {
 	return (extensions.FileReaderSync = Basic.extend({}, FileReaderSync));
+});
+
+// Included from: src/javascript/runtime/silverlight/xhr/XMLHttpRequest.js
+
+/**
+ * XMLHttpRequest.js
+ *
+ * Copyright 2013, Moxiecode Systems AB
+ * Released under GPL License.
+ *
+ * License: http://www.plupload.com/license
+ * Contributing: http://www.plupload.com/contributing
+ */
+
+/**
+@class moxie/runtime/silverlight/xhr/XMLHttpRequest
+@private
+*/
+define("moxie/runtime/silverlight/xhr/XMLHttpRequest", [
+	"moxie/runtime/silverlight/Runtime",
+	"moxie/core/utils/Basic",
+	"moxie/runtime/flash/xhr/XMLHttpRequest"
+], function(extensions, Basic, XMLHttpRequest) {
+	return (extensions.XMLHttpRequest = Basic.extend({}, XMLHttpRequest));
 });
 
 // Included from: src/javascript/runtime/silverlight/runtime/Transporter.js
@@ -9248,9 +9278,6 @@ define("moxie/runtime/silverlight/file/FileReaderSync", [
  * License: http://www.plupload.com/license
  * Contributing: http://www.plupload.com/contributing
  */
-
-/*jshint smarttabs:true, undef:true, unused:true, latedef:true, curly:true, bitwise:true, scripturl:true, browser:true */
-/*global define:true */
 
 /**
 @class moxie/runtime/silverlight/runtime/Transporter
@@ -9275,10 +9302,7 @@ define("moxie/runtime/silverlight/runtime/Transporter", [
  * License: http://www.plupload.com/license
  * Contributing: http://www.plupload.com/contributing
  */
-
-/*jshint smarttabs:true, undef:true, unused:true, latedef:true, curly:true, bitwise:true, scripturl:true, browser:true */
-/*global define:true */
-
+ 
 /**
 @class moxie/runtime/silverlight/image/Image
 @private
@@ -9303,8 +9327,7 @@ define("moxie/runtime/silverlight/image/Image", [
  * Contributing: http://www.plupload.com/contributing
  */
 
-/*jshint smarttabs:true, undef:true, unused:true, latedef:true, curly:true, bitwise:false, scripturl:true, browser:true */
-/*global define:true, File:true */
+/*global File:true */
 
 /**
 Defines constructor for HTML4 runtime.
@@ -9322,15 +9345,16 @@ define("moxie/runtime/html4/Runtime", [
 	var type = 'html4', extensions = {};
 
 	function Html4Runtime(options) {
-		var I = this, shim;
+		var I = this;
 
-		Runtime.call(this, type, options, {
+		Runtime.call(this, options, type, {
 			access_binary: !!(window.FileReader || window.File && File.getAsDataURL),
 			access_image_binary: false,
 			display_media: extensions.Image && (Env.can('create_canvas') || Env.can('use_data_uri_over32kb')),
+			do_cors: false,
 			drag_and_drop: false,
 			resize_image: function() {
-				return extensions.Image && can('access_binary') && Env.can('create_canvas');
+				return extensions.Image && I.can('access_binary') && Env.can('create_canvas');
 			},
 			report_upload_progress: false,
 			return_response_headers: false,
@@ -9367,61 +9391,15 @@ define("moxie/runtime/html4/Runtime", [
 				this.trigger("Init");
 			},
 
-			getShim: function() {
-				return shim;
-			},
-
-			shimExec: function(component, action) {
-				var args = [].slice.call(arguments, 2);
-				return I.getShim().exec.call(this, this.uid, component, action, args);
-			},
-
 			destroy: (function(destroy) { // extend default destroy method
 				return function() {
-					if (shim) {
-						shim.removeAllInstances(I);
-					}
 					destroy.call(I);
-					destroy = shim = I = null;
+					destroy = I = null;
 				};
 			}(this.destroy))
 		});
 
-		shim = Basic.extend((function() {
-			var objpool = {};
-
-			return {
-				exec: function(uid, comp, fn, args) {
-					if (shim[comp]) {
-						if (!objpool[uid]) {
-							objpool[uid] = {
-								context: this,
-								instance: new shim[comp]()
-							}
-						}
-
-						if (objpool[uid].instance[fn]) {
-							return objpool[uid].instance[fn].apply(this, args);
-						}
-					}
-				},
-
-				removeInstance: function(uid) {
-					delete objpool[uid];
-				},
-
-				removeAllInstances: function() {
-					var self = this;
-					
-					Basic.each(objpool, function(obj, uid) {
-						if (Basic.typeOf(obj.instance.destroy) === 'function') {
-							obj.instance.destroy.call(obj.context);
-						}
-						self.removeInstance(uid);
-					});
-				}
-			};
-		}()), extensions);
+		Basic.extend(this.getShim(), extensions);
 	}
 
 	Runtime.addConstructor(type, Html4Runtime);
@@ -9440,9 +9418,6 @@ define("moxie/runtime/html4/Runtime", [
  * License: http://www.plupload.com/license
  * Contributing: http://www.plupload.com/contributing
  */
-
-/*jshint smarttabs:true, undef:true, unused:true, latedef:true, curly:true, bitwise:true, scripturl:true, browser:true */
-/*global define:true */
 
 /**
 @class moxie/runtime/html4/file/FileInput
@@ -9575,6 +9550,8 @@ define("moxie/runtime/html4/file/FileInput", [
 			_uid = uid;
 
 			shimContainer = currForm = browseButton = null;
+
+			comp.trigger('ready');
 		}
 
 		Basic.extend(this, {
@@ -9659,9 +9636,6 @@ define("moxie/runtime/html4/file/FileInput", [
  * Contributing: http://www.plupload.com/contributing
  */
 
-/*jshint smarttabs:true, undef:true, unused:true, latedef:true, curly:true, bitwise:true, scripturl:true, browser:true */
-/*global define:true */
-
 /**
 @class moxie/runtime/html4/file/FileReader
 @private
@@ -9684,9 +9658,6 @@ define("moxie/runtime/html4/file/FileReader", [
  * License: http://www.plupload.com/license
  * Contributing: http://www.plupload.com/contributing
  */
-
-/*jshint smarttabs:true, undef:true, unused:true, latedef:true, curly:true, bitwise:true, scripturl:true, browser:true, laxcomma:true */
-/*global define:true */
 
 /**
 @class moxie/runtime/html4/xhr/XMLHttpRequest
@@ -9791,11 +9762,20 @@ define("moxie/runtime/html4/xhr/XMLHttpRequest", [
 								// get result
 								_response = Basic.trim(el.body.innerHTML);
 
+								// we need to fire these at least once
 								target.trigger({
-									type: 'uploadprogress',
-									loaded: blob && blob.size || 1025,
-									total: blob && blob.size || 1025
+									type: 'progress',
+									loaded: _response.length,
+									total: _response.length
 								});
+
+								if (blob) { // if we were uploading a file
+									target.trigger({
+										type: 'uploadprogress',
+										loaded: blob.size || 1025,
+										total: blob.size || 1025
+									});
+								}
 							}
 						} catch (ex) {
 							if (Url.hasSameOrigin(meta.url)) {
@@ -9922,9 +9902,6 @@ define("moxie/runtime/html4/xhr/XMLHttpRequest", [
  * Contributing: http://www.plupload.com/contributing
  */
 
-/*jshint smarttabs:true, undef:true, unused:true, latedef:true, curly:true, bitwise:true, scripturl:true, browser:true */
-/*global define:true */
-
 /**
 @class moxie/runtime/html4/image/Image
 @private
@@ -9936,7 +9913,7 @@ define("moxie/runtime/html4/image/Image", [
 	return (extensions.Image = Image);
 });
 
-expose(["moxie/core/utils/Basic","moxie/core/I18n","moxie/core/utils/Mime","moxie/core/utils/Env","moxie/core/utils/Dom","moxie/core/Exceptions","moxie/core/EventTarget","moxie/core/utils/Encode","moxie/runtime/Runtime","moxie/runtime/RuntimeClient","moxie/file/Blob","moxie/file/File","moxie/file/FileInput","moxie/file/FileDrop","moxie/file/FileReader","moxie/core/utils/Url","moxie/runtime/RuntimeTarget","moxie/xhr/FormData","moxie/xhr/XMLHttpRequest","moxie/file/FileReaderSync","moxie/runtime/Transporter","moxie/core/JSON","moxie/image/Image","moxie/core/utils/Events"]);
+expose(["moxie/core/utils/Basic","moxie/core/I18n","moxie/core/utils/Mime","moxie/core/utils/Env","moxie/core/utils/Dom","moxie/core/Exceptions","moxie/core/EventTarget","moxie/core/utils/Encode","moxie/runtime/Runtime","moxie/runtime/RuntimeClient","moxie/file/Blob","moxie/file/File","moxie/file/FileInput","moxie/file/FileDrop","moxie/file/FileReader","moxie/core/utils/Url","moxie/runtime/RuntimeTarget","moxie/file/FileReaderSync","moxie/xhr/FormData","moxie/xhr/XMLHttpRequest","moxie/runtime/Transporter","moxie/core/JSON","moxie/image/Image","moxie/core/utils/Events"]);
 })(this);/**
  * o.js
  *
@@ -9947,8 +9924,7 @@ expose(["moxie/core/utils/Basic","moxie/core/I18n","moxie/core/utils/Mime","moxi
  * Contributing: http://www.plupload.com/contributing
  */
 
-/*jshint smarttabs:true, undef:true, unused:true, latedef:true, curly:true, bitwise:true, scripturl:true, browser:true */
-/*global window:true */
+/*global moxie:true */
 
 /**
 Globally exposed namespace with the most frequently used public classes and handy methods.

@@ -43,7 +43,7 @@
 
 			// init dataTable
 			$this.oTable = $('table', wrapper).dataTable({
-				"sDom": "f<'row-fluid'<'span12'B>><'row-fluid'<'span12't>><'row-fluid row-footer'<'span12'i>>",
+				"sDom": "f<'row-fluid'<'span12'B>><'row-fluid'<'span12't>>",
 				"oLanguage": {
 					"sSearch": "_INPUT_",
 					"sEmptyTable": "No Files found",
@@ -68,27 +68,15 @@
 						}
 					},
 					{ 
-						"sTitle": "Name", "mData": "name", "sClass": "column-name",
+						"sTitle": "Name", "mData": "name", "sClass": "column-name zlux-global-entry",
 						"mRender": function ( data, type, full ) {
-							if (type == 'display') {
-								return '<a href="#">' + data + '</a>';
-							} else {
-								return data;
-							}
+							return type == 'display' ? '<span class="zlux-global-entry-name"><a href="#">' + data + '</a></span>' : data;
 						},
 						"fnCreatedCell": function (nTd, sData, oData, iRow, iCol) {
-							// remove possible first and finall /
-							var path = oData.path.replace(/(^\/|\/$)/, '');
 							// store path in data
-							$(nTd).parent('tr').attr('data-path', path)
+							$(nTd).parent('tr').attr('data-path', $this.cleanPath( oData.path ))
 						}
 					}
-					// {
-					// 	"sTitle": "Size", "mData": "size", "bSearchable": false, "sClass": "right", "sWidth": "100px",
-					// 	"mRender": function ( data, type, full ) {
-					// 		return type == 'display' ? (full.type == 'folder' ? '* ' : '')+data.display : data.value;
-					// 	}
-					// }
 				],
 				"aoColumnDefs": {
 					"bVisible": false, "aTargets": [ 2 ]
@@ -109,7 +97,24 @@
 					}
 				},
 				"fnRowCallback": function( nRow, aData, iDisplayIndex, iDisplayIndexFull ) {
+					// add the entry type, folder or file
 					$(nRow).attr('data-type', aData.type);
+
+					// prepare the details
+					var details = '';
+					$.each(aData.details, function(name, val){
+						details += '<li><strong>' + name + '</strong>: ' + val + '</li>';
+					})
+
+					// set entry details
+					$('.zlux-global-entry', $(nRow))
+					.prepend('<i class="zlux-global-entry-details-btn icon-angle-down" /><i class="zlux-global-entry-remove icon-minus-sign" />')
+
+					.append(
+						'<div class="zlux-global-entry-details">' +
+							'<ul class="unstyled">' + details + '</ul>' +
+						'</div>'
+					);
 				},
 				"fnInitComplete": function(oSettings, data) {
 					var input_filter = $('.dataTables_filter', wrapper)
@@ -199,13 +204,39 @@
 				
 				return false;
 			})
+
+			// init item details features
+			.on('click', '.zlux-global-entry-details-btn', function(){
+				var icon = $(this),
+					TD = icon.closest('td'),
+					details = icon.siblings('.zlux-global-entry-details');
+
+				if (!TD.hasClass('zlux-ui-open')) {
+					icon.removeClass('icon-angle-down').addClass('icon-angle-up');
+					details.slideDown('fast', function(){
+						TD.addClass('zlux-ui-open');
+						$this.zluxdialog.scrollbar('refresh');
+					});
+				} else {
+					icon.addClass('icon-angle-down').removeClass('icon-angle-up');
+					details.slideUp('fast', function(){
+						TD.removeClass('zlux-ui-open');
+						$this.zluxdialog.scrollbar('refresh');
+					});
+				}
+			})
 		},
 		/**
 		 * Reloads the Table content
 		 */
 		reload: function() {
-			$this.oTable.fnSettings().bReloading = true;
-			$this.oTable.fnReloadAjax($this.oTable.fnSettings().sAjaxSource);
+			var $this = this,
+				oSettings = $this.oTable.fnSettings();
+
+			// set vars
+			oSettings.bReloading = true;
+			// reload
+			$this.oTable.fnReloadAjax(oSettings.sAjaxSource);
 		},
 		_fnServerData: function( sUrl, aoData, fnCallback, oSettings ) {
 			var $this = this,
@@ -219,6 +250,9 @@
 
 			// set the root
 			root = $this.cleanPath(oSettings.sCurrentPath + '/' + oSettings.sGoToPath);
+
+			// reset vars
+			oSettings.sGoToPath = '';
 
 			// send root with post data
 			aoData.push({ "name": "root", "value": root });
@@ -432,7 +466,6 @@
 					icon : "folder-close",
 					subicon : "plus-sign",
 					click : function(){
-						console.log(1);
 						// $.ajax({
 						// 	"url": oDTSettings.oInit.sAjaxUrl+"&task=newFolder&path=images",
 						// 	"dataType": "json",
@@ -457,7 +490,10 @@
 
 							// init ZLUX Upload
 							$this.zluxupload.inited || $this.zluxupload.init();
-							
+
+							// update upload path
+							$this.zluxupload.options.path = $this.oTable.fnSettings().sCurrentPath;
+
 							// show the upload view
 							$('.zlux-upload', $this.zluxdialog.content).fadeIn('400');
 						})
@@ -499,16 +535,21 @@
 				}
 			});
 
+			// when file is uploaded
+			$this.zluxupload.bind('FileUploaded', function(up){
+				$this.reload();
+			});
+
 			// when uploader ready
 			$this.zluxupload.bind('Init', function(){
 
 				// toogle the buttons on upload events
-				$this.zluxupload.uploader.bind('BeforeUpload', function(up){
+				$this.zluxupload.bind('BeforeUpload', function(up){
 					$this.zluxdialog.toolbarBtnState(2, 'ban-circle', 'enabled');
 					$this.zluxdialog.toolbarBtnState(2, 'upload', 'disabled');
 					$this.zluxdialog.toolbarBtnState(2, 'plus-sign', 'disabled');
 				})
-				$this.zluxupload.uploader.bind('UploadComplete', function(up){
+				$this.zluxupload.bind('UploadComplete', function(up){
 					$this.zluxdialog.toolbarBtnState(2, 'ban-circle', 'enabled');
 					$this.zluxdialog.toolbarBtnState(2, 'plus-sign', 'enabled');
 					$this.zluxdialog.toolbarBtnState(2, 'ban-circle', 'disabled');
@@ -668,6 +709,10 @@
 
 				// remove file from files function
 				.on('click', '.zlux-upload-file-btn-remove', function(){
+
+					// abort if it's being uploaded
+					if ($(this).closest('li.zlux-upload-file').data('zlux-upload-status') == 'uploding') return;
+
 					var $file = $(this).closest('.zlux-upload-file'),
 						file = $this.uploader.getFile($file[0].id);
 
@@ -743,9 +788,6 @@
 			// Post init events, bound after the internal events
 			params = $.extend(params, {
 				init : {
-					Init: function() {
-						$this.trigger('Init');
-					},
 					FilesAdded: function(up, files) {
 						$this.eventFilesAdded(files);
 					},
@@ -757,6 +799,9 @@
 					},
 					BeforeUpload: function(up, file) {
 						$this.eventBeforeUpload(file);
+					},
+					UploadComplete: function(up, files) {
+						$this.eventUploadComplete(files);
 					},
 					QueueChanged: function(up) {
 						$this.eventQueueChanged();
@@ -773,6 +818,12 @@
 
 			// set the Plupload uploader
 			$this.uploader = new plupload.Uploader(params);
+
+			// workaround to trigger the Init event
+			// perhaps Plupload bug but it's not working as the others
+			$this.uploader.bind('Init', function(){
+				$this.trigger('Init');
+			})
 
 			// init the uploader
 			$this.uploader.init();
@@ -867,13 +918,18 @@
 			var $this = this,
 				$file = $('#' + file.id, $this.filelist);
 			
-			// set the upload path
-			// $this.uploader.settings.url = $this.uploader.settings.url+'&path='+$this.options.path;
+			// if local storage
+			if($this.options.storage == 'local') {
+				// update the upload path
+				$this.uploader.settings.url = $this.uploader.settings.url + '&path=' + $this.options.path;
+			}
 
 			// if S3 storage
 			if($this.options.storage == 's3') {
-				// upload multi-part data
-				$this.uploader.settings.multipart_params.key = file.name;
+				// update the upload path and file name
+				var folder = $this.options.path ? $this.options.path + '/' : '';
+				$this.uploader.settings.multipart_params.key = folder + file.name;
+				// update the content type
 				$this.uploader.settings.multipart_params['Content-Type'] = file.type;
 			}
 
@@ -885,6 +941,21 @@
 
 			// update status
 			$this._handleFileStatus(file);
+
+			// change the buttons/icons
+			$('.zlux-upload-file-btn-remove', $file).removeClass('icon-remove').addClass('icon-spinner icon-spin');
+
+			// trigger event
+			$this.trigger('BeforeUpload', file);
+		},
+		/*
+		 * Fires when all files in a queue are uploaded.
+		 */
+		eventUploadComplete: function(file) {
+			var $this = this;
+
+			// trigger event
+			$this.trigger('UploadComplete', file);
 		},
 		/*
 		 * Fires while a file is being uploaded.
@@ -900,26 +971,33 @@
 
 			// update status
 			$this._handleFileStatus(file);
-			// $this._updateTotalProgress();
 		},
 		/*
 		 * Fires when a file is successfully uploaded.
 		 */
 		eventFileUploaded: function(file, info) {
-			var $this = this;
-				// response = $.parseJSON(info.response);
+			var $this = this,
+				$file = $('#' + file.id, $this.filelist);
 
-			// update the name
-			// $('#' + file.id + ' .zlux-upload-file-name', $this.filelist).html(response.name);
+			// if local storage
+			if($this.options.storage == 'local') {
+				var response = $.parseJSON(info.response);
+
+				// update the name
+				$('.zlux-upload-file-name', $file).html(response.result);
+			}
 
 			// update progress
-			$('#' + file.id + ' .zlux-upload-file-progress', $this.filelist).html('100%').fadeOut();
+			$('.zlux-upload-file-progress', $file).html('100%').fadeOut();
 
 			// change the buttons/icons
-			$('#' + file.id + ' .zlux-upload-file-btn-remove').removeClass('icon-remove').addClass('icon-ok');
+			$('.zlux-upload-file-btn-remove', $file).removeClass('icon-remove icon-spinner icon-spin').addClass('icon-ok');
 
 			// update file status
 			$this._handleFileStatus(file);
+
+			// trigger event
+			$this.trigger('FileUploaded', file);
 		},
 		/*
 		 * Fires while when the user selects files to upload.
@@ -930,33 +1008,42 @@
 			// add the file preview
 			$.each(files, function(index, file) {
 
-				// render file dom
-				var file_dom = $this._renderFilePreview(file);
+				// set initial status
+				file.status = 'validating';
 
-				// add file spinner
-				$('.zlux-upload-file-btn-details', file_dom).addClass('icon-spinner icon-spin');
+				// add file to dom
+				var $file = $this._renderFilePreview(file);
 
 				// validate file name
 				$.ajax({
 					"url": $this.options.url + '&task=validateFileName',
+					"type": 'post',
 					"data":{
 						name: file.name
 					},
 					"dataType": "json",
 					"cache": false,
+					"beforeSend": function(jqXHR, settings){
+						// add name spinner
+						$('.zlux-upload-file-name', $file).html('<i class="icon-spinner icon-spin" />');
+					},
 					"success": function (json) {
 						// update name
-						$('.zlux-upload-file-name', file_dom).html(json.result);
+						$('.zlux-upload-file-name', $file).html(json.result);
 
-						// 
-						var new_file = $this.uploader.getFile(file.id);
+						// update file name
 						file.name = json.result;
-						// $this.uploader.addFile(new_file);
 
-						// remove spinner
-						$('.zlux-upload-file-btn-details', file_dom).removeClass('icon-spinner icon-spin');
+						// ready to upload, set status
+						file.status = 1; 
+
+						// update file status
+						$this._handleFileStatus(file);
+
+						// refresh the filelist
+						$this._updateFilelist();
 					}
-				})				
+				})
 			})
 		},
 		/*
@@ -977,7 +1064,7 @@
 
 			// add the file preview
 			$.each($this.uploader.files, function(index, file) {
-				file.status != plupload.DONE && files.push(file);
+				if (file.status != plupload.DONE && file.status != 'validating') files.push(file);
 			})
 
 			return files;
@@ -1000,7 +1087,7 @@
 			$.each($this.uploader.files, function(index, file) {
 				
 				// check if there are files left to upload
-				if (file.status != plupload.DONE) {
+				if (file.status != plupload.DONE && file.status != 'validating') {
 					queued = true;
 				}
 
@@ -1054,7 +1141,7 @@
 		_renderFilePreview: function(file) {
 			var $this = this,
 			
-			file_dom = $('<li id="' + file.id + '" class="zlux-upload-file" />').append(
+			$file = $('<li id="' + file.id + '" class="zlux-upload-file" data-zlux-upload-status="validating" />').append(
 
 				// buttons / icons
 				$('<i class="zlux-upload-file-btn-remove icon-remove" />'),
@@ -1070,7 +1157,7 @@
 				$('<div class="zlux-upload-file-details" />').append(
 					'<div class="zlux-upload-file-details-error" />' +
 					'<ul class="unstyled zlux-upload-file-details-list">' +
-						'<li><strong>Name</strong>: ' + file.name.replace(/(\.[a-z0-9]+)$/, '') + '</li>' +
+						'<li><strong>File</strong>: ' + file.name.replace(/(\.[a-z0-9]+)$/, '') + '</li>' +
 						'<li><strong>Type</strong>: ' + file.type + '</li>' +
 						'<li><strong>Size</strong>: ' + plupload.formatSize(file.size) + '</li>' +
 					'</ul>'
@@ -1081,7 +1168,7 @@
 			// append to the file list
 			.appendTo($this.filelist);
 
-			return file_dom;
+			return $file;
 		},
 		_handleFileStatus: function(file) {
 			var $this = this,
@@ -1122,12 +1209,6 @@
 
 			// set the file status
 			$file.attr('data-zlux-upload-status', status);
-		},
-		_updateTotalProgress: function() {
-			var $this = this;
-
-			// upload the bar percentage
-			$('.progress .bar', $this.toolbar).css('width', $this.uploader.total.percent + '%');
 		},
 		/**
 			Init the Drag and Drop events

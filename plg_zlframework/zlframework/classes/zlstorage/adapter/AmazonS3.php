@@ -56,11 +56,10 @@ class ZLStorageAdapterAmazonS3 extends ZLStorageAdapterBase implements ZLStorage
 	/**
 	 * Writes a file to the filesystem selected
 	 * 
-	 * @param  string  $file      The filename (or path)
-	 * @param  mixed   $content   The content to write
-	 * @param  boolean $overwrite If we have to overwrite the file (default: true)
+	 * @param string $file The filename (or path)
+	 * @param mixed $content The content to write
 	 * 
-	 * @return boolean             The success of the operation
+	 * @return boolean The success of the operation
 	 */
 	public function write($file, $content, $overwrite = true){
 	}
@@ -68,9 +67,9 @@ class ZLStorageAdapterAmazonS3 extends ZLStorageAdapterBase implements ZLStorage
 	/**
 	 * Reads a file content from the filesystem selected
 	 * 
-	 * @param  string  $file      The filename (or path)
+	 * @param string file The filename (or path)
 	 * 
-	 * @return mixed             The content of the file
+	 * @return mixed The content of the file
 	 */
 	public function read($file) {
 
@@ -79,9 +78,9 @@ class ZLStorageAdapterAmazonS3 extends ZLStorageAdapterBase implements ZLStorage
 	/**
 	 * Deletes a file from the filesystem selected
 	 * 
-	 * @param  string  $file      The filename (or path)
+	 * @param string $file The filename (or path)
 	 * 
-	 * @return boolean             The success of the operation
+	 * @return boolean The success of the operation
 	 */
 	public function delete($file) {
 
@@ -90,9 +89,9 @@ class ZLStorageAdapterAmazonS3 extends ZLStorageAdapterBase implements ZLStorage
 	/**
 	 * Check if a file exists in the filesystem selected
 	 * 
-	 * @param  string  $file      The filename (or path)
+	 * @param string $file The filename (or path)
 	 * 
-	 * @return boolean             The success of the operation
+	 * @return boolean The success of the operation
 	 */
 	public function exists($file) {
 
@@ -101,8 +100,10 @@ class ZLStorageAdapterAmazonS3 extends ZLStorageAdapterBase implements ZLStorage
 	/**
 	 * Moves an uploaded file to a destination folder
 	 * 
-	 * @param   string   $file         The name of the php (temporary) uploaded file
-	 * @param   string   $dest         The path (including filename) to move the uploaded file to
+	 * @param string $file The name of the php (temporary) uploaded file
+	 * @param string $dest The path (including filename) to move the uploaded file to
+	 * 
+	 * @return boolean The success of the operation
 	 */
 	public function upload($file, $dest)
 	{
@@ -128,9 +129,9 @@ class ZLStorageAdapterAmazonS3 extends ZLStorageAdapterBase implements ZLStorage
 	/**
 	 * Get a Folder/File tree list
 	 * 
-	 * @param string $path		The path to the root folder
+	 * @param string $root The path to the root folder
 	 * 
-	 * @return boolean			The success of the operation
+	 * @return boolean The success of the operation
 	 */
 	public function getTree($root, $legalExt)
 	{

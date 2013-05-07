@@ -499,10 +499,10 @@ class ZluxController extends AppController {
 
 		// move to the final destination
 		$storage = new ZLStorage('Local', array('s3' => 'options'));
-		$storage->upload($filePath, $dest);
+		$result = $storage->upload($filePath, $dest);
 
 		// Return Success JSON-RPC response
-		die('{"jsonrpc" : "2.0", "result" : null, "id" : "id"}');
+		die(json_encode(array('jsonrpc' => '2.0', 'result' => $result, 'id' => 'id')));
 	}
 }
 

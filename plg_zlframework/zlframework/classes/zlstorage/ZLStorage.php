@@ -71,11 +71,10 @@ class ZLStorage {
 	/**
 	 * Writes a file to the filesystem selected
 	 * 
-	 * @param  string  $file      The filename (or path)
-	 * @param  mixed   $content   The content to write
-	 * @param  boolean $overwrite If we have to overwrite the file (default: true)
+	 * @param string $file The filename (or path)
+	 * @param mixed $content The content to write
 	 * 
-	 * @return boolean             The success of the operation
+	 * @return boolean The success of the operation
 	 */
 	public function write($file, $content, $overwrite = true) {
 		return $this->adapter->write($file, $content, $overwrite);
@@ -84,9 +83,9 @@ class ZLStorage {
 	/**
 	 * Reads a file content from the filesystem selected
 	 * 
-	 * @param  string  $file      The filename (or path)
+	 * @param string file The filename (or path)
 	 * 
-	 * @return mixed             The content of the file
+	 * @return mixed The content of the file
 	 */
 	public function read($file) {
 		return $this->adapter->read($file);
@@ -95,9 +94,9 @@ class ZLStorage {
 	/**
 	 * Deletes a file from the filesystem selected
 	 * 
-	 * @param  string  $file      The filename (or path)
+	 * @param string $file The filename (or path)
 	 * 
-	 * @return boolean             The success of the operation
+	 * @return boolean The success of the operation
 	 */
 	public function delete($file) {
 		return $this->adapter->delete($file);
@@ -106,9 +105,9 @@ class ZLStorage {
 	/**
 	 * Check if a file exists in the filesystem selected
 	 * 
-	 * @param  string  $file      The filename (or path)
+	 * @param string $file The filename (or path)
 	 * 
-	 * @return boolean             The success of the operation
+	 * @return boolean The success of the operation
 	 */
 	public function exists($file) {
 		return $this->adapter->exists($file);
@@ -117,10 +116,10 @@ class ZLStorage {
 	/**
 	 * Moves an uploaded file to a destination folder
 	 * 
-	 * @param   string   $file         The name of the php (temporary) uploaded file
-	 * @param   string   $dest         The path (including filename) to move the uploaded file to
+	 * @param string $file The name of the php (temporary) uploaded file
+	 * @param string $dest The path (including filename) to move the uploaded file to
 	 * 
-	 * @return boolean             The success of the operation
+	 * @return boolean The success of the operation
 	 */
 	public function upload($file, $dest) {
 		return $this->adapter->upload($file, $dest);
@@ -129,9 +128,9 @@ class ZLStorage {
 	/**
 	 * Get a Folder/File tree list
 	 * 
-	 * @param   string   $path         The path to the root folder
+	 * @param string $root The path to the root folder
 	 * 
-	 * @return boolean             The success of the operation
+	 * @return boolean The success of the operation
 	 */
 	public function getTree($root, $legalExt = '') {
 		return $this->adapter->getTree($root, $legalExt);
@@ -140,7 +139,7 @@ class ZLStorage {
 	/**
 	 * Populate the Adapters list
 	 * 
-	 * @return Adapters array        The populated array of valid Adapters
+	 * @return Adapters array The populated array of valid Adapters
 	 */
 	public function getAdapters() {
 		
@@ -159,38 +158,38 @@ interface ZLStorageAdapter {
 	/**
 	 * Writes a file to the filesystem selected
 	 * 
-	 * @param  string  $file      The filename (or path)
-	 * @param  mixed   $content   The content to write
-	 * @param  boolean $overwrite If we have to overwrite the file (default: true)
+	 * @param string $file The filename (or path)
+	 * @param mixed $content The content to write
+	 * @param boolean $overwrite If we have to overwrite the file (default: true)
 	 * 
-	 * @return boolean             The success of the operation
+	 * @return boolean The success of the operation
 	 */
 	public function write($file, $content, $overwrite = true);
 
 	/**
 	 * Reads a file content from the filesystem selected
 	 * 
-	 * @param  string  $file      The filename (or path)
+	 * @param string $file The filename (or path)
 	 * 
-	 * @return mixed             The content of the file
+	 * @return mixed The content of the file
 	 */
 	public function read($file);
 
 	/**
 	 * Deletes a file from the filesystem selected
 	 * 
-	 * @param  string  $file      The filename (or path)
+	 * @param string $file The filename (or path)
 	 * 
-	 * @return boolean             The success of the operation
+	 * @return boolean The success of the operation
 	 */
 	public function delete($file);
 
 	/**
 	 * Check if a file exists in the filesystem selected
 	 * 
-	 * @param  string  $file      The filename (or path)
+	 * @param string $file The filename (or path)
 	 * 
-	 * @return boolean             The success of the operation
+	 * @return boolean The success of the operation
 	 */
 	public function exists($file);	
 }
@@ -198,6 +197,4 @@ interface ZLStorageAdapter {
 /**
  * This class should contain the common methods between the adapters
  */
-abstract class ZLStorageAdapterBase {
-
-}
+abstract class ZLStorageAdapterBase {}
