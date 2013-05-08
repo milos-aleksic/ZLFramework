@@ -87,7 +87,7 @@ defined('_JEXEC') or die('Restricted access');
 			}
 
 			/* Prepare Spotlight */
-			if ($settings->get('spotlight')) 
+			if ($settings->get('effect') == 'spotlight') 
 			{
 				// override caption
 				if($settings->get('zl_captions') == 0) $caption = '';
