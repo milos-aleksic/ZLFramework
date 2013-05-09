@@ -204,7 +204,9 @@
 
 					.append(
 						'<div class="zlux-global-entry-details">' +
-							'<ul class="unstyled">' + details + '</ul>' +
+							'<div class="zlux-global-entry-details-content">' +
+								'<ul class="unstyled">' + details + '</ul>' +
+							'</div>' +
 						'</div>'
 					);
 				},

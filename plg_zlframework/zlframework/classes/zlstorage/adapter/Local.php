@@ -11,6 +11,7 @@ defined('_JEXEC') or die('Restricted access');
 
 // import library dependencies
 jimport('joomla.filesystem.file');
+jimport('joomla.filesystem.folder');
 
 /**
  * ZLStorage Local Adapter class
@@ -57,14 +58,23 @@ class ZLStorageAdapterLocal extends ZLStorageAdapterBase implements ZLStorageAda
 	}
 
 	/**
-	 * Deletes a file from the filesystem selected
+	 * Deletes an asset from the filesystem selected
 	 * 
-	 * @param string $file The filename (or path)
+	 * @param string $path The path to the asset
 	 * 
 	 * @return boolean The success of the operation
 	 */
-	public function delete($file) {
-		return JFile::delete($this->app->path->path($file));
+	public function delete($path)
+	{
+		$path = $this->app->path->path($file);
+		
+		if (is_readable($path) && is_file($path)) {
+			return JFile::delete($path);
+		} else if (is_readable($path) && is_dir($path)) {
+			return JFolder::delete($path);
+		}
+
+		return false;
 	}
 
 	/**
@@ -131,12 +141,12 @@ class ZLStorageAdapterLocal extends ZLStorageAdapterBase implements ZLStorageAda
 			$row['name'] = basename($dir);
 			$row['type'] = 'folder';
 			$row['path'] = $dir;
-			$row['size']['value'] = $this->getDirectorySize($root . '/' . $row['path']);
-			$row['size']['display'] = $this->app->zlfilesystem->formatFilesize($row['size']['value'], 'KB');
+			// $row['size']['value'] = $this->getDirectorySize($root . '/' . $row['path']);
+			// $row['size']['display'] = $this->app->zlfilesystem->formatFilesize($row['size']['value'], 'KB');
 
 			// details
 			$row['details'] = array();
-			$row['details']['Size'] = $row['size']['display'];
+			// $row['details']['Size'] = $row['size']['display'];
 
 			$rows[] = $row;
 		}

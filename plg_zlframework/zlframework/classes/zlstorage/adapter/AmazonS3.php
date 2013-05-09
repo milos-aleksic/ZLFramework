@@ -71,19 +71,24 @@ class ZLStorageAdapterAmazonS3 extends ZLStorageAdapterBase implements ZLStorage
 	 * 
 	 * @return mixed The content of the file
 	 */
-	public function read($file) {
-
-	}
+	public function read($file) {}
 
 	/**
-	 * Deletes a file from the filesystem selected
+	 * Deletes an asset from the filesystem selected
 	 * 
-	 * @param string $file The filename (or path)
+	 * @param string $path The path to the asset
 	 * 
 	 * @return boolean The success of the operation
 	 */
-	public function delete($file) {
+	public function delete($path)
+	{
+		// delete the object
+		$result = $this->s3->deleteObject(
+			$this->bucket,
+			$path
+		);
 
+		return $result;
 	}
 
 	/**
@@ -93,9 +98,7 @@ class ZLStorageAdapterAmazonS3 extends ZLStorageAdapterBase implements ZLStorage
 	 * 
 	 * @return boolean The success of the operation
 	 */
-	public function exists($file) {
-
-	}
+	public function exists($file) {}
 
 	/**
 	 * Moves an uploaded file to a destination folder
@@ -156,8 +159,9 @@ class ZLStorageAdapterAmazonS3 extends ZLStorageAdapterBase implements ZLStorage
 				$row = array('type' => 'folder');
 				$row['name'] = basename($name);
 				$row['path'] = basename($obj['prefix']);
-				// $row['size']['value'] = $this->app->zlfilesystem->getSourceSize($row['path'], false);
-				// $row['size']['display'] = $this->app->zlfilesystem->formatFilesize($row['size']['value'], 'KB');
+
+				// details
+				$row['details'] = array();
 
 				$rows[] = $row;
 
@@ -173,6 +177,12 @@ class ZLStorageAdapterAmazonS3 extends ZLStorageAdapterBase implements ZLStorage
 			$row['path'] = basename($name);
 			$row['size']['value'] = $obj['size'];
 			$row['size']['display'] = $this->app->zlfilesystem->formatFilesize($row['size']['value'], 'KB');
+
+			// details
+			$row['details'] = array();
+			$row['details']['File'] = $row['name'];
+			$row['details']['Type'] = $this->app->zlfilesystem->getContentType($row['name']);
+			$row['details']['Size'] = $row['size']['display'];
 
 			$rows[] = $row;
 		}

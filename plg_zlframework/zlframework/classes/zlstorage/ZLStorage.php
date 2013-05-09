@@ -92,14 +92,14 @@ class ZLStorage {
 	}
 
 	/**
-	 * Deletes a file from the filesystem selected
+	 * Deletes an asset from the filesystem selected
 	 * 
-	 * @param string $file The filename (or path)
+	 * @param string $path The path to the asset
 	 * 
 	 * @return boolean The success of the operation
 	 */
-	public function delete($file) {
-		return $this->adapter->delete($file);
+	public function delete($path) {
+		return $this->adapter->delete($path);
 	}
 
 	/**

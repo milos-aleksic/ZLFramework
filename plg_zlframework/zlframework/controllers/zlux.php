@@ -284,7 +284,7 @@ class ZluxController extends AppController {
 		Returns:
 			JSON object
 	*/
-	public function FilesManager()
+	public function getFilesManagerData()
 	{
 		// init vars
 		$root = trim($this->app->request->get('root', 'string'), '/');
@@ -335,12 +335,24 @@ class ZluxController extends AppController {
 	{
 		// init vars
 		$path = $this->app->request->get('path', 'string', '');
+		$storage = $this->app->request->get('storage', 'string');
 		$result = false;
-	
-		jimport('joomla.filesystem.file');
-		jimport('joomla.filesystem.folder');
-		if (is_readable($path) && is_file($path)) $result = JFile::delete($path);
-		else if (is_readable($path) && is_dir($path)) $result = JFolder::delete($path);
+
+		// init storage
+		switch($storage) {
+			case 's3':
+				$bucket 	= $this->app->request->get('bucket', 'string');
+				$accesskey 	= $this->app->request->get('accesskey', 'string');
+				$secretkey 	= $this->app->zlfw->crypt($this->app->request->get('key', 'string'), 'decrypt');
+				$storage = new ZLStorage('AmazonS3', array('secretkey' => $secretkey, 'accesskey' => $accesskey, 'bucket' => $bucket));
+				break;
+
+			default:
+				$storage = new ZLStorage('Local');
+				break;
+		}
+
+		$result = $storage->delete($path);
 
 		echo json_encode(compact('result'));
 	}

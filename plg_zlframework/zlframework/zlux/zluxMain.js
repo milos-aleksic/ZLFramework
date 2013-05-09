@@ -83,6 +83,9 @@
 			list = this.events[name] || [];
 			list.push({func : func, scope : scope || this});
 			this.events[name] = list;
+
+			// chaining
+			return this;
 		},
 		/**
 		 * Removes the specified event listener.

@@ -646,11 +646,33 @@
 		.zlux-global-entry-details {
 			display: none;
 
-			ul.unstyled {
+			.zlux-global-entry-details-content {
 				border-top: 1px dashed #DDD;
 				margin-top: 8px;
 				padding-top: 8px;
 				margin-bottom: 0;
+				// position: relative;
+
+				ul.unstyled {
+					margin: 0;
+				}
+
+				.zlux-global-entry-details-message {
+					border-bottom: 1px dashed #DDD;
+					margin-bottom: 8px;
+					text-align: center;
+					font-weight: bold;
+					color: black;
+					// position: absolute;
+					top: 8px;
+					width: 100%;
+
+					.zlux-global-entry-details-message-actions {
+						.btn-mini {
+							margin: 10px;
+						}
+					}
+				}
 			}
 		}
 	}
