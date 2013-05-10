@@ -9,6 +9,9 @@
 // no direct access
 defined('_JEXEC') or die('Restricted access');
 
+// register necesary classes
+App::getInstance('zoo')->loader->register('ZLErrorHandlerAbstractObject', 'classes:errorhandler.php');
+
 /**
  * Base class to deal with file storage using abstraction layers
  */
@@ -137,6 +140,28 @@ class ZLStorage {
 	}
 
 	/**
+	 * Get the reported errors
+	 * 
+	 * @param string $root The path to the root folder
+	 * 
+	 * @return array A list of errors
+	 */
+	public function getErrors() {
+		return $this->adapter->getErrors();
+	}
+
+	/**
+	 * Get the reported warnings
+	 * 
+	 * @param string $root The path to the root folder
+	 * 
+	 * @return array A list of warnings
+	 */
+	public function getWarnings() {
+		return $this->adapter->getWarnings();
+	}
+
+	/**
 	 * Populate the Adapters list
 	 * 
 	 * @return Adapters array The populated array of valid Adapters
@@ -191,10 +216,10 @@ interface ZLStorageAdapter {
 	 * 
 	 * @return boolean The success of the operation
 	 */
-	public function exists($file);	
+	public function exists($file);
 }
 
 /**
  * This class should contain the common methods between the adapters
  */
-abstract class ZLStorageAdapterBase {}
+abstract class ZLStorageAdapterBase extends ZLErrorHandlerAbstractObject {}

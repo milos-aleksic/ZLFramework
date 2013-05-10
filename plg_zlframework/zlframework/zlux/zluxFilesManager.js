@@ -68,9 +68,9 @@
 						}
 					},
 					{ 
-						"sTitle": "Name", "mData": "name", "sClass": "column-name zlux-global-entry",
+						"sTitle": "Name", "mData": "name", "sClass": "column-name zlux-object",
 						"mRender": function ( data, type, full ) {
-							return type == 'display' ? '<span class="zlux-global-entry-name"><a href="#">' + data + '</a></span>' : data;
+							return type == 'display' ? '<span class="zlux-object-name"><a href="#">' + data + '</a></span>' : data;
 						},
 						"fnCreatedCell": function (nTd, sData, oData, iRow, iCol) {
 							// store path in data
@@ -109,18 +109,19 @@
 					})
 
 					// set entry details
-					$('.zlux-global-entry', $(nRow))
-					.prepend('<i class="zlux-global-entry-details-btn icon-angle-down" /><i class="zlux-global-entry-remove icon-minus-sign" />')
+					$('.zlux-object', $(nRow))
+					.prepend('<i class="zlux-object-details-btn icon-angle-down" /><i class="zlux-object-remove icon-minus-sign" />')
 
 					.append(
-						'<div class="zlux-global-entry-details">' +
-							'<div class="zlux-global-entry-details-content">' +
+						'<div class="zlux-object-details">' +
+							'<div class="zlux-object-messages" />' +
+							'<div class="zlux-object-details-content">' +
 								'<ul class="unstyled">' + details + '</ul>' +
 							'</div>' +
 						'</div>'
 					);
 
-					// $('.zlux-global-entry-remove', $(nRow)).popover({
+					// $('.zlux-object-remove', $(nRow)).popover({
 					// 	'html':'some',
 					// 	'content':'some nig content that should be visible even',
 					// 	'placement':'top'
@@ -200,9 +201,9 @@
 			})
 
 			// remove file event
-			.on('click', '.zlux-global-entry-remove', function(){
+			.on('click', '.zlux-object-remove', function(){
 				var row = $(this).closest('tr'),
-					entry = $(this).closest('td.zlux-global-entry');
+					entry = $(this).closest('td.zlux-object');
 
 				// if open, the remove action will delete the file, with confirmation
 				if (entry.hasClass('zlux-ui-open')) {
@@ -224,31 +225,7 @@
 				return false;
 			})
 
-			// init item details features
-			.on('click', '.zlux-global-entry-details-btn', function(){
-				var icon = $(this),
-					row = icon.closest('tr'),
-					TD = icon.closest('td'),
-					details = icon.siblings('.zlux-global-entry-details');
-
-				// if row is busy, abort
-				if (row.data('zlux-status') == 'busy') return;
-
-				// open/close the details
-				if (!TD.hasClass('zlux-ui-open')) {
-					TD.addClass('zlux-ui-open');
-					icon.removeClass('icon-angle-down').addClass('icon-angle-up');
-					details.slideDown('fast', function(){
-						$this.zluxdialog.scrollbar('refresh');
-					});
-				} else {
-					icon.addClass('icon-angle-down').removeClass('icon-angle-up');
-					TD.removeClass('zlux-ui-open');
-					details.slideUp('fast', function(){
-						$this.zluxdialog.scrollbar('refresh');
-					});
-				}
-			})
+			
 		},
 		_fnServerData: function( sUrl, aoData, fnCallback, oSettings ) {
 			var $this = this,
@@ -256,6 +233,14 @@
 
 			// create cache object
 			oSettings.aAjaxDataCache = oSettings.aAjaxDataCache ? oSettings.aAjaxDataCache : [];
+
+			// implelment deferred cache system
+			// if ( !$this.cachedScriptPromises[ path ] ) {
+			// 	$this.cachedScriptPromises[ path ] = $.Deferred(function( defer ) {
+			// 		$.getScript( path ).then( defer.resolve, defer.reject );
+			// 	}).promise();
+			// }
+			// return $this.cachedScriptPromises[ path ].done( callback );
 
 			// if first time, set start root as current path
 			if (!oSettings.aAjaxDataCache.length) oSettings.sCurrentPath = oSettings.oInit.sStartRoot;
@@ -351,6 +336,25 @@
 			return sCurrentPath ? sCurrentPath + '/' + path : path;
 		},
 		/**
+		 * Clean a path from double / and others
+		 *
+		 * @method cleanPath
+		 * @param {String} path The path to be cleaned
+		 */
+		cleanPath : function(path) {
+			// return path and
+			return path
+
+			// remove undefined
+			.replace(/undefined/g, '')
+
+			// remove double /
+			.replace(/\/\//g, '/')
+
+			// remove / from start and begining
+			.replace(/(^\/|\/$)/g, '');
+		},
+		/**
 		 * Returns the oTable row related to the provided path
 		 */
 		_getRowFromPath: function(path) {
@@ -370,12 +374,57 @@
 			$this.oTable.fnReloadAjax(oSettings.sAjaxSource);
 		},
 		/**
+		 * Push a Message specific to the object and manage old ones
+		 */
+		pushObjectMessage: function(object, message) {
+			var $this = this;
+
+			// wrap if message is plain text
+			if (typeof(text) == 'string') {
+				message = $('<div>' + message + '</div>')
+			}
+
+			// if more than one message wrap in separate divs
+			if (message.length > 1) {
+				$.each(message, function(i, v){
+					message[i] = $('<div>' + v + '</div>');
+				})
+			}
+
+			// get current siblings
+			var siblings = $('.zlux-object-msg', object),
+
+			// prepare message wrapper
+			msg = $('<div class="zlux-object-details-content zlux-object-msg" />').hide()
+
+			.append(
+				// append message content
+				message,
+
+				// append remove feature
+				$('<i class="zlux-object-msg-remove icon-remove" />').on('click', function(){
+					msg.fadeOut();
+				})
+			)
+
+			// add it to DOM
+			.prependTo($('.zlux-object-details', object))
+
+			// show it with effect
+			.slideDown('fast', function(){
+
+				// remove any msg sibling
+				siblings.fadeOut('slow', function(){
+					$(this).remove();
+				});
+			})
+		},
+		/**
 		 * Delete the file from the server
 		 */
 		deleteFile: function(path) {
 			var $this = this,
-				aoData = [],
-				row = $this._getRowFromPath(path);
+				aoData = [];
 
 			// set path
 			aoData.push({ "name": "path", "value": $this._getFullPath(path) });
@@ -388,48 +437,36 @@
 				aoData.push({ "name": "bucket", "value": $this.options.storage_params.bucket });
 			}
 
-			// make the request
-			var jqXHR = $.ajax({
-				"url": $this.options.ajax_url + "&task=deletePath",
-				"data": aoData,
-				"dataType": "json",
-				"type": "post",
-				"beforeSend": function(jqXHR, settings){
-					// avoid any further event
-					row.data('zlux-status', 'busy');
+			// make the request and return a promise
+			return $.Deferred(function( defer )
+			{
+				$.ajax({
+					"url": $this.options.ajax_url + "&task=deletePath",
+					"data": aoData,
+					"dataType": "json",
+					"type": "post"
+				})
+				
+				.done(function(json) {
+					if (json.result) {
 
-					// set spinner
-					$('.column-icon i', row).addClass('icon-spinner icon-spin');
-				}
-			})
+						defer.resolve();
 
-			.done(function(json) {
-				if (json.result) {
-					// remove row
-					row.fadeOut('fast');
+						// trigger event
+						$this.trigger("FileDeleted", path);
 
-					// trigger event
-					$this.trigger("FileDeleted", path);
+					} else {
+						// failed with reported error
+						defer.reject(json.errors);
+					}
+				})
 
-				} else {
-					jqXHR.reject();
-				}
-			})
+				.fail(function(){
+					// some unreported error
+					defer.reject('Something went wrong, the file was not deleted.');
+				})
 
-			.fail(function(jqXHR, textStatus, errorThrown) {
-				if ( textStatus == "parsererror" ) {
-					// remove spinner
-					$('.column-icon i', row).removeClass('icon-spinner icon-spin');
-
-					// show error notice
-					$('.zlux-global-entry-details-message-text', row).html('Something went wrong');
-				}
-			})
-
-			.always(function(json) {
-				// reset status
-				row.data('zlux-status', 'ready');
-			})
+			}).promise();
 		}
 	});
 	// Don't touch
@@ -521,6 +558,9 @@
 			});
 
 
+				
+
+
 			// on manager init
 			$this.bind("InitComplete", function(manager) {
 
@@ -535,49 +575,80 @@
 
 				// show the content
 				$this.zluxdialog.initContent();
+
+				// init item details features
+				$this.oTable.on('click', '.zlux-object-details-btn', function(){
+					var icon = $(this),
+						row = icon.closest('tr'),
+						TD = icon.closest('td'),
+						details = icon.siblings('.zlux-object-details');
+
+					// if row is busy, abort
+					if (row.data('zlux-status') == 'busy') return;
+
+					// open/close the details
+					if (!TD.hasClass('zlux-ui-open')) {
+						TD.addClass('zlux-ui-open');
+						icon.removeClass('icon-angle-down').addClass('icon-angle-up');
+						details.slideDown('fast', function(){
+							// $this.zluxdialog.main.scrollTop(60); // todo
+							$this.zluxdialog.scrollbar('refresh');
+						});
+					} else {
+						icon.addClass('icon-angle-down').removeClass('icon-angle-up');
+						TD.removeClass('zlux-ui-open');
+						details.slideUp('fast', function(){
+							$this.zluxdialog.scrollbar('refresh');
+						});
+					}
+				})
 			})
 
 
 			// before Deleting file
-			.bind("BeforeDeleteFile", function(manager, row){
+			.bind("BeforeDeleteFile", function(manager, object){
 				// if allready message displayed, abort
-				if ($('.zlux-global-entry-details-message-actions')[0]) return;
+				if ($('.zlux-object-details-message-actions')[0]) return;
 
 				// prepare and display the confirm message
-				var message = $('<div class="zlux-global-entry-details-message" />').append(
-					// append message text
-					$('<div class="zlux-global-entry-details-message-text">' +
-						'You are about to <span class="label label-warning">delete</span> this file.' +
-					'</div>'),
+				var msg = $('<div>You are about to delete this file, please <span class="label label-warning label-link">confirm</span></div>')
 
-					// append action buttons
-					$('<div class="zlux-global-entry-details-message-actions" />').append(
-						// confirm
-						$('<button class="btn-mini" type="button">Confirm</button>').on('click', function(){
-							if (row.data('zlux-status') == 'busy') return; // abort if busy
-							$this.deleteFile(row.data('path'));
-						}),
-						// cancel
-						$('<button class="btn-mini" type="button">Cancel</button>').on('click', function(){
-							if (row.data('zlux-status') == 'busy') return; // abort if busy
-							message.slideUp('fast', function(){
-								message.remove();
-							})
-						})
-					)
-				)
+				// confirm action
+				.on('click', '.label-link', function(){
 
-				// hide, add to dom
-				.hide().prependTo($('.zlux-global-entry-details-content', row))
+					// only allowed to be submited once
+					if ($(this).data('submited')) return; $(this).data('submited', true);
 
-				// display
-				.slideDown('fast');
+					// set spinner
+					$('.column-icon i', object).addClass('icon-spinner icon-spin');
+
+					// start the process							
+					$this.deleteFile(object.data('path'))
+					
+					// if succesfull
+					.done(function(){
+						object.fadeOut('slow');
+					})
+
+					// if fails
+					.fail(function(message) {
+						$this.pushObjectMessage(object, message);
+					})
+
+					// on result
+					.always(function(json) {
+						// remove spinner
+						$('.column-icon i', object).removeClass('icon-spinner icon-spin');
+					})
+				});
+
+				$this.pushObjectMessage(object, msg);
 			})
 
 			// File deleted
-			.bind("FileDeleted", function(manager, path){
+			// .bind("FileDeleted", function(manager, path){
 
-			})
+			// })
 		},
 		eventDialogLoaded: function() {
 			var $this = this;
@@ -1395,12 +1466,12 @@
 			inDZ = false;
 
 			// Make sure if we drop something on the page we don't navigate away
-     		$(window).on("drop", function(e) {
+			$(window).on("drop", function(e) {
 				e.preventDefault();
 				return false;
 			})
 
-     		// when enter the window draging a file, fire the event
+			// when enter the window draging a file, fire the event
 			.on('dragenter', function(e) {
 
 				if (collection.size() === 0) {

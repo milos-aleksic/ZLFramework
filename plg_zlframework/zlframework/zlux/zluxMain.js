@@ -22,23 +22,21 @@
 			var $this = this;
 		},
 		/**
-		 * Clean a path from double / and others
+		 * A cache factory that will abstract out the actual task to be performed when a key isn't in the cache yet
 		 *
-		 * @method cleanPath
-		 * @param {String} path The path to be cleaned
+		 * @method createCache
+		 * @param {Function} Function to be abstracted
 		 */
-		cleanPath : function(path) {
-			// return path and
-			return path
-
-			// remove undefined
-			.replace(/undefined/g, '')
-
-			// remove double /
-			.replace(/\/\//g, '/')
-
-			// remove / from start and begining
-			.replace(/(^\/|\/$)/g, '');
+		createCache: function(requestFunction) {
+			var cache = {};
+			return function( key, callback ) {
+				if ( !cache[ key ] ) {
+					cache[ key ] = $.Deferred(function( defer ) {
+						requestFunction( defer, key );
+					}).promise();
+				}
+				return cache[ key ].done( callback );
+			};
 		},
 		/**
 		 * Dispatches the specified event name and it's arguments to all listeners.

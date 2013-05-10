@@ -39,6 +39,11 @@
 			margin-right: 0
 		}
 	}
+
+	// make a label act as an link
+	.label-link {
+		cursor: pointer;
+	}
 }
 
 
@@ -315,9 +320,9 @@
 		.zlux-datatables-dialog-tmpl();
 
 		// items
-		[data-zlux-global-entry-status="true"] .zlux-global-entry {
+		[data-zlux-object-status="true"] .zlux-object {
 
-			.zlux-global-entry-name a {
+			.zlux-object-name a {
 				color: #444;
 				cursor: default;
 
@@ -395,12 +400,12 @@
 		}
 
 		// entry, folder/file
-		.zlux-global-entry-remove {
+		.zlux-object-remove {
 			visibility: hidden;
 		}
-		.zlux-global-entry.zlux-ui-open {
+		.zlux-object.zlux-ui-open {
 
-			.zlux-global-entry-remove {
+			.zlux-object-remove {
 				visibility: visible;
 				color: @red;
 			}
@@ -628,7 +633,7 @@
 	}
 
 	// global entry style. User for Items, files or general entries
-	.zlux-global-entry {
+	.zlux-object {
 
 		// icons
 		[class^="icon-"],
@@ -643,10 +648,10 @@
 		}
 
 		// details
-		.zlux-global-entry-details {
+		.zlux-object-details {
 			display: none;
 
-			.zlux-global-entry-details-content {
+			.zlux-object-details-content {
 				border-top: 1px dashed #DDD;
 				margin-top: 8px;
 				padding-top: 8px;
@@ -657,20 +662,18 @@
 					margin: 0;
 				}
 
-				.zlux-global-entry-details-message {
-					border-bottom: 1px dashed #DDD;
-					margin-bottom: 8px;
+				&.zlux-object-msg {
 					text-align: center;
 					font-weight: bold;
-					color: black;
-					// position: absolute;
-					top: 8px;
-					width: 100%;
+					position: relative;
+					padding-left: 11px;
+					padding-right: 11px;
 
-					.zlux-global-entry-details-message-actions {
-						.btn-mini {
-							margin: 10px;
-						}
+					.zlux-object-msg-remove {
+						font-size: 11px;
+						position: absolute;
+						right: -3px;
+						top: 0;
 					}
 				}
 			}

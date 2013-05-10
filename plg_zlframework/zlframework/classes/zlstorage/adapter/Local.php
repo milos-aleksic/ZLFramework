@@ -66,15 +66,22 @@ class ZLStorageAdapterLocal extends ZLStorageAdapterBase implements ZLStorageAda
 	 */
 	public function delete($path)
 	{
-		$path = $this->app->path->path($file);
-		
-		if (is_readable($path) && is_file($path)) {
-			return JFile::delete($path);
-		} else if (is_readable($path) && is_dir($path)) {
-			return JFolder::delete($path);
+		$path = $this->app->path->path('root:' . $path);
+		$result = false;
+
+		if (!is_readable($path)) {
+			$this->setError('Permission denied, check the server write permissions.');
+			return $result;
+		} else if (is_file($path)) {
+			$result = JFile::delete($path);
+		} else if (is_dir($path)) {
+			$result = JFolder::delete($path);
 		}
 
-		return false;
+		// if something went wrong, report
+		if (!$result) $this->setError('Something went wrong, the file was not deleted.');
+
+		return $result;
 	}
 
 	/**

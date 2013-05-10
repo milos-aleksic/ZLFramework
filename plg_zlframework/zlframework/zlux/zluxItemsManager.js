@@ -134,9 +134,9 @@
 				"aoColumns":
 				[
 					{
-						"sTitle": "Name", "mData": "_itemname", "sWidth": "38%", "sClass":"zlux-global-entry",
+						"sTitle": "Name", "mData": "_itemname", "sWidth": "38%", "sClass":"zlux-object",
 						"mRender": function ( data, type, full ) {
-							return type == 'display' ? '<span class="zlux-global-entry-name"><a href="#">' + data + '</a></span>' : data;
+							return type == 'display' ? '<span class="zlux-object-name"><a href="#">' + data + '</a></span>' : data;
 						},
 						"fnCreatedCell": function (nTd, sData, oData, iRow, iCol) {
 							$(nTd).parent('tr').attr('data-id', oData.id)
@@ -199,12 +199,12 @@
 					})
 
 					// set item details
-					$('.zlux-global-entry', $(nRow))
-					.prepend('<i class="zlux-global-entry-toggle icon-check-empty" /><i class="zlux-global-entry-details-btn icon-plus-sign" />')
+					$('.zlux-object', $(nRow))
+					.prepend('<i class="zlux-object-toggle icon-check-empty" /><i class="zlux-object-details-btn icon-plus-sign" />')
 
 					.append(
-						'<div class="zlux-global-entry-details">' +
-							'<div class="zlux-global-entry-details-content">' +
+						'<div class="zlux-object-details">' +
+							'<div class="zlux-object-details-content">' +
 								'<ul class="unstyled">' + details + '</ul>' +
 							'</div>' +
 						'</div>'
@@ -235,26 +235,26 @@
 			})
 
 			// select item event
-			.on('click', '.zlux-global-entry-name a, .zlux-global-entry-toggle', function(e){
+			.on('click', '.zlux-object-name a, .zlux-object-toggle', function(e){
 				var row = $(this).closest('tr');
 
-				if (row.attr('data-zlux-global-entry-status') != 'true') {
-					row.attr('data-zlux-global-entry-status', 'true');
+				if (row.attr('data-zlux-object-status') != 'true') {
+					row.attr('data-zlux-object-status', 'true');
 
 					// change the toggle icon
-					$('.zlux-global-entry-toggle', row).removeClass('icon-check-empty').addClass('icon-check');
+					$('.zlux-object-toggle', row).removeClass('icon-check-empty').addClass('icon-check');
 					
 					// trigger event
 					$this.trigger("ItemSelected", row.data('id'), row);
 
 				// perfome deselection only if toggle button clicked
-				} else if ($('.zlux-global-entry-toggle').is(e.target)){
+				} else if ($('.zlux-object-toggle').is(e.target)){
 
 					// set unselect state
-					row.removeAttr('data-zlux-global-entry-status');
+					row.removeAttr('data-zlux-object-status');
 
 					// change the toggle icon
-					$('.zlux-global-entry-toggle', row).removeClass('icon-check').addClass('icon-check-empty');
+					$('.zlux-object-toggle', row).removeClass('icon-check').addClass('icon-check-empty');
 					
 					// trigger event
 					$this.trigger("ItemUnselected", row.data('id'), row);
@@ -264,10 +264,10 @@
 			})
 
 			// init item details features
-			.on('click', '.zlux-global-entry-details-btn', function(){
+			.on('click', '.zlux-object-details-btn', function(){
 				var icon = $(this),
 					TD = icon.closest('td'),
-					details = icon.siblings('.zlux-global-entry-details');
+					details = icon.siblings('.zlux-object-details');
 
 				if (!TD.hasClass('zlux-ui-open')) {
 					TD.addClass('zlux-ui-open');

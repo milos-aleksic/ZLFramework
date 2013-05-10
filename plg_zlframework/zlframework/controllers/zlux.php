@@ -354,7 +354,9 @@ class ZluxController extends AppController {
 
 		$result = $storage->delete($path);
 
-		echo json_encode(compact('result'));
+		$errors = $storage->getErrors();
+
+		echo json_encode(compact('result', 'errors'));
 	}
 	
 	/*
