@@ -12,6 +12,7 @@ defined('_JEXEC') or die('Restricted access');
 // import library dependencies
 jimport('joomla.filesystem.file');
 jimport('joomla.filesystem.folder');
+jimport('joomla.filesystem.path');
 
 /**
  * ZLStorage Local Adapter class
@@ -66,11 +67,11 @@ class ZLStorageAdapterLocal extends ZLStorageAdapterBase implements ZLStorageAda
 	 */
 	public function delete($path)
 	{
-		$path = $this->app->path->path('root:' . $path);
 		$result = false;
+		$path = $this->app->path->path('root:' . $path);
 
 		if (!is_readable($path)) {
-			$this->setError('Permission denied, check the server write permissions.');
+			$this->setError('Permission denied or object not found.');
 			return $result;
 		} else if (is_file($path)) {
 			$result = JFile::delete($path);
@@ -79,7 +80,40 @@ class ZLStorageAdapterLocal extends ZLStorageAdapterBase implements ZLStorageAda
 		}
 
 		// if something went wrong, report
-		if (!$result) $this->setError('Something went wrong, the file was not deleted.');
+		if (!$result) $this->setError('Something went wrong, the task was not performed.');
+
+		return $result;
+	}
+
+	/**
+	 * Moves a file
+	 *
+ 	 * @param string $src The path to the source file
+	 * @param string $dest The path to the destination file
+	 *
+	 * @return boolean The success of the operation
+	 */
+	public function move($src, $dest)
+	{
+		$result = false;
+		$src = $this->app->path->path('root:' . $src);
+		$dest = dirname($src) . '/' . basename($dest); // workaround as the path does not exist yet
+
+		// clean paths if valid
+		$src = $src ? JPath::clean($src) : false;
+		$dest = $dest ? JPath::clean($dest) : false;
+
+		if (!is_readable($src)) {
+			$this->setError('Permission denied or object not found.');
+			return $result;
+		} else if (is_file($src)) {
+			$result = JFile::move($src, $dest);
+		} else if (is_dir($src)) {
+			$result = JFolder::move($src, $dest);
+		}
+
+		// if something went wrong, report
+		if (!$result) $this->setError('Something went wrong, the task was not performed.');
 
 		return $result;
 	}
@@ -153,6 +187,7 @@ class ZLStorageAdapterLocal extends ZLStorageAdapterBase implements ZLStorageAda
 
 			// details
 			$row['details'] = array();
+			$row['details']['Name'] = $row['name'];
 			// $row['details']['Size'] = $row['size']['display'];
 
 			$rows[] = $row;
@@ -169,7 +204,7 @@ class ZLStorageAdapterLocal extends ZLStorageAdapterBase implements ZLStorageAda
 
 			// details
 			$row['details'] = array();
-			$row['details']['File'] = $row['name'];
+			$row['details']['Name'] = basename($row['name'], '.' . JFile::getExt($row['name']));
 			$row['details']['Type'] = $this->app->zlfilesystem->getContentType($row['name']);
 			$row['details']['Size'] = $row['size']['display'];
 

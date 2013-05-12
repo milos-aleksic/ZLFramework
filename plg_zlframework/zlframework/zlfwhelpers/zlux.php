@@ -61,9 +61,8 @@ class zlfwHelperZLUX extends AppHelper {
 		// plupload
 		$this->app->document->addScript('zlfw:zlux/assets/plupload/plupload.full.min.js');
 
-		// perfect scrollbar
-		$this->app->document->addStylesheet('zlfw:zlux/assets/perfect-scrollbar/perfect-scrollbar.min.css');
-		$this->app->document->addScript('zlfw:zlux/assets/perfect-scrollbar/perfect-scrollbar.with-mousewheel.min.js');
+		// nanoScroller
+		$this->app->document->addScript('zlfw:zlux/assets/nanoscroller/nanoscroller.min.js');
 	}
 
 	/**
@@ -105,19 +104,26 @@ class zlfwHelperZLUX extends AppHelper {
 	}
 
 	/**
+	 * validateName
+	 */
+	public function validatePathName($name)
+	{
+		// convert to ASCII		
+		$result = $this->app->zlfilesystem->makeSafe($name, 'ascii');
+
+		// lowercase the extension
+		$result = JFile::stripExt($result) . '.' . strtolower( JFile::getExt($result) );
+
+		return $result;
+	}
+
+	/**
 	 * Get Amazon S3 signed policy
 	 *
 	 * @since 3.0.14
 	 */
-	public function getAmazonS3signedPolicy()
+	public function getAmazonS3signedPolicy($bucket, $secretkey)
 	{
-		// important variables that will be used throughout this example
-		$bucket = 'milcom.testing';
-
-		// these can be found on your Account page, under Security Credentials > Access Keys
-		$accessKeyId = 'AKIAJBGAQYDO6Z76KIGQ';
-		$secret = '014/6Ig4f2MTXmZWvFndZYJkhKdRW2DY3L+qqh+c';
-
 		// prepare policy
 		$policy = base64_encode(json_encode(array(
 			// ISO 8601 - date('c'); generates uncompatible date, so better do it manually
@@ -142,7 +148,7 @@ class zlfwHelperZLUX extends AppHelper {
 		)));
 
 		// sign policy
-		$signature = base64_encode(hash_hmac('sha1', $policy, $secret, true));
+		$signature = base64_encode(hash_hmac('sha1', $policy, $secretkey, true));
 
 		// return
 		return array('signature' => $signature, 'policy' => $policy);

@@ -106,6 +106,18 @@ class ZLStorage {
 	}
 
 	/**
+	 * Moves a file
+	 *
+	 * @param string $src The path to the source file
+	 * @param string $dest The path to the destination file
+	 *
+	 * @return boolean The success of the operation
+	 */
+	public function move($src, $dest){
+		return $this->adapter->move($src, $dest);
+	}
+
+	/**
 	 * Check if a file exists in the filesystem selected
 	 * 
 	 * @param string $file The filename (or path)
@@ -208,6 +220,15 @@ interface ZLStorageAdapter {
 	 * @return boolean The success of the operation
 	 */
 	public function delete($file);
+
+	/**
+	 * Deletes a file from the filesystem selected
+	 * 
+	 * @param string $file The filename (or path)
+	 * 
+	 * @return boolean The success of the operation
+	 */
+	public function move($src, $dest);
 
 	/**
 	 * Check if a file exists in the filesystem selected

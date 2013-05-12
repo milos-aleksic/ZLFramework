@@ -12,6 +12,9 @@ defined('_JEXEC') or die('Restricted access');
 // register necesary classes
 App::getInstance('zoo')->loader->register('AEUtilAmazons3', 'classes:amazons3.php');
 
+// import library dependencies
+jimport('joomla.filesystem.file');
+
 /**
  * ZLStorage Amazon S3 Adapter class
  */
@@ -88,6 +91,9 @@ class ZLStorageAdapterAmazonS3 extends ZLStorageAdapterBase implements ZLStorage
 			$path
 		);
 
+		// if something went wrong, report
+		if (!$result) $this->setError('Something went wrong, the file was not deleted.');
+
 		return $result;
 	}
 
@@ -162,6 +168,7 @@ class ZLStorageAdapterAmazonS3 extends ZLStorageAdapterBase implements ZLStorage
 
 				// details
 				$row['details'] = array();
+				$row['details']['Name'] = $row['name'];
 
 				$rows[] = $row;
 
@@ -180,7 +187,7 @@ class ZLStorageAdapterAmazonS3 extends ZLStorageAdapterBase implements ZLStorage
 
 			// details
 			$row['details'] = array();
-			$row['details']['File'] = $row['name'];
+			$row['details']['File'] = basename($row['name'], '.' . JFile::getExt($row['name']));
 			$row['details']['Type'] = $this->app->zlfilesystem->getContentType($row['name']);
 			$row['details']['Size'] = $row['size']['display'];
 

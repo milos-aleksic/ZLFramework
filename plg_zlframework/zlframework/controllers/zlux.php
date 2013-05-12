@@ -325,13 +325,14 @@ class ZluxController extends AppController {
 	}
 
 	/*
-		Function: delete
-			Delete Folder or File
+		Function: deleteObject
+			Delete the Object
 			
-		Parameters:
-			$path: file or folder relative path
+		Request parameters:
+			$path: the relative path to the object
+			$storage: the storage related information
 	*/
-	public function deletePath()
+	public function deleteObject()
 	{
 		// init vars
 		$path = $this->app->request->get('path', 'string', '');
@@ -352,11 +353,59 @@ class ZluxController extends AppController {
 				break;
 		}
 
+		// proceed
 		$result = $storage->delete($path);
 
+		// get any error
 		$errors = $storage->getErrors();
 
 		echo json_encode(compact('result', 'errors'));
+	}
+
+	/*
+		Function: moveObject
+			Move the Object
+			
+		Request parameters:
+			$src: the relative path to the source object
+			$dest: the relative path to the destination object
+			$storage: the storage related information
+	*/
+	public function moveObject()
+	{
+		// init vars
+		$src = $this->app->request->get('src', 'string', '');
+		$dest = $this->app->request->get('dest', 'string', '');
+		$storage = $this->app->request->get('storage', 'string');
+		$result = false;
+
+		// clean the destination path
+		$dest = dirname($dest) . '/' . $this->app->zlfw->zlux->validatePathName(basename($dest));
+
+		// init storage
+		switch($storage) {
+			case 's3':
+				$bucket 	= $this->app->request->get('bucket', 'string');
+				$accesskey 	= $this->app->request->get('accesskey', 'string');
+				$secretkey 	= $this->app->zlfw->crypt($this->app->request->get('key', 'string'), 'decrypt');
+				$storage = new ZLStorage('AmazonS3', array('secretkey' => $secretkey, 'accesskey' => $accesskey, 'bucket' => $bucket));
+				break;
+
+			default:
+				$storage = new ZLStorage('Local');
+				break;
+		}
+
+		// proceed
+		$result = $storage->move($src, $dest);
+
+		// get any error
+		$errors = $storage->getErrors();
+
+		// get final name
+		$name = basename($dest);
+
+		echo json_encode(compact('result', 'errors', 'name'));
 	}
 	
 	/*
@@ -379,22 +428,19 @@ class ZluxController extends AppController {
 	}
 
 	/*
-		Function: validateFileName
+		Function: validateObjectName
 			Validate the name for uploading
 			
 		Parameters:
 			$name: file name
 	*/
-	public function validateFileName()
+	public function validateObjectName()
 	{
 		// init vars
 		$name = $this->app->request->get('name', 'string', '');
 
-		// convert to ASCII		
-		$result = $this->app->zlfilesystem->makeSafe($name, 'ascii');
-
-		// lowercase the extension
-		$result = JFile::stripExt($result) . '.' . strtolower( JFile::getExt($result) );
+		// clean the name
+		$result = $this->app->zlfw->zlux->validatePathName($name);
 
 		// return result
 		echo json_encode(compact('result'));

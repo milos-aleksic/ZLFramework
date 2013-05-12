@@ -1,5 +1,5 @@
 /* ===================================================
- * ZLUX Items Manager v0.2
+ * ZLUX Items Manager
  * https://zoolanders.com/extensions/zl-framework
  * ===================================================
  * Copyright (C) JOOlanders SL 
@@ -16,8 +16,7 @@
 			"apps": '', // comma separated values
 			"types": '', // comma separated values
 			"categories": '', // comma separated values
-			"tags": '', // comma separated values
-			"ajax_url": ''
+			"tags": '' // comma separated values
 		},
 		initialize: function(target, options) {
 			this.options = $.extend({}, this.options, options);
@@ -318,7 +317,7 @@
 
 
 /* ===================================================
- * ZLUX Dialog Items Manager v0.1
+ * ZLUX Dialog Items Manager
  * https://zoolanders.com/extensions/zl-framework
  * ===================================================
  * Copyright (C) JOOlanders SL 

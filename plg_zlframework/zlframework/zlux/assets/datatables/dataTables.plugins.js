@@ -216,7 +216,9 @@ $.extend( true, $.fn.dataTable.defaults, {
 
 /* Default class modification */
 $.extend( $.fn.dataTableExt.oStdClasses, {
-	"sWrapper": "dataTables_wrapper form-horizontal zlux-datatables"
+	"sWrapper": "dataTables_wrapper form-horizontal zlux-datatables",
+	"sStripeOdd": "",
+	"sStripeEven": ""
 });
 
 

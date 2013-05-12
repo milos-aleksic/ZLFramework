@@ -1,5 +1,5 @@
 /* ===================================================
- * ZLUX Dialog v0.1
+ * ZLUX Dialog
  * https://zoolanders.com/extensions/zl-framework
  * Eg: new $.zluxDialog();
  * ===================================================
@@ -19,10 +19,19 @@
 			title: 'Dialog'
 		},
 		events: {},
-		init: function() {
+		initialize: function(options) {
+			this.options = $.extend({}, this.options, options);
 			var $this = this;
 
-			if ($this.inited) return;
+			// save the deferred
+			$this.creatingDialog = $.Deferred();
+
+			// return a promise events attached to current object
+			// in order to allow allready start adding events
+			return $this.creatingDialog.promise($this);
+		},
+		initDialog: function() {
+			var $this = this;
 
 			// set dialog class
 			$this.options.dialogClass = 'zlux-dialog ' + $this.options.dialogClass;
@@ -34,7 +43,6 @@
 				resizable: !1,
 				height: 'auto'
 			}, $this.options));
-
 
 			// hide main so it's content is not accesible during initial loading
 			$this.main.hide();
@@ -60,17 +68,23 @@
 			$this._spinner_area = $this.main;
 
 			// init scrollbar
-			$this.main.perfectScrollbar();
+			$this.main.addClass('zlux-scroller').nanoScroller({
+				preventPageScrolling: true,
+				contentClass: 'zlux-dialog-content'
+			});
 
 			// set toolbar
 			$this.toolbar = {};
 			$this.toolbar.wrapper = $('<div class="zlux-dialog-toolbar" />').hide().insertAfter($this.widget.children()[0]);
 
-			// trigget init event
-			$this.trigger("InitComplete");
+			// change the close icon
+			$('.ui-dialog-titlebar-close', $this.widget).html('<i class="icon-remove" />');
 
-			// not inited until the content is ready
-			$this.inited = false;
+			// resolved
+			$this.creatingDialog.resolve();
+
+			// TODO, reject if any issue during init
+			// $this.creatingDialog.reject();
 		},
 		/**
 		 * Called from the outside when the content is ready to be shown
@@ -94,7 +108,13 @@
 			$this.spinner('hide');
 		},
 		toggle: function() {
-			this.dialog(this.dialog("isOpen") ? "close" : "open");
+			var $this = this;
+
+			// state is pending, load the dialog
+			if ($this.creatingDialog.state() == 'pending') $this.initDialog();
+
+			// if allready loaded, open it
+			else if ($this.creatingDialog.state() == 'resolved') $this.dialog($this.dialog("isOpen") ? "close" : "open");
 		},
 		dialog: function(method) {
 			return this.main.dialog(method);
@@ -103,13 +123,10 @@
 			var $this = this;
 
 			if (action == 'refresh') {
-				var $scroll_y = $('.ps-scrollbar-y', $this.main),
-					$scroll_x = $('.ps-scrollbar-x', $this.main).remove();
+				var $scroll_y = $('.pane .slider', $this.main);
 
-				$scroll_y.css('top', 0);
-				// $x.css('left', 0);
 				$this.scrollbar('show'); // let's be sure is visible
-				$this.scrollbar('update');
+				$this.main.nanoScroller(); // refresh
 
 				// if no scroll necesary, hide it
 				var margin = Math.round($this.main.height()) - Math.round($scroll_y.height());
@@ -118,11 +135,13 @@
 				}
 
 			} else if (action == 'hide') {
-				$this.widget.addClass('noscroll');
+				$this.main.nanoScroller({ stop: true });
+				// $this.main.addClass('noscroll'); // is necesary ?
 			} else if (action == 'show') {
-				$this.widget.removeClass('noscroll');
+				$this.main.nanoScroller({ stop: false }); 
+				// $this.main.removeClass('noscroll'); // is necesary ?
 			} else {
-				$this.main.perfectScrollbar(action);
+				$this.main.nanoScroller(action);
 			}
 		},
 		/**
@@ -135,9 +154,10 @@
 				if (action == 'show') {
 					$this.main.fadeTo(0, 0.5);
 					$this._spinner.show();
+					$this.scrollbar('hide');
 
 				} else { // hide
-
+					$this.scrollbar('show');
 					$this._spinner.hide();
 					$this.main.add($this.toolbar.wrapper).fadeTo('slow', 1);
 				}
@@ -159,7 +179,7 @@
 			$.each(tools, function(i, tool) {
 				toolbar.append(
 					$('<li />').append(
-						$('<i class="icon-' + tool.icon + ' icon-2x icon-border" title="' + tool.title + '">' +
+						$('<i data-id="' + tool.id + '" class="icon-' + tool.icon + ' icon-2x icon-border" title="' + tool.title + '">' +
 								(tool.subicon ? '<i class="icon-' + tool.subicon + '"></i>' : '') +
 						'</i>')
 						.on('click', function(){
@@ -221,9 +241,9 @@
 		/*
 		 * Toggle Toolbar button
 		 */
-		toolbarBtnState: function(toolbar_alias, btn, state) {
+		toolbarBtnState: function(toolbar_alias, id, state) {
 			var $this = this,
-				tool = $('.zlux-dialog-toolbar-' + toolbar_alias + ' i.icon-' + btn, $this.toolbar.wrapper);
+				tool = $('.zlux-dialog-toolbar-' + toolbar_alias + ' i[data-id="' + id + '"]', $this.toolbar.wrapper);
 
 			if (state == 'disabled') {
 				tool.animate({
@@ -240,6 +260,12 @@
 			}
 		}
 	});
-	// save the plugin for global use
-	$.zluxDialog = Plugin;
+	// Don't touch
+	$.fn[Plugin.prototype.name] = function() {
+		var args   = arguments;
+		var plugin = new Plugin();
+		if (Plugin.prototype['initialize']) {
+			return plugin.initialize.apply(plugin, args);
+		}
+	};
 })(jQuery);

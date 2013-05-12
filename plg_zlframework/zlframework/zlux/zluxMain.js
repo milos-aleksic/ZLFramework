@@ -1,5 +1,5 @@
 /* ===================================================
- * ZLUX Main Plugin v0.1
+ * ZLUX Main
  * https://zoolanders.com/extensions/zl-framework
  * ===================================================
  * Copyright (C) JOOlanders SL 
@@ -160,7 +160,149 @@
 
 
 /* ===================================================
- * ZLUX SaveElement v0.2
+ * ZLUX Manager
+ * https://zoolanders.com/extensions/zl-framework
+ * ===================================================
+ * Copyright (C) JOOlanders SL 
+ * http://www.gnu.org/licenses/gpl-2.0.html GNU/GPLv2 only
+ * ========================================================== */
+(function ($) {
+	var Plugin = function(options){
+		this.options = $.extend({}, this.options, options);
+		this.events = {};
+	};
+	Plugin.prototype = $.extend(Plugin.prototype, $.zluxMain.prototype, {
+		name: 'zluxManager',
+		options: {
+			"ajax_url": ''
+		},
+		events: {},
+		initialize: function(target, options) {
+			this.options = $.extend({}, this.options, options);
+			var $this = this;
+		},
+		/**
+		 * Render the Object content
+		 */
+		renderObjectDOM: function(sName, aDetails) {
+			var $this = this;
+
+			// prepare the details
+			var sDetails = '';
+			$.each(aDetails, function(i, detail){
+				sDetails += '<li><strong>' + detail.name + '</strong>: <span>' + detail.value + '</span></li>';
+			})
+
+			// set entry details
+			var content = $(
+
+				// btns
+				'<div class="zlux-x-tools">' +
+					'<i class="zlux-x-details-btn icon-angle-down" />' +
+					'<i class="zlux-x-remove icon-minus-sign" />' +
+				'</div>' +
+
+				// name
+				'<div class="zlux-x-name">' + sName + '<i class="icon-edit-sign" /></div>' +
+
+				// details
+				'<div class="zlux-x-details">' +
+					'<div class="zlux-x-messages" />' +
+					'<div class="zlux-x-details-content">' +
+						'<ul class="unstyled">' + sDetails + '</ul>' +
+					'</div>' +
+				'</div>'
+			);
+
+			return content;
+		},
+		/**
+		 * Reloads the Table content
+		 */
+		reload: function() {
+			var $this = this,
+				oSettings = $this.oTable.fnSettings();
+
+			// set vars
+			oSettings.bReloading = true;
+
+			// reload
+			$this.oTable.fnReloadAjax(oSettings.sAjaxSource);
+		},
+		/**
+		 * Push a Message specific to the object and manage old ones
+		 */
+		pushMessageToObject: function(object, message) {
+			var $this = this;
+
+			// wrap if message is plain text
+			if (typeof(text) == 'string') {
+				message = $('<div>' + message + '</div>')
+			}
+
+			// if more than one message wrap in separate divs
+			if (message.length > 1) {
+				$.each(message, function(i, v){
+					message[i] = $('<div>' + v + '</div>');
+				})
+			}
+
+			// get current siblings
+			var siblings = $('.zlux-x-msg', object),
+
+			// prepare message wrapper
+			msg = $('<div class="zlux-x-details-content zlux-x-msg" />').hide()
+
+			.append(
+				// append message content
+				message,
+
+				// append remove feature
+				$('<i class="zlux-x-msg-remove icon-remove" />').on('click', function(){
+					msg.fadeOut();
+				})
+			)
+
+			// add it to DOM
+			.prependTo($('.zlux-x-details', object))
+
+			// show it with effect
+			.slideDown('fast', function(){
+
+				// remove any msg sibling
+				siblings.fadeOut('slow', function(){
+					$(this).remove();
+				});
+			})
+		}
+	});
+	// Don't touch
+	$.fn[Plugin.prototype.name] = function() {
+		if (this.data(Plugin.prototype.name)) return; // standart check to avoid duplicate inits
+		var args   = arguments;
+		var method = args[0] ? args[0] : null;
+		return this.each(function() {
+			var element = $(this);
+			if (Plugin.prototype[method] && element.data(Plugin.prototype.name) && method != 'initialize') {
+				element.data(Plugin.prototype.name)[method].apply(element.data(Plugin.prototype.name), Array.prototype.slice.call(args, 1));
+			} else if (!method || $.isPlainObject(method)) {
+				var plugin = new Plugin();
+				if (Plugin.prototype['initialize']) {
+					plugin.initialize.apply(plugin, $.merge([element], args));
+				}
+				element.data(Plugin.prototype.name, plugin);
+			} else {
+				$.error('Method ' +  method + ' does not exist on jQuery.' + Plugin.name);
+			}
+		});
+	};
+	// save the plugin for global use
+	$.zluxManager = Plugin;
+})(jQuery);
+
+
+/* ===================================================
+ * ZLUX SaveElement
  * https://zoolanders.com/extensions/zl-framework
  * ===================================================
  * Copyright (C) JOOlanders SL 
