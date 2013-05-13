@@ -100,7 +100,7 @@ class plgSystemZlframeworkInstallerScript
 				JFile::write($this->_src.'/warned.txt', $some);
 
 				// copy the entire install to avoid it delition on cancel
-				JFolder::copy($this->_src, $this->_src.'_copy');
+				JFolder::copy($this->_src, JPath::clean(JPATH_ROOT . '/tmp/' . basename($this->_src.'_copy')));
 
 				// cancel update
 				return false;
@@ -263,10 +263,10 @@ class plgSystemZlframeworkInstallerScript
 			if (!$pass) {
 
 				// set the proceede link with it's behaviour
-				$path = str_replace('\\', '\\/', $this->_src.'_copy');
+				$path = JPATH_ROOT . '/tmp/' . basename($this->_src.'_copy');
+				$path = str_replace('\\', '\\/', $path);
 				$javascript = "document.getElementById('install_directory').value = '{$path}';document.querySelectorAll('form .uploadform .button, form .uploadform .btn')[1].click();return false;";
-				$this->_error = JText::sprintf('PLG_ZLFRAMEWORK_SYS_OUTDATED_EXTENSIONS', $this->_ext_version, implode(', ', $outdated_ext), $javascript);
-				
+				$this->_error = JText::sprintf('PLG_ZLFRAMEWORK_SYS_OUTDATED_EXTENSIONS', $this->_ext_version, implode(', ', $outdated_ext), $javascript);				
 			}
 		}
 
