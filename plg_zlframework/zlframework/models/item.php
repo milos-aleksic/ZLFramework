@@ -240,6 +240,8 @@ class ZLModelItem extends ZLModel
 			$period_mode 	= $date->get('period_mode', 'static');
 			$interval 		= $date->get('interval', 0);
 			$interval_unit 	= $date->get('interval_unit', '');
+
+			$query->where($this->getDateSearch(compact('sql_value', 'value', 'value_from', 'value_to', 'search_type', 'period_mode', 'interval', 'interval_unit')));
 		}
 
 		// default publication up
