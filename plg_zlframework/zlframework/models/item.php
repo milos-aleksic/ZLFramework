@@ -511,7 +511,7 @@ class ZLModelItem extends ZLModel
 
 		// Multiple choice!
 		if( is_array( $value ) && !$from && !$to) {
-			$wheres[$logic][] = $this->getElementMultipleSearch($id, $value, $mode, $k, $is_select, $logic);
+			$wheres[$logic][] = $this->getElementMultipleSearch($id, $value, $mode, $k, $is_select);
 		} else {
 			// Search ranges!
 			if ($is_range && !$is_date){
@@ -688,10 +688,9 @@ class ZLModelItem extends ZLModel
 	/**
 	 * Get the multiple values search sql
 	 */
-	protected function getElementMultipleSearch($identifier, $values, $mode, $k, $is_select = true, $logic='AND')
+	protected function getElementMultipleSearch($identifier, $values, $mode, $k, $is_select = true)
 	{
 		$el_where = "b$k.element_id = " . $this->_db->Quote($identifier);               
-		$el_where .= " $logic ";
 
 		// lets be sure mode is set
 		$mode = $mode ? $mode : "AND";
@@ -723,7 +722,7 @@ class ZLModelItem extends ZLModel
 			}
 		}
 		
-		$el_where .= "(".implode(" ".$mode. " ", $multiples).")";
+		$el_where .= " AND (".implode(" ".$mode. " ", $multiples).")";
 		
 		return $el_where;
 	}
