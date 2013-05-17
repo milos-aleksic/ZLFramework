@@ -443,16 +443,11 @@ class ZLModelItem extends ZLModel
 				// merge elements ORs / ANDs
 				$elements_query = '';
 				if ( count( $elements_where['OR'] ) ) {
-					$elements_query .= '(' . implode(' OR ', $elements_where['OR']) . ')';
+					$type_query .= ' AND (' . implode(' OR ', $elements_where['OR']) . ')';
 				}
 
 				if ( count( $elements_where['AND'] ) ) {
-					$elements_query .= '(' . implode(' AND ', $elements_where['AND']) . ')';
-				}
-
-				// append elements query to the type one
-				if ( strlen($elements_query) ) {
-					$type_query .= ' AND (' . $elements_query . ')';
+					$type_query .= ' AND (' . implode(' AND ', $elements_where['AND']) . ')';
 				}
 
 				// save type query
