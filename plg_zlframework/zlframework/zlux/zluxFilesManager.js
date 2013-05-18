@@ -96,13 +96,10 @@
 					}
 				},
 				"fnRowCallback": function( nRow, aData, iDisplayIndex, iDisplayIndexFull ) {
-					var $object = $(nRow);
+					var $object = $(nRow).addClass('zlux-object');
 
 					// set the entry type, folder or file
-					$object.attr('data-type', aData.type).addClass('zlux-object');
-
-					// set the status
-					// .data('zlux-status', 'ready');
+					$object.attr('data-type', aData.type);
 
 					// prepare the details
 					var aDetails = [];
@@ -110,11 +107,17 @@
 						aDetails.push({'name': name, 'value': val});
 					})
 
-					// render the object content
-					$this.renderObjectDOM('<a href="#">' + aData.name + '</a>', aDetails)
+					// reset and append the object data
+					$('.column-name', $object).html('').removeClass('zlux-ui-open').append(
 
-					// append
-					.appendTo($('.column-name', $object));
+						// render the object content
+						$this.renderObjectDOM('<a href="#">' + aData.name + '</a>', aDetails)
+					);
+
+					// append the object edit feature to the name
+					$('.zlux-x-name', $object).append(
+						'<i class="zlux-x-name-edit icon-edit-sign" />'
+					)
 				},
 				"fnInitComplete": function(oSettings, data) {
 					var input_filter = $('.dataTables_filter', wrapper)
@@ -131,6 +134,10 @@
 						})
 					);
 
+					// add class for CSS perfomance
+					$('label', input_filter).addClass('zlux-x-label');
+
+					// set search events
 					$('input', input_filter).on('keyup', function(){
 						if ($(this).val() == '') {
 							$('.zlux-ui-dropdown-unselect', input_filter).hide();
@@ -320,6 +327,7 @@
 		 */
 		_getFullPath: function(path) {
 			var sCurrentPath = this.oTable.fnSettings().sCurrentPath;
+			
 			return sCurrentPath ? sCurrentPath + '/' + path : path;
 		},
 		/**
@@ -351,20 +359,27 @@
 		/**
 		 * Delete the file from the server
 		 */
-		deleteObjectFile: function(path) {
+		deleteObjectFile: function($object) {
 			var $this = this,
-				aoData = [];
+				aoData = [],
 
-			// set path
-			aoData.push({ "name": "path", "value": $this._getFullPath(path) });
+			// save object path
+			path = $this._getFullPath($object.data('path'));
+
+			// push the storage related data
+			aoData = $this.pushStorageData(aoData);
 
 			// if S3 storage
 			if($this.options.storage == 's3') {
-				aoData.push({ "name": "storage", "value": "s3" });
-				aoData.push({ "name": "accesskey", "value": $this.options.storage_params.accesskey });
-				aoData.push({ "name": "key", "value": $this.options.storage_params.secretkey });
-				aoData.push({ "name": "bucket", "value": $this.options.storage_params.bucket });
+
+				// add a slash if folder
+				if($object.data('type') == 'folder') {
+					path = path + '/';
+				}
 			}
+
+			// set path
+			aoData.push({ "name": "path", "value": path });
 
 			// make the request and return a promise
 			return $.Deferred(function( defer )
@@ -400,21 +415,29 @@
 		/**
 		 * Change the server Object name
 		 */
-		changeObjectName: function(name, new_name) {
+		changeObjectName: function($object, new_name) {
 			var $this = this,
-				aoData = [];
+				aoData = [],
 
-			// set path
-			aoData.push({ "name": "src", "value": $this._getFullPath(name) });
-			aoData.push({ "name": "dest", "value": $this._getFullPath(new_name) });
+			src = $this._getFullPath($object.data('path'))
+			dest = $this._getFullPath(new_name);
+
+			// push the storage related data
+			aoData = $this.pushStorageData(aoData);
 
 			// if S3 storage
 			if($this.options.storage == 's3') {
-				aoData.push({ "name": "storage", "value": "s3" });
-				aoData.push({ "name": "accesskey", "value": $this.options.storage_params.accesskey });
-				aoData.push({ "name": "key", "value": $this.options.storage_params.secretkey });
-				aoData.push({ "name": "bucket", "value": $this.options.storage_params.bucket });
+
+				// add a slash if folder
+				if($object.data('type') == 'folder') {
+					src = src + '/';
+					dest = dest + '/';
+				}
 			}
+
+			// set paths
+			aoData.push({ "name": "src", "value": src });
+			aoData.push({ "name": "dest", "value": dest });
 
 			// make the request and return a promise
 			return $.Deferred(function( defer )
@@ -442,6 +465,118 @@
 				})
 
 			}).promise();
+		},
+		/**
+		 * Change the server Object name
+		 */
+		createFolder: function(name) {
+			var $this = this,
+				aoData = [],
+
+			// save folder path
+			path = $this._getFullPath(name);
+
+			// push the storage related data
+			aoData = $this.pushStorageData(aoData);
+
+			// if S3 storage
+			if($this.options.storage == 's3') {
+				// add a slash, needed for folders
+				path = path + '/';
+			}
+
+			// set paths
+			aoData.push({ "name": "path", "value": path });
+
+			// make the request and return a promise
+			return $.Deferred(function( defer )
+			{
+				$.ajax({
+					"url": $this.options.ajax_url + "&task=newFolder",
+					"data": aoData,
+					"dataType": "json",
+					"type": "post"
+				})
+				
+				.done(function(json) {
+					if (json.result) {
+
+						defer.resolve(json.name);
+					} else {
+						// failed with reported error
+						defer.reject(json.errors);
+					}
+				})
+
+				.fail(function(){
+					// some unreported error
+					defer.reject('Something went wrong, the task was not performed.');
+				})
+
+			}).promise();
+		},
+		/**
+		 * Perform the actions related to rename the Object
+		 */
+		renameObject: function($object) {
+			var $this = this,
+				name = $('.zlux-x-name a', $object),
+				ext = name.html().match(/\.[a-zA-Z0-9]{3,4}$/g),
+				raw_name = name.html().replace(/\.[a-zA-Z0-9]{3,4}$/g, '');
+
+			// if is folder ignore the extension
+			ext = ext !== null ? ext : '';
+
+			// prepare and display the confirm message
+			var msg = $('<div>Input the new name <br /><input class="zlux-x-input" type="text" value="' + raw_name + '" /> ' + ext + '<br />and <span class="label label-success label-link">confirm</span></div>')
+
+			// confirm action
+			.on('click', '.label-link', function(){
+				// only allowed to be submited once
+				if ($(this).data('submited')) return; $(this).data('submited', true);
+
+				// set spinner
+				$('.column-icon i', $object).addClass('icon-spinner icon-spin');
+
+				// change the object name
+				var processing = $this.changeObjectName($object, $('input', msg).val() + ext)
+				
+				// if succesfull
+				.done(function(new_name){
+					// update the object name
+					name.html(new_name);
+
+					// in details also
+					$('.zlux-x-details-content ul li:first span', $object).html(new_name);
+
+					// and path data
+					$object.data('path', new_name);
+
+					// remove msg
+					$('.zlux-x-msg', $object).remove();
+				})
+
+				// if fails
+				.fail(function(message) {
+					$this.pushMessageToObject($object, message);
+				})
+
+				// on result
+				.always(function(json) {
+					// remove spinner
+					$('.column-icon i', $object).removeClass('icon-spinner icon-spin');
+				})
+			})
+
+			.on('keypress', 'input', function(e){
+				var code = (e.keyCode ? e.keyCode : e.which);
+				if (code == 13) {
+					// Enter key was pressed, emulate click event
+					$('.label-link', msg).trigger('click');
+				}
+			})
+
+			$this.pushMessageToObject($object, msg);
 		}
 	});
 	// Don't touch
@@ -560,7 +695,7 @@
 					$('.column-icon i', $object).addClass('icon-spinner icon-spin');
 
 					// delete the file						
-					var deleting = $this.deleteObjectFile($object.data('path'));
+					var deleting = $this.deleteObjectFile($object);
 					
 					// if succesfull
 					deleting.done(function(){
@@ -586,137 +721,55 @@
 				$this.pushMessageToObject($object, msg);
 			})
 		},
-		eventDialogLoaded: function() {
+		/**
+		 * init the Main Dialog Toolbar
+		 */
+		initMainToolbar: function($object) {
 			var $this = this;
 
-			// init filesmanager
-			$this.filesmanager = $('<div class="zlux-filesmanager" />').appendTo($this.zluxdialog.content);
-			$this.initDataTable($this.filesmanager);
-
-
-			// set Object details Open event
-			$this.zluxdialog.main.on('click', '.zlux-x-details-btn', function(){
-				var toggle = $(this),
-					$object = toggle.closest('tr.zlux-object'),
-					TD = $('td', $object),
-					details = $('.zlux-x-details', $object);
-
-				// open the details
-				if (!TD.hasClass('zlux-ui-open')) {
-					TD.addClass('zlux-ui-open');
-					toggle.removeClass('icon-angle-down').addClass('icon-angle-up');
-
-					// scroll to the Object with animation
-					$this.zluxdialog.content.stop().animate({
-						'scrollTop': $object.get(0).offsetTop
-					}, 900, 'swing')
-
-					// open, when done...
-					details.slideDown('fast', function(){
-						$this.zluxdialog.scrollbar('refresh');
-					});
-
-				// close them
-				} else {
-					toggle.addClass('icon-angle-down').removeClass('icon-angle-up');
-					TD.removeClass('zlux-ui-open');
-					details.slideUp('fast', function(){
-						$this.zluxdialog.scrollbar('refresh');
-					});
-				}
-			})
-
-			// set Object details rename event
-			$this.zluxdialog.main.on('click', '.icon-edit-sign', function(){
-				var toggle = $(this),
-					$object = toggle.closest('tr.zlux-object'),
-					name = $('.zlux-x-name a', $object),
-					ext = name.html().match(/\.[a-zA-Z0-9]{3,4}$/g),
-					raw_name = name.html().replace(/\.[a-zA-Z0-9]{3,4}$/g, '');
-
-				// prepare and display the confirm message
-				var msg = $('<div>Input the new name <br /><input class="zlux-x-input" type="text" value="' + raw_name + '" /> ' + ext + '<br />and <span class="label label-success label-link">confirm</span></div>')
-
-				// confirm action
-				.on('click', '.label-link', function(){
-					// only allowed to be submited once
-					if ($(this).data('submited')) return; $(this).data('submited', true);
-
-					// set spinner
-					$('.column-icon i', $object).addClass('icon-spinner icon-spin');
-
-					// change the object name
-					var processing = $this.changeObjectName($object.data('path'), $('input', msg).val() + ext)
-					
-					// if succesfull
-					.done(function(new_name){
-						// update the object name
-						name.html(new_name);
-
-						// in details also
-						$('.zlux-x-details-content ul li:first span', $object).html(new_name);
-
-						// and path data
-						$object.data('path', new_name);
-
-						// remove msg
-						$('.zlux-x-msg', $object).remove();
-					})
-
-					// if fails
-					.fail(function(message) {
-						$this.pushMessageToObject($object, message);
-					})
-
-					// on result
-					.always(function(json) {
-						// remove spinner
-						$('.column-icon i', $object).removeClass('icon-spinner icon-spin');
-					})
-				})
-
-				.on('keypress', 'input', function(e){
-					var code = (e.keyCode ? e.keyCode : e.which);
-					if (code == 13) {
-						// Enter key was pressed, emulate click event
-						$('.label-link', msg).trigger('click');
-					}
-				})
-
-				$this.pushMessageToObject($object, msg);
-			})
-
-			// set global close event
-			$('html').on('mousedown', function(event) {
-				// close if target is not the trigger or the dialog it self
-				$this.zluxdialog.dialog('isOpen') && !$this.dialogTrigger.is(event.target) && !$this.dialogTrigger.find(event.target).length && !$this.zluxdialog.widget.find(event.target).length && $this.zluxdialog.dialog('close')
-			});
-
-
-			// init toolbar
 			$this.zluxdialog.setMainToolbar(
 				[{
 					title : "Apply Filters",
 					icon : "filter",
 					click : function(tool){
 						// toggle the subtoolbar visibility
-						$('.zlux-dialog-subtoolbar-filter', $this.zluxdialog.toolbar.wrapper).slideToggle('fast');
+						$this.zluxdialog.toggleSubtoolbar('filter', 'main');
 
+						tool.parent().siblings().children('i').not(tool).removeClass('zlux-ui-tool-enabled');
 						tool.toggleClass('zlux-ui-tool-enabled');
 					}
 				},{
 					title : "New folder",
 					icon : "folder-close",
 					subicon : "plus-sign",
-					click : function(){
-						// $.ajax({
-						// 	"url": oDTSettings.oInit.sAjaxUrl+"&task=newFolder&path=images",
-						// 	"dataType": "json",
-						// 	"cache": false,
-						// 	"success": function (json) {
-								
-						// 	}
-						// })
+					click : function(tool){
+						$this.zluxdialog.toggleSubtoolbar('newfolder', 'main');
+
+						// toggle the subtoolbar visibility
+						$('.zlux-dialog-subtoolbar-newfolder', $this.zluxdialog.toolbar.wrapper).html('').
+						append(
+							$('<input type="text" class="zlux-x-input" placeholder="Folder name" />').on('keypress', function(e){
+								var code = (e.keyCode ? e.keyCode : e.which);
+								if (code == 13) {
+									// Enter key was pressed, create folder
+									$this.createFolder($(this).val());
+
+									// set spinner
+									$this.zluxdialog.spinner('show');
+
+									// start creating the folder
+									var processing = $this.createFolder($(this).val())
+
+									// on result
+									.always(function(json) {
+										$this.reload();
+									})
+								}
+							})
+						);
+
+						tool.parent().siblings().children('i').not(tool).removeClass('zlux-ui-tool-enabled');
+						tool.toggleClass('zlux-ui-tool-enabled');
 					}
 				},
 				{
@@ -750,9 +803,69 @@
 					}
 				}]
 			);
+		},
+		/**
+		 * Triger functions when Dialog ready
+		 */
+		eventDialogLoaded: function() {
+			var $this = this;
 
-			// init subtoolbar
-			$this.zluxdialog.newSubToolbar('filter');
+			// init filesmanager
+			$this.filesmanager = $('<div class="zlux-filesmanager" />').appendTo($this.zluxdialog.content);
+			$this.initDataTable($this.filesmanager);
+
+
+			// set Object details Open event
+			$this.zluxdialog.main.on('click', '.zlux-x-details-btn', function(){
+				var toggle = $(this),
+					$object = toggle.closest('tr.zlux-object'),
+					TD = $('td.column-name', $object),
+					details = $('.zlux-x-details', $object);
+
+				// open the details
+				if (!TD.hasClass('zlux-ui-open')) {
+					TD.addClass('zlux-ui-open');
+					toggle.removeClass('icon-angle-down').addClass('icon-angle-up');
+
+					// scroll to the Object with animation
+					$this.zluxdialog.content.stop().animate({
+						'scrollTop': $object.get(0).offsetTop
+					}, 900, 'swing')
+
+					// open, when done...
+					details.slideDown('fast', function(){
+						$this.zluxdialog.scrollbar('refresh');
+					});
+
+				// close them
+				} else {
+					toggle.addClass('icon-angle-down').removeClass('icon-angle-up');
+					TD.removeClass('zlux-ui-open');
+					details.slideUp('fast', function(){
+						$this.zluxdialog.scrollbar('refresh');
+					});
+				}
+			})
+
+			// trigger Object rename event on click
+			$this.zluxdialog.main.on('click', '.icon-edit-sign', function(){
+				var $object = $(this).closest('tr.zlux-object');
+				$this.renameObject($object);
+			})
+
+			// set global close event
+			$('html').on('mousedown', function(event) {
+				// close if target is not the trigger or the dialog it self
+				$this.zluxdialog.dialog('isOpen') && !$this.dialogTrigger.is(event.target) && !$this.dialogTrigger.find(event.target).length && !$this.zluxdialog.widget.find(event.target).length && $this.zluxdialog.dialog('close')
+			});
+
+
+			// init main toolbar
+			$this.initMainToolbar();
+
+			// init subtoolbars
+			$this.zluxdialog.newSubToolbar('filter', 'main');
+			$this.zluxdialog.newSubToolbar('newfolder', 'main');
 
 			// set upload engine
 			$this.zluxupload = new $.zluxUpload({

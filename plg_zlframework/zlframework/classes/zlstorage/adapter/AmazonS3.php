@@ -57,6 +57,15 @@ class ZLStorageAdapterAmazonS3 extends ZLStorageAdapterBase implements ZLStorage
 	}
 
 	/**
+	 * Check if a file exists in the filesystem selected
+	 * 
+	 * @param string $file The filename (or path)
+	 * 
+	 * @return boolean The success of the operation
+	 */
+	public function exists($file) {}
+
+	/**
 	 * Writes a file to the filesystem selected
 	 * 
 	 * @param string $file The filename (or path)
@@ -77,34 +86,93 @@ class ZLStorageAdapterAmazonS3 extends ZLStorageAdapterBase implements ZLStorage
 	public function read($file) {}
 
 	/**
-	 * Deletes an asset from the filesystem selected
-	 * 
-	 * @param string $path The path to the asset
-	 * 
+	 * Creates a folder
+	 *
+ 	 * @param string $path The path to the new object
+	 *
 	 * @return boolean The success of the operation
 	 */
-	public function delete($path)
+	public function createFolder($path)
 	{
-		// delete the object
-		$result = $this->s3->deleteObject(
+		$result = false;
+
+		// create
+		$result = $this->s3->putObject(
+			'',
 			$this->bucket,
-			$path
+			$path,
+			AEUtilAmazons3::ACL_BUCKET_OWNER_FULL_CONTROL,
+			array(),
+			array()
 		);
 
+		// propagate S3 object errors to storage object
+		$this->s3->propagateToObject($this);
+		
 		// if something went wrong, report
-		if (!$result) $this->setError('Something went wrong, the file was not deleted.');
+		if ($result !== true) {
+			$result = false;
+			$this->setError('Something went wrong, the task was not performed.');
+		}
 
 		return $result;
 	}
 
 	/**
-	 * Check if a file exists in the filesystem selected
-	 * 
-	 * @param string $file The filename (or path)
-	 * 
+	 * Moves an object
+	 *
+ 	 * @param string $src The path to the source file
+	 * @param string $dest The path to the destination file
+	 *
 	 * @return boolean The success of the operation
 	 */
-	public function exists($file) {}
+	public function move($src, $dest)
+	{
+		$result = false;
+
+		// if is folder
+		if (preg_match('/\/$/', $src)) { // they have a slash at the end
+
+			// check if the folder is empty
+			$objects = $this->s3->getBucket($this->bucket, $src, null, 20);
+
+			// unset the folder being deleted
+			unset($objects[$src]);
+
+			// if they are objects in the folder, cancel
+			if (!empty($objects)) {
+				$this->setError('You must empty the folder content first.');
+				return false;
+			}
+		}
+
+		// Copy the object
+		$result = $this->s3->copyObject(
+			$this->bucket,
+			$src,
+			$this->bucket,
+			$dest,
+			AEUtilAmazons3::ACL_BUCKET_OWNER_FULL_CONTROL,
+			array(),
+			array()
+		);
+
+		// if copy success delete the original object
+		if ($result === true) {
+			$this->delete($src);
+		}
+
+		// propagate S3 object errors to storage object
+		$this->s3->propagateToObject($this);
+
+		// if something went wrong, report
+		if ($result !== true) {
+			$result = false;
+			$this->setError('Something went wrong, the task was not performed.');
+		}
+
+		return $result;
+	}
 
 	/**
 	 * Moves an uploaded file to a destination folder
@@ -133,6 +201,51 @@ class ZLStorageAdapterAmazonS3 extends ZLStorageAdapterBase implements ZLStorage
 		);
 
 		// $this->s3->setError('You have not set up your Amazon S3 Access Key');
+	}
+
+	/**
+	 * Deletes an asset from the filesystem selected
+	 * 
+	 * @param string $path The path to the asset
+	 * 
+	 * @return boolean The success of the operation
+	 */
+	public function delete($path)
+	{
+		$result = false;
+
+		// if is folder
+		if (preg_match('/\/$/', $path)) { // they have a slash at the end
+
+			// check if the folder is empty
+			$objects = $this->s3->getBucket($this->bucket, $path, null, 20);
+
+			// unset the folder being deleted
+			unset($objects[$path]);
+
+			// if they are objects in the folder, cancel
+			if (!empty($objects)) {
+				$this->setError('You must empty the folder content first.');
+				return false;
+			}
+		}
+
+		// delete the object
+		$result = $this->s3->deleteObject(
+			$this->bucket,
+			$path
+		);
+
+		// propagate S3 object errors to storage object
+		$this->s3->propagateToObject($this);
+
+		// if something went wrong, report
+		if ($result !== true) {
+			$result = false;
+			$this->setError('Something went wrong, the task was not performed.');
+		}
+
+		return $result;
 	}
 
 	/**

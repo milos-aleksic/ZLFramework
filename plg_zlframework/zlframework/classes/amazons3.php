@@ -22,7 +22,78 @@ App::getInstance('zoo')->loader->register('ZLErrorHandlerAbstractObject', 'class
 /**
  * Amazon S3 Utility class
  */
-class AEUtilAmazons3 extends ZLErrorHandlerAbstractObject
+class AEUtilAmazons3 extends MainAEUtilAmazons3
+{
+	const STORAGE_CLASS_STANDARD = 'STANDARD';
+	const STORAGE_CLASS_RRS = 'REDUCED_REDUNDANCY';
+
+	/**
+	* Copy an object
+	*
+	* @param string $bucket Source bucket name
+	* @param string $uri Source object URI
+	* @param string $bucket Destination bucket name
+	* @param string $uri Destination object URI
+	* @param constant $acl ACL constant
+	* @param array $metaHeaders Optional array of x-amz-meta-* headers
+	* @param array $requestHeaders Optional array of request headers (content type, disposition, etc.)
+	* @param constant $storageClass Storage class constant
+	* @return mixed | false
+	*/
+	public static function copyObject($srcBucket, $srcUri, $bucket, $uri, $acl = self::ACL_PRIVATE, $metaHeaders = array(), $requestHeaders = array(), $storageClass = self::STORAGE_CLASS_STANDARD)
+	{
+		$rest = new AEUtilsS3Request('PUT', $bucket, $uri, AEUtilAmazons3::getInstance()->defaultHost);
+		$rest->setHeader('Content-Length', 0);
+		foreach ($requestHeaders as $h => $v) $rest->setHeader($h, $v);
+		foreach ($metaHeaders as $h => $v) $rest->setAmzHeader('x-amz-meta-'.$h, $v);
+		if ($storageClass !== self::STORAGE_CLASS_STANDARD) // Storage class
+			$rest->setAmzHeader('x-amz-storage-class', $storageClass);
+		$rest->setAmzHeader('x-amz-acl', $acl);
+		$rest->setAmzHeader('x-amz-copy-source', sprintf('/%s/%s', $srcBucket, rawurlencode($srcUri)));
+		if (sizeof($requestHeaders) > 0 || sizeof($metaHeaders) > 0)
+			$rest->setAmzHeader('x-amz-metadata-directive', 'REPLACE');
+
+		$rest = $rest->getResponse();
+		if ($rest->error === false && $rest->code !== 200)
+			$rest->error = array('code' => $rest->code, 'message' => 'Unexpected HTTP status');
+		if ($rest->error !== false)
+		{
+			$o = self::getInstance();
+			$o->setWarning(sprintf(__CLASS__."::copyObject({$srcBucket}, {$srcUri}, {$bucket}, {$uri}): [%s] %s",
+			$rest->error['code'], $rest->error['message']));
+			return false;
+		}
+		return true;
+	}
+
+	// /**
+	// * Delete an object
+	// *
+	// * @param string $bucket Bucket name
+	// * @param string $uri Object URI
+	// * @return boolean
+	// */
+	// public static function deleteObject($bucket, $uri) {
+	// 	$rest = new AEUtilsS3Request('DELETE', $bucket, $uri, AEUtilAmazons3::getInstance()->defaultHost);
+	// 	$rest = $rest->getResponse();
+	// 	if ($rest->error === false && $rest->code !== 204)
+	// 		$rest->error = array('code' => $rest->code, 'message' => 'Unexpected HTTP status');
+	// 	if ($rest->error === false && $rest->code === 204)
+	// 		return false;
+	// 	if ($rest->error !== false) {
+	// 		$o = self::getInstance();
+	// 		$o->setWarning(sprintf(__CLASS__."::deleteObject({$bucket}, {$uri}): [%s] %s",
+	// 		$rest->error['code'], $rest->error['message']));
+	// 		return false;
+	// 	}
+	// 	return true;
+	// }
+}
+
+/**
+ * Main Amazon S3 Utility class
+ */
+class MainAEUtilAmazons3 extends ZLErrorHandlerAbstractObject
 {
 	// ACL flags
 	const ACL_PRIVATE = 'private';

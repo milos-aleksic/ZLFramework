@@ -104,20 +104,6 @@ class zlfwHelperZLUX extends AppHelper {
 	}
 
 	/**
-	 * validateName
-	 */
-	public function validatePathName($name)
-	{
-		// convert to ASCII		
-		$result = $this->app->zlfilesystem->makeSafe($name, 'ascii');
-
-		// lowercase the extension
-		$result = JFile::stripExt($result) . '.' . strtolower( JFile::getExt($result) );
-
-		return $result;
-	}
-
-	/**
 	 * Get Amazon S3 signed policy
 	 *
 	 * @since 3.0.14

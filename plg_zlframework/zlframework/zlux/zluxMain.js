@@ -195,7 +195,6 @@
 
 			// set entry details
 			var content = $(
-
 				// btns
 				'<div class="zlux-x-tools">' +
 					'<i class="zlux-x-details-btn icon-angle-down" />' +
@@ -203,7 +202,7 @@
 				'</div>' +
 
 				// name
-				'<div class="zlux-x-name">' + sName + '<i class="icon-edit-sign" /></div>' +
+				'<div class="zlux-x-name">' + sName + '</div>' +
 
 				// details
 				'<div class="zlux-x-details">' +
@@ -212,7 +211,7 @@
 						'<ul class="unstyled">' + sDetails + '</ul>' +
 					'</div>' +
 				'</div>'
-			);
+			)
 
 			return content;
 		},
@@ -274,6 +273,22 @@
 					$(this).remove();
 				});
 			})
+		},
+		/**
+		 * Push the necesary storage DATA
+		 */
+		pushStorageData: function(aoData) {
+			var $this = this;
+
+			// if S3 storage
+			if($this.options.storage == 's3') {
+				aoData.push({ "name": "storage", "value": "s3" });
+				aoData.push({ "name": "accesskey", "value": $this.options.storage_params.accesskey });
+				aoData.push({ "name": "key", "value": $this.options.storage_params.secretkey });
+				aoData.push({ "name": "bucket", "value": $this.options.storage_params.bucket });
+			}
+
+			return aoData;
 		}
 	});
 	// Don't touch

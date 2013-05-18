@@ -173,11 +173,11 @@
 			var $this = this;
 
 			// set the wrapper
-			var toolbar = $('<ul class="zlux-dialog-toolbar-' + alias + ' inline" />').appendTo($this.toolbar.wrapper);
+			var toolbar = $('<div class="zlux-dialog-toolbar-' + alias + '"><ul class="inline" /></div>').appendTo($this.toolbar.wrapper);
 
 			// append the tools
 			$.each(tools, function(i, tool) {
-				toolbar.append(
+				$('ul', toolbar).append(
 					$('<li />').append(
 						$('<i data-id="' + tool.id + '" class="icon-' + tool.icon + ' icon-2x icon-border" title="' + tool.title + '">' +
 								(tool.subicon ? '<i class="icon-' + tool.subicon + '"></i>' : '') +
@@ -201,11 +201,13 @@
 		/**
 		 * Set a Dialog Sub Toolbar
 		 */
-		newSubToolbar: function(alias) {
+		newSubToolbar: function(alias, parent) {
 			var $this = this;
 
 			// set the wrapper
-			var subtoolbar = $('<div class="zlux-dialog-subtoolbar-' + alias + '" />').hide().appendTo($this.toolbar.wrapper);
+			var subtoolbar = $('<div class="zlux-dialog-subtoolbar-' + alias + '" />').hide().appendTo(
+				$('.zlux-dialog-toolbar-' + parent, $this.toolbar.wrapper)
+			);
 		},
 		setMainToolbar: function(tools) {
 			var $this = this;
@@ -237,6 +239,19 @@
 
 			// show the back button
 			$('.zlux-dialog-toolbar-backtomain', $this.toolbar.wrapper).show();
+		},
+		/*
+		 * Toggle the Subtoolbar visibility
+		 */
+		toggleSubtoolbar: function(alias, parent) {
+			var $this = this,
+				parent = $('.zlux-dialog-toolbar-' + parent, $this.toolbar.wrapper),
+				subtoolbar = $('.zlux-dialog-subtoolbar-' + alias, parent);
+
+			// hide all siblings toolbars, unhide the current
+			subtoolbar.siblings('div').slideUp('fast', function(){
+				subtoolbar.slideToggle('fast');
+			})
 		},
 		/*
 		 * Toggle Toolbar button

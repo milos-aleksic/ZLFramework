@@ -72,6 +72,17 @@ class ZLStorage {
 	}
 
 	/**
+	 * Check if a file exists in the filesystem selected
+	 * 
+	 * @param string $file The filename (or path)
+	 * 
+	 * @return boolean The success of the operation
+	 */
+	public function exists($file) {
+		return $this->adapter->exists($file);
+	}
+
+	/**
 	 * Writes a file to the filesystem selected
 	 * 
 	 * @param string $file The filename (or path)
@@ -95,14 +106,15 @@ class ZLStorage {
 	}
 
 	/**
-	 * Deletes an asset from the filesystem selected
-	 * 
-	 * @param string $path The path to the asset
-	 * 
+	 * Creates a folder
+	 *
+ 	 * @param string $path The path to the new object
+	 *
 	 * @return boolean The success of the operation
 	 */
-	public function delete($path) {
-		return $this->adapter->delete($path);
+	public function createFolder($path)
+	{
+		return $this->adapter->createFolder($path);
 	}
 
 	/**
@@ -118,17 +130,6 @@ class ZLStorage {
 	}
 
 	/**
-	 * Check if a file exists in the filesystem selected
-	 * 
-	 * @param string $file The filename (or path)
-	 * 
-	 * @return boolean The success of the operation
-	 */
-	public function exists($file) {
-		return $this->adapter->exists($file);
-	}
-
-	/**
 	 * Moves an uploaded file to a destination folder
 	 * 
 	 * @param string $file The name of the php (temporary) uploaded file
@@ -138,6 +139,17 @@ class ZLStorage {
 	 */
 	public function upload($file, $dest) {
 		return $this->adapter->upload($file, $dest);
+	}
+
+	/**
+	 * Deletes an asset from the filesystem selected
+	 * 
+	 * @param string $path The path to the asset
+	 * 
+	 * @return boolean The success of the operation
+	 */
+	public function delete($path) {
+		return $this->adapter->delete($path);
 	}
 
 	/**
@@ -193,6 +205,15 @@ class ZLStorage {
 interface ZLStorageAdapter {
 
 	/**
+	 * Check if a file exists in the filesystem selected
+	 * 
+	 * @param string $file The filename (or path)
+	 * 
+	 * @return boolean The success of the operation
+	 */
+	public function exists($file);
+
+	/**
 	 * Writes a file to the filesystem selected
 	 * 
 	 * @param string $file The filename (or path)
@@ -219,7 +240,7 @@ interface ZLStorageAdapter {
 	 * 
 	 * @return boolean The success of the operation
 	 */
-	public function delete($file);
+	public function move($src, $dest);
 
 	/**
 	 * Deletes a file from the filesystem selected
@@ -228,16 +249,7 @@ interface ZLStorageAdapter {
 	 * 
 	 * @return boolean The success of the operation
 	 */
-	public function move($src, $dest);
-
-	/**
-	 * Check if a file exists in the filesystem selected
-	 * 
-	 * @param string $file The filename (or path)
-	 * 
-	 * @return boolean The success of the operation
-	 */
-	public function exists($file);
+	public function delete($file);
 }
 
 /**

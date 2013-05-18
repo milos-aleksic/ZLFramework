@@ -253,13 +253,16 @@
 		}
 
 		// all toolbars
-		ul[class^="zlux-dialog-toolbar-"] {
+		[class^="zlux-dialog-toolbar-"] {
 			display: none;
-			margin-bottom: 0;
+
+			ul.inline {
+				margin-bottom: 0;
+			}
 		}
 
 		// main toolbar
-		ul[class^="zlux-dialog-toolbar-main"] {
+		[class^="zlux-dialog-toolbar-main"] {
 			display: block;
 		}
 
@@ -286,7 +289,7 @@
 .zlux-itemsmanager {
 
 	&.zlux-dialog {
-		.zlux-datatables-dialog-tmpl();
+		.zlux-manager-dialog-tmpl();
 
 		// items
 		[data-zlux-status="true"] .zlux-object {
@@ -330,21 +333,34 @@
 
 	// DIALOG
 	&.zlux-dialog {
-		.zlux-datatables-dialog-tmpl();
+		.zlux-manager-dialog-tmpl();
 
 		// TOOLBAR
 		&.zlux-dialog [class^="zlux-dialog-toolbar-"] {
 
-			[class*=" icon-"],
-			[class^="icon-"] {
-				font-size: 20px;
+			> ul.inline {
+				[class*=" icon-"],
+				[class^="icon-"] {
+					font-size: 20px;
 
-				// new folder plus icon
-				.icon-plus-sign {
-					font-size: 10px;
-					top: -3px;
-					right: -5px;
-					position: absolute;
+					// new folder plus icon
+					.icon-plus-sign {
+						font-size: 10px;
+						top: -3px;
+						right: -5px;
+						position: absolute;
+					}
+				}
+			}
+
+			// subtoolbar
+			[class^="zlux-dialog-subtoolbar-"] {
+				border-top: 1px solid #EEE;
+				margin-top: 4px;
+
+				.zlux-x-input {
+					width: 262px;
+					margin: 4px 0 0;
 				}
 			}
 		}
@@ -367,22 +383,6 @@
 					position: absolute;
 				}
 			}
-		}
-
-		// OBJECT
-		.dataTable .zlux-object {
-
-			.zlux-x-remove {
-				visibility: hidden;
-			}
-
-			.zlux-ui-open {
-
-				.zlux-x-remove {
-					visibility: visible;
-				}
-			}
-
 		}
 	}
 }
@@ -459,11 +459,10 @@
 /* LESS Mixtins
 ----------------------------------------------------------------------------------------------------*/
 // dialog
-.zlux-datatables-dialog-tmpl(){
+.zlux-manager-dialog-tmpl(){
 
 	// FILTER TOOLBAR
 	.zlux-dialog-subtoolbar-filter {
-		border-top: 1px solid #EEE;
 		margin: 4px 2px 0;
 
 		// dropdowns
@@ -545,16 +544,17 @@
 				text-indent: 20px;	
 			}
 
-			label {
+			label.zlux-x-label {
 				cursor: default;
 				margin-bottom: 0;
 			}
 
 			[class^="icon-"] {
-				position: absolute;
 				cursor: default;
-				left: 7px;
-				top: 8px;
+				font-size: 13px;
+				left: -1px;
+				position: absolute;
+				top: 4px;
 			}
 
 			.zlux-ui-dropdown-unselect {
@@ -585,26 +585,26 @@
 			width: 1.25em;
 		}
 
+		// remove btn
 		.zlux-x-remove {
 			color: @red;
 		}
 
-		// name
-		.zlux-x-name {
-			// height: 19px;
-
-			// input {
-			// 	width: 130px;
-			// }
+		.zlux-x-remove,
+		.zlux-x-name-edit {
+			visibility: hidden;
 		}
 
-		.zlux-x-input {
-			margin: 7px 0;
-    		width: 156px;
+		.zlux-ui-open {
+
+			.zlux-x-remove,
+			.zlux-x-name-edit {
+				visibility: visible;
+			}
 		}
 
-		i.icon-edit-sign,
-		i.icon-edit {
+		// name edit
+		i.zlux-x-name-edit {
 			display: inline-block;
 			float: none;
     		font-size: 15px;
@@ -613,14 +613,18 @@
     		&:before {
     			position: absolute;
     			top: -11px;
+    			left: 2px;
     		}
+		}
+
+		.zlux-x-input {
+			margin: 7px 0;
+			width: 156px;
 		}
 
 		// details
 		.zlux-x-details {
 			display: none;
-
-
 
 			.zlux-x-details-content {
 				border-top: 1px dashed #DDD;
@@ -799,13 +803,17 @@
 
 /* ZLUX Scroller based on NanoScroller.js
 ----------------------------------------------------------------------------------------------------*/
-// original style
-.zlux-scroller { // changed class name from .nano
+@nanoClass: ~'zlux-scroller';
+@paneClass: ~'pane';
+@sliderClass: ~'slider';
+@contentClass: ~'zlux-dialog-content';
+
+.@{nanoClass} {
   position: relative;
   width: 100%;
   height: 100%;
   overflow: hidden;
-  .zlux-dialog-content { // changed class name from .content
+  .@{contentClass} {
   position: absolute;
   overflow: scroll;
   overflow-x: hidden;
@@ -820,7 +828,7 @@
       visibility: hidden;
     }
   }
-  > .pane {
+  > .@{paneClass} {
     background: rgba(0,0,0,.25);
     position:absolute;
     width:10px;
@@ -837,7 +845,7 @@
     -moz-border-radius: 5px;
     -webkit-border-radius: 5px;  
     border-radius: 5px;
-    > .slider {
+    > .@{sliderClass} {
       background: #444;
       background: rgba(0,0,0,.5);
       position: relative;
@@ -847,36 +855,39 @@
       border-radius: 3px;
     }
   }
-  &:hover > .pane, 
-  &.active, 
-  &.flashed {
-    /* Target only IE7 and IE8 with this hack */
-    visibility: visible\9; 
-    opacity: 0.99;
-  }
-  &.has-scrollbar .zlux-dialog-content::-webkit-scrollbar { // changed class name from .content
-    visibility: visible;
-  }
+}
 
+.@{nanoClass}:hover > .@{paneClass}, 
+.@{paneClass}.active, 
+.@{paneClass}.flashed {
+  /* Target only IE7 and IE8 with this hack */
+  visibility: visible\9; 
+  opacity: 0.99;
+}
 
-  	// ZLUX modifications
-	.zlux-dialog-content {
+.has-scrollbar .@{contentClass}::-webkit-scrollbar {
+  visibility: visible;
+}
+
+// ZLUX modifications
+.zlux-scroller {
+
+	.@{contentClass} {
 		padding: 0.5em 1em;
 	}
 
-	> .pane {
+	> .@{paneClass} {
 		right: 1px;
 		width: 7px;
-		margin: 4px 0;
 
-		> .slider {
+		> .@{sliderClass} {
 			margin: 0;
 		}
 	}
 
 	// hide scroll
 	&.noscroll {
-		.pane {
+		.@{paneClass} {
 			display: none !important;
 		}
 	}

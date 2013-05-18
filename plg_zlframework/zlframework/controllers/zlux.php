@@ -356,8 +356,8 @@ class ZluxController extends AppController {
 		// proceed
 		$result = $storage->delete($path);
 
-		// get any error
-		$errors = $storage->getErrors();
+		// get any error / warning
+		$errors = array_merge($storage->getErrors(), $storage->getWarnings());
 
 		echo json_encode(compact('result', 'errors'));
 	}
@@ -380,7 +380,7 @@ class ZluxController extends AppController {
 		$result = false;
 
 		// clean the destination path
-		$dest = dirname($dest) . '/' . $this->app->zlfw->zlux->validatePathName(basename($dest));
+		$dest = dirname($dest) . '/' . $this->app->zlfilesystem->makeSafe(basename($dest), 'ascii');
 
 		// init storage
 		switch($storage) {
@@ -388,6 +388,14 @@ class ZluxController extends AppController {
 				$bucket 	= $this->app->request->get('bucket', 'string');
 				$accesskey 	= $this->app->request->get('accesskey', 'string');
 				$secretkey 	= $this->app->zlfw->crypt($this->app->request->get('key', 'string'), 'decrypt');
+
+				// workaround when object is on root
+				$dest = preg_replace('/^(\.\/)/', '', $dest);
+
+				// workaround to get back the slash if the object is folder
+				if (preg_match('/\/$/', $src)) $dest = $dest . '/';
+
+				// construct storage
 				$storage = new ZLStorage('AmazonS3', array('secretkey' => $secretkey, 'accesskey' => $accesskey, 'bucket' => $bucket));
 				break;
 
@@ -399,8 +407,8 @@ class ZluxController extends AppController {
 		// proceed
 		$result = $storage->move($src, $dest);
 
-		// get any error
-		$errors = $storage->getErrors();
+		// get any error / warning
+		$errors = array_merge($storage->getErrors(), $storage->getWarnings());
 
 		// get final name
 		$name = basename($dest);
@@ -419,12 +427,44 @@ class ZluxController extends AppController {
 	{
 		// init vars
 		$path = $this->app->request->get('path', 'string', '');
+		$storage = $this->app->request->get('storage', 'string');
 		$result = false;
-		
-		// if does not exist, create
-		if (!JFolder::exists($path)) $result = JFolder::create($path);
 
-		echo json_encode(compact('result'));
+		// clean the destination path
+		$path = dirname($path) . '/' . $this->app->zlfilesystem->makeSafe(basename($path), 'ascii');
+
+		// init storage
+		switch($storage) {
+			case 's3':
+				$bucket 	= $this->app->request->get('bucket', 'string');
+				$accesskey 	= $this->app->request->get('accesskey', 'string');
+				$secretkey 	= $this->app->zlfw->crypt($this->app->request->get('key', 'string'), 'decrypt');
+
+				// workaround when object is on root
+				$path = preg_replace('/^(\.\/)/', '', $path);
+
+				// workaround to get back the slash
+				$path = $path . '/';
+
+				// construct storage
+				$storage = new ZLStorage('AmazonS3', array('secretkey' => $secretkey, 'accesskey' => $accesskey, 'bucket' => $bucket));
+				break;
+
+			default:
+				$storage = new ZLStorage('Local');
+				break;
+		}
+
+		// proceed
+		$result = $storage->createFolder($path);
+
+		// get any error / warning
+		$errors = array_merge($storage->getErrors(), $storage->getWarnings());
+
+		// get final name
+		$name = basename($path);
+
+		echo json_encode(compact('result', 'errors', 'name'));
 	}
 
 	/*
@@ -439,8 +479,11 @@ class ZluxController extends AppController {
 		// init vars
 		$name = $this->app->request->get('name', 'string', '');
 
-		// clean the name
-		$result = $this->app->zlfw->zlux->validatePathName($name);
+		// convert to ASCII		
+		$result = $this->app->zlfilesystem->makeSafe($name, 'ascii');
+
+		// lowercase the extension
+		$result = JFile::stripExt($result) . '.' . strtolower( JFile::getExt($result) );
 
 		// return result
 		echo json_encode(compact('result'));

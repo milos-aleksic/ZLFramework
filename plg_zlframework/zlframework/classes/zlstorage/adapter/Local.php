@@ -36,6 +36,17 @@ class ZLStorageAdapterLocal extends ZLStorageAdapterBase implements ZLStorageAda
 	}
 
 	/**
+	 * Check if a file exists in the filesystem selected
+	 * 
+	 * @param string $file The filename (or path)
+	 * 
+	 * @return boolean The success of the operation
+	 */
+	public function exists($file) {
+		return JFile::exists($this->app->path->path($file));
+	}
+
+	/**
 	 * Writes a file to the filesystem selected
 	 * 
 	 * @param string $file The filename (or path)
@@ -59,28 +70,32 @@ class ZLStorageAdapterLocal extends ZLStorageAdapterBase implements ZLStorageAda
 	}
 
 	/**
-	 * Deletes an asset from the filesystem selected
-	 * 
-	 * @param string $path The path to the asset
-	 * 
+	 * Creates a folder
+	 *
+ 	 * @param string $path The path to the new object
+	 *
 	 * @return boolean The success of the operation
 	 */
-	public function delete($path)
+	public function createFolder($path)
 	{
 		$result = false;
-		$path = $this->app->path->path('root:' . $path);
+		$path = $this->app->path->path('root:' . dirname($path)) . '/' . basename($path); // workaround as the path does not exist yet
 
-		if (!is_readable($path)) {
-			$this->setError('Permission denied or object not found.');
-			return $result;
-		} else if (is_file($path)) {
-			$result = JFile::delete($path);
-		} else if (is_dir($path)) {
-			$result = JFolder::delete($path);
+		// clean paths if valid
+		$path = $path ? JPath::clean($path) : false;
+
+		if (JFolder::exists($path)) {
+			$this->setError('The folder already exists.');
+			return true;
+		} else {
+			$result = JFolder::create($path);
 		}
 
 		// if something went wrong, report
-		if (!$result) $this->setError('Something went wrong, the task was not performed.');
+		if ($result !== true) {
+			$result = false;
+			$this->setError('Something went wrong, the task was not performed.');
+		}
 
 		return $result;
 	}
@@ -113,20 +128,12 @@ class ZLStorageAdapterLocal extends ZLStorageAdapterBase implements ZLStorageAda
 		}
 
 		// if something went wrong, report
-		if (!$result) $this->setError('Something went wrong, the task was not performed.');
+		if ($result !== true) {
+			$result = false;
+			$this->setError('Something went wrong, the task was not performed.');
+		}
 
 		return $result;
-	}
-
-	/**
-	 * Check if a file exists in the filesystem selected
-	 * 
-	 * @param string $file The filename (or path)
-	 * 
-	 * @return boolean The success of the operation
-	 */
-	public function exists($file) {
-		return JFile::exists($this->app->path->path($file));
 	}
 
 	/**
@@ -161,6 +168,36 @@ class ZLStorageAdapterLocal extends ZLStorageAdapterBase implements ZLStorageAda
 		if (JFile::move($file, $dest)){
 			return $fileName;
 		} else return false;
+	}
+
+	/**
+	 * Deletes an asset from the filesystem selected
+	 * 
+	 * @param string $path The path to the asset
+	 * 
+	 * @return boolean The success of the operation
+	 */
+	public function delete($path)
+	{
+		$result = false;
+		$path = $this->app->path->path('root:' . $path);
+
+		if (!is_readable($path)) {
+			$this->setError('Permission denied or object not found.');
+			return $result;
+		} else if (is_file($path)) {
+			$result = JFile::delete($path);
+		} else if (is_dir($path)) {
+			$result = JFolder::delete($path);
+		}
+
+		// if something went wrong, report
+		if ($result !== true) {
+			$result = false;
+			$this->setError('Something went wrong, the task was not performed.');
+		}
+
+		return $result;
 	}
 
 	/**
