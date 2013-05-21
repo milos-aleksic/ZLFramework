@@ -443,16 +443,11 @@ class ZLModelItem extends ZLModel
 				// merge elements ORs / ANDs
 				$elements_query = '';
 				if ( count( $elements_where['OR'] ) ) {
-					$elements_query .= '(' . implode(' OR ', $elements_where['OR']) . ')';
+					$type_query .= ' AND (' . implode(' OR ', $elements_where['OR']) . ')';
 				}
 
 				if ( count( $elements_where['AND'] ) ) {
-					$elements_query .= '(' . implode(' AND ', $elements_where['AND']) . ')';
-				}
-
-				// append elements query to the type one
-				if ( strlen($elements_query) ) {
-					$type_query .= ' AND (' . $elements_query . ')';
+					$type_query .= ' AND (' . implode(' AND ', $elements_where['AND']) . ')';
 				}
 
 				// save type query
@@ -511,7 +506,7 @@ class ZLModelItem extends ZLModel
 
 		// Multiple choice!
 		if( is_array( $value ) && !$from && !$to) {
-			$wheres[$logic][] = $this->getElementMultipleSearch($id, $value, $mode, $k, $is_select, $logic);
+			$wheres[$logic][] = $this->getElementMultipleSearch($id, $value, $mode, $k, $is_select);
 		} else {
 			// Search ranges!
 			if ($is_range && !$is_date){
@@ -688,10 +683,9 @@ class ZLModelItem extends ZLModel
 	/**
 	 * Get the multiple values search sql
 	 */
-	protected function getElementMultipleSearch($identifier, $values, $mode, $k, $is_select = true, $logic='AND')
+	protected function getElementMultipleSearch($identifier, $values, $mode, $k, $is_select = true)
 	{
 		$el_where = "b$k.element_id = " . $this->_db->Quote($identifier);               
-		$el_where .= " $logic ";
 
 		// lets be sure mode is set
 		$mode = $mode ? $mode : "AND";
@@ -723,7 +717,7 @@ class ZLModelItem extends ZLModel
 			}
 		}
 		
-		$el_where .= "(".implode(" ".$mode. " ", $multiples).")";
+		$el_where .= " AND (".implode(" ".$mode. " ", $multiples).")";
 		
 		return $el_where;
 	}
