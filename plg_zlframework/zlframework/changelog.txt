@@ -1,6 +1,12 @@
 Changelog
 ------------
 
+3.0.14
+ # Fixed Item Model query issue
+ # Recoevered Item Published date filtering
+ # Fixed "Continue Anyway" option when updating
+ # Minor bugs fixed
+
 3.0.13
  ^ Updated Plupload to v1.5.7
  + Item Model Items IDs/Tags filtering, 
