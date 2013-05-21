@@ -724,9 +724,9 @@ class zlfwHelper extends AppHelper
 	
 		$current_lang = '';
 		if ($zoo->joomla->isVersion('1.5')) {
-			$current_lang =& JFactory::getLanguage()->_lang;
+			$current_lang = JFactory::getLanguage()->_lang;
 		} else {
-			$current_lang =& JFactory::getLanguage()->get('tag');
+			$current_lang = JFactory::getLanguage()->get('tag');
 		}
 	
 		if ($url_safe) {
