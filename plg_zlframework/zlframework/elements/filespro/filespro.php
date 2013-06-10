@@ -270,26 +270,32 @@ abstract class ElementFilesPro extends ElementRepeatablePro {
 	{
 		parent::loadAssets();
 		
-		// ui must be loaded first
-		$this->app->document->addStylesheet('libraries:jquery/jquery-ui.custom.css');
-		$this->app->document->addScript('libraries:jquery/jquery-ui.custom.min.js');
+		// // ui must be loaded first
+		// $this->app->document->addStylesheet('libraries:jquery/jquery-ui.custom.css');
+		// $this->app->document->addScript('libraries:jquery/jquery-ui.custom.min.js');
 
-		// workaround for jQuery 1.9 transition
-		$this->app->document->addScript('zlfw:assets/js/jquery.plugins/jquery.migrate.min.js');
+		// // workaround for jQuery 1.9 transition
+		// $this->app->document->addScript('zlfw:assets/js/jquery.plugins/jquery.migrate.min.js');
 
-		// then plupload
-		$this->app->document->addStylesheet('elements:filespro/assets/plupload/css/jquery.ui.plupload.custom.css');
-		$this->app->document->addScript('elements:filespro/assets/plupload/plupload.full.js');
-		$this->app->document->addScript('elements:filespro/assets/plupload/jquery.ui.plupload.js');
-		$this->app->zlfw->pluploadTranslation();
-		$this->app->zlfw->filesproTranslation();
+		// // then plupload
+		// $this->app->document->addStylesheet('elements:filespro/assets/plupload/css/jquery.ui.plupload.custom.css');
+		// $this->app->document->addScript('elements:filespro/assets/plupload/plupload.full.js');
+		// $this->app->document->addScript('elements:filespro/assets/plupload/jquery.ui.plupload.js');
+		// $this->app->zlfw->pluploadTranslation();
+		// $this->app->zlfw->filesproTranslation();
 
-		// and others
-		$this->app->zlfw->loadLibrary('qtip');
-		$this->app->document->addScript('elements:filespro/assets/js/plupload.js');
-		$this->app->document->addStylesheet('elements:filespro/assets/filespro.css');
+		// // and others
+		// $this->app->zlfw->loadLibrary('qtip');
+		// $this->app->document->addScript('elements:filespro/assets/js/plupload.js');
+		// $this->app->document->addStylesheet('elements:filespro/assets/filespro.css');
+		// $this->app->document->addScript('elements:filespro/assets/js/filespro.js');
+		// $this->app->document->addScript('elements:filespro/assets/js/finder.js');
+
+		// load ZLUX assets
+		$this->app->zlfw->zlux->loadFilesManagerAssets();
+
+		// new
 		$this->app->document->addScript('elements:filespro/assets/js/filespro.js');
-		$this->app->document->addScript('elements:filespro/assets/js/finder.js');
 	}
 
 /* -------------------------------------------------------------------------------------------------------------------------------------------------------- FILE MANAGER */

@@ -29,10 +29,12 @@
 		}
 	}
 
-	.zlux-btn-edit {
+	.btn.zlux-btn-edit {
 		margin-bottom: 9px;
 		margin-left: 6px;
 		vertical-align: middle;
+		font-size: 14px;
+		padding: 3px 6px 2px 8px;
 
 		[class^="icon-"],
 		[class*=" icon-"] {
@@ -210,7 +212,7 @@
 		top: 50%;
 		left: 50%;
 		font-size: 80px;
-		margin-left: -40px !important;
+		margin-left: -33px !important;
 		margin-top: -40px !important;
 		z-index: 1;
 		cursor: default;
@@ -295,7 +297,7 @@
 		// items
 		[data-zlux-status="true"] .zlux-object {
 
-			.zlux-x-name a {
+			.zlux-x-name a.zlux-x-name-link {
 				color: #444;
 				cursor: default;
 
@@ -450,8 +452,8 @@
 /* ZLUX Object
 ----------------------------------------------------------------------------------------------------*/
 .zlux-object-tmpl() {
-
 	.zlux-object {
+
 		.column-icon {
 			width: 21px;
 		}
@@ -473,30 +475,36 @@
 			color: @red;
 		}
 
+		// hide/show buttons
 		.zlux-x-remove,
 		.zlux-x-name-edit {
 			visibility: hidden;
 		}
 
+		// &:hover 
 		.zlux-ui-open {
-
 			.zlux-x-remove,
 			.zlux-x-name-edit {
 				visibility: visible;
 			}
 		}
 
-		// name edit
-		i.zlux-x-name-edit {
-			display: inline-block;
-			float: none;
-			font-size: 15px;
-			position: relative;
+		// name
+		.zlux-x-name {
+			max-width: 175px;
 
-			&:before {
-				position: absolute;
-				top: -11px;
-				left: 2px;
+			// name edit
+			i.zlux-x-name-edit {
+				display: inline-block;
+				float: none;
+				font-size: 15px;
+				position: relative;
+
+				&:before {
+					position: absolute;
+					top: -11px;
+					left: 2px;
+				}
 			}
 		}
 

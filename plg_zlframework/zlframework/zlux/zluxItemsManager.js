@@ -10,7 +10,7 @@
 		this.options = $.extend({}, this.options, options);
 		this.events = {};
 	};
-	Plugin.prototype = $.extend(Plugin.prototype, $.zluxManager.prototype, {
+	Plugin.prototype = $.extend(Plugin.prototype, $.fn.zluxManager.prototype, {
 		name: 'zluxItemsManager',
 		options: {
 			"apps": '', // comma separated values
@@ -108,7 +108,7 @@
 				"sDom": "f<'row-fluid'<'span12't>><'row-fluid'<'span12'p>><'row-fluid'<'span12'i>>",
 				"bServerSide": true,
 				"iDisplayLength": 20,
-				"sAjaxSource": $this.options.ajax_url+'&task=ItemsManager',
+				"sAjaxSource": $this.AjaxUrl + '&task=ItemsManager',
 				"fnServerParams": function (aoData) {
 					// determine what filter values to use
 					var apps = $this.filter.apps ? $this.filter.apps : $this.options.apps,
@@ -318,7 +318,7 @@
 		});
 	};
 	// save the plugin for global use
-	$.zluxItemsManager = Plugin;
+	$.fn[Plugin.prototype.name] = Plugin;
 })(jQuery);
 
 
@@ -331,10 +331,10 @@
  * ========================================================== */
 (function ($) {
 	var Plugin = function(options){
-		this.options = $.extend({}, $.zluxItemsManager.prototype.options, this.options, options);
+		this.options = $.extend({}, $.fn.zluxItemsManager.prototype.options, this.options, options);
 		this.events = {};
 	};
-	Plugin.prototype = $.extend(Plugin.prototype, $.zluxItemsManager.prototype, {
+	Plugin.prototype = $.extend(Plugin.prototype, $.fn.zluxItemsManager.prototype, {
 		name: 'zluxDialogItemsManager',
 		options: {
 			"title": 'Items Manager',
@@ -449,7 +449,7 @@
 				input.val(id).trigger('change');
 			});
 
-			// on item select
+			// on item unselect
 			$this.bind("ItemUnselected", function(manager, id, row){
 				// unset item value
 				input.val('').trigger('change');

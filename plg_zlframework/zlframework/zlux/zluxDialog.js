@@ -11,7 +11,7 @@
 		this.options = $.extend({}, this.options, options);
 		this.events = {};
 	};
-	Plugin.prototype = $.extend(Plugin.prototype, $.zluxMain.prototype, {
+	Plugin.prototype = $.extend(Plugin.prototype, $.fn.zluxMain.prototype, {
 		name: 'zluxDialog',
 		options: {
 			width: '300',

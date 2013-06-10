@@ -16,7 +16,9 @@
 		// var for internal events, must be reseted when expanding
 		events: {},
 		// save the Joomla Root url
-		JRoot: location.href.match(/^(.+)administrator\/index\.php.*/i)[1],
+		// JRoot: location.href.match(/^(.+)administrator\/index\.php.*/i)[1],
+		// save the AJAX URL
+		AjaxUrl: location.href.match(/^(.+)administrator\/index\.php.*/i)[1] + 'administrator/index.php?option=com_zoo&controller=zlux&format=raw',
 		initialize: function(target, options) {
 			this.options = $.extend({}, this.options, options);
 			var $this = this;
@@ -155,7 +157,7 @@
 		}
 	});
 	// save the plugin for global use
-	$.zluxMain = Plugin;
+	$.fn[Plugin.prototype.name] = Plugin;
 })(jQuery);
 
 
@@ -171,11 +173,9 @@
 		this.options = $.extend({}, this.options, options);
 		this.events = {};
 	};
-	Plugin.prototype = $.extend(Plugin.prototype, $.zluxMain.prototype, {
+	Plugin.prototype = $.extend(Plugin.prototype, $.fn['zluxMain'].prototype, {
 		name: 'zluxManager',
-		options: {
-			"ajax_url": ''
-		},
+		options: {},
 		events: {},
 		initialize: function(target, options) {
 			this.options = $.extend({}, this.options, options);
@@ -312,7 +312,7 @@
 		});
 	};
 	// save the plugin for global use
-	$.zluxManager = Plugin;
+	$.fn[Plugin.prototype.name] = Plugin;
 })(jQuery);
 
 
@@ -330,8 +330,7 @@
 		options: {
 			msgSaveElement: 'Save Element',
 			item_id: 0,
-			elm_id: '',
-			ajax_url: ''
+			elm_id: ''
 		},
 		initialize: function(element, options) {
 			this.options = $.extend({}, this.options, options);
@@ -346,12 +345,58 @@
 					postData = button.closest('.element').find('input, textarea').serializeArray();
 
 				$.post(
-					$this.options.ajax_url+'&task=saveelement&item_id='+$this.options.item_id+'&elm_id='+$this.options.elm_id, 
+					$this.AjaxUrl + '&task=saveelement&item_id=' + $this.options.item_id + '&elm_id=' + $this.options.elm_id, 
 					postData, function(data) {
 					button.removeClass('btn-working');
 				});
 			}
 			).appendTo(element.find('.btn-toolbar'));
+		}
+	});
+	// Don't touch
+	$.fn[Plugin.prototype.name] = function() {
+		var args   = arguments;
+		var method = args[0] ? args[0] : null;
+		return this.each(function() {
+			var element = $(this);
+			if (Plugin.prototype[method] && element.data(Plugin.prototype.name) && method != 'initialize') {
+				element.data(Plugin.prototype.name)[method].apply(element.data(Plugin.prototype.name), Array.prototype.slice.call(args, 1));
+			} else if (!method || $.isPlainObject(method)) {
+				var plugin = new Plugin();
+				if (Plugin.prototype['initialize']) {
+					plugin.initialize.apply(plugin, $.merge([element], args));
+				}
+				element.data(Plugin.prototype.name, plugin);
+			} else {
+				$.error('Method ' +  method + ' does not exist on jQuery.' + Plugin.name);
+			}
+		});
+	};
+})(jQuery);
+
+/* ===================================================
+ * ZLUX Example
+ * https://zoolanders.com/extensions/zl-framework
+ * ===================================================
+ * Copyright (C) JOOlanders SL 
+ * http://www.gnu.org/licenses/gpl-2.0.html GNU/GPLv2 only
+ * ========================================================== */
+(function ($) {
+	var Plugin = function(options){
+		this.options = $.extend({}, this.options, options);
+		this.events = {};
+	};
+	Plugin.prototype = $.extend(Plugin.prototype, $.fn['zluxMain'].prototype, {
+		name: 'zluxExample',
+		options: {
+			"param": ''
+		},
+		events: {},
+		initialize: function(input, options) {
+			this.options = $.extend({}, $.fn['zluxMain'].prototype.options, this.options, options);
+			var $this = this;
+
+			// code
 		}
 	});
 	// Don't touch

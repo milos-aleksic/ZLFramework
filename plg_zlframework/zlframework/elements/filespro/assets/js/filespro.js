@@ -1,5 +1,101 @@
-(function(d){var c=function(){};d.extend(c.prototype,{name:"ElementFilespro",options:{url:null,flashUrl:null,type:null,fileMode:"files",max_file_size:"1024kb",title:"Files",extensions:"jpg,gif,png,zip,pdf",file_details:{}},initialize:function(a,b){this.options=d.extend({},this.options,b);var e=this,f=e.options;a.delegate("p.add a","click",function(){e.apply(a.find("input."+f.type+"-element"))});e.apply(a.find("input."+f.type+"-element"))},apply:function(a){var b=this,e=b.options;a.each(function(a){if(!d(this).data("initialized")){var c=
-d(this),g=c.closest(".repeatable-element");c.attr("id",e.type+"-element-"+a);b.setOptions(g,c);g.find("input."+e.type+"-subelement").each(function(){b.setOptions(g,d(this))});c.val()||b.resetFileDetails(g.find(".file-details"))}d(this).data("initialized",!0)})},setOptions:function(a,b){var e=this,f=e.options,c=b.parent("div.row").find(".file-details");b.bind("change",function(){e.updatedetails(c)});b.DirectoriesPro({mode:f.fileMode,url:f.url,title:f.title,extensions:f.extensions,max_file_size:f.max_file_size,
-filemanager:f.filemanager});d("<span>").addClass("input-cancel").insertAfter(b).click(function(){b.val("");e.resetFileDetails(c)})},updatedetails:function(a){var b=this,c=b.options,f=a.prevAll("input"),k=a.find(".file-preview"),g=a.find(".file-info"),h=a.find(".fp-found"),j=a.find(".fp-missing");f.val()?(d.ajax({url:c.url,data:{task:"callelement",method:"getfiledetails","args[0]":f.val()},type:"post",datatype:"json",beforeSend:function(){b.resetFileDetails(a);h.show();g.find("div").hide();g.find("div.file-name span").html("").addClass("zl-loaderhoriz").parent().show()},
-success:function(a){a=d.parseJSON(a);a.name&&a.all?(k.html(a.preview),a.name&&g.find(".file-name span").html(a.name).removeClass("zl-loaderhoriz"),a.all&&g.find(".file-properties").html(a.all).show(),h.show(),j.hide()):(h.hide(),j.show())}}),a.show()):a.hide()},bigpreview:function(a){var b=this.options;d("<div>").append(d("<img>").attr("src",b.server+a.val())).dialog({width:785,height:450,resizable:!1,title:a.val()})},resetFileDetails:function(a){a&&(a.find(".fp-found, .fp-missing").hide(),a.find(".file-preview, .file-name span, .file-properties").html(""))}});
-d.fn[c.prototype.name]=function(){var a=arguments,b=a[0]?a[0]:null;return this.each(function(){var e=d(this);if(c.prototype[b]&&e.data(c.prototype.name)&&"initialize"!=b)e.data(c.prototype.name)[b].apply(e.data(c.prototype.name),Array.prototype.slice.call(a,1));else if(!b||d.isPlainObject(b)){var f=new c;c.prototype.initialize&&f.initialize.apply(f,d.merge([e],a));e.data(c.prototype.name,f)}else d.error("Method "+b+" does not exist on jQuery."+c.name)})}})(jQuery);
+/* ===================================================
+ * Files Pro edit script
+ * https://zoolanders.com/extensions/zl-framework
+ * ===================================================
+ * Copyright (C) JOOlanders SL 
+ * http://www.gnu.org/licenses/gpl-2.0.html GNU/GPLv2 only
+ * ========================================================== */
+(function ($) {
+	var Plugin = function(options){
+		this.options = $.extend({}, this.options, options);
+		this.events = {};
+	};
+	Plugin.prototype = $.extend(Plugin.prototype, $.fn['zluxMain'].prototype, {
+		name: 'ElementFilespro',
+		options: {
+			root: '',
+			extensions: '',
+			storage: '',
+			fileMode: ''
+		},
+		events: {},
+		initialize: function(element, options) {
+			this.options = $.extend({}, $.fn['zluxMain'].prototype.options, this.options, options);
+			var $this = this;
+
+			// save the element reference
+			$this.element = element;
+
+			// apply on each new instances
+			element.on('click', 'p.add a', function () {
+				$this.apply($('input.filespro', element));
+			});
+			
+			// first time init
+			$this.apply($('input.filespro', element));
+		},
+		apply: function (inputs){
+			var $this = this;
+				
+			inputs.each(function(index, input)
+			{
+				if (!$(input).data('initialized'))
+				{
+					var id = 'filespro-element-' + index;
+					
+					// set input id and options
+					$(input).attr('id', id);
+					// $this.setOptions($this.element, input);
+					
+					// $this.element.find('input.'+op.type+'-subelement').each(function()
+					// {
+					// 	d.setOptions($this.element, $(this));
+					// });
+
+					// clean preview if no file selected
+					// input.val() || d.resetFileDetails($this.element.find(".file-details")); 
+
+					$(input).zluxDialogFilesManager({
+						root: $this.options.images,
+						extensions: $this.options.extensions,
+						storage: $this.options.storage
+					})
+
+					// on object select event
+					.data('zluxDialogFilesManager').bind("ObjectSelected", function(manager, object){
+
+						// abort if file mode incompatible
+						if ($this.options.fileMode == 'files' && object.data('type') != 'file') return;
+						if ($this.options.fileMode == 'folders' && object.data('type') != 'folder') return;
+
+						// prepare the value
+						var value = manager.oTable.fnSettings().sCurrentPath + '/' + object.data('path');
+
+						// save new value in input
+						$(input).val(value).trigger('change');
+					});
+				
+				} $(input).data('initialized', !0);
+			});
+		},
+	});
+	// Don't touch
+	$.fn[Plugin.prototype.name] = function() {
+		var args   = arguments;
+		var method = args[0] ? args[0] : null;
+		return this.each(function() {
+			var element = $(this);
+			if (Plugin.prototype[method] && element.data(Plugin.prototype.name) && method != 'initialize') {
+				element.data(Plugin.prototype.name)[method].apply(element.data(Plugin.prototype.name), Array.prototype.slice.call(args, 1));
+			} else if (!method || $.isPlainObject(method)) {
+				var plugin = new Plugin();
+				if (Plugin.prototype['initialize']) {
+					plugin.initialize.apply(plugin, $.merge([element], args));
+				}
+				element.data(Plugin.prototype.name, plugin);
+			} else {
+				$.error('Method ' +  method + ' does not exist on jQuery.' + Plugin.name);
+			}
+		});
+	};
+})(jQuery);

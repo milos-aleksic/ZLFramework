@@ -10,7 +10,7 @@
 		this.options = $.extend({}, this.options, options);
 		this.events = {};
 	};
-	Plugin.prototype = $.extend(Plugin.prototype, $.zluxManager.prototype, {
+	Plugin.prototype = $.extend(Plugin.prototype, $.fn.zluxManager.prototype, {
 		name: 'zluxFilesManager',
 		options: {
 			"root": 'images', // relative path to the root
@@ -34,7 +34,7 @@
 		},
 		initDataTable: function(wrapper) {
 			var $this = this,
-				source = $this.options.ajax_url + '&task=getFilesManagerData';
+				source = $this.AjaxUrl + '&task=getFilesManagerData';
 
 			// set table
 			$('<table cellpadding="0" cellspacing="0" border="0" class="table table-striped table-bordered" />')
@@ -49,7 +49,7 @@
 					"sInfoEmpty": "",
 					"sInfo": "Showing _END_ of _TOTAL_ Files"
 				},
-				"sAjaxUrl": $this.options.ajax_url,
+				"sAjaxUrl": $this.AjaxUrl,
 				"sAjaxSource": source,
 				"sServerMethod": "POST",
 				"sStartRoot": $this.cleanPath($this.options.root),
@@ -111,7 +111,7 @@
 					$('.column-name', $object).html('').removeClass('zlux-ui-open').append(
 
 						// render the object content
-						$this.renderObjectDOM('<a href="#">' + aData.name + '</a>', aDetails)
+						$this.renderObjectDOM('<a href="#" class="zlux-x-name-link">' + aData.name + '</a>', aDetails)
 					);
 
 					// append the object edit feature to the name
@@ -167,37 +167,37 @@
 				}
 			})
 
-			// when folder clicked
-			.on('click', 'tbody [data-type=folder] a', function(e) {
-				var row = $(this).closest('tr'),
+			// object Selected event
+			.on('click', '.zlux-object .zlux-x-name a', function(){
+				var object = $(this).closest('.zlux-object').attr('data-checked', 'true'),
 					oSettings = $this.oTable.fnSettings();
 
-				// update paths
-				oSettings.sGoToPath = row.data('path');
+				if (object.attr('data-zlux-object-status') != 'true') {
+					object.attr('data-zlux-object-status', 'true');
 
-				$this.oTable.fnReloadAjax(oSettings.sAjaxSource);
-				return false;
-			})
+					// remove selected status from siblings
+					object.siblings().removeAttr('data-zlux-object-status');
 
-			// select file event
-			.on('click', 'tbody [data-type=file] a', function(){
+					// if folder
+					if (object.data('type') == 'folder') {
+						$this.oTable.fnSettings();
 
-				var row = $(this).closest('tr').attr('data-checked', 'true'),
-					col = $(this).closest('td'),
-					oSettings = $this.oTable.fnSettings();
-					
-				// if input
-				// if ($this.target[0].tagName == 'INPUT'){
-				// 	row.siblings('[data-checked]').removeAttr('data-checked');
-				// 	var value = oSettings.sCurrentPath+'/'+row.data('path')
-				// 	$this.target.val(value).trigger('change');
-				// } else {}
+						// update go to path
+						oSettings.sGoToPath = object.data('path');
+
+						// reload with new path
+						$this.oTable.fnReloadAjax(oSettings.sAjaxSource);
+					}
+
+					// trigger event
+					$this.trigger("ObjectSelected", object);
+				}
 				
 				return false;
 			})
 
-			// remove file event
-			.on('click', '.zlux-x-remove', function(){
+			// Object Removed event
+			.on('click', '.zlux-object .zlux-x-remove', function(){
 				var $object = $(this).closest('tr.zlux-object'),
 					TD = $('td', $object);
 
@@ -228,7 +228,7 @@
 			// create cache object
 			oSettings.aAjaxDataCache = oSettings.aAjaxDataCache ? oSettings.aAjaxDataCache : [];
 
-			// implelment deferred cache system
+			// implelment deferred cache system, should we?
 			// if ( !$this.cachedScriptPromises[ path ] ) {
 			// 	$this.cachedScriptPromises[ path ] = $.Deferred(function( defer ) {
 			// 		$.getScript( path ).then( defer.resolve, defer.reject );
@@ -385,7 +385,7 @@
 			return $.Deferred(function( defer )
 			{
 				$.ajax({
-					"url": $this.options.ajax_url + "&task=deleteObject",
+					"url": $this.AjaxUrl + "&task=deleteObject",
 					"data": aoData,
 					"dataType": "json",
 					"type": "post"
@@ -443,7 +443,7 @@
 			return $.Deferred(function( defer )
 			{
 				$.ajax({
-					"url": $this.options.ajax_url + "&task=moveObject",
+					"url": $this.AjaxUrl + "&task=moveObject",
 					"data": aoData,
 					"dataType": "json",
 					"type": "post"
@@ -492,7 +492,7 @@
 			return $.Deferred(function( defer )
 			{
 				$.ajax({
-					"url": $this.options.ajax_url + "&task=newFolder",
+					"url": $this.AjaxUrl + "&task=newFolder",
 					"data": aoData,
 					"dataType": "json",
 					"type": "post"
@@ -600,7 +600,7 @@
 		});
 	};
 	// save the plugin for global use
-	$.zluxFilesManager = Plugin;
+	$.fn[Plugin.prototype.name] = Plugin;
 })(jQuery);
 
 
@@ -616,7 +616,7 @@
 		this.options = $.extend({}, this.options, options);
 		this.events = {};
 	};
-	Plugin.prototype = $.extend(Plugin.prototype, $.zluxFilesManager.prototype, {
+	Plugin.prototype = $.extend(Plugin.prototype, $.fn.zluxFilesManager.prototype, {
 		name: 'zluxDialogFilesManager',
 		options: {
 			"title": 'Files Manager',
@@ -624,8 +624,11 @@
 		},
 		events: {},
 		initialize: function(input, options) {
-			this.options = $.extend({}, $.zluxFilesManager.prototype.options, this.options, options);
+			this.options = $.extend({}, $.fn.zluxFilesManager.prototype.options, this.options, options);
 			var $this = this;
+
+			// is allways an input?
+			// if ($this.target[0].tagName == 'INPUT')
 
 			// set main wrapper arount the input
 			$this.wrapper = input.wrap($('<div class="zl-bootstrap" />'));
@@ -720,6 +723,14 @@
 
 				$this.pushMessageToObject($object, msg);
 			})
+
+			// on object select example
+			// .bind("ObjectSelected", function(manager, object){
+				// var value = $this.oTable.fnSettings().sCurrentPath + '/' + object.data('path');
+
+				// save new value in input
+				// input.val(value).trigger('change');
+			// });
 		},
 		/**
 		 * init the Main Dialog Toolbar
@@ -868,8 +879,7 @@
 			$this.zluxdialog.newSubToolbar('newfolder', 'main');
 
 			// set upload engine
-			$this.zluxupload = new $.zluxUpload({
-				url: $this.options.ajax_url,
+			$this.zluxupload = new $.fn.zluxUpload({
 				path: 'images',
 				wrapper: $this.zluxdialog.content,
 				storage: $this.options.storage,
@@ -1056,10 +1066,9 @@
 		this.options = $.extend({}, this.options, options);
 		this.events = {};
 	};
-	Plugin.prototype = $.extend(Plugin.prototype, $.zluxMain.prototype, {
+	Plugin.prototype = $.extend(Plugin.prototype, $.fn.zluxMain.prototype, {
 		name: 'zluxUpload',
 		options: {
-			url: null,
 			extensions: null,
 			path: null,
 			fileMode: 'files',
@@ -1165,7 +1174,7 @@
 				browse_button: $('.zlux-upload-browse', $this.upload)[0],
 				drop_element: $this.dropzone[0], 
 				max_file_size: '1mb',
-				url: $this.options.url + '&task=upload',
+				url: $this.AjaxUrl + '&task=upload',
 
 				// flash runtime settings
 				flash_swf_url : $this.JRoot + 'media/zoo/applications/docs/elements/contentarea/assets/plupload/Moxie.swf'
@@ -1448,7 +1457,7 @@
 
 				// validate file name
 				$.ajax({
-					"url": $this.options.url + '&task=validateObjectName',
+					"url": $this.AjaxUrl + '&task=validateObjectName',
 					"type": 'post',
 					"data":{
 						name: file.name
@@ -1721,7 +1730,7 @@
 		}
 	});
 	// save the plugin for global use
-	$.zluxUpload = Plugin;
+	$.fn[Plugin.prototype.name] = Plugin;
 })(jQuery);
 
 
