@@ -668,11 +668,13 @@ abstract class ElementFilesPro extends ElementRepeatablePro {
 		$pattern = array(
 			'/\[userid\]/', '/\[username\]/', '/\[usertype\]/',
 			'/\[zooapp\]/', '/\[zooprimarycat\]/', '/\[zooprimarycatid\]/',
+			'/\[zooitemtype\]/',
 			'/\[day\]/', '/\[month\]/', '/\[year\]/'
 		);
 		$replace = array(
 			$user->id, $user->username, $usertype,
 			strtolower($item->getApplication()->name), ($item->getPrimaryCategory() ? $item->getPrimaryCategory()->alias : 'none'), $item->getPrimaryCategoryId(),
+			$this->_item->type,
 			date('d'), date('m'), date('Y')
 		);
 		
