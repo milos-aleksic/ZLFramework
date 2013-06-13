@@ -39,45 +39,59 @@
 				
 			inputs.each(function(index, input)
 			{
+				var $input = $(input);
+
 				if (!$(input).data('initialized'))
 				{
 					var id = 'filespro-element-' + index;
 					
-					// set input id and options
-					$(input).attr('id', id);
-					// $this.setOptions($this.element, input);
-					
-					// $this.element.find('input.'+op.type+'-subelement').each(function()
-					// {
-					// 	d.setOptions($this.element, $(this));
-					// });
+					// set input id
+					$input.attr('id', id);
 
-					// clean preview if no file selected
-					// input.val() || d.resetFileDetails($this.element.find(".file-details")); 
+					// set main wrapper arount the input
+					$this.wrapper = $input.closest('.row').addClass('zl-bootstrap');
 
-					$(input).zluxDialogFilesManager({
+					// init preview engine
+					$this.zluxpreview = $.fn.zluxPreview();
+
+					// init the file manager
+					$input.zluxDialogFilesManager({
 						root: $this.options.images,
 						extensions: $this.options.extensions,
 						storage: $this.options.storage
 					})
 
 					// on object select event
-					.data('zluxDialogFilesManager').bind("ObjectSelected", function(manager, object){
+					.data('zluxDialogFilesManager').bind("ObjectSelected", function(manager, $object){
 
 						// abort if file mode incompatible
-						if ($this.options.fileMode == 'files' && object.data('type') != 'file') return;
-						if ($this.options.fileMode == 'folders' && object.data('type') != 'folder') return;
+						if ($this.options.fileMode == 'files' && $object.data.type != 'file') return;
+						if ($this.options.fileMode == 'folders' && $object.data.type != 'folder') return;
 
 						// prepare the value
-						var value = manager.oTable.fnSettings().sCurrentPath + '/' + object.data('path');
+						var value = manager.oTable.fnSettings().sCurrentPath + '/' + $object.data.path;
 
 						// save new value in input
-						$(input).val(value).trigger('change');
+						$input.val(value).trigger('change');
+
+						// update preview
+						$('.zlux-preview', $this.wrapper).remove();
+						$this.wrapper.append($this.zluxpreview.renderPreviewDOM($object.data));
+					});
+
+					// set the initial preview
+					var oData = $('span.zlux-x-filedata', $this.wrapper).data('zlux-data');
+					$this.wrapper.append($this.zluxpreview.renderPreviewDOM(oData));
+
+					// create cancel button
+					$('<i class="icon-remove zlux-x-cancel-btn" />').insertAfter($input).on('click', function () {
+						$input.val('');
+						$('.zlux-preview', $this.wrapper).remove();
 					});
 				
-				} $(input).data('initialized', !0);
+				} $input.data('initialized', !0);
 			});
-		},
+		}
 	});
 	// Don't touch
 	$.fn[Plugin.prototype.name] = function() {

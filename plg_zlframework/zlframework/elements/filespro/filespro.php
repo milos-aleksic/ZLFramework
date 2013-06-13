@@ -41,13 +41,6 @@ abstract class ElementFilesPro extends ElementRepeatablePro {
 		
 		// set joomla file path
 		$this->_joomla_file_path = $params->get('file_path') ? $params->get('file_path') : 'images';
-		
-		// set callbacks
-		$this->registerCallback('uploadFiles');
-		$this->registerCallback('getfiledetails');
-		$this->registerCallback('files');
-		$this->registerCallback('delete');
-		$this->registerCallback('newfolder');
 	}
 
 	/*
@@ -269,46 +262,18 @@ abstract class ElementFilesPro extends ElementRepeatablePro {
 	public function loadAssets()
 	{
 		parent::loadAssets();
-		
-		// // ui must be loaded first
-		// $this->app->document->addStylesheet('libraries:jquery/jquery-ui.custom.css');
-		// $this->app->document->addScript('libraries:jquery/jquery-ui.custom.min.js');
-
-		// // workaround for jQuery 1.9 transition
-		// $this->app->document->addScript('zlfw:assets/js/jquery.plugins/jquery.migrate.min.js');
-
-		// // then plupload
-		// $this->app->document->addStylesheet('elements:filespro/assets/plupload/css/jquery.ui.plupload.custom.css');
-		// $this->app->document->addScript('elements:filespro/assets/plupload/plupload.full.js');
-		// $this->app->document->addScript('elements:filespro/assets/plupload/jquery.ui.plupload.js');
-		// $this->app->zlfw->pluploadTranslation();
-		// $this->app->zlfw->filesproTranslation();
-
-		// // and others
-		// $this->app->zlfw->loadLibrary('qtip');
-		// $this->app->document->addScript('elements:filespro/assets/js/plupload.js');
-		// $this->app->document->addStylesheet('elements:filespro/assets/filespro.css');
-		// $this->app->document->addScript('elements:filespro/assets/js/filespro.js');
-		// $this->app->document->addScript('elements:filespro/assets/js/finder.js');
 
 		// load ZLUX assets
 		$this->app->zlfw->zlux->loadFilesManagerAssets();
 
-		// new
-		$this->app->document->addScript('elements:filespro/assets/js/filespro.js');
+		// load the FilesPro js
+		$this->app->document->addScript('elements:filespro/assets/js/filespro.min.js');
 	}
 
 /* -------------------------------------------------------------------------------------------------------------------------------------------------------- FILE MANAGER */
 
 	/*
-		Function: getPreview
-			Return file preview
-			
-		Parameters:
-			$source
-			
-		Returns:
-			string
+		DEPRICATED since 3.0.15
 	*/
 	public function getPreview($source = null) 
 	{
@@ -364,11 +329,10 @@ abstract class ElementFilesPro extends ElementRepeatablePro {
 		if (strpos($source, 'http') === 0) // external source
 		{
 			$data = array(
-				'source'	=> 'file',
+				'type'		=> 'file',
 				'name'		=> JFile::stripExt(basename($source)),
-				'preview'	=> $this->getPreview($source),
 				'ext'		=> strtolower($this->app->zlfilesystem->getExtension($source)),
-				'size'		=> $this->getSourceSize($source)
+				'size'		=> array('display' => $this->getSourceSize($source))
 			);
 		} 
 		else // local source
@@ -377,20 +341,18 @@ abstract class ElementFilesPro extends ElementRepeatablePro {
 			if (is_readable($sourcepath) && is_file($sourcepath)){
 				$imageinfo = getimagesize($sourcepath);
 				$data = array(
-					'source'	=> 'file',
+					'type'		=> 'file',
 					'name'		=> JFile::stripExt(basename($source)),
-					'preview'	=> $this->getPreview($source),
 					'ext'		=> strtolower($this->app->zlfilesystem->getExtension($source)),
-					'size'		=> $this->getSourceSize($source),
+					'size'		=> array('display' => $this->getSourceSize($source)),
 					'res'		=> $imageinfo ? $imageinfo[0].'x'.$imageinfo[1].'px' : ''
 				);
 			} else if (is_readable($sourcepath) && is_dir($sourcepath)){
 				$tSize = $this->getSourceSize($source);
 				$data = array(
-					'source'	=> 'folder',
+					'type'		=> 'folder',
 					'name'		=> ($tSize ? basename($source) : JText::_('PLG_ZLFRAMEWORK_FLP_NO_VALID_FILES')),
-					'preview'	=> $this->getPreview($source),
-					'size'		=> $tSize,
+					'size'		=> array('display' => $tSize),
 					'files'		=> count($this->app->path->files('root:'.$source, false, '/^.*('.$this->getLegalExtensions().')$/i'))
 				);
 			}
@@ -407,9 +369,8 @@ abstract class ElementFilesPro extends ElementRepeatablePro {
 		$data = array(
 			'type'		=> $this->getElementType(),
 			'name'		=> JFile::stripExt(basename($file)),
-			'preview'	=> $this->getPreview($this->_S3()->getAuthenticatedURL($bucket, $file, 3600)),
 			'ext'		=> strtolower($this->app->zlfilesystem->getExtension($file)),
-			'size'		=> $this->app->zlfilesystem->formatFilesize($this->app->zlfilesystem->returnBytes($object['size']))
+			'size'		=> array('display' => $this->app->zlfilesystem->formatFilesize($this->app->zlfilesystem->returnBytes($object['size'])))
 		);	
 		
 		return $data;
@@ -428,58 +389,8 @@ abstract class ElementFilesPro extends ElementRepeatablePro {
 	public function getFileDetailsDom($file=null)
 	{
 		$file = $file === null ? $this->get('file') : $file;
-		$fd = $this->app->data->create($this->getFileDetails($file, false));
-		
-		return '<div class="file-details">'
-					.'<div class="fp-found" style="display: '.($fd->get('name') ? 'block' : 'none').'">'
-						.'<div class="file-preview">'.$fd->get('preview').'</div>'
-						.'<div class="file-info">'
-							.'<div class="file-name"><span>'.$fd->get('name').'</span></div>'
-							.'<div class="file-properties">'.$fd->get('all').'</div>'
-						.'</div>'
-					.'</div>'
-					.'<div class="fp-missing" style="display: '.(!strlen($file) || $fd->get('name') ? 'none' : 'block').'">'.JText::_('PLG_ZLFRAMEWORK_FLP_MISSING_FILE').'</div>'
-				.'</div>';
-	}
-	
-	/*
-		Function: delete
-			Delete Folder or File
-			
-		Parameters:
-			$path: file or folder relative path
-	*/
-	public function delete()
-	{
-		$path = $this->app->request->get('path', 'string', ''); // selected path to delete
-		$fullpath = JPATH_ROOT . '/' . $this->getDirectory() . '/' . ($path ? $path : '');
-	
-		if (is_readable($fullpath) && is_file($fullpath))
-			JFile::delete($fullpath);
-		else if (is_readable($fullpath) && is_dir($fullpath))
-			JFolder::delete($fullpath);
 
-		echo json_encode(array('result' => true));
-	}
-	
-	/*
-		Function: newfolder
-			Create new Folder
-			
-		Parameters:
-			$path: parent folder path
-	*/
-	public function newfolder()
-	{
-		$path	   = $this->app->request->get('path', 'string', ''); // selected path
-		$newfolder = $this->app->request->get('newfolder', 'string', ''); // new folder name
-		$fullpath  = JPATH_ROOT . '/' . $this->getDirectory() . '/' . ($path ? $path : '').'/'.$newfolder;		
-		
-		// if does not exist, create
-		if (!JFolder::exists($fullpath))
-			JFolder::create($fullpath);
-
-		echo json_encode(array('result' => true));
+		return "<span class=\"zlux-x-filedata\" data-zlux-data='" . json_encode($this->getFileDetails($file, false)) . "'></span>";
 	}
 
 	/*
@@ -541,81 +452,6 @@ abstract class ElementFilesPro extends ElementRepeatablePro {
 		
 		return ($size ? $this->app->zlfilesystem->formatFilesize($size) : 0);
 	}
-
-	/*
-		Function: files
-			Get directory/file list JSON formatted
-
-		Returns:
-			Void
-	*/
-	public function files()
-	{
-		if ($this->config->find('files._s3', 0)) return $this->filesFromS3();
-		else return $this->filesFromDirectory();
-	}
-	
-	protected function filesFromDirectory() {
-		$tree = array();
-		$path = trim($this->app->request->get('path', 'string'), '/');
-		$path = empty($path) ? '' : '/'.$path;
-		foreach ($this->app->path->dirs('root:'.$this->getDirectory().$path) as $dir) {
-			$name = basename($dir); $name = (strlen($name) > 30) ? substr($name, 0,30).'...' : $name; // limit name length
-			$tree[] = array('name' => $name, 'path' => $path.'/'.$dir, 'type' => 'folder', 'val' => $this->getDirectory().$path.'/'.$dir);
-		}
-		foreach ($this->app->path->files('root:'.$this->getDirectory().$path, false, '/^.*('.$this->getLegalExtensions().')$/i') as $file) {
-			$name = basename($file); $name = (strlen($name) > 30) ? substr($name, 0,30).'...' : $name; // limit name length
-			$tree[] = array('name' => $name, 'path' => $path.'/'.$file, 'type' => 'file', 'val' => $this->getDirectory().$path.'/'.$file);
-		}
-		
-		return json_encode($tree);
-	}
-
-	protected function filesFromS3() {
-	
-		$s3 = $this->_S3();
-	
-		if ($s3){
-		
-			$awsbucket = trim($this->config->find('files._s3bucket'));
-			$req_type  = $this->app->request->get('req_type', 'string', 0);
-			$folders = $files = array();
-
-			$path   = $req_type == 'init' ? $this->getDirectory(true) : $this->app->request->get('path', 'string', '');
-			$prefix = trim($path, '/');
-			
-			// get all objects and filter by folder/file
-			$objects = $s3->getBucket($awsbucket, $prefix);
-			if (count($objects) && $req_type != 'file') foreach ($objects as $obj) {
-				$name		  = $obj['name'];
-				$last_car 	  = substr($name, -1);
-				$child		  = substr($name, strlen($prefix)+1);
-				$count_folder = substr_count($child, '/');
-				
-				// filter current folder and subfolders objects
-				if ($name == $prefix.'/' || $count_folder >= 2 || ($count_folder >= 1 && $last_car != '/')) continue;
-			
-				if ($obj['size'] == 0 && $last_car == '/') {
-					$folders[] = array('name' => basename($name), 'path' => $name, 'type' => 'folder', 'val' => $name);
-				} else {
-					// continue if no regex filter match
-					if (!preg_match('/^.*('.$this->getLegalExtensions().')$/i', $name)) continue;
-					$files[]   = array('name' => basename($name), 'path' => $name, 'type' => 'file', 'val' => $name);
-				}
-			}
-			else if ($req_type == 'init')
-			{
-				return json_encode(array('msg' => JText::_('PLG_ZLFRAMEWORK_FLS_S3_NO_DATA')));
-			}
-			
-			return json_encode(array_merge($folders, $files));
-			
-
-		} else {
-			return json_encode(array('msg' => JText::_('PLG_ZLFRAMEWORK_FLS_S3_ACCES_FAIL')));
-		}
-	}
-	
 	
 	/*
 	 * Return the full directory path
@@ -700,100 +536,6 @@ abstract class ElementFilesPro extends ElementRepeatablePro {
 		}
 		
 		return $root;
-	}
-	
-	/**
-	 * Original Credits:
-	 * upload.php
-	 *
-	 * Copyright 2009, Moxiecode Systems AB
-	 * Released under GPL License.
-	 *
-	 * License: http://www.plupload.com/license
-	 * Contributing: http://www.plupload.com/contributing
-	 * 
-	 * Adapted to ZOO (ZOOlanders.com)
-	 * Copyright 2011, ZOOlanders.com
-	 */
-	public function uploadFiles()
-	{	
-		// get filename and make itwebsafe
-		$fileName = $this->app->zlfilesystem->makeSafe(JRequest::getVar("name", ''), 'ascii');
-
-		// init vars
-		$path 		= $this->app->request->get('path', 'string', ''); // selected subfolder
-		$chunk 		= JRequest::getVar("chunk", 0);
-		$chunks 	= JRequest::getVar("chunks", 0);
-		$ext 		= strtolower(JFile::getExt($fileName));
-		$basename 	= substr($fileName, 0, strrpos($fileName, '.'));
-		$targetDir 	= JPATH_ROOT.'/'.$this->getDirectory().(isset($path) ? '/'.$path : '');
-
-		// construct filename
-		$fileName = "{$basename}.{$ext}";
-
-		// Make sure the fileName is unique but only if chunking is disabled
-		if ($chunks < 2 && JFile::exists("$targetDir/$fileName")) {
-			$count = 1;
-			while (JFile::exists("{$targetDir}/{$basename}_{$count}.{$ext}"))
-				$count++;
-		
-			$fileName = "{$basename}_{$count}.{$ext}";
-		}
-
-		// Create target dir
-		if (!JFolder::exists($targetDir))
-			JFolder::create($targetDir);
-		
-		// Look for the content type header
-		if (isset($_SERVER["HTTP_CONTENT_TYPE"]))
-			$contentType = $_SERVER["HTTP_CONTENT_TYPE"];
-		
-		if (isset($_SERVER["CONTENT_TYPE"]))
-			$contentType = $_SERVER["CONTENT_TYPE"];
-		
-		// Handle non multipart uploads older WebKit versions didn't support multipart in HTML5
-		if (strpos($contentType, "multipart") !== false) {
-			if (isset($_FILES['file']['tmp_name']) && is_uploaded_file($_FILES['file']['tmp_name'])) {
-				// Open temp file
-				$out = fopen($targetDir . DIRECTORY_SEPARATOR . $fileName, $chunk == 0 ? "wb" : "ab");
-				if ($out) {
-					// Read binary input stream and append it to temp file
-					$in = fopen($_FILES['file']['tmp_name'], "rb");
-		
-					if ($in) {
-						while ($buff = fread($in, 4096))
-							fwrite($out, $buff);
-					} else
-						die('{"jsonrpc" : "2.0", "error" : {"code": 101, "message": "Failed to open input stream."}, "id" : "id"}');
-					fclose($in);
-					fclose($out);
-					@unlink($_FILES['file']['tmp_name']);
-				} else
-					die('{"jsonrpc" : "2.0", "error" : {"code": 102, "message": "Failed to open output stream."}, "id" : "id"}');
-			} else
-				die('{"jsonrpc" : "2.0", "error" : {"code": 103, "message": "Failed to move uploaded file."}, "id" : "id"}');
-		} else {
-			// Open temp file
-			$out = fopen($targetDir . DIRECTORY_SEPARATOR . $fileName, $chunk == 0 ? "wb" : "ab");
-			if ($out) {
-				// Read binary input stream and append it to temp file
-				$in = fopen("php://input", "rb");
-		
-				if ($in) {
-					while ($buff = fread($in, 4096))
-						fwrite($out, $buff);
-				} else
-					die('{"jsonrpc" : "2.0", "error" : {"code": 101, "message": "Failed to open input stream."}, "id" : "id"}');
-		
-				fclose($in);
-				fclose($out);
-			} else
-				die('{"jsonrpc" : "2.0", "error" : {"code": 102, "message": "Failed to open output stream."}, "id" : "id"}');
-		}
-		
-		// Return JSON-RPC response
-		die('{"jsonrpc" : "2.0", "result" : null, "id" : "id"}');
-		
 	}
 	
 /* -------------------------------------------------------------------------------------------------------------------------------------------------------- SUBMISSIONS */
