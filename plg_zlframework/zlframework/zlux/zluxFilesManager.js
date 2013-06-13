@@ -96,26 +96,23 @@
 					}
 				},
 				"fnRowCallback": function( nRow, aData, iDisplayIndex, iDisplayIndexFull ) {
-					var $object = $(nRow).addClass('zlux-object');
+					var $object = {
+						dom: $(nRow).addClass('zlux-object'),
+						data: aData
+					};
 
-					// set the entry type, folder or file
-					$object.attr('data-type', aData.type);
-
-					// prepare the details
-					var aDetails = [];
-					$.each(aData.details, function(name, val){
-						aDetails.push({'name': name, 'value': val});
-					})
+					// set the object type
+					$object.dom.attr('data-type', aData.type);
 
 					// reset and append the object data
-					$('.column-name', $object).html('').removeClass('zlux-ui-open').append(
+					$('.column-name', $object.dom).html('').removeClass('zlux-ui-open').append(
 
 						// render the object content
-						$this.renderObjectDOM('<a href="#" class="zlux-x-name-link">' + aData.name + '</a>', aDetails)
+						$this.renderObjectDOM($object)
 					);
 
 					// append the object edit feature to the name
-					$('.zlux-x-name', $object).append(
+					$('.zlux-x-name', $object.dom).append(
 						'<i class="zlux-x-name-edit icon-edit-sign" />'
 					)
 				},
@@ -189,8 +186,13 @@
 						$this.oTable.fnReloadAjax(oSettings.sAjaxSource);
 					}
 
+					$object = {
+						dom: object,
+						data: $this.oTable.fnGetData( object[0] )
+					};
+
 					// trigger event
-					$this.trigger("ObjectSelected", object);
+					$this.trigger("ObjectSelected", $object);
 				}
 				
 				return false;
@@ -630,8 +632,8 @@
 			// is allways an input?
 			// if ($this.target[0].tagName == 'INPUT')
 
-			// set main wrapper arount the input
-			$this.wrapper = input.wrap($('<div class="zl-bootstrap" />'));
+			// // set main wrapper arount the input
+			// $this.wrapper = input.wrap($('<div class="zl-bootstrap" />')).parent();
 
 			// set the trigger button after the input
 			$this.dialogTrigger = $('<a title="'+$this.options.title+'" class="btn btn-mini zlux-btn-edit" href="#"><i class="icon-edit"></i></a>')
@@ -646,7 +648,6 @@
 				// avoid default
 				return false;
 			})
-
 
 			// set the dialog options
 			$this.zluxdialog = $.fn.zluxDialog({
@@ -909,7 +910,7 @@
 					$('<td class="column-icon" />').append('<i class="icon-file-alt" />'),
 
 					$('<td class="column-name" />').append(
-						$this.renderObjectDOM(file.name, aDetails)
+						$this.renderObjectDOM(file.file, aDetails)
 					)
 				)
 
@@ -1742,34 +1743,70 @@
  * http://www.gnu.org/licenses/gpl-2.0.html GNU/GPLv2 only
  * ========================================================== */
 (function ($) {
-	var Plugin = function(){};
-	Plugin.prototype = $.extend(Plugin.prototype, {
-		name: 'zluxFilesPreview',
+	var Plugin = function(options){
+		this.options = $.extend({}, this.options, options);
+		this.events = {};
+	};
+	Plugin.prototype = $.extend(Plugin.prototype, $.fn.zluxMain.prototype, {
+		name: 'zluxPreview',
 		options: {
 		},
-		initialize: function(target, options) {
+		events: {},
+		initialize: function(input, options) {
 			this.options = $.extend({}, this.options, options);
 			var $this = this;
+
+			// save the deferred
+			$this.creatingDialog = $.Deferred();
+
+			// return a promise events attached to current object
+			// in order to allow allready start adding events
+			return $this.creatingDialog.promise($this);
+		},
+		renderPreviewDOM: function(oData) {
+			var $this = this,
+				sThumb,
+				aDetails;
+
+			// prepare the details
+			if (oData.type == 'folder') {
+				sThumb = '<span class="zlux-x-folder"></span>';
+				aDetails = [
+					{name: 'name', value: oData.name}
+				]
+			} else {
+				sThumb = '<span class="zlux-x-filetype">' + oData.ext + '</span>';
+				aDetails = [
+					{name: 'name', value: oData.name},
+					{name: 'size', value: oData.size.display}
+				]
+			}
+
+			var sDetails = '';
+			$.each(aDetails, function(i, detail){
+				sDetails += '<li>' + detail.value + '</li>';
+			})
+				
+			// set and return the DOM
+			return $(
+				'<div class="zlux-preview">' +
+					// thumbnail
+					'<div class="zlux-x-thumbnail">' +
+						sThumb +
+					'</div>' +
+
+					// details
+					'<ul class="zlux-x-details unstyled">' + sDetails + '</ul>' +
+				'</div>'
+			)
 		}
 	});
 	// Don't touch
 	$.fn[Plugin.prototype.name] = function() {
-		if (this.data(Plugin.prototype.name)) return; // standart check to avoid duplicate inits
 		var args   = arguments;
-		var method = args[0] ? args[0] : null;
-		return this.each(function() {
-			var element = $(this);
-			if (Plugin.prototype[method] && element.data(Plugin.prototype.name) && method != 'initialize') {
-				element.data(Plugin.prototype.name)[method].apply(element.data(Plugin.prototype.name), Array.prototype.slice.call(args, 1));
-			} else if (!method || $.isPlainObject(method)) {
-				var plugin = new Plugin();
-				if (Plugin.prototype['initialize']) {
-					plugin.initialize.apply(plugin, $.merge([element], args));
-				}
-				element.data(Plugin.prototype.name, plugin);
-			} else {
-				$.error('Method ' +  method + ' does not exist on jQuery.' + Plugin.name);
-			}
-		});
+		var plugin = new Plugin();
+		if (Plugin.prototype['initialize']) {
+			return plugin.initialize.apply(plugin, args);
+		}
 	};
 })(jQuery);

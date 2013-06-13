@@ -32,7 +32,6 @@
 	.btn.zlux-btn-edit {
 		margin-bottom: 9px;
 		margin-left: 6px;
-		vertical-align: middle;
 		font-size: 14px;
 		padding: 3px 6px 2px 8px;
 
@@ -45,6 +44,16 @@
 	// make a label act as an link
 	.label-link {
 		cursor: pointer;
+	}
+
+
+	// Input Cancel button
+	.zlux-x-cancel-btn {
+		cursor: pointer;
+		font-size: 13px;
+		display: inline-block !important;
+		margin: 8px 13px 0 -21px !important;
+		vertical-align: top !important;
 	}
 }
 
@@ -284,6 +293,13 @@
 			}
 		}
 	}
+}
+
+
+/* ZLUX Preview
+----------------------------------------------------------------------------------------------------*/
+.zlux-preview {
+	
 }
 
 
@@ -549,8 +565,6 @@
 
 /* LESS Mixtins
 ----------------------------------------------------------------------------------------------------*/
-
-// .dataTables_info {}
 
 // dialog
 .zlux-manager-dialog-tmpl(){
@@ -831,6 +845,50 @@
 		}
 	}
 }
+
+
+/* ZLUX Preview
+----------------------------------------------------------------------------------------------------*/
+.zlux-preview {
+	overflow: hidden;
+
+	// thumbnail
+	.zlux-x-thumbnail {
+		overflow: hidden;
+		height: 95px;
+		width: 130px;
+		float: left;
+		text-align: center;
+
+		.zlux-x-filetype,
+		.zlux-x-folder {
+			background: url(assets/img/zlux_sprite.png) no-repeat scroll 0 0 transparent;
+			display: inline-block;
+			height: 91px;
+			width: 81px;
+			margin: 0;
+		}
+
+		.zlux-x-filetype {
+			font-size: 15px;
+			line-height: 111px;
+			text-align: left;
+			text-indent: 13px;
+			color: white;
+		}
+
+		.zlux-x-folder {
+			background-position: -86px 0;
+			width: 100px;
+		}
+	}
+
+	// details
+	.zlux-x-details {
+		margin-top: 30px;
+	}
+}
+
 
 
 /* ZLUX Scroller based on NanoScroller.js

@@ -173,7 +173,7 @@
 		this.options = $.extend({}, this.options, options);
 		this.events = {};
 	};
-	Plugin.prototype = $.extend(Plugin.prototype, $.fn['zluxMain'].prototype, {
+	Plugin.prototype = $.extend(Plugin.prototype, $.fn.zluxMain.prototype, {
 		name: 'zluxManager',
 		options: {},
 		events: {},
@@ -184,8 +184,28 @@
 		/**
 		 * Render the Object content
 		 */
-		renderObjectDOM: function(sName, aDetails) {
-			var $this = this;
+		renderObjectDOM: function($object) {
+			var $this = this,
+				sName,
+				aDetails;
+
+			// set the details
+			if ($object.data.type == 'folder') {
+				sName = $object.data.folder;
+
+				aDetails = [
+					{name: 'Name', value: $object.data.name}
+				]
+
+			} else { // file
+				sName = $object.data.file;
+
+				aDetails = [
+					{name: 'Name', value: $object.data.name},
+					{name: 'Type', value: $object.data.content_type},
+					{name: 'Size', value: $object.data.size.display}
+				]
+			}
 
 			// prepare the details
 			var sDetails = '';
@@ -202,7 +222,7 @@
 				'</div>' +
 
 				// name
-				'<div class="zlux-x-name">' + sName + '</div>' +
+				'<div class="zlux-x-name"><a href="#" class="zlux-x-name-link">' + sName + '</a></div>' +
 
 				// details
 				'<div class="zlux-x-details">' +
@@ -386,14 +406,19 @@
 		this.options = $.extend({}, this.options, options);
 		this.events = {};
 	};
-	Plugin.prototype = $.extend(Plugin.prototype, $.fn['zluxMain'].prototype, {
+	Plugin.prototype = $.extend(Plugin.prototype, $.fn.zluxMain.prototype, {
 		name: 'zluxExample',
 		options: {
 			"param": ''
 		},
 		events: {},
 		initialize: function(input, options) {
-			this.options = $.extend({}, $.fn['zluxMain'].prototype.options, this.options, options);
+			this.options = $.extend({}, $.fn.zluxMain.prototype.options, this.options, options);
+			var $this = this;
+
+			// code
+		},
+		some_function: function() {
 			var $this = this;
 
 			// code
