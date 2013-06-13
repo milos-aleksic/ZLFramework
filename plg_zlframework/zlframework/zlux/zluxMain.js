@@ -16,7 +16,7 @@
 		// var for internal events, must be reseted when expanding
 		events: {},
 		// save the Joomla Root url
-		// JRoot: location.href.match(/^(.+)administrator\/index\.php.*/i)[1],
+		JRoot: location.href.match(/^(.+)administrator\/index\.php.*/i)[1],
 		// save the AJAX URL
 		AjaxUrl: location.href.match(/^(.+)administrator\/index\.php.*/i)[1] + 'administrator/index.php?option=com_zoo&controller=zlux&format=raw',
 		initialize: function(target, options) {
@@ -191,17 +191,15 @@
 
 			// set the details
 			if ($object.data.type == 'folder') {
-				sName = $object.data.folder;
 
 				aDetails = [
-					{name: 'Name', value: $object.data.name}
+					{name: 'Name', value: $object.data.basename}
 				]
 
 			} else { // file
-				sName = $object.data.file;
 
 				aDetails = [
-					{name: 'Name', value: $object.data.name},
+					{name: 'Name', value: $object.data.basename},
 					{name: 'Type', value: $object.data.content_type},
 					{name: 'Size', value: $object.data.size.display}
 				]
@@ -222,7 +220,7 @@
 				'</div>' +
 
 				// name
-				'<div class="zlux-x-name"><a href="#" class="zlux-x-name-link">' + sName + '</a></div>' +
+				'<div class="zlux-x-name"><a href="#" class="zlux-x-name-link">' + $object.data.name + '</a></div>' +
 
 				// details
 				'<div class="zlux-x-details">' +

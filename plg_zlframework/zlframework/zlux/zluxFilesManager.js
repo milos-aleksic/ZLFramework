@@ -73,7 +73,7 @@
 						},
 						"fnCreatedCell": function (nTd, sData, oData, iRow, iCol) {
 							// store path in data
-							$(nTd).parent('tr').attr('data-path', $this.cleanPath( oData.path ))
+							$(nTd).parent('tr').attr('data-id', $this.cleanPath( oData.name ))
 						}
 					}
 				],
@@ -180,16 +180,14 @@
 						$this.oTable.fnSettings();
 
 						// update go to path
-						oSettings.sGoToPath = object.data('path');
+						oSettings.sGoToPath = object.data('id');
 
 						// reload with new path
 						$this.oTable.fnReloadAjax(oSettings.sAjaxSource);
 					}
 
-					$object = {
-						dom: object,
-						data: $this.oTable.fnGetData( object[0] )
-					};
+					var $object = $this.oTable.fnGetData( object[0] );
+					$object.dom = object;
 
 					// trigger event
 					$this.trigger("ObjectSelected", $object);
@@ -198,7 +196,7 @@
 				return false;
 			})
 
-			// Object Removed event
+			// object Removed event
 			.on('click', '.zlux-object .zlux-x-remove', function(){
 				var $object = $(this).closest('tr.zlux-object'),
 					TD = $('td', $object);
@@ -212,13 +210,6 @@
 				else {
 					row.removeAttr('data-checked');
 				}
-					
-				// if input
-				// if ($this.target[0].tagName == 'INPUT'){
-				// 	$this.target.val('').trigger('change');
-				// } else {
-				// 	// $this._addReleatedItem($this.oTable, wrapper.children('div'), col);
-				// }
 				
 				return false;
 			})
@@ -366,7 +357,7 @@
 				aoData = [],
 
 			// save object path
-			path = $this._getFullPath($object.data('path'));
+			path = $this._getFullPath($object.data('id'));
 
 			// push the storage related data
 			aoData = $this.pushStorageData(aoData);
@@ -421,7 +412,7 @@
 			var $this = this,
 				aoData = [],
 
-			src = $this._getFullPath($object.data('path'))
+			src = $this._getFullPath($object.data('id'))
 			dest = $this._getFullPath(new_name);
 
 			// push the storage related data
@@ -552,7 +543,7 @@
 					$('.zlux-x-details-content ul li:first span', $object).html(new_name);
 
 					// and path data
-					$object.data('path', new_name);
+					$object.data('name', new_name);
 
 					// remove msg
 					$('.zlux-x-msg', $object).remove();
@@ -726,8 +717,8 @@
 			})
 
 			// on object select example
-			// .bind("ObjectSelected", function(manager, object){
-				// var value = $this.oTable.fnSettings().sCurrentPath + '/' + object.data('path');
+			// .bind("ObjectSelected", function(manager, $object){
+				// var value = $this.oTable.fnSettings().sCurrentPath + '/' + $object.name;
 
 				// save new value in input
 				// input.val(value).trigger('change');
@@ -1772,12 +1763,12 @@
 			if (oData.type == 'folder') {
 				sThumb = '<span class="zlux-x-folder"></span>';
 				aDetails = [
-					{name: 'name', value: oData.name}
+					{name: 'name', value: oData.basename}
 				]
 			} else {
 				sThumb = '<span class="zlux-x-filetype">' + oData.ext + '</span>';
 				aDetails = [
-					{name: 'name', value: oData.name},
+					{name: 'name', value: oData.basename},
 					{name: 'size', value: oData.size.display}
 				]
 			}
@@ -1792,7 +1783,8 @@
 				'<div class="zlux-preview">' +
 					// thumbnail
 					'<div class="zlux-x-thumbnail">' +
-						sThumb +
+						// sThumb +
+						'<div class="zlux-x-image"><img src="' + $this.JRoot + oData.path + '" /></div>' +
 					'</div>' +
 
 					// details

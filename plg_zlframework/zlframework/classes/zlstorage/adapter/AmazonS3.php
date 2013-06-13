@@ -276,8 +276,8 @@ class ZLStorageAdapterAmazonS3 extends ZLStorageAdapterBase implements ZLStorage
 			// if folder
 			if(isset($obj['prefix'])) {
 				$row = array('type' => 'folder');
-				$row['folder'] = $name;
-				$row['name'] = basename($name);
+				$row['name'] = $name;
+				$row['basename'] = basename($name);
 				$row['path'] = basename($obj['prefix']);
 
 				$rows[] = $row;
@@ -290,10 +290,10 @@ class ZLStorageAdapterAmazonS3 extends ZLStorageAdapterBase implements ZLStorage
 		foreach ($objects as $name => $obj) 
 		{
 			$row = array('type' => 'file');
-			$row['file'] = $name;
+			$row['name'] = $name;
 			$row['path'] = basename($name);
-			$row['ext'] = JFile::getExt($row['file']);
-			$row['name'] = basename($row['file'], '.' . $row['ext']);
+			$row['ext'] = JFile::getExt($row['name']);
+			$row['basename'] = basename($row['name'], '.' . $row['ext']);
 			$row['content_type'] = $this->app->zlfilesystem->getContentType($row['name']);
 			$row['size']['value'] = $this->app->zlfilesystem->getSourceSize($root . '/' . $row['name'], false);
 			$row['size']['display'] = $this->app->zlfilesystem->formatFilesize($row['size']['value'], 'KB');

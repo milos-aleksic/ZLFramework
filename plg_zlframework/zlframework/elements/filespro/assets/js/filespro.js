@@ -43,13 +43,13 @@
 
 				if (!$(input).data('initialized'))
 				{
-					var id = 'filespro-element-' + index;
-					
+					var id = 'filespro-element-' + index,
+
+						// set main wrapper arount the input
+						$wrapper = $input.closest('.row').addClass('zl-bootstrap');
+
 					// set input id
 					$input.attr('id', id);
-
-					// set main wrapper arount the input
-					$this.wrapper = $input.closest('.row').addClass('zl-bootstrap');
 
 					// init preview engine
 					$this.zluxpreview = $.fn.zluxPreview();
@@ -65,28 +65,30 @@
 					.data('zluxDialogFilesManager').bind("ObjectSelected", function(manager, $object){
 
 						// abort if file mode incompatible
-						if ($this.options.fileMode == 'files' && $object.data.type != 'file') return;
-						if ($this.options.fileMode == 'folders' && $object.data.type != 'folder') return;
+						if ($this.options.fileMode == 'files' && $object.type != 'file') return;
+						if ($this.options.fileMode == 'folders' && $object.type != 'folder') return;
 
 						// prepare the value
-						var value = manager.oTable.fnSettings().sCurrentPath + '/' + $object.data.path;
+						var value = manager.oTable.fnSettings().sCurrentPath + '/' + $object.name;
 
 						// save new value in input
 						$input.val(value).trigger('change');
 
 						// update preview
-						$('.zlux-preview', $this.wrapper).remove();
-						$this.wrapper.append($this.zluxpreview.renderPreviewDOM($object.data));
+						$('.zlux-preview', $wrapper).remove();
+						$wrapper.append($this.zluxpreview.renderPreviewDOM($object));
 					});
 
 					// set the initial preview
-					var oData = $('span.zlux-x-filedata', $this.wrapper).data('zlux-data');
-					$this.wrapper.append($this.zluxpreview.renderPreviewDOM(oData));
+					var oData = $('span.zlux-x-filedata', $wrapper).data('zlux-data');
+					if (oData.length) {
+						$wrapper.append($this.zluxpreview.renderPreviewDOM(oData));	
+					}
 
 					// create cancel button
 					$('<i class="icon-remove zlux-x-cancel-btn" />').insertAfter($input).on('click', function () {
 						$input.val('');
-						$('.zlux-preview', $this.wrapper).remove();
+						$('.zlux-preview', $wrapper).remove();
 					});
 				
 				} $input.data('initialized', !0);

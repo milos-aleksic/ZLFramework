@@ -314,10 +314,10 @@ abstract class ElementFilesPro extends ElementRepeatablePro {
 		}
 		
 		$data = $this->app->data->create($data);
-		$data['all'] = ($data->get('size') ? $data->get('size') : '')
-					  .($data->get('res') ? ' - '.$data->get('res') : '')
-					  .($data->get('dur') ? ' - '.$data->get('dur') : '')
-					  .($data->get('files') ? ' - '.$data->get('files').' '.JText::_('PLG_ZLFRAMEWORK_FILES') : '');
+		// $data['all'] = ($data->get('size') ? $data->get('size') : '')
+		// 			  .($data->get('res') ? ' - '.$data->get('res') : '')
+		// 			  .($data->get('dur') ? ' - '.$data->get('dur') : '')
+		// 			  .($data->get('files') ? ' - '.$data->get('files').' '.JText::_('PLG_ZLFRAMEWORK_FILES') : '');
 						
 		
 		return $json ? json_encode($data) : $data;
@@ -330,7 +330,7 @@ abstract class ElementFilesPro extends ElementRepeatablePro {
 		{
 			$data = array(
 				'type'		=> 'file',
-				'name'		=> JFile::stripExt(basename($source)),
+				'basename'	=> JFile::stripExt(basename($source)),
 				'ext'		=> strtolower($this->app->zlfilesystem->getExtension($source)),
 				'size'		=> array('display' => $this->getSourceSize($source))
 			);
@@ -342,7 +342,7 @@ abstract class ElementFilesPro extends ElementRepeatablePro {
 				$imageinfo = getimagesize($sourcepath);
 				$data = array(
 					'type'		=> 'file',
-					'name'		=> JFile::stripExt(basename($source)),
+					'basename'	=> JFile::stripExt(basename($source)),
 					'ext'		=> strtolower($this->app->zlfilesystem->getExtension($source)),
 					'size'		=> array('display' => $this->getSourceSize($source)),
 					'res'		=> $imageinfo ? $imageinfo[0].'x'.$imageinfo[1].'px' : ''
@@ -351,7 +351,7 @@ abstract class ElementFilesPro extends ElementRepeatablePro {
 				$tSize = $this->getSourceSize($source);
 				$data = array(
 					'type'		=> 'folder',
-					'name'		=> ($tSize ? basename($source) : JText::_('PLG_ZLFRAMEWORK_FLP_NO_VALID_FILES')),
+					'basename'	=> ($tSize ? basename($source) : JText::_('PLG_ZLFRAMEWORK_FLP_NO_VALID_FILES')),
 					'size'		=> array('display' => $tSize),
 					'files'		=> count($this->app->path->files('root:'.$source, false, '/^.*('.$this->getLegalExtensions().')$/i'))
 				);

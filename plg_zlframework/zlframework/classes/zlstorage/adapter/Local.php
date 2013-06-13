@@ -216,10 +216,10 @@ class ZLStorageAdapterLocal extends ZLStorageAdapterBase implements ZLStorageAda
 		// dirs
 		foreach ($this->app->path->dirs("root:$root") as $dir) {
 			$row = array('type' => 'folder');
-			$row['folder'] = $dir;
-			$row['path'] = $dir;
-			$row['name'] = basename($dir);
-			// $row['size']['value'] = $this->getDirectorySize($root . '/' . $row['path']);
+			$row['name'] = $dir;
+			$row['path'] = $root . '/' . $dir;
+			$row['basename'] = basename($dir);
+			// $row['size']['value'] = $this->getDirectorySize($root . '/' . $row['name']);
 			// $row['size']['display'] = $this->app->zlfilesystem->formatFilesize($row['size']['value'], 'KB');
 
 			$rows[] = $row;
@@ -228,11 +228,12 @@ class ZLStorageAdapterLocal extends ZLStorageAdapterBase implements ZLStorageAda
 		// files
 		foreach ($this->app->path->files("root:$root", false, '/^.*('.$legalExt.')$/i') as $file) {
 			$row = array('type' => 'file');
-			$row['file'] = $file;
-			$row['path'] = $file;
-			$row['name'] = basename($row['file'], '.' . JFile::getExt($row['file']));
-			$row['content_type'] = $this->app->zlfilesystem->getContentType($row['file']);
-			$row['size']['value'] = $this->app->zlfilesystem->getSourceSize($root . '/' . $row['file'], false);
+			$row['name'] = $file;
+			$row['path'] = $root . '/' . $file;
+			$row['ext'] = JFile::getExt($row['name']);
+			$row['basename'] = basename($row['name'], '.' . $row['ext']);
+			$row['content_type'] = $this->app->zlfilesystem->getContentType($row['name']);
+			$row['size']['value'] = $this->app->zlfilesystem->getSourceSize($root . '/' . $row['name'], false);
 			$row['size']['display'] = $this->app->zlfilesystem->formatFilesize($row['size']['value'], 'KB');
 
 			$rows[] = $row;
