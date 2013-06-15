@@ -330,7 +330,9 @@ abstract class ElementFilesPro extends ElementRepeatablePro {
 		{
 			$data = array(
 				'type'		=> 'file',
+				'name'		=> basename($source),
 				'basename'	=> JFile::stripExt(basename($source)),
+				'path'		=> $source,
 				'ext'		=> strtolower($this->app->zlfilesystem->getExtension($source)),
 				'size'		=> array('display' => $this->getSourceSize($source))
 			);
@@ -342,7 +344,9 @@ abstract class ElementFilesPro extends ElementRepeatablePro {
 				$imageinfo = getimagesize($sourcepath);
 				$data = array(
 					'type'		=> 'file',
+					'name'		=> basename($source),
 					'basename'	=> JFile::stripExt(basename($source)),
+					'path'		=> $source,
 					'ext'		=> strtolower($this->app->zlfilesystem->getExtension($source)),
 					'size'		=> array('display' => $this->getSourceSize($source)),
 					'res'		=> $imageinfo ? $imageinfo[0].'x'.$imageinfo[1].'px' : ''
@@ -351,7 +355,9 @@ abstract class ElementFilesPro extends ElementRepeatablePro {
 				$tSize = $this->getSourceSize($source);
 				$data = array(
 					'type'		=> 'folder',
+					'name'		=> basename($source),
 					'basename'	=> ($tSize ? basename($source) : JText::_('PLG_ZLFRAMEWORK_FLP_NO_VALID_FILES')),
+					'path'		=> $source,
 					'size'		=> array('display' => $tSize),
 					'files'		=> count($this->app->path->files('root:'.$source, false, '/^.*('.$this->getLegalExtensions().')$/i'))
 				);

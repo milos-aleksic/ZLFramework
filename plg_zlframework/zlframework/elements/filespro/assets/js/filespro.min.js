@@ -16,7 +16,9 @@
 			root: '',
 			extensions: '',
 			storage: '',
-			fileMode: ''
+			fileMode: '',
+			max_file_size: '',
+			title: ''
 		},
 		events: {},
 		initialize: function(element, options) {
@@ -46,7 +48,10 @@
 					var id = 'filespro-element-' + index,
 
 						// set main wrapper arount the input
-						$wrapper = $input.closest('.row').addClass('zl-bootstrap');
+						$wrapper = $input.closest('.row').addClass('zl-bootstrap'),
+
+						// should the preview render a mini file preview?
+						filePreview = $input.hasClass('image-element') ? true : false;
 
 					// set input id
 					$input.attr('id', id);
@@ -58,7 +63,9 @@
 					$input.zluxDialogFilesManager({
 						root: $this.options.images,
 						extensions: $this.options.extensions,
-						storage: $this.options.storage
+						storage: 'local',
+						max_file_size: '1024kb',
+						title: $this.options.title
 					})
 
 					// on object select event
@@ -76,13 +83,13 @@
 
 						// update preview
 						$('.zlux-preview', $wrapper).remove();
-						$wrapper.append($this.zluxpreview.renderPreviewDOM($object));
+						$wrapper.append($this.zluxpreview.renderPreviewDOM($object, filePreview));
 					});
 
 					// set the initial preview
 					var oData = $('span.zlux-x-filedata', $wrapper).data('zlux-data');
-					if (oData.length) {
-						$wrapper.append($this.zluxpreview.renderPreviewDOM(oData));	
+					if (!$.isEmptyObject(oData)) {
+						$wrapper.append($this.zluxpreview.renderPreviewDOM(oData, filePreview));	
 					}
 
 					// create cancel button

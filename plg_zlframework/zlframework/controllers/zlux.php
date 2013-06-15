@@ -501,7 +501,7 @@ class ZluxController extends AppController {
 	 * Copyright (C) JOOlanders, SL
 	 */
 	public function upload()
-	{	
+	{
 		// Make sure file is not cached (as it happens for example on iOS devices)
 		header("Expires: Mon, 26 Jul 1997 05:00:00 GMT");
 		header("Last-Modified: " . gmdate("D, d M Y H:i:s") . " GMT");
@@ -558,7 +558,6 @@ class ZluxController extends AppController {
 			closedir($dir);
 		}	
 
-
 		// Open temp file
 		if (!$out = @fopen("{$filePath}.part", $chunking ? "cb" : "wb")) {
 			die('{"jsonrpc" : "2.0", "error" : {"code": 102, "message": "Failed to open output stream."}, "id" : "id"}');
@@ -603,6 +602,9 @@ class ZluxController extends AppController {
 		// move to the final destination
 		$storage = new ZLStorage('Local', array('s3' => 'options'));
 		$result = $storage->upload($filePath, $dest);
+
+		// if fails
+		if (!$result) die('{"jsonrpc" : "2.0", "error" : {"code": 101, "message": "' . $result . '"}, "id" : "id"}');
 
 		// Return Success JSON-RPC response
 		die(json_encode(array('jsonrpc' => '2.0', 'result' => $result, 'id' => 'id')));

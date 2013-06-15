@@ -154,6 +154,35 @@
 				}
 			});
 			return reStr;
+		},
+		/**
+		 * Log an error message
+		 *  @param {int} iLevel log error messages, or display them to the user
+		 *  @param {string} sMesg error message
+		 */
+		_ErrorLog: function(iLevel, sMesg ) {
+			var $this = this,
+				sAlert = ($this.ID === undefined) ?
+				$this.name + ": " + sMesg :
+				$this.name + " warning (id = '" + $this.ID + "'): " + sMesg;
+
+			if ( iLevel === 0 )
+			{
+				// DataTable.ext.sErrMode == 'alert'
+				if ( true  )
+				{
+					alert( sAlert );
+				}
+				else
+				{
+					throw new Error(sAlert);
+				}
+				return;
+			}
+			else if ( window.console && console.log )
+			{
+				console.log( sAlert );
+			}
 		}
 	});
 	// save the plugin for global use
@@ -190,18 +219,18 @@
 				aDetails;
 
 			// set the details
-			if ($object.data.type == 'folder') {
+			if ($object.type == 'folder') {
 
 				aDetails = [
-					{name: 'Name', value: $object.data.basename}
+					{name: 'Name', value: $object.basename}
 				]
 
 			} else { // file
 
 				aDetails = [
-					{name: 'Name', value: $object.data.basename},
-					{name: 'Type', value: $object.data.content_type},
-					{name: 'Size', value: $object.data.size.display}
+					{name: 'Name', value: $object.basename},
+					{name: 'Type', value: $object.content_type},
+					{name: 'Size', value: $object.size.display}
 				]
 			}
 
@@ -220,7 +249,7 @@
 				'</div>' +
 
 				// name
-				'<div class="zlux-x-name"><a href="#" class="zlux-x-name-link">' + $object.data.name + '</a></div>' +
+				'<div class="zlux-x-name"><a href="#" class="zlux-x-name-link">' + $object.name + '</a></div>' +
 
 				// details
 				'<div class="zlux-x-details">' +
@@ -253,12 +282,12 @@
 			var $this = this;
 
 			// wrap if message is plain text
-			if (typeof(text) == 'string') {
+			if (typeof(message) == 'string') {
 				message = $('<div>' + message + '</div>')
 			}
 
 			// if more than one message wrap in separate divs
-			if (message.length > 1) {
+			else if (message.length > 1) {
 				$.each(message, function(i, v){
 					message[i] = $('<div>' + v + '</div>');
 				})
