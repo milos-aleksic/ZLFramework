@@ -10,11 +10,31 @@
 defined('_JEXEC') or die('Restricted access');
 
 /*
+ Transition workaround to the new ZLFW Helpers
+*/
+
+/* ZlFilesystemHelper // DEPRICATED CLASS - Use the ZLFW Helper instead */
+App::getInstance('zoo')->loader->register('zlfwHelperFileSystem', 'zlfw:zlfwhelpers/filesystem.php');
+class ZlFilesystemHelper extends zlfwHelperFileSystem {}
+
+/* ZlStringHelper // DEPRICATED CLASS - Use the ZLFW Helper instead */
+App::getInstance('zoo')->loader->register('zlfwHelperString', 'zlfw:zlfwhelpers/string.php');
+class ZlStringHelper extends zlfwHelperString {}
+
+/* ZlPathHelper // DEPRICATED CLASS - Use the ZLFW Helper instead */
+App::getInstance('zoo')->loader->register('zlfwHelperPath', 'zlfw:zlfwhelpers/path.php');
+class ZlPathHelper extends zlfwHelperPath {}
+
+/* ZLXmlHelper // DEPRICATED CLASS - Use the ZLFW Helper instead */
+App::getInstance('zoo')->loader->register('zlfwHelperXml', 'zlfw:zlfwhelpers/xml.php');
+class ZLXmlHelper extends zlfwHelperXml {}
+
+/*
  Class: ZLFW Helper
  The general ZL Framework helper Class for zoo
  */
-class zlfwHelper extends AppHelper
-{
+class zlfwHelper extends AppHelper {
+
 	/* prefix */
 	protected $_prefix;
 
@@ -724,9 +744,9 @@ class zlfwHelper extends AppHelper
 	
 		$current_lang = '';
 		if ($zoo->joomla->isVersion('1.5')) {
-			$current_lang =& JFactory::getLanguage()->_lang;
+			$current_lang = JFactory::getLanguage()->_lang;
 		} else {
-			$current_lang =& JFactory::getLanguage()->get('tag');
+			$current_lang = JFactory::getLanguage()->get('tag');
 		}
 	
 		if ($url_safe) {

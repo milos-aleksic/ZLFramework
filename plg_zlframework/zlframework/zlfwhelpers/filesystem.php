@@ -13,11 +13,11 @@ defined('_JEXEC') or die('Restricted access');
 App::getInstance('zoo')->loader->register('FilesystemHelper', 'helpers:filesystem.php');
 
 /*
-	Class: ZlFilesystemHelper
-		The ZL filesystem helper class
+	Class: zlfwHelperFileSystem
+		The ZLFW filesystem helper class
 */
-class ZlFilesystemHelper extends FilesystemHelper
-{
+class zlfwHelperFileSystem extends FilesystemHelper {
+
 	/**
 	 * Makes file name safe to use
 	 * @param mixed The name of the file (not full path)

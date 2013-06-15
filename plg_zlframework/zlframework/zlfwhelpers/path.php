@@ -13,11 +13,11 @@ defined('_JEXEC') or die('Restricted access');
 App::getInstance('zoo')->loader->register('PathHelper', 'helpers:path.php');
 
 /*
-	Class: ZlPathHelper
-		The ZL filesystem helper class
+	Class: zlfwHelperPath
+		The ZLFW path helper class
 */
-class ZlpathHelper extends PathHelper
-{
+class zlfwHelperPath extends PathHelper {
+
 	/*
 		Function: resources
 			returns a list of resources to the given resource
