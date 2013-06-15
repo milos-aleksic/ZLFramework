@@ -14,7 +14,7 @@
 		name: 'zluxFilesManager',
 		options: {
 			"root": 'images', // relative path to the root
-			"extensions": '', // comma separated values,
+			"extensions": '', // comma separated values
 			"storage": 'local',
 			"storage_params": {},
 			"max_file_size": ''
@@ -192,28 +192,28 @@
 
 			// object Selected event
 			.on('click', '.zlux-object .zlux-x-name a', function(){
-				var object = $(this).closest('.zlux-object').attr('data-checked', 'true'),
+				var object_dom = $(this).closest('.zlux-object').attr('data-checked', 'true'),
 					oSettings = $this.oTable.fnSettings();
 
-				if (object.attr('data-zlux-object-status') != 'true') {
-					object.attr('data-zlux-object-status', 'true');
+				if (object_dom.attr('data-zlux-object-status') != 'true') {
+					object_dom.attr('data-zlux-object-status', 'true');
 
 					// remove selected status from siblings
-					object.siblings().removeAttr('data-zlux-object-status');
+					object_dom.siblings().removeAttr('data-zlux-object-status');
 
 					// if folder
-					if (object.data('type') == 'folder') {
+					if (object_dom.data('type') == 'folder') {
 						$this.oTable.fnSettings();
 
 						// update go to path
-						oSettings.sGoToPath = object.data('id');
+						oSettings.sGoToPath = object_dom.data('id');
 
 						// reload with new path
 						$this.oTable.fnReloadAjax(oSettings.sAjaxSource);
 					}
 
-					var $object = $this.oTable.fnGetData( object[0] );
-					$object.dom = object;
+					var $object = $this.oTable.fnGetData( object_dom[0] );
+					$object.dom = object_dom;
 
 					// trigger event
 					$this.trigger("ObjectSelected", $object);
@@ -224,8 +224,12 @@
 
 			// object Removed event
 			.on('click', '.zlux-object .zlux-x-remove', function(){
-				var $object = $(this).closest('tr.zlux-object'),
-					TD = $('td', $object);
+				var object_dom = $(this).closest('tr.zlux-object'),
+					TD = $('td', object_dom),
+					$object = $this.oTable.fnGetData( object_dom[0] );
+
+				// set the zlux object
+				$object.dom = object_dom;
 
 				// if open, the remove action will delete the file, with confirmation
 				if (TD.hasClass('zlux-ui-open')) {
@@ -342,11 +346,10 @@
 			});
 		},
 		/**
-		 * Returns the full path to the asset
+		 * Returns the full path prepended to the passed relative path
 		 */
 		_getFullPath: function(path) {
 			var sCurrentPath = this.oTable.fnSettings().sCurrentPath;
-			
 			return sCurrentPath ? sCurrentPath + '/' + path : path;
 		},
 		/**
@@ -383,7 +386,7 @@
 				aoData = [],
 
 			// save object path
-			path = $this._getFullPath($object.data('id'));
+			path = $this._getFullPath($object.name);
 
 			// push the storage related data
 			aoData = $this.pushStorageData(aoData);
@@ -392,7 +395,7 @@
 			if($this.options.storage == 's3') {
 
 				// add a slash if folder
-				if($object.data('type') == 'folder') {
+				if($object.type == 'folder') {
 					path = path + '/';
 				}
 			}
@@ -418,60 +421,6 @@
 						// trigger event
 						$this.trigger("FileDeleted", path);
 
-					} else {
-						// failed with reported error
-						defer.reject(json.errors);
-					}
-				})
-
-				.fail(function(){
-					// some unreported error
-					defer.reject('Something went wrong, the task was not performed.');
-				})
-
-			}).promise();
-		},
-		/**
-		 * Change the server Object name
-		 */
-		changeObjectName: function($object, new_name) {
-			var $this = this,
-				aoData = [],
-
-			src = $this._getFullPath($object.data('id'))
-			dest = $this._getFullPath(new_name);
-
-			// push the storage related data
-			aoData = $this.pushStorageData(aoData);
-
-			// if S3 storage
-			if($this.options.storage == 's3') {
-
-				// add a slash if folder
-				if($object.data('type') == 'folder') {
-					src = src + '/';
-					dest = dest + '/';
-				}
-			}
-
-			// set paths
-			aoData.push({ "name": "src", "value": src });
-			aoData.push({ "name": "dest", "value": dest });
-
-			// make the request and return a promise
-			return $.Deferred(function( defer )
-			{
-				$.ajax({
-					"url": $this.AjaxUrl + "&task=moveObject",
-					"data": aoData,
-					"dataType": "json",
-					"type": "post"
-				})
-				
-				.done(function(json) {
-					if (json.result) {
-
-						defer.resolve(json.name);
 					} else {
 						// failed with reported error
 						defer.reject(json.errors);
@@ -539,7 +488,7 @@
 		 */
 		renameObject: function($object) {
 			var $this = this,
-				name = $('.zlux-x-name a', $object),
+				name = $('.zlux-x-name a', $object.dom),
 				ext = name.html().match(/\.[a-zA-Z0-9]{3,4}$/g),
 				raw_name = name.html().replace(/\.[a-zA-Z0-9]{3,4}$/g, '');
 
@@ -555,24 +504,29 @@
 				if ($(this).data('submited')) return; $(this).data('submited', true);
 
 				// set spinner
-				$('.column-icon i', $object).addClass('icon-spinner icon-spin');
+				$('.column-icon i', $object.dom).addClass('icon-spinner icon-spin');
 
 				// change the object name
-				var processing = $this.changeObjectName($object, $('input', msg).val() + ext)
+				var processing = $this._changeObjectName($object, $('input', msg).val() + ext)
 				
 				// if succesfull
-				.done(function(new_name){
-					// update the object name
+				.done(function(new_name)
+				{
+					// update the dom name
 					name.html(new_name);
-
 					// in details also
-					$('.zlux-x-details-content ul li:first span', $object).html(new_name);
+					$('.zlux-x-details-content ul li:first span', $object.dom).html(new_name);
 
 					// and path data
-					$object.data('name', new_name);
+					$object.dom.attr('data-id', new_name);
+
+					// update the object data, as it's a reference to DT data it will be also updated :)
+					$object.name = new_name;
+					$object.basename = new_name.replace(/\.[a-zA-Z0-9]{3,4}$/g, '');
+					$object.path = $object.path.replace(/(\w|[-.])+$/, new_name);
 
 					// remove msg
-					$('.zlux-x-msg', $object).remove();
+					$('.zlux-x-msg', $object.dom).remove();
 				})
 
 				// if fails
@@ -583,7 +537,7 @@
 				// on result
 				.always(function(json) {
 					// remove spinner
-					$('.column-icon i', $object).removeClass('icon-spinner icon-spin');
+					$('.column-icon i', $object.dom).removeClass('icon-spinner icon-spin');
 				})
 			})
 
@@ -596,6 +550,60 @@
 			})
 
 			$this.pushMessageToObject($object, msg);
+		},
+		/**
+		 * Requests the Object name change
+		 */
+		_changeObjectName: function($object, name) {
+			var $this = this,
+				aoData = [],
+
+			src = $this._getFullPath($object.name);
+			dest = $this._getFullPath(name);
+
+			// push the storage related data
+			aoData = $this.pushStorageData(aoData);
+
+			// if S3 storage
+			if($this.options.storage == 's3') {
+
+				// add a slash if folder
+				if($object.type == 'folder') {
+					src = src + '/';
+					dest = dest + '/';
+				}
+			}
+
+			// set paths
+			aoData.push({ "name": "src", "value": src });
+			aoData.push({ "name": "dest", "value": dest });
+
+			// make the request and return a promise
+			return $.Deferred(function( defer )
+			{
+				$.ajax({
+					"url": $this.AjaxUrl + "&task=moveObject",
+					"data": aoData,
+					"dataType": "json",
+					"type": "post"
+				})
+				
+				.done(function(json) {
+					if (json.result) {
+
+						defer.resolve(json.name);
+					} else {
+						// failed with reported error
+						defer.reject(json.errors);
+					}
+				})
+
+				.fail(function(){
+					// some unreported error
+					defer.reject('Something went wrong, the task was not performed.');
+				})
+
+			}).promise();
 		}
 	});
 	// Don't touch
@@ -743,7 +751,13 @@
 
 			// trigger Object rename event on click
 			$this.zluxdialog.main.on('click', '.icon-edit-sign', function(){
-				var $object = $(this).closest('tr.zlux-object');
+				var object_dom = $(this).closest('tr.zlux-object');
+
+				// set zlux object
+				$object = $this.oTable.fnGetData( object_dom[0] );
+				$object.dom = object_dom;
+
+				// rename
 				$this.renameObject($object);
 			})
 
@@ -761,6 +775,7 @@
 			$this.zluxdialog.newSubToolbar('filter', 'main');
 			$this.zluxdialog.newSubToolbar('newfolder', 'main');
 
+			// init the uploaded
 			$this.initUploader();
 
 			// set Upload toolbar
@@ -771,7 +786,7 @@
 					id : "add",
 					click : function(){
 						// find the upload browse input and trigger it
-						$('.zlux-upload-browse', $this.upload).siblings('.moxie-shim').children('input').trigger('click');
+						$('.zlux-upload-browse', $this.zluxupload.upload).siblings('.moxie-shim').children('input').trigger('click');
 					}
 				},
 				{
@@ -851,7 +866,7 @@
 					if ($(this).data('submited')) return; $(this).data('submited', true);
 
 					// set spinner
-					$('.column-icon i', $object).addClass('icon-spinner icon-spin');
+					$('.column-icon i', $object.dom).addClass('icon-spinner icon-spin');
 
 					// delete the file						
 					var deleting = $this.deleteObjectFile($object);
@@ -859,7 +874,7 @@
 					// if succesfull
 					deleting.done(function(){
 						// hide the object
-						$object.fadeOut('slow', function(){
+						$object.dom.fadeOut('slow', function(){
 							// remove object from dom
 							$(this).remove();
 						});
@@ -867,16 +882,18 @@
 
 					// if fails
 					.fail(function(message) {
+						// pushs the issue message
 						$this.pushMessageToObject($object, message);
 					})
 
 					// on result
 					.always(function(json) {
 						// remove spinner
-						$('.column-icon i', $object).removeClass('icon-spinner icon-spin');
+						$('.column-icon i', $object.dom).removeClass('icon-spinner icon-spin');
 					})
 				});
 
+				// show the message
 				$this.pushMessageToObject($object, msg);
 			})
 
@@ -891,7 +908,7 @@
 		/**
 		 * Init the Main Dialog Toolbar
 		 */
-		initMainToolbar: function($object) {
+		initMainToolbar: function() {
 			var $this = this;
 
 			$this.zluxdialog.setMainToolbar(
@@ -983,7 +1000,8 @@
 				wrapper: $this.zluxdialog.content,
 				storage: $this.options.storage,
 				storage_params: $this.options.storage_params,
-				max_file_size: $this.options.max_file_size
+				max_file_size: $this.options.max_file_size,
+				extensions: $this.options.extensions
 			});
 
 			// set events
@@ -995,36 +1013,100 @@
 				$this.zluxdialog.scrollbar('refresh');
 			})
 
-			// toogle the buttons
-			.bind('FilesAdded', function(up, file){
+			// when new file added to queue
+			.bind('FilesAdded', function($up, files)
+			{
 				// toggle toolbar buttons
 				$this.zluxdialog.toolbarBtnState(2, 'upload', 'enabled');
 
-				// prepare object
-				var $object = {};
-				$object.name = file.name;
-				$object.basename = file.name.replace(/(\.[a-z0-9]+)$/, '');
-				$object.type = 'file'; // upload folders is not yet posible
-				$object.content_type = file.type;
-				$object.size = {size: file.size, display: plupload.formatSize(file.size)};
+				// show the filelist
+				$up.filelist.show();
 
-				// render the dom
-				$file = $('<tr id="' + file.id + '" class="zlux-object" data-zlux-status="validating" />').append(
+				// add the file preview
+				$.each(files, function(index, file) {
 
-					$('<td class="column-icon" />').append('<i class="icon-file-alt" />'),
+					// set initial status
+					file.status = 'validating';
 
-					$('<td class="column-name" />').append(
-						$this.renderObjectDOM($object)
+					// prepare object
+					var $object = {
+						name: file.name,
+						basename: file.name.replace(/(\.[a-z0-9]+)$/, ''),
+						type: 'file', // upload folders is not yet posible
+						content_type: file.type,
+						size: {size: file.size, display: plupload.formatSize(file.size)}
+					}
+
+					// render the dom
+					$object.dom = $('<tr id="' + file.id + '" class="zlux-object" data-zlux-status="validating" />').append(
+
+						$('<td class="column-icon" />').append('<i class="icon-file-alt zlux-x-object-icon" />'),
+
+						$('<td class="column-name" />').append(
+							$this.renderObjectDOM($object)
+						)
 					)
-				)
 
-				// append to the file list
-				.appendTo($this.zluxupload.filelist);
+					// append to the file list
+					.appendTo($up.filelist);
 
-				// append the file upload progress bar
-				$('.zlux-x-tools', $file).append(
-					$('<span class="zlux-upload-file-progress"/>')
-				)
+					// append the file upload progress bar
+					$('.zlux-x-tools', $object.dom).append(
+						$('<span class="zlux-upload-file-progress"/>')
+					)
+
+					// remove the name link, not needed here
+					$('.zlux-x-name', $object.dom).html(file.name);
+
+					// check file size
+					if (file.size !== undefined && file.size > $this.options.max_file_size) {
+						// set icon
+						$('.icon-file-alt', $object.dom).removeClass('icon-file-alt').addClass('icon-warning-sign');
+						
+						// set msg
+						var msg = $this.pushMessageToObject($object, 'File size error.<br />The file exceeds the maximum allowed size of ' + plupload.formatSize($this.options.max_file_size));
+
+						// delete the 'remove' msg option, as this message can not be ignored
+						$('.zlux-x-msg-remove', msg).remove();
+
+						// continue
+						return true;
+					}
+
+					// validate file name
+					$.ajax({
+						"url": $this.AjaxUrl + '&task=validateObjectName',
+						"type": 'post',
+						"data":{
+							name: file.name
+						},
+						"dataType": "json",
+						"cache": false,
+						"beforeSend": function(jqXHR, settings){
+							// set spinner
+							$('.column-icon i', $object.dom).addClass('icon-spinner icon-spin');
+						},
+						"success": function (json) {
+							// update name
+							$('.zlux-x-name', $object.dom).html(json.result);
+
+							// update file name
+							file.name = json.result;
+
+							// ready to upload, set status
+							file.status = 1; 
+
+							// update file status
+							$up._handleFileStatus(file);
+
+							// remove spinner
+							$('.column-icon i', $object.dom).removeClass('icon-spinner icon-spin');
+
+							// refresh the filelist
+							$up._updateFilelist();
+						}
+					})
+				})
 			})
 
 			// toogle the buttons on upload events
@@ -1035,28 +1117,55 @@
 			})
 
 			// when file is uploaded
-			.bind('FileUploaded', function(up){
-				$this.reload();
-			})
+			.bind('FileUploaded', function(up, $object){
 
-			// toogle the buttons on upload events
-			.bind('UploadComplete', function(up){
-				$this.zluxdialog.toolbarBtnState(2, 'cancel', 'disabled');
-				$this.zluxdialog.toolbarBtnState(2, 'start', 'disabled');
-				$this.zluxdialog.toolbarBtnState(2, 'add', 'enabled');
+				// update the file name to reflect the final result
+				$('.zlux-x-name', $object.dom).html($object.name);
+
+				// update progress
+				$('.zlux-upload-file-progress', $object.dom).html('100%').fadeOut();
+
+				// set the OK icon
+				$('.zlux-x-object-icon', $object.dom).removeClass('icon-file-alt').addClass('icon-ok');
 			})
 
 			// when file upload fails
-			.bind('FileError', function(up, file, message, $file){
+			.bind('FileNotUpload', function(up, $object, message){
 
-				// toogle the buttons on file error event
+				// toogle toolbar buttons
 				$this.zluxdialog.toolbarBtnState(2, 'cancel', 'disabled');
 				$this.zluxdialog.toolbarBtnState(2, 'start', 'disabled');
 				$this.zluxdialog.toolbarBtnState(2, 'add', 'enabled');
 
-				// render the message
+				// remove progress indication
+				$('.zlux-upload-file-progress', $object.dom).fadeOut();
 
-				$this.pushMessageToObject($file, message);
+				// set the fail icon
+				$('.zlux-x-object-icon', $object.dom).removeClass('icon-file-alt').addClass('icon-warning-sign');
+
+				// render the message
+				var msg = $this.pushMessageToObject($object, message);
+
+				// delete the 'remove' msg option, as this message can not be ignored
+				$('.zlux-x-msg-remove', msg).remove();
+			})
+
+			// when all files uploaded
+			.bind('UploadComplete', function(up){
+				// toogle the toolbar buttons
+				$this.zluxdialog.toolbarBtnState(2, 'cancel', 'disabled');
+				$this.zluxdialog.toolbarBtnState(2, 'start', 'disabled');
+				$this.zluxdialog.toolbarBtnState(2, 'add', 'enabled');
+
+				// reload the table data
+				$this.reload();
+			})
+
+			// when uploading canceled by the user
+			.bind('CancelUpload', function(up){
+				// toogle the toolbar buttons
+				$this.zluxdialog.toolbarBtnState(2, 'cancel', 'disabled');
+				$this.zluxdialog.toolbarBtnState(2, 'add', 'enabled');
 			})
 
 			// when the queue changes
@@ -1130,7 +1239,7 @@
 	Plugin.prototype = $.extend(Plugin.prototype, $.fn.zluxMain.prototype, {
 		name: 'zluxUpload',
 		options: {
-			extensions: null,
+			extensions: '', // comma separated values
 			path: null,
 			fileMode: 'files',
 			max_file_size: '1024kb', // Maximum file size. This string can be in 100b, 10kb, 10mb, 1gb format.
@@ -1236,6 +1345,9 @@
 				drop_element: $this.dropzone[0], 
 				max_file_size: undefined, // controlled by ZLUX Upload
 				url: $this.AjaxUrl + '&task=upload',
+				filters: [ // Specify what files to browse for
+					{title: "Files", extensions: this.options.extensions}
+				],
 
 				// flash runtime settings
 				flash_swf_url : $this.JRoot + 'media/zoo/applications/docs/elements/contentarea/assets/plupload/Moxie.swf'
@@ -1278,6 +1390,9 @@
 					UploadComplete: function(up, files) {
 						$this.eventUploadComplete(files);
 					},
+					CancelUpload: function(up) {
+						$this.trigger('CancelUpload');
+					},
 					FilesAdded: function(up, files) {
 						$this.eventFilesAdded(files);
 					},
@@ -1303,7 +1418,7 @@
 				$this.trigger('Init');
 			})
 
-			// init the uploader
+			// init the plupload uploader
 			$this.uploader.init();
 		},
 		/*
@@ -1395,9 +1510,6 @@
 			if ($this.uploader.state === plupload.STOPPED) {
 				$this.upload.attr('data-zlux-status', 'stopped');
 
-				// reset the progress bar
-				$('.zlux-upload-toolbar-progress .bar', $this.upload).width('0%');
-
 				// refresh the file list
 				$this._updateFilelist();
 			}
@@ -1444,34 +1556,29 @@
 		 */
 		eventUploadFile: function(file) {
 			var $this = this,
-				$file = $('#' + file.id, $this.filelist);
+				$object = file; // set the file as zlux object
+
+			// add the file dom
+			$object.dom = $('#' + file.id, $this.filelist);
 
 			// create and save the upload deferrer
 			$this.uploading = $.Deferred()
 
 			// if the upload fails
 			.fail(function(msg){
-				// remove progress
-				$('.zlux-upload-file-progress', $file).fadeOut();
-
 				// trigger file error event
-				$this.trigger('FileError', file, msg, $file);
+				$this.trigger('FileNotUpload', $object, msg);
 			})
 
 			// if succeeds
 			.done(function(result){
-				// update the file name to reflect the final result
-				$('.zlux-upload-file-name', $file).html(result);
 
-				// update progress
-				$('.zlux-upload-file-progress', $file).html('100%').fadeOut();
+				// update the file name
+				$object.name = result;
 
 				// trigger event
-				$this.trigger('FileUploaded', file);
+				$this.trigger('FileUploaded', $object);
 			})
-
-			// change the buttons/icons
-			// $('.zlux-upload-file-btn-remove', $file).removeClass('icon-remove icon-spinner icon-spin').addClass('icon-ok');
 
 			// always
 			.always(function(result){
@@ -1540,68 +1647,8 @@
 		eventFilesAdded: function(files) {
 			var $this = this;
 
-			$this.filelist.show();
-
-			// add the file preview
-			$.each(files, function(index, file) {
-
-				// set initial status
-				file.status = 'validating';
-
-				// trigger event
-				$this.trigger('FilesAdded', file);
-
-				// init vars
-				var $object = $('#' + file.id + '.zlux-object', $this.filelist);
-
-				// remove the name link, not needed here
-				$('.zlux-x-name', $object).html(file.name);
-
-				// check file size
-				if (file.size !== undefined && file.size > $this.options.max_file_size) {
-					// set icon
-					$('.icon-file-alt', $object).removeClass('icon-file-alt').addClass('icon-warning-sign');
-					
-					// set msg
-					// $('.zlux-x-messages', $object).html('File size error.');
-
-					return true;
-				}
-
-				// validate file name
-				$.ajax({
-					"url": $this.AjaxUrl + '&task=validateObjectName',
-					"type": 'post',
-					"data":{
-						name: file.name
-					},
-					"dataType": "json",
-					"cache": false,
-					"beforeSend": function(jqXHR, settings){
-						// set spinner
-						$('.column-icon i', $object).addClass('icon-spinner icon-spin');
-					},
-					"success": function (json) {
-						// update name
-						$('.zlux-x-name', $file).html(json.result);
-
-						// update file name
-						file.name = json.result;
-
-						// ready to upload, set status
-						file.status = 1; 
-
-						// update file status
-						$this._handleFileStatus(file);
-
-						// remove spinner
-						$('.column-icon i', $object).removeClass('icon-spinner icon-spin');
-
-						// refresh the filelist
-						$this._updateFilelist();
-					}
-				})
-			})
+			// trigger event
+			$this.trigger('FilesAdded', files);
 		},
 		/*
 		 * Fires when the file queue is changed.

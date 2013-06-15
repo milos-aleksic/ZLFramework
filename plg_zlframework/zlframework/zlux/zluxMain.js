@@ -278,7 +278,7 @@
 		/**
 		 * Push a Message specific to the object and manage old ones
 		 */
-		pushMessageToObject: function(object, message) {
+		pushMessageToObject: function($object, message) {
 			var $this = this;
 
 			// wrap if message is plain text
@@ -294,7 +294,7 @@
 			}
 
 			// get current siblings
-			var siblings = $('.zlux-x-msg', object),
+			var siblings = $('.zlux-x-msg', $object.dom),
 
 			// prepare message wrapper
 			msg = $('<div class="zlux-x-details-content zlux-x-msg" />').hide()
@@ -310,7 +310,7 @@
 			)
 
 			// add it to DOM
-			.prependTo($('.zlux-x-details', object))
+			.prependTo($('.zlux-x-details', $object.dom))
 
 			// show it with effect
 			.slideDown('fast', function(){
@@ -320,6 +320,8 @@
 					$(this).remove();
 				});
 			})
+
+			return msg;
 		},
 		/**
 		 * Push the necesary storage DATA
