@@ -168,15 +168,7 @@
 
 			if ( iLevel === 0 )
 			{
-				// DataTable.ext.sErrMode == 'alert'
-				if ( true  )
-				{
-					alert( sAlert );
-				}
-				else
-				{
-					throw new Error(sAlert);
-				}
+				alert( sAlert );
 				return;
 			}
 			else if ( window.console && console.log )
