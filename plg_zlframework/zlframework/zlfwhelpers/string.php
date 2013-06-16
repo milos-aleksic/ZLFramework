@@ -10,10 +10,10 @@
 defined('_JEXEC') or die('Restricted access');
 
 /*
-	Class: ZL String Helper
-		The ZOOlander String helper Class for zoo
+	Class: zlfwHelperString
+		The ZLFW string helper class
 */
-class ZlStringHelper extends AppHelper {
+class zlfwHelperString extends AppHelper {
 
 	// HTML FIXER
 	public $dirtyhtml;

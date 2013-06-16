@@ -9,7 +9,11 @@
 // no direct access
 defined('_JEXEC') or die('Restricted access');
 
-class ZLXmlHelper extends AppHelper {
+/*
+	Class: zlfwHelperXml
+		The ZLFW xml helper class
+*/
+class zlfwHelperXml extends AppHelper {
 
 	/**
 	 * This method adds parmeters to the elements on the fly, reading them from an xml file
