@@ -10,7 +10,7 @@
 		this.options = $.extend({}, this.options, options);
 		this.events = {};
 	};
-	Plugin.prototype = $.extend(Plugin.prototype, $.fn['zluxMain'].prototype, {
+	Plugin.prototype = $.extend(Plugin.prototype, $.fn.zluxMain.prototype, {
 		name: 'ElementFilespro',
 		options: {
 			root: '',
@@ -22,7 +22,7 @@
 		},
 		events: {},
 		initialize: function(element, options) {
-			this.options = $.extend({}, $.fn['zluxMain'].prototype.options, this.options, options);
+			this.options = $.extend({}, $.fn.zluxMain.prototype.options, this.options, options);
 			var $this = this;
 
 			// save the element reference
