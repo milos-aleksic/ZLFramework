@@ -190,39 +190,41 @@
 				}
 			})
 
-			// object Selected event
+			// Trigger Object Selected event
 			.on('click', '.zlux-object .zlux-x-name a', function(){
-				var object_dom = $(this).closest('.zlux-object').attr('data-checked', 'true'),
+				var object_dom = $(this).closest('tr.zlux-object'),
+					$object = $this.oTable.fnGetData( object_dom[0] ),
 					oSettings = $this.oTable.fnSettings();
 
-				if (object_dom.attr('data-zlux-object-status') != 'true') {
-					object_dom.attr('data-zlux-object-status', 'true');
+				// set the zlux object
+				$object.dom = object_dom;
+
+				if ($object.dom.attr('data-zlux-object-status') != 'true') {
+					$object.dom.attr('data-zlux-object-status', 'true');
 
 					// remove selected status from siblings
-					object_dom.siblings().removeAttr('data-zlux-object-status');
+					$object.dom.siblings().removeAttr('data-zlux-object-status');
 
 					// if folder
-					if (object_dom.data('type') == 'folder') {
+					if ($object.dom.data('type') == 'folder') {
 						$this.oTable.fnSettings();
 
 						// update go to path
-						oSettings.sGoToPath = object_dom.data('id');
+						oSettings.sGoToPath = $object.dom.data('id');
 
 						// reload with new path
 						$this.oTable.fnReloadAjax(oSettings.sAjaxSource);
 					}
 
-					var $object = $this.oTable.fnGetData( object_dom[0] );
-					$object.dom = object_dom;
-
 					// trigger event
 					$this.trigger("ObjectSelected", $object);
 				}
 				
+				// prevent default
 				return false;
 			})
 
-			// object Removed event
+			// Trigger Object Removed event
 			.on('click', '.zlux-object .zlux-x-remove', function(){
 				var object_dom = $(this).closest('tr.zlux-object'),
 					TD = $('td', object_dom),
@@ -241,6 +243,7 @@
 					row.removeAttr('data-checked');
 				}
 				
+				// prevent default
 				return false;
 			})
 		},
@@ -249,7 +252,7 @@
 				root;
 
 			// create cache object
-			oSettings.aAjaxDataCache = oSettings.aAjaxDataCache ? oSettings.aAjaxDataCache : [];
+			oSettings.aAjaxDataCache = oSettings.aAjaxDataCache ? oSettings.aAjaxDataCache : {};
 
 			// implelment deferred cache system, should we?
 			// if ( !$this.cachedScriptPromises[ path ] ) {
@@ -260,7 +263,7 @@
 			// return $this.cachedScriptPromises[ path ].done( callback );
 
 			// if first time, set start root as current path
-			if (!oSettings.aAjaxDataCache.length) oSettings.sCurrentPath = oSettings.oInit.sStartRoot;
+			if ($.isEmptyObject(oSettings.aAjaxDataCache)) oSettings.sCurrentPath = oSettings.oInit.sStartRoot;
 
 			// set the root
 			root = $this.cleanPath(oSettings.sCurrentPath + '/' + oSettings.sGoToPath);
@@ -279,22 +282,22 @@
 					// check if the data is cached
 					var cached = false;
 
+					// if not reloading
 					if (!oSettings.bReloading){
-						$.each(oSettings.aAjaxDataCache, function(i, v){
-							if (v.root == root){
-								var json = v.data;
 
-								// save root
-								oSettings.sCurrentPath = v.root;
+						// check if already cached
+						var json = oSettings.aAjaxDataCache[root];
+						if (json) {
+							// save root
+							oSettings.sCurrentPath = root;
 
-								// emulate the xhr events
-								$(oSettings.oInstance).trigger('xhr', [oSettings, json]);
-								fnCallback( json );
+							// emulate the xhr events
+							$(oSettings.oInstance).trigger('xhr', [oSettings, json]);
+							fnCallback( json );
 
-								// avoid ajax call
-								cached = true;
-							}
-						})
+							// avoid ajax call
+							cached = true;
+						}
 					}
 
 					// if cached abort ajax
@@ -304,28 +307,20 @@
 					$this.zluxdialog.spinner('show');
 				},
 				"success": function (json) {
-					if ( json.sError ) {
-						oSettings.oApi._fnLog( oSettings, 0, json.sError );
-					}
+					// manage possible errors
+					if ( json.sError ) oSettings.oApi._fnLog( oSettings, 0, json.sError );
 
 					// if first time, save real root path, as it can be changed for security reasons by the server
-					if (!oSettings.aAjaxDataCache.length) oSettings.oInit.sStartRoot = json.root;
+					if ($.isEmptyObject(oSettings.aAjaxDataCache)) oSettings.oInit.sStartRoot = json.root;
 
 					// save new path
 					oSettings.sCurrentPath = json.root;
 
 					// reset cache to 0 if reloading
-					if (oSettings.bReloading) oSettings.aAjaxDataCache = [];
+					if (oSettings.bReloading) oSettings.aAjaxDataCache = {};
 
-					// upload cache data or save new cache
-					var cached = false;
-					$.each(oSettings.aAjaxDataCache, function(i, v){
-						if (v.root == json.root){
-							oSettings.aAjaxDataCache[i] = {'root':json.root, 'data':json};
-							cached = true; return false;
-						}
-					})
-					if (!cached) oSettings.aAjaxDataCache.push({'root':json.root, 'data':json});
+					// upload or save cache
+					oSettings.aAjaxDataCache[json.root] = json;
 
 					// set reloading to false
 					oSettings.bReloading = false;
@@ -877,6 +872,18 @@
 						$object.dom.fadeOut('slow', function(){
 							// remove object from dom
 							$(this).remove();
+
+							// remove the object from cache
+							var aaData = $this.oTable.fnSettings().aAjaxDataCache[$this.oTable.fnSettings().sCurrentPath].aaData;
+							$.each(aaData, function(i, value){
+								if ($object.dom.data('id') == value.name && $object.dom.data('type') == value.type) {
+									// found, remove
+									aaData.splice(i, 1);
+
+									// stop iteration
+									return false;
+								}
+							})
 						});
 					})
 
@@ -1280,18 +1287,28 @@
 			$this.initFilelist();
 			
 			// listen to File Errors event
-			$this.bind("FileError", function(up, file, message) {
-				var $file = $('#' + file.id, $this.filelist);
-				
-				// set status
-				$file.attr('data-zlux-status', 'error');
+			$this.bind("FileError", function(up, $object, message) {
 
-				// set message
-				$('.zlux-upload-file-details-error', $file).html(message);
+				// resolve the uploading deferrer, if any
+				if ($this.uploading && $this.uploading.state() == 'pending') {
+					$this.uploading.reject(message);
 
-				// change icons
-				$('.zlux-upload-file-btn-details', $file).removeClass('icon-minus-sign').addClass('icon-warning-sign');
-				$('.zlux-upload-file-btn-remove', $file).removeClass('icon-spinner icon-spin').addClass('icon-remove');
+					return;
+				}
+
+				// else render the error message
+
+				// set the fail icon
+				$('.zlux-x-object-icon', $object.dom).removeClass('icon-file-alt').addClass('icon-warning-sign');
+
+				// render the message
+				var msg = $this.pushMessageToObject($object, message);
+
+				// delete the 'remove' msg option, as this message can not be ignored
+				$('.zlux-x-msg-remove', msg).remove();
+
+				// set status, necesary?
+				// $file.attr('data-zlux-status', 'error');
 			})
 
 			// init plupload
@@ -1362,7 +1379,6 @@
 						'key': '${filename}', // use filename as a key
 						'Filename': '${filename}', // adding this to keep consistency across the runtimes
 						'acl': 'public-read',
-						'Content-Type': 'image/jpeg',
 						'success_action_status': '201',
 						'AWSAccessKeyId': $this.options.storage_params.accesskey,
 						'policy': $this.options.storage_params.policy,
@@ -1391,7 +1407,7 @@
 						$this.eventUploadComplete(files);
 					},
 					CancelUpload: function(up) {
-						$this.trigger('CancelUpload');
+						$this.eventCancelUpload();
 					},
 					FilesAdded: function(up, files) {
 						$this.eventFilesAdded(files);
@@ -1407,7 +1423,6 @@
 					}
 				}
 			});
-
 
 			// set the Plupload uploader
 			$this.uploader = new plupload.Uploader(params);
@@ -1481,6 +1496,7 @@
 								} else {
 									details = $this._("There is some missconfiguration with the Bucket. Checkout the CORS permissions. If the bucket is recently created 24h must pass because of Amazon redirections.");
 								}
+
 							// if local storage
 							} else {
 								details = $this._("Upload URL might be wrong or doesn't exist.");
@@ -1489,12 +1505,15 @@
 					}
 					message += " <br /><i>" + details + "</i>";
 				}
+
+				var $object = file; // set the file as zlux object
+
+				// add the file dom
+				$object.dom = $('#' + file.id, $this.filelist);
 				
 				// trigger file error event
-				$this.trigger('FileError', file, message);
+				$this.trigger('FileError', $object, message);
 			}
-
-			// console.log(message);
 		},
 		/*
 		 * Fires when the overall state is being changed for the upload queue.
@@ -1532,8 +1551,6 @@
 				// update the upload path and file name
 				var folder = $this.options.path ? $this.options.path + '/' : '';
 				$this.uploader.settings.multipart_params.key = folder + file.name;
-				// update the content type
-				$this.uploader.settings.multipart_params['Content-Type'] = file.type;
 			}
 
 			// set progress to 0
@@ -1625,11 +1642,7 @@
 				var response = $(info.response);
 
 				// resolve/reject the deferrer
-				if (response.error) {
-					$this.uploading.reject('')
-				} else {
-					$this.uploading.resolve(response.find('Key').html())
-				}
+				$this.uploading.resolve(response.find('Key').html())
 			}
 		},
 		/*
@@ -1640,6 +1653,15 @@
 
 			// trigger event
 			$this.trigger('UploadComplete', file);
+		},
+		/*
+		 * Fires when the uploading is canceled by the user.
+		 */
+		eventCancelUpload: function(file) {
+			var $this = this;
+
+			// trigger event
+			$this.trigger('CancelUpload');
 		},
 		/*
 		 * Fires while when the user selects files to upload.

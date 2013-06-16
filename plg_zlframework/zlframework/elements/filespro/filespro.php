@@ -287,14 +287,19 @@ abstract class ElementFilesPro extends ElementRepeatablePro {
 			$accesskey = $this->app->zlfw->decryptPassword(trim($this->config->find('files._awsaccesskey')));
 			$secretkey = $this->app->zlfw->decryptPassword(trim($this->config->find('files._awssecretkey')));
 
+			// get signed policy
+			$policy = $this->app->zlfw->zlux->getAmazonS3signedPolicy($bucket, $secretkey);
+
 			// encrypt back for JS
-			$accesskey = $this->app->zlfw->crypt($accesskey, 'encrypt');
 			$secretkey = $this->app->zlfw->crypt($secretkey, 'encrypt');
 
 			$storage['engine'] = 's3';
 			$storage['bucket'] = $bucket;
 			$storage['accesskey'] = urlencode($accesskey);
 			$storage['secretkey'] = urlencode($secretkey);
+			$storage['policy']	  = $policy['policy'];
+			$storage['signature'] = $policy['signature'];
+
 		} else {
 			$storage['engine'] = 'local';
 		}

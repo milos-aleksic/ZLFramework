@@ -10,15 +10,13 @@
 defined('_JEXEC') or die('Restricted access');
 
 /*
-   Class: zlfwHelperZLUX
-   	  A class that contains ZLUX functions
+	Class: zlfwHelperZLUX
+		A class that contains ZLUX functions
 */
 class zlfwHelperZLUX extends AppHelper {
 
 	/**
 	 * Load ZLUX Items Manager assets
-	 *
-	 * @since 3.0.14
 	 */
 	public function loadItemsManagerAssets()
 	{
@@ -41,8 +39,6 @@ class zlfwHelperZLUX extends AppHelper {
 
 	/**
 	 * Load ZLUX Files Manager assets
-	 *
-	 * @since 3.0.14
 	 */
 	public function loadFilesManagerAssets()
 	{
@@ -67,8 +63,6 @@ class zlfwHelperZLUX extends AppHelper {
 
 	/**
 	 * Load ZLUX Main assets
-	 *
-	 * @since 3.0.14
 	 */
 	public function loadMainAssets()
 	{
@@ -90,8 +84,6 @@ class zlfwHelperZLUX extends AppHelper {
 
 	/**
 	 * Load ZL Bootstrap assets
-	 *
-	 * @since 3.0.14
 	 */
 	public function loadBootstrap($loadJS = false)
 	{
@@ -105,8 +97,6 @@ class zlfwHelperZLUX extends AppHelper {
 
 	/**
 	 * Get Amazon S3 signed policy
-	 *
-	 * @since 3.0.14
 	 */
 	public function getAmazonS3signedPolicy($bucket, $secretkey)
 	{
@@ -118,8 +108,6 @@ class zlfwHelperZLUX extends AppHelper {
 				array('bucket' => $bucket),
 				array('acl' => 'public-read'),
 				array('starts-with', '$key', ''),
-				// for demo purposes we are accepting only images
-				array('starts-with', '$Content-Type', 'image/'),
 				// "Some versions of the Adobe Flash Player do not properly handle HTTP responses that have an empty body. 
 				// To configure POST to return a response that does not have an empty body, set success_action_status to 201.
 				// When set, Amazon S3 returns an XML document with a 201 status code." 

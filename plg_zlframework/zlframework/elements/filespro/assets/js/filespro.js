@@ -81,7 +81,7 @@
 						if ($this.options.fileMode == 'folders' && $object.type != 'folder') return;
 
 						// prepare the value
-						var value = manager.oTable.fnSettings().sCurrentPath + '/' + $object.name;
+						var value = $input.data('zluxDialogFilesManager')._getFullPath($object.name);
 
 						// save new value in input
 						$input.val(value).trigger('change');

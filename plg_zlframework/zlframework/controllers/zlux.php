@@ -26,7 +26,6 @@ class ZluxController extends AppController {
 		$this->application = $this->app->zoo->getApplication();
 	}
 
-
 	/*
 		Function: saveElement
 			Save Element data without the need to save the entire Item
@@ -295,8 +294,8 @@ class ZluxController extends AppController {
 		switch($storage) {
 			case 's3':
 				$bucket 	= $this->app->request->get('bucket', 'string');
-				$accesskey 	= $this->app->request->get('accesskey', 'string');
-				$secretkey 	= $this->app->zlfw->crypt($this->app->request->get('key', 'string'), 'decrypt');
+				$accesskey 	= urldecode($this->app->request->get('accesskey', 'string'));
+				$secretkey 	= $this->app->zlfw->crypt(urldecode($this->app->request->get('key', 'string')), 'decrypt');
 				$storage = new ZLStorage('AmazonS3', array('secretkey' => $secretkey, 'accesskey' => $accesskey, 'bucket' => $bucket));
 				break;
 
@@ -343,8 +342,8 @@ class ZluxController extends AppController {
 		switch($storage) {
 			case 's3':
 				$bucket 	= $this->app->request->get('bucket', 'string');
-				$accesskey 	= $this->app->request->get('accesskey', 'string');
-				$secretkey 	= $this->app->zlfw->crypt($this->app->request->get('key', 'string'), 'decrypt');
+				$accesskey 	= urldecode($this->app->request->get('accesskey', 'string'));
+				$secretkey 	= $this->app->zlfw->crypt(urldecode($this->app->request->get('key', 'string')), 'decrypt');
 				$storage = new ZLStorage('AmazonS3', array('secretkey' => $secretkey, 'accesskey' => $accesskey, 'bucket' => $bucket));
 				break;
 
@@ -386,8 +385,8 @@ class ZluxController extends AppController {
 		switch($storage) {
 			case 's3':
 				$bucket 	= $this->app->request->get('bucket', 'string');
-				$accesskey 	= $this->app->request->get('accesskey', 'string');
-				$secretkey 	= $this->app->zlfw->crypt($this->app->request->get('key', 'string'), 'decrypt');
+				$accesskey 	= urldecode($this->app->request->get('accesskey', 'string'));
+				$secretkey 	= $this->app->zlfw->crypt(urldecode($this->app->request->get('key', 'string')), 'decrypt');
 
 				// workaround when object is on root
 				$dest = preg_replace('/^(\.\/)/', '', $dest);
@@ -437,8 +436,8 @@ class ZluxController extends AppController {
 		switch($storage) {
 			case 's3':
 				$bucket 	= $this->app->request->get('bucket', 'string');
-				$accesskey 	= $this->app->request->get('accesskey', 'string');
-				$secretkey 	= $this->app->zlfw->crypt($this->app->request->get('key', 'string'), 'decrypt');
+				$accesskey 	= urldecode($this->app->request->get('accesskey', 'string'));
+				$secretkey 	= $this->app->zlfw->crypt(urldecode($this->app->request->get('key', 'string')), 'decrypt');
 
 				// workaround when object is on root
 				$path = preg_replace('/^(\.\/)/', '', $path);
@@ -556,7 +555,7 @@ class ZluxController extends AppController {
 				}
 			}
 			closedir($dir);
-		}	
+		}
 
 		// Open temp file
 		if (!$out = @fopen("{$filePath}.part", $chunking ? "cb" : "wb")) {
