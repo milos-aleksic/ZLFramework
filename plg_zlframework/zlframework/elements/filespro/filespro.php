@@ -143,7 +143,7 @@ abstract class ElementFilesPro extends ElementRepeatablePro {
 	*/
 	protected function _hasValue($params = array())
 	{
-		$files = $this->getFiles($this->get('file'));
+		$files = $this->getValidResources($this->get('file'));
 		return !empty($files);
 	}
 
@@ -160,38 +160,26 @@ abstract class ElementFilesPro extends ElementRepeatablePro {
 		return parent::getRenderedValues($params, $wk, $opts);
 	}
 
-	/*
-		Function: getURL
-			Get external files url
-
-		Returns:
-			Array
-	*/
-	protected function getURL($file)
+	/* DEPRICATED */
+	public function getFiles($path = null)
 	{
-		return $this->storage()->getAbsoluteURL();
+		return $this->_resources = $this->getValidResources($path);
 	}
 
 	/*
-		Function: getFiles
-			Retrieve valid resources from the path
-			Note: wey not use an cache system here?
+		Function: getValidResources
+			Retrieve all valid resources from a path
 
 		Returns:
-			Array
+			Array or resources
 	*/
-	public function getFiles($path = null)
+	public function getValidResources($path = null)
 	{
-		if ($this->_resources == null)
-		{
-			// get final path
-			$path = $path ? $path : $this->getDefaultSource();
+		// get final path
+		$path = $path ? $path : $this->getDefaultSource();
 
-			// get the valid resources from the path
-			$this->_resources = $this->storage()->getValidResources($path, $this->getLegalExtensions());
-		}
-		
-		return $this->_resources;
+		// get the valid resources from the path
+		return $this->storage()->getValidResources($path, $this->getLegalExtensions());
 	}
 
 	/*

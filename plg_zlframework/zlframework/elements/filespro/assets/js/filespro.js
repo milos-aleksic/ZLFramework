@@ -93,7 +93,7 @@
 
 					// set the initial preview
 					var oData = $('span.zlux-x-filedata', $wrapper).data('zlux-data');
-					if (!$.isEmptyObject(oData)) {
+					if (!$.isEmptyObject(oData) && $input.val()) {
 						$wrapper.append($this.zluxpreview.renderPreviewDOM(oData, filePreview));	
 					}
 
