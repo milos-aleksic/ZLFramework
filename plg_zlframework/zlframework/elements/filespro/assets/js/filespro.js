@@ -59,13 +59,18 @@
 					// init preview engine
 					$this.zluxpreview = $.fn.zluxPreview();
 
+					var storage = $('span.zlux-x-filedata', $wrapper).data('zlux-storage');
+
 					// init the file manager
 					$input.zluxDialogFilesManager({
 						root: $this.options.images,
 						extensions: $this.options.extensions,
 						storage: 'local',
 						max_file_size: '1024kb',
-						title: $this.options.title
+						title: $this.options.title,
+						storage: storage.engine,
+						storage_params: storage,
+						root: storage.root
 					})
 
 					// on object select event

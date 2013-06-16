@@ -180,15 +180,15 @@ class ZLStorageAdapterLocal extends ZLStorageAdapterBase implements ZLStorageAda
 	public function delete($path)
 	{
 		$result = false;
-		$path = $this->app->path->path('root:' . $path);
+		$fullpath = $this->app->path->path("root:$path");
 
-		if (!is_readable($path)) {
+		if (!$fullpath || !is_readable($fullpath)) {
 			$this->setError('Permission denied or object not found.');
 			return $result;
-		} else if (is_file($path)) {
-			$result = JFile::delete($path);
-		} else if (is_dir($path)) {
-			$result = JFolder::delete($path);
+		} else if (is_file($fullpath)) {
+			$result = JFile::delete($fullpath);
+		} else if (is_dir($fullpath)) {
+			$result = JFolder::delete($fullpath);
 		}
 
 		// if something went wrong, report
@@ -204,6 +204,7 @@ class ZLStorageAdapterLocal extends ZLStorageAdapterBase implements ZLStorageAda
 	 * Get a Folder/File tree list
 	 * 
 	 * @param string $root The path to the root folder
+	 * @param string $legalExt The allowed file extensions comma separated
 	 * 
 	 * @return boolean The success of the operation
 	 */
@@ -215,32 +216,141 @@ class ZLStorageAdapterLocal extends ZLStorageAdapterBase implements ZLStorageAda
 
 		// dirs
 		foreach ($this->app->path->dirs("root:$root") as $dir) {
-			$row = array('type' => 'folder');
-			$row['name'] = $dir;
-			$row['path'] = $root . '/' . $dir;
-			$row['basename'] = basename($dir);
-			// $row['size']['value'] = $this->getDirectorySize($root . '/' . $row['name']);
-			// $row['size']['display'] = $this->app->zlfilesystem->formatFilesize($row['size']['value'], 'KB');
-
-			$rows[] = $row;
+			$rows[] = $this->getObjectInfo($root . '/' . $dir);
 		}
 
 		// files
 		foreach ($this->app->path->files("root:$root", false, '/^.*('.$legalExt.')$/i') as $file) {
-			$row = array('type' => 'file');
-			$row['name'] = $file;
-			$row['path'] = $root . '/' . $file;
-			$row['ext'] = JFile::getExt($row['name']);
-			$row['basename'] = basename($row['name'], '.' . $row['ext']);
-			$row['content_type'] = $this->app->zlfilesystem->getContentType($row['name']);
-			$row['size']['value'] = $this->app->zlfilesystem->getSourceSize($root . '/' . $row['name'], false);
-			$row['size']['display'] = $this->app->zlfilesystem->formatFilesize($row['size']['value'], 'KB');
-
-			$rows[] = $row;
+			$rows[] = $this->getObjectInfo($root . '/' . $file);
 		}
 
 		// return list
 		return compact('root', 'rows');
+	}
+
+	/**
+	 * Get Object related information
+	 * 
+	 * @param string $path The object path
+	 * 
+	 * @return array The object info
+	 */
+	public function getObjectInfo($path)
+	{
+		$result = false;
+		$obj = null;
+		$fullpath = $this->app->path->path("root:$path");
+
+		if (!$fullpath || !is_readable($fullpath)) {
+			$this->setError('Permission denied or object not found.');
+			return $result;
+
+		// if file
+		} else if (is_file($fullpath)) {
+
+			$obj = array('type' => 'file');
+			$obj['name'] = basename($path);
+			$obj['path'] = $path;
+			$obj['ext']  = JFile::getExt($obj['name']);
+			$obj['basename'] = basename($obj['name'], '.' . $obj['ext']);
+			$obj['content_type'] = $this->app->zlfw->filesystem->getContentType($obj['name']);
+			$obj['size']['value'] = $this->app->zlfw->filesystem->getSourceSize($path, false);
+			$obj['size']['display'] = $this->app->zlfw->filesystem->formatFilesize($obj['size']['value'], 'KB');
+
+			// if image
+			if ($imageinfo = getimagesize($fullpath)) {
+				$obj['resolution'] = $imageinfo[0].'x'.$imageinfo[1].'px';
+			}
+
+			// all ok
+			$result = true;
+
+		// if folder
+		} else if (is_dir($fullpath)){
+
+			$obj = array('type' => 'folder');
+			$obj['name'] = basename($path);
+			$obj['path'] = $path;
+			$obj['basename'] = $obj['name'];
+			$obj['size']['value'] = $this->app->zlfw->filesystem->getSourceSize($path, false);
+			$obj['size']['display'] = $this->app->zlfw->filesystem->formatFilesize($obj['size']['value'], 'KB');
+			// $obj['size'] = count($this->app->path->files('root:'.$path, false, '/^.*('.$this->getLegalExtensions().')$/i'))
+
+			// all ok
+			$result = true;
+		}
+
+		// if something went wrong, report
+		if ($result !== true) {
+			$this->setError('Something went wrong, the task was not performed.');
+
+			return false;
+		}
+
+		return $obj;
+	}
+
+	/**
+	 * Get valid resources, a list of readable files from a folder or individually
+	 * 
+	 * @param string $path The object path
+	 * @param string $legalExt The allowed file extensions comma separated
+	 * 
+	 * @return array The resources
+	 */
+	public function getValidResources($path, $legalExt)
+	{
+		$result = false;
+		$resources = array();
+		$fullpath = $this->app->path->path("root:$path");
+
+		if (!$fullpath || !is_readable($fullpath)) {
+			$this->setError('Permission denied or object not found.');
+			return $result;
+
+		// if file
+		} else if (is_file($fullpath)) {
+
+			$resources[] = $path;
+
+			// all ok
+			$result = true;
+
+		// if folder
+		} else if (is_dir($fullpath)){
+			
+			// retrieve all valid files
+			foreach ($this->app->path->files("root:$path", false, '/^.*('.$legalExt.')$/i') as $filename) {
+				$filepath = "$fullpath/$filename";
+				if (is_readable($filepath) && is_file($filepath)) {
+					$resources[] = "$path/$filename"; // add relative path
+				}
+			}
+
+			// all ok
+			$result = true;
+		}
+
+		// if something went wrong, report
+		if ($result !== true) {
+			$this->setError('Something went wrong, the task was not performed.');
+
+			return false;
+		}
+
+		return $resources;
+	}
+
+	/**
+	 * Get the absolute url to a resource
+	 *
+	 * @param string $path The object path
+	 *
+	 * @return string The absolute url
+	 */
+	public function getAbsoluteURL($path)
+	{
+		$this->app->path->url("root:$path");
 	}
 
 	/**

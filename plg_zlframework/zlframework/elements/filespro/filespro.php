@@ -24,6 +24,8 @@ abstract class ElementFilesPro extends ElementRepeatablePro {
 	protected $_extensions = '';
 	protected $_s3;
 	protected $_jfile_path;
+	protected $_storage;
+	protected $_resources;
 
 	/* this file INDEX - render, edit, file manager, submissions */
 
@@ -44,6 +46,43 @@ abstract class ElementFilesPro extends ElementRepeatablePro {
 	}
 
 	/*
+		Function: storage
+			Init the Storage
+
+		Returns:
+			Class - Storage php class
+	*/
+	public function storage()
+	{
+		// init storage
+		if ($this->_storage == null)
+		{
+			// if source is an URI
+			if (strpos($this->get('file'), 'http') === 0) 
+			{
+				$this->_storage = new ZLStorage('URI');
+			}
+
+			// s3
+			else if ($this->config->find('files._s3', 0))
+			{
+				$bucket	   = trim($this->config->find('files._s3bucket'));
+				$accesskey = trim($this->app->zlfw->decryptPassword($this->config->find('files._awsaccesskey')));
+				$secretkey = trim($this->app->zlfw->decryptPassword($this->config->find('files._awssecretkey')));
+
+				$this->_storage = new ZLStorage('AmazonS3', array('secretkey' => $secretkey, 'accesskey' => $accesskey, 'bucket' => $bucket));
+			} 
+
+			// local
+			else
+			{
+				$this->_storage = new ZLStorage('Local');
+			}
+		}
+		return $this->_storage;
+	}
+
+	/*
 		Function: get - IMPORTANT TO KEEP DATA COMPATIBILITY WITH ZOO NO REPEATABLE ELEMENTS
 			Gets the elements data.
 
@@ -60,44 +99,37 @@ abstract class ElementFilesPro extends ElementRepeatablePro {
 	}
 	
 	/*
-	   Function: initS3
-		   Init the S3 class
-
-	   Returns:
-		   Class - S3 php class
+		DEPICATED since 3.0.15, still needed for old FilesPro elements
 	*/
 	public function _S3()
 	{
 		if ($this->_s3 == null)
 		{
-			//include the S3 class
-			if (!class_exists('S3')) require_once($this->app->path->path('elements:filespro/assets/s3/S3.php'));
+			$bucket	   = $this->config->find('files._s3bucket');
+			$accesskey = trim($this->app->zlfw->decryptPassword($this->config->find('files._awsaccesskey')));
+			$secretkey = trim($this->app->zlfw->decryptPassword($this->config->find('files._awssecretkey')));			
 
-			$awsaccesskey = trim($this->app->zlfw->decryptPassword($this->config->find('files._awsaccesskey')));
-			$awssecretkey = trim($this->app->zlfw->decryptPassword($this->config->find('files._awssecretkey')));
-			$s3 = new S3($awsaccesskey, $awssecretkey); // instantiate the class
+			// register s3 class
+			$this->app->loader->register('AEUtilAmazons3', 'classes:amazons3.php');
 
-			if(@$s3->listBuckets() && (@$constraint = $s3->getBucketLocation(trim($this->config->find('files._s3bucket')))) !== false)
-			{
-				$location = array('US' => 's3.amazonaws.com', 'us-west-1' => 's3-us-west-1.amazonaws.com', 'us-west-2' => 's3-us-west-2.amazonaws.com', 'eu-west-1' => 's3-eu-west-1.amazonaws.com', 'EU' => 's3-eu-west-1.amazonaws.com', 'ap-southeast-1' => 's3-ap-southeast-1.amazonaws.com', 'ap-northeast-1' => 's3-ap-northeast-1.amazonaws.com', 'sa-east-1' => 's3-sa-east-1.amazonaws.com');
-				$this->_s3 = new S3($awsaccesskey, $awssecretkey, false, $location[$constraint]);
-			}
+			// init S3 Utility
+			$this->_s3 = AEUtilAmazons3::getInstance($accesskey, $secretkey, false);
 		}
 		return $this->_s3;
 	}
 
 	/*
 		Function: isDownloadLimitReached
-			Gets the download file size.
+			Checks if the file has reached it's download limit
 
 		Returns:
-			String - Download file with KB/MB suffix
+			Boolean
 	*/
 	function isDownloadLimitReached() {
 		return ($limit = $this->get('download_limit')) && $this->get('hits', 0) >= $limit;
 	}
 
-/* -------------------------------------------------------------------------------------------------------------------------------------------------------- RENDER */
+/* RENDER --------------------------------------------------------------------------------------------------------------------------- */
 
 	/*
 		Function: _hasValue
@@ -129,26 +161,6 @@ abstract class ElementFilesPro extends ElementRepeatablePro {
 	}
 
 	/*
-		Function: getFileObject
-			Create and return the individual File object
-
-		Returns:
-			Array
-	*/
-	protected function getFileObject($file, $params)
-	{
-		$fileObj = array();
-		$fileObj['path']				= $file;
-		//$fileObj['file']				= 'root:'.$this->app->path->relative($file);
-		$fileObj['ext'] 				= $this->getExtension($file);
-		$fileObj['url']					= $this->getURL($file);
-		$fileObj['name'] 				= basename($file, '.'.$fileObj['ext']);
-		$fileObj['title'] 				= $this->get('title') ? $this->get('title') : $fileObj['name'];
-		
-		return $fileObj;
-	}
-
-	/*
 		Function: getURL
 			Get external files url
 
@@ -157,71 +169,29 @@ abstract class ElementFilesPro extends ElementRepeatablePro {
 	*/
 	protected function getURL($file)
 	{
-		if($this->config->find('files._s3', 0) || strpos($file, 'http') === 0) // S3 or external source
-		{
-			$bucket = $this->config->find('files._s3bucket');
-			return $this->_S3()->getAuthenticatedURL($bucket, $file, 3600);
-		}
-		else
-		{
-			return JURI::base().$this->app->path->relative($file); // using base is important
-		}
+		return $this->storage()->getAbsoluteURL();
 	}
 
 	/*
 		Function: getFiles
-			Retrieve files from folders and individuals
+			Retrieve valid resources from the path
+			Note: wey not use an cache system here?
 
 		Returns:
 			Array
 	*/
-	public function getFiles($source = null)
+	public function getFiles($path = null)
 	{
-		// get source or use default
-		$source = $source ? $source : $this->getDefaultSource();
-
-		$files = array();
-		if(!empty($source))
+		if ($this->_resources == null)
 		{
-			// S3 integration
-			if($this->config->find('files._s3', 0) && $this->_S3())
-			{
-				// TODO check if is readable
-				$files[] = $source;
-			}
+			// get final path
+			$path = $path ? $path : $this->getDefaultSource();
 
-			// external source
-			else if (strpos($source, 'http') === 0)
-			{
-				// TODO check if is readable
-				$files[] = $source;
-			}
-
-			// local source
-			else 
-			{
-				// get full path
-				$sourcepath = $this->app->path->path("root:$source");
-
-				// if directory
-				if($sourcepath && is_dir($sourcepath)){
-
-					// retrieve all valid files
-					foreach ($this->app->path->files("root:$source", false, '/^.*('.$this->getLegalExtensions().')$/i') as $filename) {
-						$file = "$sourcepath/$filename";
-						if ($file && is_file($file) && is_readable($file)) {
-							$files[] = "$source/$filename";
-						}
-					}
-
-				// if file
-				} else if($sourcepath && is_file($sourcepath) && is_readable($sourcepath)) {
-					$files[] = $source;
-				}
-			}
+			// get the valid resources from the path
+			$this->_resources = $this->storage()->getValidResources($path, $this->getLegalExtensions());
 		}
-
-		return $files;
+		
+		return $this->_resources;
 	}
 
 	/*
@@ -250,8 +220,6 @@ abstract class ElementFilesPro extends ElementRepeatablePro {
 		return preg_replace($pattern, $replace, $default_source); 
 	}
 
-/* -------------------------------------------------------------------------------------------------------------------------------------------------------- EDIT */
-
 	/*
 		Function: loadAssets
 			Load elements css/js assets.
@@ -270,27 +238,8 @@ abstract class ElementFilesPro extends ElementRepeatablePro {
 		$this->app->document->addScript('elements:filespro/assets/js/filespro.min.js');
 	}
 
-/* -------------------------------------------------------------------------------------------------------------------------------------------------------- FILE MANAGER */
+/* FILE MANAGER ----------------------------------------------------------------------------------------------------------------------  */
 
-	/*
-		DEPRICATED since 3.0.15
-	*/
-	public function getPreview($source = null) 
-	{
-		$sourcepath = $this->app->path->path('root:'.$source);
-		
-		if (is_dir($sourcepath))
-		{
-			return '<img src="'.$this->app->path->url('elements:filespro/assets/images/folder_horiz.png').'">';
-		}
-		else if (is_file($sourcepath) || strpos($source, 'http') === 0 || $this->config->find('files._s3', 0))
-		{
-			$url = parse_url($source);
-			$ext = strtolower($this->app->zlfilesystem->getExtension($url['path']));
-			return '<span class="file-type">'.$ext.'</span>';
-		}
-	}
-	
 	/*
 		Function: getFileDetails
 			Return file info
@@ -304,82 +253,14 @@ abstract class ElementFilesPro extends ElementRepeatablePro {
 	*/
 	public function getFileDetails($file = null, $json = true)
 	{
-		$file = $file === null ? $this->get('file') : $file;
-	
-		$data = null;
-		if(strlen($file) && $this->config->find('files._s3', 0) && $this->_S3()){
-			$data = $this->_s3FileDetails($file, $json);
-		} else if (strlen($file)){
-			$data = $this->_fileDetails($file, $json); // local or external source
-		}
-		
-		$data = $this->app->data->create($data);
-		// $data['all'] = ($data->get('size') ? $data->get('size') : '')
-		// 			  .($data->get('res') ? ' - '.$data->get('res') : '')
-		// 			  .($data->get('dur') ? ' - '.$data->get('dur') : '')
-		// 			  .($data->get('files') ? ' - '.$data->get('files').' '.JText::_('PLG_ZLFRAMEWORK_FILES') : '');
-						
-		
-		return $json ? json_encode($data) : $data;
-	}
-	
-	private function _fileDetails($source = null)
-	{
-		$data = null;
-		if (strpos($source, 'http') === 0) // external source
-		{
-			$data = array(
-				'type'		=> 'file',
-				'name'		=> basename($source),
-				'basename'	=> JFile::stripExt(basename($source)),
-				'path'		=> $source,
-				'ext'		=> strtolower($this->app->zlfilesystem->getExtension($source)),
-				'size'		=> array('display' => $this->getSourceSize($source))
-			);
-		} 
-		else // local source
-		{
-			$sourcepath = $this->app->path->path('root:'.$source);
-			if (is_readable($sourcepath) && is_file($sourcepath)){
-				$imageinfo = getimagesize($sourcepath);
-				$data = array(
-					'type'		=> 'file',
-					'name'		=> basename($source),
-					'basename'	=> JFile::stripExt(basename($source)),
-					'path'		=> $source,
-					'ext'		=> strtolower($this->app->zlfilesystem->getExtension($source)),
-					'size'		=> array('display' => $this->getSourceSize($source)),
-					'res'		=> $imageinfo ? $imageinfo[0].'x'.$imageinfo[1].'px' : ''
-				);
-			} else if (is_readable($sourcepath) && is_dir($sourcepath)){
-				$tSize = $this->getSourceSize($source);
-				$data = array(
-					'type'		=> 'folder',
-					'name'		=> basename($source),
-					'basename'	=> ($tSize ? basename($source) : JText::_('PLG_ZLFRAMEWORK_FLP_NO_VALID_FILES')),
-					'path'		=> $source,
-					'size'		=> array('display' => $tSize),
-					'files'		=> count($this->app->path->files('root:'.$source, false, '/^.*('.$this->getLegalExtensions().')$/i'))
-				);
-			}
-		}
-		
-		return $data;
-	}
-	
-	private function _s3FileDetails($file = null)
-	{		
-		$bucket = $this->config->find('files._s3bucket');
-		$object = $this->_S3()->getObjectInfo($bucket, $file);
+		// get the object path
+		$path = $file === null ? $this->get('file') : $file;
 
-		$data = array(
-			'type'		=> $this->getElementType(),
-			'name'		=> JFile::stripExt(basename($file)),
-			'ext'		=> strtolower($this->app->zlfilesystem->getExtension($file)),
-			'size'		=> array('display' => $this->app->zlfilesystem->formatFilesize($this->app->zlfilesystem->returnBytes($object['size'])))
-		);	
-		
-		return $data;
+		// get the object info
+		$data = $this->storage()->getObjectInfo($path);
+
+		// return in json or param object
+		return $json ? json_encode($data) : $this->app->data->create($data);
 	}
 	
 	/*
@@ -396,19 +277,33 @@ abstract class ElementFilesPro extends ElementRepeatablePro {
 	{
 		$file = $file === null ? $this->get('file') : $file;
 
-		return "<span class=\"zlux-x-filedata\" data-zlux-data='" . json_encode($this->getFileDetails($file, false)) . "'></span>";
-	}
+		// set storage params
+		$storage = array();
+		if ($this->config->find('files._s3', 0))
+		{
+			$bucket = trim($this->config->find('files._s3bucket'));
 
-	/*
-	   Function: getExtension
-		   Get the file extension string.
+			// decrypt the ZLField password 
+			$accesskey = $this->app->zlfw->decryptPassword(trim($this->config->find('files._awsaccesskey')));
+			$secretkey = $this->app->zlfw->decryptPassword(trim($this->config->find('files._awssecretkey')));
 
-	   Returns:
-		   String - file extension
-	*/
-	public function getExtension($file = null, $checkMime = true) {
-		$file = empty($file) ? $this->get('file') : $file;
-		return strtolower($this->app->zlfilesystem->getExtension($file, $checkMime));
+			// encrypt back for JS
+			$accesskey = $this->app->zlfw->crypt($accesskey, 'encrypt');
+			$secretkey = $this->app->zlfw->crypt($secretkey, 'encrypt');
+
+			$storage['engine'] = 's3';
+			$storage['bucket'] = $bucket;
+			$storage['accesskey'] = urlencode($accesskey);
+			$storage['secretkey'] = urlencode($secretkey);
+		} else {
+			$storage['engine'] = 'local';
+		}
+
+		// set the storage root
+		$storage['root'] = trim($this->config->find('files._source_dir', 'images'));
+
+		return "<span class=\"zlux-x-filedata\" data-zlux-data='" . json_encode($this->getFileDetails($file, false)) 
+			. "' data-zlux-storage='" . json_encode($storage) . "'></span>";
 	}
 	
 	/*
@@ -421,42 +316,6 @@ abstract class ElementFilesPro extends ElementRepeatablePro {
 	public function getLegalExtensions($separator = '|') {
 		$extensions = $this->config->find('files._extensions', $this->_extensions);
 		return str_replace('|', $separator, $extensions);
-	}
-	
-	/*
-		Function: getSourceSize
-			get the file or folder files size with extension filter
-
-		Returns:
-			Array
-	*/
-	protected function getSourceSize($source = null)
-	{
-		// init vars
-		$sourcepath = $this->app->path->path('root:'.$source);
-		$size = '';
-		
-		if (strpos($source, 'http') === 0) // external source
-		{
-			$ch = curl_init(); 
-			curl_setopt($ch, CURLOPT_HEADER, true); 
-			curl_setopt($ch, CURLOPT_NOBODY, true);
-			curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true); 
-			curl_setopt($ch, CURLOPT_URL, $source); //specify the url
-			curl_setopt($ch, CURLOPT_RETURNTRANSFER, TRUE); 
-			$head = curl_exec($ch);
-			
-			$size = curl_getinfo($ch, CURLINFO_CONTENT_LENGTH_DOWNLOAD);
-		} 
-		if (is_file($sourcepath))
-		{
-			$size = filesize($sourcepath);
-		}
-		else if(is_dir($sourcepath)) foreach ($this->app->path->files('root:'.$source, false, '/^.*('.$this->getLegalExtensions().')$/i') as $file){
-			$size += filesize($this->app->path->path("root:{$source}/{$file}"));
-		}
-		
-		return ($size ? $this->app->zlfilesystem->formatFilesize($size) : 0);
 	}
 	
 	/*
@@ -544,7 +403,7 @@ abstract class ElementFilesPro extends ElementRepeatablePro {
 		return $root;
 	}
 	
-/* -------------------------------------------------------------------------------------------------------------------------------------------------------- SUBMISSIONS */
+/* SUBMISSIONS ------------------------------------------------------------------------------------------------------------------------  */
 	
 	/*
 		Function: _renderSubmission

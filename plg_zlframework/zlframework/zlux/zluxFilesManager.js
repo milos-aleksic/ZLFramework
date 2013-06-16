@@ -13,11 +13,11 @@
 	Plugin.prototype = $.extend(Plugin.prototype, $.fn.zluxManager.prototype, {
 		name: 'zluxFilesManager',
 		options: {
-			"root": 'images', // relative path to the root
-			"extensions": '', // comma separated values
-			"storage": 'local',
-			"storage_params": {},
-			"max_file_size": ''
+			root: 'images', // relative path to the root
+			extensions: '', // comma separated values
+			storage: 'local',
+			storage_params: {},
+			max_file_size: ''
 		},
 		events: {},
 		iNextUnique: 0,
@@ -489,8 +489,8 @@
 		renameObject: function($object) {
 			var $this = this,
 				name = $('.zlux-x-name a', $object.dom),
-				ext = name.html().match(/\.[a-zA-Z0-9]{3,4}$/g),
-				raw_name = name.html().replace(/\.[a-zA-Z0-9]{3,4}$/g, '');
+				ext = name.html().match(/\.+[a-zA-Z]+$/g),
+				raw_name = name.html().replace(/\.+[a-zA-Z]+$/g, '');
 
 			// if is folder ignore the extension
 			ext = ext !== null ? ext : '';
@@ -522,7 +522,7 @@
 
 					// update the object data, as it's a reference to DT data it will be also updated :)
 					$object.name = new_name;
-					$object.basename = new_name.replace(/\.[a-zA-Z0-9]{3,4}$/g, '');
+					$object.basename = new_name.replace(/\.+[a-zA-Z]+$/g, '');
 					$object.path = $object.path.replace(/(\w|[-.])+$/, new_name);
 
 					// remove msg
@@ -1924,17 +1924,18 @@
 		renderPreviewDOM: function(oData, preview) {
 			var $this = this,
 				sThumb,
-				aDetails;
+				aDetails = [];
 
 			// set defaults
 			preview = preview == undefined ? false : preview;
+			oData.size = oData.size == undefined ? false : oData.size;
+
+			// set name
+			aDetails.push({name: 'name', value: oData.basename});
 
 			// prepare the details
 			if (oData.type == 'folder') {
 				sThumb = '<span class="zlux-x-folder"></span>';
-				aDetails = [
-					{name: 'name', value: oData.basename}
-				]
 			} else { // file
 
 				// if preview enabled render a mini preview of the file
@@ -1944,10 +1945,8 @@
 					sThumb = '<span class="zlux-x-filetype">' + oData.ext + '</span>';
 				}
 
-				aDetails = [
-					{name: 'name', value: oData.basename},
-					{name: 'size', value: oData.size.display}
-				]
+				// set size if available
+				if (oData.size) aDetails.push({name: 'size', value: oData.size.display});
 			}
 
 			var sDetails = '';

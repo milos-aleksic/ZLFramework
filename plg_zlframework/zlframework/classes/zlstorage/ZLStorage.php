@@ -156,11 +156,47 @@ class ZLStorage {
 	 * Get a Folder/File tree list
 	 * 
 	 * @param string $root The path to the root folder
+	 * @param string $legalExt The allowed file extensions comma separated
 	 * 
 	 * @return boolean The success of the operation
 	 */
 	public function getTree($root, $legalExt = '') {
 		return $this->adapter->getTree($root, $legalExt);
+	}
+
+	/**
+	 * Get Object related information
+	 * 
+	 * @param string $path The object path
+	 * 
+	 * @return array The object info
+	 */
+	public function getObjectInfo($path) {
+		return $this->adapter->getObjectInfo($path);
+	}
+
+	/**
+	 * Get valid resources, a list of readable files from a folder or individually
+	 * 
+	 * @param string $path The object path
+	 * @param string $legalExt The allowed file extensions comma separated
+	 * 
+	 * @return array The resources
+	 */
+	public function getValidResources($path, $legalExt = '') {
+		return $this->adapter->getValidResources($path, $legalExt);
+	}
+
+	/**
+	 * Get the absolute url to a resource
+	 *
+	 * @param string $path The object path
+	 *
+	 * @return string The absolute url
+	 */
+	public function getAbsoluteURL($path)
+	{
+		return $this->adapter->getAbsoluteURL($path);
 	}
 
 	/**

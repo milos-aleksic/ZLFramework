@@ -264,6 +264,9 @@ class ZLStorageAdapterAmazonS3 extends ZLStorageAdapterBase implements ZLStorage
 		// get range of objects
 		$objects = $this->s3->getBucket($this->bucket, $prefix, null, null, '/', true);
 
+		// must be array
+		settype($objects, 'array');
+
 		// folders
 		foreach ($objects as $name => $obj) 
 		{
@@ -303,5 +306,105 @@ class ZLStorageAdapterAmazonS3 extends ZLStorageAdapterBase implements ZLStorage
 		
 		// return list
 		return compact('root', 'rows');
+	}
+
+	/**
+	 * Get Object related information
+	 * 
+	 * @param string $path The object path
+	 * 
+	 * @return array The object info
+	 */
+	public function getObjectInfo($path)
+	{
+		$result = false;
+		$obj = null;
+
+		// get info from s3
+		$result = $this->s3->getObjectInfo($this->bucket, $path);
+
+		// propagate S3 object errors to storage object
+		$this->s3->propagateToObject($this);
+
+		// if something went wrong, report
+		if ($result == FALSE) {
+			$this->setError('Something went wrong, the task was not performed.');
+
+			return false;
+		}
+
+		// prepare object
+		$obj = array();
+		$obj['name'] = basename($path);
+		$obj['path'] = $path;
+		$obj['ext']  = JFile::getExt($obj['name']);
+		$obj['basename'] = basename($obj['name'], '.' . $obj['ext']);
+		$obj['content_type'] = $this->app->zlfw->filesystem->getContentType($obj['name']);
+		$obj['size']['value'] = $this->app->zlfw->filesystem->returnBytes($result['size']);
+		$obj['size']['display'] = $this->app->zlfw->filesystem->formatFilesize($obj['size']['value'], 'KB');
+
+		// 'preview'	=> $this->s3->getAuthenticatedURL($this->bucket, $path, 900);
+
+		// set the object type
+		if (preg_match('/\/$/', $path)) { // is folder, they have a slash at the end
+			$obj['type'] = 'folder';
+		} else {
+			$obj['type'] = 'file';
+		}
+
+		return $obj;
+	}
+
+	/**
+	 * Get valid resources, a list of readable files from a folder or individually
+	 * 
+	 * @param string $path The object path
+	 * 
+	 * @return array The resources
+	 */
+	public function getValidResources($path, $legalExt)
+	{
+		$resources = array();
+		
+		// if folder
+		if (preg_match('/\.+[a-zA-Z]+$/', $path) == 0) { // folders have no extension
+
+			// they to need a slash at the end, adding if missing
+			if (preg_match('/\/$/', $path) == 0) $path = $path . '/';
+
+			// get range of objects
+			$objects = $this->s3->getBucket($this->bucket, $path, null, null, '/', true);
+
+			// folders
+			foreach ($objects as $name => $obj) 
+			{
+				// skip root folder
+				if (!isset($obj['prefix']) && $obj['size'] == 0) continue;
+				
+				// skip folders
+				if (isset($obj['prefix'])) continue;
+
+				// add resource
+				$resources[] = $obj['name'];
+			}
+
+		// if file
+		} else if ($obj = $this->getObjectInfo($path)){
+			$resources[] = $obj['path'];
+		}
+
+		return $resources;
+	}
+
+	/**
+	 * Get the absolute url to a resource
+	 *
+	 * @param string $path The object path
+	 *
+	 * @return string The absolute url
+	 */
+	public function getAbsoluteURL($path)
+	{
+		return $this->s3->getAuthenticatedURL($this->bucket, $path, 3600);
 	}
 }
