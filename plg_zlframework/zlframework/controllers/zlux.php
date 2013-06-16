@@ -82,6 +82,8 @@ class ZluxController extends AppController {
 		   you want to insert a non-database field (for example a counter or static image) */
 		$aColumns = array('_itemname', 'application', 'type', 'access', 'author', 'id');
 
+		/* Using _itemname for core filtering purposes */
+
 		// filter values
 		$s_apps = array_filter($s_apps);
 		$s_types = array_filter($s_types);
@@ -230,12 +232,14 @@ class ZluxController extends AppController {
 		foreach ($items as &$item) {
 			$row = array();
 			$row['id'] = $item->id;
-			$row['_itemname'] = $item->name;
+			$row['name'] = $item->name;
+			$row['_itemname'] = $item->name; // necesary
 			$row['application']['name'] = $item->getApplication()->name;
 			$row['application']['id'] = $item->getApplication()->id;
 			$row['type']['name'] = $item->getType()->name;
 			$row['type']['id'] = $item->getType()->id;
 			$row['access'] = JText::_($this->app->zoo->getGroup($item->access)->name);
+			$row['created'] = $item->created;
 
 			// author
 			$author = $item->created_by_alias;
@@ -248,13 +252,6 @@ class ZluxController extends AppController {
 			$row['author']['name'] = $author;
 			$row['author']['id'] = $author_id;
 
-			// item details
-			$row['details'] = array();
-			$row['details']['Route'] = $item->getApplication()->name.' / '.$item->getType()->name.' / ID '.$item->id;
-			if ($author) $row['details']['Author'] = $author;
-			$row['details']['Created'] = $item->created;
-			$row['details']['Access'] = $row['access'];
-			
 			// add row
 			$rows[] = $row;
 		};

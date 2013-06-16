@@ -32,9 +32,8 @@ class zlfwHelperZLUX extends AppHelper {
 			$this->app->document->addScript('zlfw:zlux/assets/datatables/dataTables.plugins.js');
 		}
 
-		// perfect scrollbar
-		$this->app->document->addStylesheet('zlfw:zlux/assets/perfect-scrollbar/perfect-scrollbar.min.css');
-		$this->app->document->addScript('zlfw:zlux/assets/perfect-scrollbar/perfect-scrollbar.with-mousewheel.min.js');
+		// nanoScroller
+		$this->app->document->addScript('zlfw:zlux/assets/nanoscroller/nanoscroller.min.js');
 	}
 
 	/**

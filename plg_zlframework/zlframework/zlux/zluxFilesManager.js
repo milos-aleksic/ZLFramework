@@ -20,7 +20,6 @@
 			max_file_size: ''
 		},
 		events: {},
-		iNextUnique: 0,
 		initialize: function(target, options) {
 			this.options = $.extend({}, this.options, options);
 			var $this = this;
@@ -40,7 +39,7 @@
 			$this.initDataTable($this.filesmanager);
 		},
 		/**
-		 * Performs an initial tasks
+		 * Performs initial tasks
 		 */
 		initCheck: function() {
 			var $this = this;
@@ -374,6 +373,58 @@
 			return $('tr[data-path="' + path + '"]', $this.oTable);
 		},
 		/**
+		 * Render the Object content
+		 */
+		renderObjectDOM: function($object) {
+			var $this = this,
+				sName,
+				aDetails;
+
+			// set the details
+			if ($object.type == 'folder') {
+
+				aDetails = [
+					{name: 'Name', value: $object.basename}
+				]
+
+			} else { // file
+
+				aDetails = [
+					{name: 'Name', value: $object.basename},
+					{name: 'Type', value: $object.content_type},
+					{name: 'Size', value: $object.size.display}
+				]
+			}
+
+			// prepare the details
+			var sDetails = '';
+			$.each(aDetails, function(i, detail){
+				sDetails += '<li><strong>' + detail.name + '</strong>: <span>' + detail.value + '</span></li>';
+			})
+
+			// set entry details
+			var content = $(
+				// btns
+				'<div class="zlux-x-tools">' +
+					'<i class="zlux-x-details-btn icon-angle-down" />' +
+					'<i class="zlux-x-remove icon-minus-sign" />' +
+				'</div>' +
+
+				// name
+				'<div class="zlux-x-name"><a href="#" class="zlux-x-name-link">' + $object.name + '</a></div>' +
+
+				// details
+				'<div class="zlux-x-details">' +
+					'<div class="zlux-x-messages" />' +
+					'<div class="zlux-x-details-content">' +
+						'<ul class="unstyled">' + sDetails + '</ul>' +
+					'</div>' +
+				'</div>'
+			)
+
+			return content;
+		},
+		/**
 		 * Delete the file from the server
 		 */
 		deleteObjectFile: function($object) {
@@ -603,7 +654,6 @@
 	});
 	// Don't touch
 	$.fn[Plugin.prototype.name] = function() {
-		if (this.data(Plugin.prototype.name)) return; // standart check to avoid duplicate inits
 		var args   = arguments;
 		var method = args[0] ? args[0] : null;
 		return this.each(function() {
@@ -650,7 +700,7 @@
 			this.options = $.extend({}, $.fn.zluxFilesManager.prototype.options, this.options, options);
 			var $this = this;
 
-			// run the initial check
+			// run initial check
 			$this.initCheck();
 
 			// is allways an input?

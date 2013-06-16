@@ -13,10 +13,10 @@
 	Plugin.prototype = $.extend(Plugin.prototype, $.fn.zluxManager.prototype, {
 		name: 'zluxItemsManager',
 		options: {
-			"apps": '', // comma separated values
-			"types": '', // comma separated values
-			"categories": '', // comma separated values
-			"tags": '' // comma separated values
+			apps: '', // comma separated values
+			types: '', // comma separated values
+			categories: '', // comma separated values
+			tags: '' // comma separated values
 		},
 		initialize: function(target, options) {
 			this.options = $.extend({}, this.options, options);
@@ -85,16 +85,15 @@
 				$this._addReleatedItem(wrapper.children('div'), col);
 			});
 		},
-		_addReleatedItem: function(row) {
-			var $this = this,
-				Data = $this.oTable.fnGetData(row[0]),
+		/**
+		 * Performs initial tasks
+		 */
+		initCheck: function() {
+			var $this = this;
 
-			// set row content
-			row = $('<div class="row-fluid" />').append(
-				$('<span class="span12"><h4>'+Data._itemname+'</h4><div>'+Data.details+'</div></span>')
-			);
-
-			$this.wrapper.append(row);
+			// set ID
+			$.fn.zluxItemsManager.iNextUnique++;
+			$this.ID = $.fn.zluxItemsManager.iNextUnique;
 		},
 		initDataTable: function(wrapper) {
 			var $this = this;
@@ -195,25 +194,20 @@
 					$this.trigger("InitComplete");
 				},
 				"fnRowCallback": function( nRow, aData, iDisplayIndex, iDisplayIndexFull ) {
-					var $object = $(nRow).addClass('zlux-object');
+					var $object = aData;
+					
+					// save object dom
+					$object.dom = $(nRow);
 
-					//('<i class="zlux-object-toggle icon-check-empty" /><i class="zlux-object-details-btn icon-plus-sign" />')
-
-					// prepare the details
-					var aDetails = [];
-					$.each(aData.details, function(name, val){
-						aDetails.push({'name': name, 'value': val});
-					})
+					// set object dom properties
+					$object.dom.addClass('zlux-object');
 
 					// reset and append the object data
-					$('.column-name', $object).html('').removeClass('zlux-ui-open').append(
+					$('.column-name', $object.dom).html('').removeClass('zlux-ui-open').append(
 
 						// render the object content
-						$this.renderObjectDOM('<a href="#">' + aData._itemname + '</a>', aDetails)
-					);
-
-					// the remove feature is not ready yet, must be hiden
-					$('.zlux-x-remove', $object).remove();
+						$this.renderObjectDOM($object)
+					)
 				},
 				"fnPreDrawCallback": function(oSettings) {
 					// show processing
@@ -239,56 +233,101 @@
 				}
 			})
 
-			// select item event
-			.on('click', '.zlux-object-name a, .zlux-object-toggle', function(e){
-				var row = $(this).closest('tr');
+			// Trigger Object Selected event
+			.on('click', '.zlux-object .zlux-x-name a', function(){
+				var object_dom = $(this).closest('tr.zlux-object'),
+					$object = $this.oTable.fnGetData( object_dom[0] ),
+					oSettings = $this.oTable.fnSettings();
 
-				if (row.attr('data-zlux-object-status') != 'true') {
-					row.attr('data-zlux-object-status', 'true');
+				// set the zlux object
+				$object.dom = object_dom;
 
-					// change the toggle icon
-					$('.zlux-object-toggle', row).removeClass('icon-check-empty').addClass('icon-check');
-					
+				if ($object.dom.attr('data-zlux-object-status') != 'true') {
+					$object.dom.attr('data-zlux-object-status', 'true');
+
+					// remove selected status from siblings
+					$object.dom.siblings().removeAttr('data-zlux-object-status');
+
 					// trigger event
-					$this.trigger("ItemSelected", row.data('id'), row);
-
-				// perfome deselection only if toggle button clicked
-				} else if ($('.zlux-object-toggle').is(e.target)){
-
-					// set unselect state
-					row.removeAttr('data-zlux-object-status');
-
-					// change the toggle icon
-					$('.zlux-object-toggle', row).removeClass('icon-check').addClass('icon-check-empty');
-					
-					// trigger event
-					$this.trigger("ItemUnselected", row.data('id'), row);
+					$this.trigger("ObjectSelected", $object);
 				}
 				
+				// prevent default
 				return false;
 			})
 
-			// init item details features
-			.on('click', '.zlux-object-details-btn', function(){
-				var icon = $(this),
-					TD = icon.closest('td'),
-					details = icon.siblings('.zlux-object-details');
+			// .on('click', '.zlux-object-name a, .zlux-object-toggle', function(e){
+			// 	var row = $(this).closest('tr');
 
-				if (!TD.hasClass('zlux-ui-open')) {
-					TD.addClass('zlux-ui-open');
-					details.slideDown('fast', function(){
-						icon.removeClass('icon-plus-sign').addClass('icon-minus-sign');
-						$this.zluxdialog.scrollbar('refresh');
-					});
-				} else {
-					details.slideUp('fast', function(){
-						TD.removeClass('zlux-ui-open');
-						icon.addClass('icon-plus-sign').removeClass('icon-minus-sign');
-						// update dialog scrollbar
-						$this.zluxdialog.scrollbar('refresh');
-					});
-				}
+			// 	if (row.attr('data-zlux-object-status') != 'true') {
+			// 		row.attr('data-zlux-object-status', 'true');
+
+			// 		// change the toggle icon
+			// 		$('.zlux-object-toggle', row).removeClass('icon-check-empty').addClass('icon-check');
+					
+			// 		// trigger event
+			// 		$this.trigger("ItemSelected", row.data('id'), row);
+
+			// 	// perfome deselection only if toggle button clicked
+			// 	} else if ($('.zlux-object-toggle').is(e.target)){
+
+			// 		// set unselect state
+			// 		row.removeAttr('data-zlux-object-status');
+
+			// 		// change the toggle icon
+			// 		$('.zlux-object-toggle', row).removeClass('icon-check').addClass('icon-check-empty');
+					
+			// 		// trigger event
+			// 		$this.trigger("ItemUnselected", row.data('id'), row);
+			// 	}
+				
+			// 	return false;
+			// })
+		},
+		/**
+		 * Render the Object content
+		 */
+		renderObjectDOM: function($object) {
+			var $this = this,
+				sName,
+				aDetails;
+			
+			// prepare the details
+			aDetails = [
+				{name: 'Route', value: $object.application.name + ' / ' + $object.type.name + ' / ID ' + $object.id},
+				{name: 'Access', value: $object.access},
+				{name: 'Created', value: $object.created}
+			]
+
+			// add Author if known
+			$object.author.name && aDetails.push({name: 'Author', value: $object.author.name});
+			
+			var sDetails = '';
+			$.each(aDetails, function(i, detail){
+				sDetails += '<li><strong>' + detail.name + '</strong>: <span>' + detail.value + '</span></li>';
 			})
+
+			// set object dom
+			var content = $(
+				// btns
+				'<div class="zlux-x-tools">' +
+					'<i class="zlux-x-details-btn icon-angle-down" />' +
+					// '<i class="zlux-x-remove icon-minus-sign" />' + // remove feature - TODO
+				'</div>' +
+
+				// name
+				'<div class="zlux-x-name"><a href="#" class="zlux-x-name-link">' + $object.name + '</a></div>' +
+
+				// details
+				'<div class="zlux-x-details">' +
+					'<div class="zlux-x-messages" />' +
+					'<div class="zlux-x-details-content">' +
+						'<ul class="unstyled">' + sDetails + '</ul>' +
+					'</div>' +
+				'</div>'
+			)
+
+			return content;
 		},
 		/**
 		 * Reloads the Table content
@@ -299,7 +338,6 @@
 	});
 	// Don't touch
 	$.fn[Plugin.prototype.name] = function() {
-		// if (this.data(Plugin.prototype.name)) return; // standart check to avoid duplicate inits
 		var args   = arguments;
 		var method = args[0] ? args[0] : null;
 		return this.each(function() {
@@ -319,6 +357,7 @@
 	};
 	// save the plugin for global use
 	$.fn[Plugin.prototype.name] = Plugin;
+	$.fn[Plugin.prototype.name].iNextUnique = 0;
 })(jQuery);
 
 
@@ -337,26 +376,25 @@
 	Plugin.prototype = $.extend(Plugin.prototype, $.fn.zluxItemsManager.prototype, {
 		name: 'zluxDialogItemsManager',
 		options: {
-			"title": 'Items Manager',
-			"full_mode": 0
+			title: 'Items Manager',
+			full_mode: 0
 		},
 		events: {},
-		initialize: function(input, options) {
+		initialize: function(dialogTrigger, options) {
 			this.options = $.extend({}, this.options, options);
 			var $this = this;
+
+			// run initial check
+			$this.initCheck();
 
 			// set the filter param
 			$this.filter = {};
 
-			// set main wrapper arount the input
-			$this.wrapper = input.wrap($('<div class="zl-bootstrap" />'));
+			// dialogTrigger example, it should be set by the caller script
+			// $('<a title="' + $this.options.title + '" class="btn btn-mini zlux-btn-edit" href="#"><i class="icon-edit"></i></a>')
 
-			// set the trigger button after the input
-			$this.dialogTrigger = $('<a title="'+$this.options.title+'" class="btn btn-mini zlux-btn-edit" href="#"><i class="icon-edit"></i></a>')
-			.insertAfter(input)
-
-			// button events
-			.on('click', function(){
+			// set the trigger button event
+			$this.dialogTrigger = dialogTrigger.on('click', function(){
 				
 				// toggle the dialog
 				$this.zluxdialog.toggle();
@@ -365,14 +403,13 @@
 				return false;
 			})
 
-
 			// set the dialog options
 			$this.zluxdialog = new $.fn.zluxDialog({
 				title: $this.options.title,
 				width: $this.options.full_mode ? '75%' : 300,
 				dialogClass: 'zl-bootstrap zlux-itemsmanager ' + ($this.options.full_mode ? 'zlux-dialog-full' : 'zlux-dialog-mini'),
 				position: ($this.options.full_mode == false ? {
-					of: $this.dialogTrigger,
+					of: dialogTrigger,
 					my: 'left top',
 					at: 'right bottom'
 				} : null)

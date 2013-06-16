@@ -203,58 +203,6 @@
 			var $this = this;
 		},
 		/**
-		 * Render the Object content
-		 */
-		renderObjectDOM: function($object) {
-			var $this = this,
-				sName,
-				aDetails;
-
-			// set the details
-			if ($object.type == 'folder') {
-
-				aDetails = [
-					{name: 'Name', value: $object.basename}
-				]
-
-			} else { // file
-
-				aDetails = [
-					{name: 'Name', value: $object.basename},
-					{name: 'Type', value: $object.content_type},
-					{name: 'Size', value: $object.size.display}
-				]
-			}
-
-			// prepare the details
-			var sDetails = '';
-			$.each(aDetails, function(i, detail){
-				sDetails += '<li><strong>' + detail.name + '</strong>: <span>' + detail.value + '</span></li>';
-			})
-
-			// set entry details
-			var content = $(
-				// btns
-				'<div class="zlux-x-tools">' +
-					'<i class="zlux-x-details-btn icon-angle-down" />' +
-					'<i class="zlux-x-remove icon-minus-sign" />' +
-				'</div>' +
-
-				// name
-				'<div class="zlux-x-name"><a href="#" class="zlux-x-name-link">' + $object.name + '</a></div>' +
-
-				// details
-				'<div class="zlux-x-details">' +
-					'<div class="zlux-x-messages" />' +
-					'<div class="zlux-x-details-content">' +
-						'<ul class="unstyled">' + sDetails + '</ul>' +
-					'</div>' +
-				'</div>'
-			)
-
-			return content;
-		},
-		/**
 		 * Reloads the Table content
 		 */
 		reload: function() {
