@@ -158,10 +158,23 @@
 							return type == 'display' ? data.name : data.id;
 						}
 					},
-					{ "sTitle": "ID", "mData": "id", "bSearchable": false, "bSortable": false }
+					{
+						"sTitle": "ID", "mData": "id", "bSearchable": false, "bSortable": false
+					},
+					{
+						"sTitle": "", "mData": "type", "bSortable": false, "bSearchable": false, "sWidth": "14px", "sClass": "column-icon",
+						"mRender": function ( data, type, full ) {
+							if (type == 'display') {
+								return '<i class="icon-file-alt"></i>';
+							} else {
+								return data;
+							}
+						}
+					}
 				],
 				"aoColumnDefs": [
 					{ "bVisible": false, "aTargets": [ 1, 2, 3, 4, 5 ] }
+					// { "bVisible": false, "aTargets": [ 2, 3, 4, 5, 6 ] }
 				],
 				"fnInitComplete": function(oSettings, data) {
 					var input_filter = $('.dataTables_filter', wrapper)
@@ -190,6 +203,9 @@
 						}
 					})
 
+					// fix the header column order
+					$('thead tr th:last', $this.oTable).prependTo($('thead tr', $this.oTable));
+
 					// trigger table init event
 					$this.trigger("InitComplete");
 				},
@@ -201,6 +217,9 @@
 
 					// set object dom properties
 					$object.dom.addClass('zlux-object');
+
+					// fix the column order
+					$('td:last', $object.dom).prependTo($object.dom);
 
 					// reset and append the object data
 					$('.column-name', $object.dom).html('').removeClass('zlux-ui-open').append(
@@ -229,28 +248,27 @@
 					$this.zluxdialog.spinner('hide');
 
 					// trigger event
-					$this.trigger("DTDrawCallback", oSettings);
+					$this.trigger("TableDrawCallback", oSettings);
 				}
 			})
 
 			// Trigger Object Selected event
 			.on('click', '.zlux-object .zlux-x-name a', function(){
 				var object_dom = $(this).closest('tr.zlux-object'),
-					$object = $this.oTable.fnGetData( object_dom[0] ),
-					oSettings = $this.oTable.fnSettings();
+					$object = $this.oTable.fnGetData( object_dom[0] );
 
 				// set the zlux object
 				$object.dom = object_dom;
 
-				if ($object.dom.attr('data-zlux-object-status') != 'true') {
-					$object.dom.attr('data-zlux-object-status', 'true');
+				// if ($object.dom.attr('data-zlux-object-status') != 'true') {
+				// 	$object.dom.attr('data-zlux-object-status', 'true');
 
-					// remove selected status from siblings
-					$object.dom.siblings().removeAttr('data-zlux-object-status');
+				// 	// remove selected status from siblings
+				// 	$object.dom.siblings().removeAttr('data-zlux-object-status');
 
 					// trigger event
 					$this.trigger("ObjectSelected", $object);
-				}
+				// }
 				
 				// prevent default
 				return false;
@@ -403,21 +421,110 @@
 				return false;
 			})
 
+			$this.initDialog();
+			$this.initMainEvents();
+		},
+		/**
+		 * Init the Dialog
+		 */
+		initDialog: function() {
+			var $this = this;
+
 			// set the dialog options
 			$this.zluxdialog = new $.fn.zluxDialog({
 				title: $this.options.title,
 				width: $this.options.full_mode ? '75%' : 300,
 				dialogClass: 'zl-bootstrap zlux-itemsmanager ' + ($this.options.full_mode ? 'zlux-dialog-full' : 'zlux-dialog-mini'),
 				position: ($this.options.full_mode == false ? {
-					of: dialogTrigger,
+					of: $this.dialogTrigger,
 					my: 'left top',
 					at: 'right bottom'
 				} : null)
 			})
 
 			.done(function(){
+				// set the dialog unique ID
+				$this.zluxdialog.widget.attr('id', 'zluxItemsManager_' + $this.ID);
+
+				// init dialog related functions
 				$this.eventDialogLoaded();
 			});
+		},
+		eventDialogLoaded: function() {
+			var $this = this;
+
+			// init itemsmanager
+			$this.itemsmanager = $('<div class="zlux-itemsmanager" />').appendTo($this.zluxdialog.content);
+			$this.initDataTable($this.itemsmanager);
+
+
+			// set Object details Open event
+			$this.zluxdialog.main.on('click', '.zlux-x-details-btn', function(){
+				var toggle = $(this),
+					$object = toggle.closest('tr.zlux-object'),
+					TD = $('td.column-name', $object),
+					details = $('.zlux-x-details', $object);
+
+				// open the details
+				if (!TD.hasClass('zlux-ui-open')) {
+					TD.addClass('zlux-ui-open');
+					toggle.removeClass('icon-angle-down').addClass('icon-angle-up');
+
+					// scroll to the Object with animation
+					$this.zluxdialog.content.stop().animate({
+						'scrollTop': $object.get(0).offsetTop
+					}, 900, 'swing')
+
+					// open, when done...
+					details.slideDown('fast', function(){
+						$this.zluxdialog.scrollbar('refresh');
+					});
+
+				// close them
+				} else {
+					toggle.addClass('icon-angle-down').removeClass('icon-angle-up');
+					TD.removeClass('zlux-ui-open');
+					details.slideUp('fast', function(){
+						$this.zluxdialog.scrollbar('refresh');
+					});
+				}
+			})
+
+			// set global close event
+			$('html').on('mousedown', function(event) {
+				// close if target is not the trigger or the dialog it self
+				$this.zluxdialog.dialog('isOpen') && !$this.dialogTrigger.is(event.target) && !$this.dialogTrigger.find(event.target).length && !$this.zluxdialog.widget.find(event.target).length && !$this.zluxdialog.widget.is(event.target) && $this.zluxdialog.dialog('close')
+			});
+
+			// init toolbar
+			$this.zluxdialog.setMainToolbar(
+				[{
+					title : "Apply Filters",
+					icon : "filter",
+					click : function(tool){
+						// toggle the subtoolbar visibility
+						$('.zlux-dialog-subtoolbar-filter', $this.zluxdialog.toolbar.wrapper).slideToggle('fast');
+
+						tool.toggleClass('zlux-ui-tool-enabled');
+					}
+				},{
+					title : "Refresh",
+					icon : "refresh",
+					click : function(){
+						// reload the table data
+						$this.reload();
+					}
+				}]
+			);
+
+			// init subtoolbar
+			$this.zluxdialog.newSubToolbar('filter', 'main');
+		},
+		/**
+		 * Init the Main Events
+		 */
+		initMainEvents: function() {
+			var $this = this;
 
 			// on manager init
 			$this.bind("InitComplete", function(manager) {
@@ -492,76 +599,6 @@
 				input.val('').trigger('change');
 			});
 		},
-		eventDialogLoaded: function() {
-			var $this = this;
-
-			// init itemsmanager
-			$this.itemsmanager = $('<div class="zlux-itemsmanager" />').appendTo($this.zluxdialog.content);
-			$this.initDataTable($this.itemsmanager);
-
-
-			// set Object details Open event
-			$this.zluxdialog.main.on('click', '.zlux-x-details-btn', function(){
-				var toggle = $(this),
-					$object = toggle.closest('tr.zlux-object'),
-					TD = $('td.column-name', $object),
-					details = $('.zlux-x-details', $object);
-
-				// open the details
-				if (!TD.hasClass('zlux-ui-open')) {
-					TD.addClass('zlux-ui-open');
-					toggle.removeClass('icon-angle-down').addClass('icon-angle-up');
-
-					// scroll to the Object with animation
-					$this.zluxdialog.content.stop().animate({
-						'scrollTop': $object.get(0).offsetTop
-					}, 900, 'swing')
-
-					// open, when done...
-					details.slideDown('fast', function(){
-						$this.zluxdialog.scrollbar('refresh');
-					});
-
-				// close them
-				} else {
-					toggle.addClass('icon-angle-down').removeClass('icon-angle-up');
-					TD.removeClass('zlux-ui-open');
-					details.slideUp('fast', function(){
-						$this.zluxdialog.scrollbar('refresh');
-					});
-				}
-			})
-
-			// set global close event
-			$('html').on('mousedown', function(event) {
-				// close if target is not the trigger or the dialog it self
-				$this.zluxdialog.dialog('isOpen') && !$this.dialogTrigger.is(event.target) && !$this.dialogTrigger.find(event.target).length && !$this.zluxdialog.widget.find(event.target).length && !$this.zluxdialog.widget.is(event.target) && $this.zluxdialog.dialog('close')
-			});
-
-			// init toolbar
-			$this.zluxdialog.setMainToolbar(
-				[{
-					title : "Apply Filters",
-					icon : "filter",
-					click : function(tool){
-						// toggle the subtoolbar visibility
-						$('.zlux-dialog-subtoolbar-filter', $this.zluxdialog.toolbar.wrapper).slideToggle('fast');
-
-						tool.toggleClass('zlux-ui-tool-enabled');
-					}
-				},{
-					title : "Refresh",
-					icon : "refresh",
-					click : function(){
-						// reload the table data
-						$this.reload();
-					}
-				}]
-			);
-
-			// init subtoolbar
-			$this.zluxdialog.newSubToolbar('filter', 'main');
-		},
 		getSelect: function(dataName, text, onChangeCallback, onUnselectCallback, updateCallback) {
 			var $this = this,
 
@@ -632,7 +669,7 @@
 			});
 
 			// set update event
-			$this.bind("DTDrawCallback", function(manager, oSettings) {
+			$this.bind("TableDrawCallback", function(manager, oSettings) {
 				// update options
 				var options = $.parseJSON($this.oTable.fnSettings().jqXHR.responseText)[ dataName ];
 				dropdown.empty().append($this._getSelectOptions(options));
