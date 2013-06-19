@@ -1,0 +1,995 @@
+/* Copyright (C) JOOlanders SL http://www.gnu.org/licenses/gpl-2.0.html GNU/GPLv2 only */
+
+/* ZL Bootstrap
+----------------------------------------------------------------------------------------------------*/
+
+@red: #b94a48;
+@green: #468847;
+
+
+.zl-bootstrap {
+
+	.btn {
+
+		&:focus {
+			outline: 0;
+		}
+
+		[class^="icon-"],
+		[class*=" icon-"] {
+			margin-right: 6px;
+		}
+
+		.caret {
+			margin-left: 6px;
+		}
+
+		&.btn-mini [class^="icon-"],
+		&.btn-mini [class*=" icon-"] {
+			margin-top: 0;
+		}
+	}
+
+	.btn.zlux-btn-edit {
+		margin-bottom: 9px;
+		margin-left: 6px;
+		font-size: 14px;
+		padding: 3px 6px 2px 8px;
+
+		[class^="icon-"],
+		[class*=" icon-"] {
+			margin-right: 0
+		}
+	}
+
+	// make a label act as an link
+	.label-link {
+		cursor: pointer;
+	}
+
+
+	// Input Cancel button
+	.zlux-x-cancel-btn {
+		cursor: pointer;
+		font-size: 13px;
+		display: inline-block !important;
+		margin: 8px 13px 0 -21px !important;
+		vertical-align: top !important;
+	}
+}
+
+
+/* ZLUX Upload
+----------------------------------------------------------------------------------------------------*/
+.zlux-upload {
+
+	// DROPZONE
+	.zlux-upload-dropzone {
+		border: 4px dashed transparent;
+		border-radius: 3px;
+		width: 287px;
+		height: 343px;
+		top: -3px;
+		left: 0;
+		margin: 4px 0 0 3px;
+		position: absolute;
+		display: none;
+
+		&[data-zlux-draghover="true"] {
+			display: block;
+			border-color: #CFCFCF; // CFCFCF
+			background-color: white;
+			opacity: .7;
+		}
+
+		.zlux-upload-dropzone-msg {
+			display: none; // by default don't display
+			text-align: center;
+			left: 50%;
+			margin-left: -80px;
+			margin-top: -28px;
+			position: absolute;
+			top: 50%;
+			width: 160px;
+		}
+	}
+
+	// if zlux upload status = ''
+	&[data-zlux-status=""] .zlux-upload-dropzone {
+		display: block;
+
+		.zlux-upload-dropzone-msg {
+			display: block;
+		}
+	}
+
+
+	// FILE LIST
+	.zlux-upload-filelist {
+
+		// OBJECT FILE
+		.zlux-object {
+
+			.icon-warning-sign {
+				color: @red;
+			}
+
+			// file upload progress
+			.zlux-upload-file-progress {
+				display: none;
+				float: right;
+			}
+
+			// if status = started / uploading
+			&[data-zlux-status="started"],
+			&[data-zlux-status="uploading"] {
+
+				// set the loading icon
+				.zlux-upload-file-btn-remove {
+					cursor: default;
+				}
+
+				// show progress
+				.zlux-upload-file-progress {
+					display: block;
+				}
+			}
+
+			// if status = error
+			&[data-zlux-status="error"] {
+
+				// show the error
+				.zlux-upload-file-details-error {
+					display: block;
+				}
+
+				// set icon color
+				.zlux-upload-file-btn-details {
+					color: @red;					
+				}
+			}
+
+			// if status = done
+			&[data-zlux-status="done"] {
+
+				// remove icon
+				.zlux-upload-file-btn-remove {
+					color: #468847;
+				}
+
+				// show the progress
+				.zlux-upload-file-progress {
+					display: block;
+				}
+			}
+
+			// if status = validating
+			&[data-zlux-status="validating"] {
+
+				.zlux-upload-file-name {
+					min-height: 20px;
+
+					i.icon-spinner {
+						float: left;
+					}
+				}
+			}
+		}
+	}
+
+	// if zlux upload status = ''
+	&[data-zlux-status=""] .zlux-upload-filelist {
+		display: none !important;
+	}
+}
+
+
+/* ZLUX Dialog
+----------------------------------------------------------------------------------------------------*/
+.zlux-dialog {
+
+	// widget adaption
+	&.ui-dialog {
+		min-height: 455px;
+		border: 1px solid #999;
+		border: 1px solid rgba(0, 0, 0, 0.3);
+		overflow: hidden;
+		*border: 1px solid #999;
+		-webkit-border-radius: 6px;
+		 -moz-border-radius: 6px;
+			  border-radius: 6px;
+		-webkit-box-shadow: 0 3px 7px rgba(0, 0, 0, 0.3);
+		 -moz-box-shadow: 0 3px 7px rgba(0, 0, 0, 0.3);
+			  box-shadow: 0 3px 7px rgba(0, 0, 0, 0.3);
+		-webkit-background-clip: padding-box;
+		 -moz-background-clip: padding-box;
+			  background-clip: padding-box;
+	
+		.ui-dialog-titlebar {
+			background: none;
+			border: none;
+			padding: 9px 15px;
+			border-bottom: 1px solid #eee;
+			
+			.ui-dialog-title {
+				font-size: 24px;
+				margin: 0;
+				line-height: 30px;
+			}
+		}
+	}
+
+	// spinner
+	.zlux-loader-circle-big {
+		position: absolute;
+		top: 50%;
+		left: 50%;
+		font-size: 80px;
+		margin-left: -33px !important;
+		margin-top: -40px !important;
+		z-index: 1;
+		cursor: default;
+	}
+
+	&[data-zlux-status="ready"] {
+		.zlux-loader-circle-big {
+			margin-top: -5px !important;
+		}
+	}
+
+	// TOOLBAR
+	.zlux-dialog-toolbar {
+		position: relative;
+		text-align: center;
+		border-bottom: 1px solid #EEE;
+		border-radius: 2px;
+		padding: 4px 0;
+
+		// tools
+		[class*=" icon-"],
+		[class^="icon-"] {
+			cursor: pointer;
+			padding: 4px 9px 3px;
+			display: inline-block;
+			position: relative;
+
+			&:hover {
+				border-color: #CFCFCF;
+			}
+
+			&.disabled {
+				border-color: #EEEEEE;
+				color: #C0C0C0;
+				cursor: default;
+			}
+
+			&.zlux-ui-tool-enabled {
+				border-color: #CFCFCF;
+			}
+		}
+
+		// all toolbars
+		[class^="zlux-dialog-toolbar-"] {
+			display: none;
+
+			ul.inline {
+				margin-bottom: 0;
+			}
+		}
+
+		// main toolbar
+		[class^="zlux-dialog-toolbar-main"] {
+			display: block;
+		}
+
+		// back to main menu btn
+		.zlux-dialog-toolbar-backtomain {
+			display: none;
+			cursor: pointer;
+			font-size: 17px;
+			top: 5px;
+			left: 4px;
+			position: absolute;
+			border-color: transparent;
+
+			&:hover {
+				border-color: #CFCFCF;
+			}
+		}
+	}
+}
+
+
+/* ZLUX Items Manager
+----------------------------------------------------------------------------------------------------*/
+.zlux-itemsmanager {
+
+	&.zlux-dialog {
+		.zlux-manager-dialog-tmpl();
+
+		// items
+		[data-zlux-status="true"] .zlux-object {
+
+			.zlux-x-name a.zlux-x-name-link {
+				color: #444;
+				cursor: default;
+
+				&:hover,
+				&:focus {
+					text-decoration: none;
+				}
+			}
+		}
+	}
+}
+
+
+/* ZLUX Files Manager
+----------------------------------------------------------------------------------------------------*/
+.zlux-filesmanager {
+
+	// bredcrumb
+	ul.breadcrumb {
+		margin: 0;
+	}
+
+	table.dataTable {
+
+		// icon column ordering img fix
+		thead th:nth-child(1) {
+			background-position: center 7px;
+
+			&:after {
+				padding-left: 10px;
+				float: none;
+				padding: 4px;
+			}
+		}
+	}
+
+	// DIALOG
+	&.zlux-dialog {
+		.zlux-manager-dialog-tmpl();
+
+		// TOOLBAR
+		&.zlux-dialog [class^="zlux-dialog-toolbar-"] {
+
+			> ul.inline {
+				[class*=" icon-"],
+				[class^="icon-"] {
+
+					// new folder plus icon
+					.icon-plus-sign {
+						font-size: 10px;
+						top: -3px;
+						right: -5px;
+						position: absolute;
+					}
+				}
+			}
+
+			
+		}
+
+		// Actions Tools
+		ul.action_tools {
+			text-align: center;
+
+			[class^="icon-"],
+			[class*=" icon-"] {
+				cursor: pointer;
+				position: relative;
+
+				// new folder plus icon
+				[class^="icon-"],
+				[class*=" icon-"] {
+					font-size: 10px;
+					left: 28px;
+					top: 3px;
+					position: absolute;
+				}
+			}
+		}
+	}
+}
+
+
+/* ZLUX DataTables
+----------------------------------------------------------------------------------------------------*/
+.zlux-datatables {
+
+	// wrapper
+	&.dataTables_wrapper {
+		position: relative;
+		clear: both;
+		// min-height: 225px;
+		padding-bottom: 3px;
+
+		a:focus {
+			outline: none;
+		}
+	}
+
+	// pagination
+	div.dataTables_paginate {
+		margin: 0;
+	}
+
+	// table
+	table.dataTable {
+
+		// sorting
+		thead {
+			.sorting, // both
+			.sorting_asc,
+			.sorting_desc,
+			.sorting_asc_disabled,
+			.sorting_desc_disabled {
+				cursor: pointer;
+				*cursor: hand;
+				position: relative;
+
+				&:after {
+					font-family: FontAwesome;
+					font-style: normal;
+					font-weight: normal;
+					font-size: 14px;
+					float: right;
+				}
+			}
+
+			.sorting_asc:after,
+			.sorting_asc_disabled:after {
+				content: "\f0de"; // icon-sort-up
+			}
+			
+			.sorting_desc:after,
+			.sorting_desc_disabled:after {
+				content: "\f0dd"; // icon-sort-down
+			}
+
+			.sorting:after {
+				content: "\f0dc"; // icon-sort
+				color: #DCDCDC;
+			}
+
+			.sorting_asc_disabled:after,
+			.sorting_desc_disabled:after { 
+				color: #DCDCDC;
+			}
+		}
+	}
+}
+
+
+/* ZLUX Object
+----------------------------------------------------------------------------------------------------*/
+.zlux-object-tmpl() {
+	.zlux-object {
+
+		.column-icon {
+			width: 21px;
+		}
+
+		// icons
+		[class^="icon-"],
+		[class*=" icon-"] {
+			float: right;
+			margin: 3px 0 0 4px;
+			cursor: pointer;
+			font-size: 14px;
+			display: inline-block;
+			text-align: center;
+			width: 1.25em;
+		}
+
+		// red color icons
+		.zlux-x-object-icon.icon-warning-sign {
+			color: @red;
+		}
+
+		// ok icon
+		.zlux-x-object-icon.icon-ok {
+			color: @green;
+		}
+
+		// hide/show buttons
+		.zlux-x-remove,
+		.zlux-x-name-edit {
+			visibility: hidden;
+		}
+
+		// &:hover 
+		.zlux-ui-open {
+			.zlux-x-remove,
+			.zlux-x-name-edit {
+				visibility: visible;
+			}
+		}
+
+		// name
+		.zlux-x-name {
+			max-width: 175px;
+
+			// name edit
+			i.zlux-x-name-edit {
+				display: inline-block;
+				float: none;
+				font-size: 15px;
+				position: relative;
+
+				&:before {
+					position: absolute;
+					top: -11px;
+					left: 2px;
+				}
+			}
+		}
+
+		.zlux-x-input {
+			margin: 7px 0;
+			width: 156px;
+		}
+
+		// details
+		.zlux-x-details {
+			display: none;
+
+			.zlux-x-details-content {
+				border-top: 1px dashed #DDD;
+				margin-top: 8px;
+				padding-top: 8px;
+				margin-bottom: 0;
+
+				ul.unstyled {
+					margin: 0;
+				}
+
+				&.zlux-x-msg {
+					text-align: center;
+					font-weight: bold;
+					position: relative;
+					padding-left: 11px;
+					padding-right: 11px;
+
+					.zlux-x-msg-remove {
+						font-size: 11px;
+						position: absolute;
+						right: -3px;
+						top: 0;
+					}
+				}
+			}
+		}
+	}
+}
+
+
+/* LESS Mixtins
+----------------------------------------------------------------------------------------------------*/
+
+// dialog
+.zlux-manager-dialog-tmpl(){
+
+	// TOOLBAR
+	&.zlux-dialog [class^="zlux-dialog-toolbar-"] {
+
+		> ul.inline {
+			[class*=" icon-"],
+			[class^="icon-"] {
+				font-size: 20px;
+			}
+		}
+
+		// subtoolbar
+		[class^="zlux-dialog-subtoolbar-"] {
+			border-top: 1px solid #EEE;
+			margin-top: 4px;
+
+			.zlux-x-input {
+				width: 262px;
+				margin: 4px 0 0;
+			}
+		}
+	}
+
+	// FILTER TOOLBAR
+	.zlux-dialog-subtoolbar-filter {
+		margin: 4px 2px 0;
+
+		// dropdowns
+		.btn-group {
+			display: block;
+			width: 276px;
+			margin: 5px auto !important;
+
+			// menu triggerer
+			a.dropdown-toggle {
+				display: block;
+				background-color: white;
+				background-image: none;
+				border-radius: 4px;
+				box-shadow: none;
+				text-shadow: none;
+				color: #444;
+				border: 1px solid #CCC;
+
+				&:focus {
+					box-shadow: 0 1px 1px rgba(0, 0, 0, 0.075) inset, 0 0 8px rgba(82, 168, 236, 0.6);
+					border-color: rgba(82, 168, 236, 0.8);
+					outline: 0 none;
+				}
+
+				// if disabled
+				&.disabled {
+					font-weight: normal;
+					
+					&:focus {
+						box-shadow: none;
+						border-color: #CCC;
+					}
+				}
+
+				// caret
+				.caret {
+					margin-left: 5px;
+				}
+			}
+
+			&.open a.dropdown-toggle {
+				background-color: white;
+			}
+
+			// remove icon
+			.zlux-ui-dropdown-unselect {
+				font-size: 13px;
+				padding: 9px 10px 7px;
+				position: absolute;
+				right: 0;
+				top: -1px;
+				z-index: 3;
+			}
+
+			// menu list
+			.dropdown-menu {
+				min-width: 275px;
+				max-height: 300px;
+				border: 1px solid #CCC;
+				text-align: left;
+				overflow: auto;
+
+				a[data-value="0"] {
+					text-align: center;
+				}
+			}
+		}
+
+		// Input
+		.dataTables_filter {
+			position: relative;
+			margin: 5px auto 0;
+			width: 276px;
+
+			input[aria-controls^="DataTables_Table"] {
+				width: 262px;
+				margin: 0;
+				text-indent: 20px;	
+			}
+
+			label.zlux-x-label {
+				cursor: default;
+				margin-bottom: 0;
+			}
+
+			[class^="icon-"] {
+				cursor: default;
+				font-size: 13px;
+				left: -1px;
+				position: absolute;
+				top: 4px;
+			}
+
+			.zlux-ui-dropdown-unselect {
+				cursor: pointer;
+				font-size: 13px;
+				left: auto;
+				right: 10px;
+			}
+		}
+	}
+
+	// load object css
+	.zlux-object-tmpl();
+
+	// DIALOG
+	.ui-dialog-content {
+		height: 349px !important;
+		max-height: 349px !important;
+		overflow: hidden;
+		position: relative;
+		opacity: 0; // init visibility
+	}
+
+	.ui-dialog-titlebar-close {
+		font-size: 17px;
+		color: inherit;
+
+		&.ui-state-hover {
+			background: none;
+			border: none;
+
+		}
+
+		&:hover,
+		&:focus {
+			text-decoration: none;
+		}
+	}
+
+	// bootstrap rows
+	.row-fluid {
+		margin-bottom: 5px;
+	}
+
+	// TABLE
+	table.table {
+		clear: both;
+		margin-bottom: 0 !important;
+		max-width: none !important;
+
+		// TD
+		td {
+			&.right {
+				text-align: left;
+			}
+
+			&.center {
+				text-align: center;
+			}
+
+			&.right {
+				text-align: right;
+			}
+
+			// icon column
+			&.column-icon {
+				font-size: 14px;
+				width: 14px;
+				padding-top: 12px;
+				text-align: center;
+				
+
+				[class^="icon-"],
+				[class*=" icon-"] {
+					cursor: default;
+					float: none;
+					margin: 0;
+
+					&:before {
+						margin-left: 1px;
+					}
+				}
+			}
+
+			// name column
+			&.column-name {
+				max-width: 229px;
+				word-wrap: break-word;
+			}
+		}
+
+		// TH
+		th {
+			&:active {
+				outline: none;
+			}
+		}
+	}
+
+	// min mode
+	&.zlux-dialog-mini {
+		// pagination adaption
+		.dataTables_paginate {
+			li {
+				display: none;
+
+				a.prev {
+					float: left;
+					width: 112px;
+				}
+				a.next {
+					float: right;
+					width: 111px;
+				}
+			}
+
+			li.prev,
+			li.next {
+				display: inline;
+			}
+		}
+	}
+
+	// full mode
+	&.zlux-dialog-full {
+
+		table.table {
+			margin-top: 6px !important;
+			margin-bottom: 6px !important;
+		}
+
+		// rows
+		.row-fluid {
+			margin-bottom: 0;
+		}
+
+		// search input
+		div.dataTables_filter {
+			input {
+				width: 200px;
+			}
+
+			label {
+				float: right;
+			}
+		}
+
+		// footer
+		.row-footer {
+			position: absolute;
+			bottom: 0;
+			left: 0;
+		}
+
+		// pagination adaption
+		.dataTables_paginate {
+			li {display: inline}
+		}
+	}
+}
+
+
+/* ZLUX Preview
+----------------------------------------------------------------------------------------------------*/
+.zlux-preview {
+	overflow: hidden;
+
+	// thumbnail
+	.zlux-x-thumbnail {
+		overflow: hidden;
+		height: 95px;
+		width: 130px;
+		float: left;
+		text-align: center;
+		margin-right: 30px;
+
+		// file/folder
+		.zlux-x-filetype,
+		.zlux-x-folder {
+			background: url(assets/img/zlux_sprite.png) no-repeat scroll 0 0 transparent;
+			display: inline-block;
+			height: 91px;
+			width: 81px;
+			margin: 0;
+		}
+
+		.zlux-x-filetype {
+			font-size: 15px;
+			line-height: 111px;
+			text-align: left;
+			text-indent: 13px;
+			color: white;
+		}
+
+		.zlux-x-folder {
+			background-position: -86px 0;
+			width: 100px;
+		}
+
+		// image
+		.zlux-x-image {
+			margin: 0 auto;
+    		width: 115px;
+		}
+	}
+
+	// details
+	.zlux-x-details {
+		margin-top: 30px;
+	}
+}
+
+
+/* ZLUX Scroller based on NanoScroller.js
+----------------------------------------------------------------------------------------------------*/
+@nanoClass: ~'zlux-scroller';
+@paneClass: ~'pane';
+@sliderClass: ~'slider';
+@contentClass: ~'zlux-dialog-content';
+
+.@{nanoClass} {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  .@{contentClass} {
+  position: absolute;
+  overflow: scroll;
+  overflow-x: hidden;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+    &:focus {
+      outline: thin dotted;
+    }
+    &::-webkit-scrollbar {
+      visibility: hidden;
+    }
+  }
+  > .@{paneClass} {
+    background: rgba(0,0,0,.25);
+    position:absolute;
+    width:10px;
+    right:0;
+    top:0;
+    bottom:0;
+    /* Target only IE7 and IE8 with this hack */
+    visibility:hidden\9; 
+    opacity: .01; 
+    -webkit-transition: .2s;
+    -moz-transition: .2s;
+    -o-transition: .2s;
+    transition: .2s;
+    -moz-border-radius: 5px;
+    -webkit-border-radius: 5px;  
+    border-radius: 5px;
+    > .@{sliderClass} {
+      background: #444;
+      background: rgba(0,0,0,.5);
+      position: relative;
+      margin : 0 1px;
+      -moz-border-radius: 3px;
+      -webkit-border-radius: 3px;  
+      border-radius: 3px;
+    }
+  }
+}
+
+.@{nanoClass}:hover > .@{paneClass}, 
+.@{paneClass}.active, 
+.@{paneClass}.flashed {
+  /* Target only IE7 and IE8 with this hack */
+  visibility: visible\9; 
+  opacity: 0.99;
+}
+
+.has-scrollbar .@{contentClass}::-webkit-scrollbar {
+  visibility: visible;
+}
+
+// ZLUX modifications
+.zlux-scroller {
+
+	.@{contentClass} {
+		padding: 0.5em 1em;
+	}
+
+	> .@{paneClass} {
+		right: 1px;
+		width: 7px;
+
+		// margin: 4px 0;
+
+		> .@{sliderClass} {
+			margin: 0;
+		}
+	}
+
+	// hide scroll
+	&.noscroll {
+		.@{paneClass} {
+			display: none !important;
+		}
+	}
+}
