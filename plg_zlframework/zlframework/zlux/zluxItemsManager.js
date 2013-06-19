@@ -25,65 +25,15 @@
 			// set the filter param
 			$this.filter = {};
 
-			// save targer
+			// run the initial check
+			$this.initCheck();
+
+			// save target
 			$this.target = target;
 
-			// set items manager
-			$this.itemsmanager = $('<div class="zl-bootstrap zlux-itemsmanager" />'),
-			button = null;
-
-			// if input, create dialog and return Item ID
-			if (target[0].tagName == 'INPUT')
-			{
-				// wrapp the input
-				target.wrap($this.itemsmanager);
-
-				// set the trigger button
-				button = $('<a title="'+$this.options.title+'" class="btn btn-mini zlux-btn-edit" href="#"><i class="icon-edit"></i></a>')
-				.insertAfter(target);
-			} 
-			else // if placeholder, create dialog and return Item Rendered DOM
-			{
-				// append the Items Rendering wrapper
-				$('<div />').appendTo($this.itemsmanager);
-				
-				// set the trigger button
-				button = $('<a class="btn btn-mini" href="#"><i class="icon-plus-sign"></i>Add Item</a>')
-				.appendTo($this.itemsmanager);
-
-				// append wrapper
-				$this.itemsmanager.appendTo(target);
-			}
-
-			// init Item Selector
-			button.zluxSelector({
-				title: $this.options.title,
-				width: $this.options.full_mode ? '75%' : 300,
-				height: 'auto',
-				dialogClass: 'zl-bootstrap zlux-items-manager-dialog '+($this.options.full_mode ? 'zlux-dialog-full' : 'zlux-dialog-mini'),
-				position: ($this.options.full_mode ? {
-					my: 'center',
-					at: 'center',
-					of: window
-				} : null),
-				button: button
-			}, function(zluxSelector) {
-
-				// save zluxSelector
-				$this.zluxSelector = zluxSelector;
-
-				// when dialog ready init table
-				$this._dataTable(zluxSelector.content, function(){
-
-					// init dialog scrollbar
-					$this.zluxSelector.scrollbar();
-				});
-			});
-
-			// bind event
-			$this.bind("ItemSelected", function(manager, id){
-				$this._addReleatedItem(wrapper.children('div'), col);
-			});
+			// init filesmanager
+			$this.filesmanager = $('<div class="zl-bootstrap zlux-itemsmanager" />').appendTo(target);
+			$this.initDataTable($this.filesmanager);
 		},
 		/**
 		 * Performs initial tasks
@@ -395,6 +345,7 @@
 		name: 'zluxDialogItemsManager',
 		options: {
 			title: 'Items Manager',
+			position: {}, // override the Dialog position
 			full_mode: 0
 		},
 		events: {},
@@ -435,11 +386,11 @@
 				title: $this.options.title,
 				width: $this.options.full_mode ? '75%' : 300,
 				dialogClass: 'zl-bootstrap zlux-itemsmanager ' + ($this.options.full_mode ? 'zlux-dialog-full' : 'zlux-dialog-mini'),
-				position: ($this.options.full_mode == false ? {
+				position: $.extend({
 					of: $this.dialogTrigger,
 					my: 'left top',
 					at: 'right bottom'
-				} : null)
+				}, $this.options.position)
 			})
 
 			.done(function(){
