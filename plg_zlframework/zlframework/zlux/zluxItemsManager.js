@@ -68,6 +68,8 @@
 					// push the values
 					aoData.push({ "name": "apps", "value": $this.options.apps }); // allways send the original app selection
 					aoData.push({ "name": "types", "value": $this.options.types }); // allways send the original type selection
+					aoData.push({ "name": "categories", "value": $this.options.categories }); // allways send the original cat selection
+					aoData.push({ "name": "tags", "value": $this.options.tags }); // allways send the original tag selection
 					aoData.push({ "name": "filter_apps", "value": apps });
 					aoData.push({ "name": "filter_types", "value": types });
 					aoData.push({ "name": "filter_cats", "value": cats });
@@ -550,14 +552,17 @@
 				input.val('').trigger('change');
 			});
 		},
-		getSelect: function(dataName, text, onChangeCallback, onUnselectCallback, updateCallback) {
+		getSelect: function(dataName, text, onChangeCallback, onUnselectCallback) {
 			var $this = this,
 
 			// get initial options
-			options = $.parseJSON($this.oTable.fnSettings().jqXHR.responseText)[ dataName ],
+			options = $.parseJSON($this.oTable.fnSettings().jqXHR.responseText)[ dataName ];
+
+			// if 0 or 1 option, abort rendering
+			if (options.length <= 1) return;
 
 			// set the toggle btn
-			toggle = $('<a class="btn dropdown-toggle" data-toggle="dropdown" href="#">' + text + '<span class="caret" /></a>'),
+			var toggle = $('<a class="btn dropdown-toggle" data-toggle="dropdown" href="#">' + text + '<span class="caret" /></a>'),
 
 			// set the dropdown
 			dropdown = $('<ul class="dropdown-menu">' + $this._getSelectOptions(options) + '</ul>'),

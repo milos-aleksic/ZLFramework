@@ -72,6 +72,9 @@ class ZluxController extends AppController {
 		// init vars
 		$s_apps	 	= explode(',', $this->app->request->get('apps', 'string', ''));
 		$s_types	= explode(',', $this->app->request->get('types', 'string', ''));
+		$s_cats		= explode(',', $this->app->request->get('categories', 'string', ''));
+		$s_tags		= explode(',', $this->app->request->get('tags', 'string', ''));
+
 		$g_apps	 	= explode(',', $this->app->request->get('filter_apps', 'string', ''));
 		$g_types 	= explode(',', $this->app->request->get('filter_types', 'string', ''));
 		$g_cats		= explode(',', $this->app->request->get('filter_cats', 'string', ''));
@@ -87,6 +90,8 @@ class ZluxController extends AppController {
 		// filter values
 		$s_apps = array_filter($s_apps);
 		$s_types = array_filter($s_types);
+		$s_cats = array_filter($s_cats);
+		$s_tags = array_filter($s_tags);
 
 		$g_apps = array_filter($g_apps);
 		$g_types = array_filter($g_types);
@@ -137,34 +142,38 @@ class ZluxController extends AppController {
 
 			// get types list
 			foreach ($app->getTypes() as $type) {
-				// if type is not filtered or it is filtered array
-				if (empty($s_types) || in_array($type->id, $s_types)) {
+
+				// populate filter list
+				if (empty($s_types) || in_array($type->id, $s_types))
 					$aaTypes[] = array('name' => $type->name, 'id' => $type->id);
 
-					// types filtering
-					if (in_array($type->id, $g_types)) {
-						$model->type(array('value' => $type->id));
-					}
-				}
+				// set the filtering
+				if (in_array($type->id, $g_types))
+					$model->type(array('value' => $type->id));
 			}
 
 			// get categories list
 			$list = $this->app->tree->buildList(0, $app->getCategoryTree(), array(), '- ', '.   ', '  ');
 			foreach ($list as $category) {
-				$aaCats[] = array('name' => $category->treename, 'id' => $category->id);
 
-				// tag filtering
-				if (in_array($category->id, $g_cats)) {
+				// populate filter list
+				if (empty($s_cats) || in_array($category->id, $s_cats))
+					$aaCats[] = array('name' => $category->treename, 'id' => $category->id);
+
+				// set the filtering
+				if (in_array($category->id, $g_cats)) 
 					$model->categories(array('value' => array($category->id)));
-				}
 			}
 
 			// get tag list
 			$tags = $this->app->table->tag->getAll($app->id);
 			foreach ($tags as $key => $tag) {
-				$tags[$key] = array('name' => $tag->name, 'id' => $tag->name);
 
-				// tag filtering
+				// populate filter list
+				if (empty($s_tags) || in_array($tag->name, $s_tags))
+					$tags[$key] = array('name' => $tag->name, 'id' => $tag->name);
+
+				// set the filtering
 				if (in_array($tag->name, $g_tags)) {
 					$model->tags(array('value' => array($tag->name)));
 				}
