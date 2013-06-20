@@ -202,11 +202,11 @@ class plgSystemZlframeworkInstallerScript
 	}
 
 	/**
-	 * check extensions requirements
+	 * check requirements EXAMPLE
 	 *
 	 * @return  boolean  True on success
 	 */
-	protected function checkRequirementsEXAMPLE($parent)
+	protected function checkRequirements($parent)
 	{
 		/*
 		 * make sure Akeeba Subscription exist, is enabled
@@ -225,6 +225,19 @@ class plgSystemZlframeworkInstallerScript
 			$this->_error = "Akeeba Subscription v{$min_release} or higher required, please update it and retry the installation.";
 
 			return false;
+		}
+
+		/*
+		 * make sure ZLFW is up to date
+		 */
+		if($min_zlfw_release = $parent->get( "manifest" )->attributes()->zlfw)
+		{
+			$zlfw_manifest = simplexml_load_file(JPATH_ROOT.'/plugins/system/zlframework/zlframework.xml');
+
+			if( version_compare((string)$zlfw_manifest->version, (string)$min_zlfw_release, '<') ) {
+				$this->_error = "<a href=\"https://www.zoolanders.com/extensions/zl-framework\" target=\"_blank\">ZL Framework</a> v{$min_zlfw_release} or higher required, please update it and retry the installation.";
+				return false;
+			}
 		}
 
 		return true;
