@@ -15,10 +15,8 @@
 		options: {},
 		// var for internal events, must be reseted when expanding
 		events: {},
-		// save the Joomla Root url
-		JRoot: location.href.match(/^(.+)administrator\/index\.php.*/i)[1],
 		// save the AJAX URL
-		AjaxUrl: location.href.match(/^(.+)administrator\/index\.php.*/i)[1] + 'administrator/index.php?option=com_zoo&controller=zlux&format=raw',
+		AjaxUrl: 'administrator/index.php?option=com_zoo&controller=zlux&format=raw',
 		initialize: function(target, options) {
 			this.options = $.extend({}, this.options, options);
 			var $this = this;

@@ -1412,7 +1412,7 @@
 				],
 
 				// flash runtime settings
-				flash_swf_url : $this.JRoot + 'media/zoo/applications/docs/elements/contentarea/assets/plupload/Moxie.swf'
+				flash_swf_url: 'media/zoo/applications/docs/elements/contentarea/assets/plupload/Moxie.swf'
 			};
 
 			// if S3 storage
@@ -2007,7 +2007,7 @@
 
 				// if preview enabled render a mini preview of the file
 				if (preview) {
-					sThumb = '<div class="zlux-x-image"><img src="' + $this.JRoot + oData.path + '" /></div>'
+					sThumb = '<div class="zlux-x-image"><img src="' + oData.path + '" /></div>'
 				} else {
 					sThumb = '<span class="zlux-x-filetype">' + oData.ext + '</span>';
 				}
