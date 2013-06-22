@@ -56,33 +56,13 @@ class zlfwHelperHTML extends AppHelper {
 	 */
 	public function categoryList($application, $type=null, $root_cat=0, $maxLevel=9999, $hide_empty=false, $prefix='-&nbsp;', $spacer='.&nbsp;&nbsp;&nbsp;')
 	{
-		// get category tree list
-		$list = $this->app->tree->buildList($root_cat, $application->getCategoryTree(true, null, false), array(), $prefix, $spacer, '', 0, $maxLevel);
+		// get tree list
+		$cats = $this->app->tree->buildList($root_cat, $application->getCategoryTree(true, null, false), array(), $prefix, $spacer, '', 0, $maxLevel);
 
-		// create options
-		$categories = array();
-		foreach ($list as $category)
-		{
-			if ($hide_empty && $type) 
-			{
-				// set query
-				$model = $this->app->zlmodel->getNew('item');
-				$model	->setState('select', 'DISTINCT a.*')
-						->application(array('value' => $application->id))
-						->type(array('value'  => $type))
-						->categories(array('value' => array($category->id)));
+		// remove empty categories
+		if ($hide_empty) 
+			$cats = array_filter($cats, create_function('$category', 'return $category->totalItemCount();'));
 
-				// retrieve items
-				$items = $model->getList();
-
-				// if no items skip category
-				if (empty($items)) continue;
-			}
-			
-			// save category
-			$categories[] = $category;
-		}
-
-		return $categories;
+		return $cats;
 	}
 }
