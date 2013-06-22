@@ -129,6 +129,12 @@ abstract class ElementFilesPro extends ElementRepeatablePro {
 		return ($limit = $this->get('download_limit')) && $this->get('hits', 0) >= $limit;
 	}
 
+	/* DEPRICATED since 3.0.15 */
+	public function getExtension($file = null, $checkMime = true) {
+		$file = empty($file) ? $this->get('file') : $file;
+		return strtolower($this->app->zlfw->filesystem->getExtension($file, $checkMime));
+	}
+
 /* RENDER --------------------------------------------------------------------------------------------------------------------------- */
 
 	/*
