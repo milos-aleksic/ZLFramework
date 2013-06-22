@@ -124,7 +124,12 @@ $.fn.dataTableExt.oApi.fnReloadAjax = function ( oSettings, sNewSource, fnCallba
 };
 
 
-// Breadcrumb Feature
+/* ===================================================
+ * DT Breadcrumb
+ * ===================================================
+ * Copyright (C) JOOlanders SL 
+ * http://www.gnu.org/licenses/gpl-2.0.html GNU/GPLv2 only
+ * ========================================================== */
 $.fn.dataTableExt.aoFeatures.push({
 	"fnInit": function( oDTSettings ) {
 		return new DT_Breadcrumb( oDTSettings );
@@ -192,6 +197,61 @@ var DT_Breadcrumb = function ( oDTSettings )
 	})
 
 	return breadcrumb.get(0);
+}
+
+
+/* ===================================================
+ * DT Filtering
+ * ===================================================
+ * Copyright (C) JOOlanders SL 
+ * http://www.gnu.org/licenses/gpl-2.0.html GNU/GPLv2 only
+ * ========================================================== */
+$.fn.dataTableExt.aoFeatures.push({
+	"fnInit": function( oDTSettings ) {
+		return new DT_Filtering( oDTSettings );
+	},
+	"cFeature": "F",
+	"sFeature": "Filtering"
+});
+
+var DT_Filtering = function ( oSettings )
+{
+	// create the breadcrumb wrapper
+	var wrapper = $('<div class="zlux-x-filter-input_wrapper" />');
+
+	// prepare the input and it's events
+	var thread = null;
+	$('<input type="text" class="zlux-x-filter-input" />').on('keyup', function(e){
+		var val = $(this).val();
+
+		// clear any previous query execution
+		clearTimeout(thread);
+
+		// if input empty, reset search
+		if (val == '') DT_Filtering_search(oSettings, '');
+		
+		// perform search on enter key press
+		var code = (e.keyCode ? e.keyCode : e.which);
+		if (code == 13) {
+			// Enter key was pressed,
+			DT_Filtering_search(oSettings, val);
+		}
+
+		// queue the query
+		thread = setTimeout(function() { DT_Filtering_search(oSettings, val); }, 500); 
+	})
+
+	// add to wrapper
+	.appendTo(wrapper);
+
+	return wrapper[0];
+}
+
+var DT_Filtering_search = function ( oSettings, val )
+{
+	if ( val != oSettings.oPreviousSearch.sSearch ) {
+		oSettings.oInstance.fnFilter(val);
+	}
 }
 
 

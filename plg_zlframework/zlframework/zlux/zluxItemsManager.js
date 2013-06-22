@@ -54,7 +54,7 @@
 
 			// init dataTable
 			$this.oTable = $('table', wrapper).dataTable({
-				"sDom": "f<'row-fluid'<'span12't>><'row-fluid'<'span12'p>><'row-fluid'<'span12'i>>",
+				"sDom": "F<'row-fluid'<'span12't>><'row-fluid'<'span12'p>><'row-fluid'<'span12'i>>",
 				"bServerSide": true,
 				"iDisplayLength": 20,
 				"sAjaxSource": $this.AjaxUrl + '&task=ItemsManager',
@@ -126,10 +126,9 @@
 				],
 				"aoColumnDefs": [
 					{ "bVisible": false, "aTargets": [ 1, 2, 3, 4, 5 ] }
-					// { "bVisible": false, "aTargets": [ 2, 3, 4, 5, 6 ] }
 				],
 				"fnInitComplete": function(oSettings, data) {
-					var input_filter = $('.dataTables_filter', wrapper)
+					var input_filter = $('.zlux-x-filter-input_wrapper', wrapper)
 					
 					.append(
 						// set search icon
@@ -142,9 +141,6 @@
 							$this.oTable.fnFilter('');
 						})
 					);
-
-					// add class for CSS perfomance
-					$('label', input_filter).addClass('zlux-x-label');
 
 					// set search events
 					$('input', input_filter).on('keyup', function(){
@@ -529,7 +525,7 @@
 				);
 
 				// move the search field to the toolbar
-				$('.dataTables_filter', $this.oTable.fnSettings().nTableWrapper).appendTo(subtoolbar);
+				$('.zlux-x-filter-input_wrapper', $this.oTable.fnSettings().nTableWrapper).appendTo(subtoolbar);
 
 				// show the content
 				$this.zluxdialog.initContent();
