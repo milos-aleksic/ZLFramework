@@ -54,7 +54,7 @@
 
 			// init dataTable
 			$this.oTable = $('table', wrapper).dataTable({
-				"sDom": "F<'row-fluid'<'span12't>><'row-fluid'<'span12'p>><'row-fluid'<'span12'i>>",
+				"sDom": "F<'row-fluid'<'span12't>><'row-fluid'<'span12'p>><'row-fluid zlux-x-info'<'span12'i>>",
 				"bServerSide": true,
 				"iDisplayLength": 20,
 				"sAjaxSource": $this.AjaxUrl + '&task=ItemsManager',
@@ -76,10 +76,9 @@
 					aoData.push({ "name": "filter_tags", "value": tags });
 				},
 				"oLanguage": {
-					"sSearch": "_INPUT_",
-					"sEmptyTable": "No Items found",
+					"sEmptyTable": "No items found",
 					"sInfoEmpty": "",
-					"sInfo": "_END_ of _TOTAL_"
+					"sInfo": "Showing _START_ to _END_ of _TOTAL_ items"
 				},
 				"aoColumns":
 				[
@@ -383,7 +382,7 @@
 			$this.zluxdialog = new $.fn.zluxDialog({
 				title: $this.options.title,
 				width: $this.options.full_mode ? '75%' : 300,
-				dialogClass: 'zl-bootstrap zlux-itemsmanager ' + ($this.options.full_mode ? 'zlux-dialog-full' : 'zlux-dialog-mini'),
+				dialogClass: 'zl-bootstrap zlux-itemsmanager ' + ($this.options.full_mode ? 'zlux-dialog-full' : ''),
 				position: $.extend({
 					of: $this.dialogTrigger,
 					my: 'left top',

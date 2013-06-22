@@ -781,64 +781,35 @@
 		}
 	}
 
-	// min mode
-	&.zlux-dialog-mini {
-		// pagination adaption
-		.dataTables_paginate {
-			li {
-				display: none;
+	// PAGINATION
+	.pagination {
+		text-align: center;
 
-				a.prev {
-					float: left;
-					width: 112px;
-				}
-				a.next {
-					float: right;
-					width: 111px;
-				}
+		ul.zlux-x-pagination > li {
+			[class^="icon-"] {
+				font-size: 15px;
 			}
 
-			li.prev,
-			li.next {
-				display: inline;
+			& > a {
+				padding: 4px 13px;
+			}
+
+			a.zlux-x-btn {
+				padding: 6px 13px;
 			}
 		}
 	}
 
-	// full mode
-	&.zlux-dialog-full {
+	// INFO
+	.zlux-x-info {
+		margin-bottom: 0;
 
-		table.table {
-			margin-top: 6px !important;
-			margin-bottom: 6px !important;
+		.span12 {
+			min-height: 0;
 		}
 
-		// rows
-		.row-fluid {
-			margin-bottom: 0;
-		}
-
-		// search input
-		div.dataTables_filter {
-			input {
-				width: 200px;
-			}
-
-			label {
-				float: right;
-			}
-		}
-
-		// footer
-		.row-footer {
-			position: absolute;
-			bottom: 0;
-			left: 0;
-		}
-
-		// pagination adaption
-		.dataTables_paginate {
-			li {display: inline}
+		.dataTables_info {
+			text-align: center;
 		}
 	}
 }

@@ -69,10 +69,8 @@
 			$this.oTable = $('table', wrapper).dataTable({
 				"sDom": "F<'row-fluid'<'span12'B>><'row-fluid'<'span12't>>",
 				"oLanguage": {
-					"sSearch": "_INPUT_",
-					"sEmptyTable": "No Files found",
-					"sInfoEmpty": "",
-					"sInfo": "Showing _END_ of _TOTAL_ Files"
+					"sEmptyTable": "No files found",
+					"sInfoEmpty": ""
 				},
 				"sAjaxUrl": $this.AjaxUrl,
 				"sAjaxSource": source,
@@ -733,7 +731,7 @@
 			$this.zluxdialog = $.fn.zluxDialog({
 				title: $this.options.title,
 				width: $this.options.full_mode ? '75%' : 300,
-				dialogClass: 'zl-bootstrap zlux-filesmanager ' + ($this.options.full_mode ? 'zlux-dialog-full' : 'zlux-dialog-mini'),
+				dialogClass: 'zl-bootstrap zlux-filesmanager ' + ($this.options.full_mode ? 'zlux-dialog-full' : ''),
 				position: ($this.options.full_mode == false ? {
 					of: $this.dialogTrigger,
 					my: 'left top',
