@@ -42,7 +42,7 @@
 		 * Returns the ZLUX Ajax URL
 		 */
 		AjaxURL: function() {
-			return this.JRoot() + 'administrator/index.php?option=com_zoo&controller=zlux&format=raw';
+			return this.JRoot() + 'index.php?option=com_zoo&controller=zlux&format=raw';
 		},
 		/**
 		 * Dispatches the specified event name and it's arguments to all listeners.

@@ -1412,7 +1412,7 @@
 				],
 
 				// flash runtime settings
-				flash_swf_url: $this.JRoot() + 'media/zoo/applications/docs/elements/contentarea/assets/plupload/Moxie.swf'
+				flash_swf_url: $this.JRoot() + 'plugins/system/zlframework/zlframework/zlux/assets/plupload/Moxie.swf'
 			};
 
 			// if S3 storage

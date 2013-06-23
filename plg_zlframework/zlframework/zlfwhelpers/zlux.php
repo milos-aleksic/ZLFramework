@@ -23,11 +23,13 @@ class zlfwHelperZLUX extends AppHelper {
 		// ZLUX Main
 		$this->loadMainAssets();
 
-		// dataTables
 		if(!JDEBUG){
+			// DataTables
 			$this->app->document->addScript('zlfw:zlux/assets/datatables/dataTables.with.plugins.min.js');
-		} else {
-			// Site in debug Mode
+			
+		} else { // Site in debug Mode
+			
+			// DataTables
 			$this->app->document->addScript('zlfw:zlux/assets/datatables/dataTables.js');
 			$this->app->document->addScript('zlfw:zlux/assets/datatables/dataTables.plugins.js');
 		}
@@ -44,17 +46,23 @@ class zlfwHelperZLUX extends AppHelper {
 		// ZLUX Core
 		$this->loadMainAssets();
 
-		// dataTables
 		if(!JDEBUG) {
+			// DataTables
 			$this->app->document->addScript('zlfw:zlux/assets/datatables/dataTables.with.plugins.min.js');
-		} else {
-			// Site in debug Mode
+
+			// plupload
+			$this->app->document->addScript('zlfw:zlux/assets/plupload/plupload.full.min.js');
+		
+		} else { // Site in debug Mode
+
+			// DataTables
 			$this->app->document->addScript('zlfw:zlux/assets/datatables/dataTables.js');
 			$this->app->document->addScript('zlfw:zlux/assets/datatables/dataTables.plugins.js');
-		}
 
-		// plupload
-		$this->app->document->addScript('zlfw:zlux/assets/plupload/plupload.full.min.js');
+			// plupload
+			$this->app->document->addScript('zlfw:zlux/assets/plupload/moxie.js');
+			$this->app->document->addScript('zlfw:zlux/assets/plupload/plupload.dev.js');
+		}
 
 		// nanoScroller
 		$this->app->document->addScript('zlfw:zlux/assets/nanoscroller/nanoscroller.min.js');
@@ -107,7 +115,7 @@ class zlfwHelperZLUX extends AppHelper {
 			define('PLG_ZLFRAMEWORK_ZLUX_SCRIPT_DECLARATION', true);
 
 			// save Joomla root URL
-			$javascript .= "jQuery.fn.zluxMain.prototype.JRoot = '" . JURI::root() . "';";
+			$javascript = "jQuery.fn.zluxMain.prototype.JRoot = '" . JURI::root() . "';";
 
 			// load the script
 			$this->app->document->addScriptDeclaration($javascript);
