@@ -43,6 +43,22 @@ abstract class ElementFilesPro extends ElementRepeatablePro {
 		
 		// set joomla file path
 		$this->_joomla_file_path = $params->get('file_path') ? $params->get('file_path') : 'images';
+
+		$this->app->event->dispatcher->connect('item:saved', array($this, 'itemSaved'));
+	}
+
+	/**
+	 * Actions for item:saved event
+	 */
+	public function itemSaved($event)
+	{
+		$item = $event->getSubject();
+		$new = $event['new'];
+		$element = $item->getElement($this->identifier);
+
+		if ($new)
+			// if Item is new, move uploaded files from temp folder. Used with [zooitemid] path var
+			$element->storage()->move('tmp/zl-' . $element->identifier, $element->getDirectory(false, $item));
 	}
 
 	/*
@@ -299,7 +315,7 @@ abstract class ElementFilesPro extends ElementRepeatablePro {
 		}
 
 		// set the storage root
-		$storage['root'] = trim($this->config->find('files._source_dir', 'images'));
+		$storage['root'] = $this->getDirectory();
 
 		return "<span class=\"zlux-x-filedata\" data-zlux-data='" . json_encode($this->getFileDetails($file, false)) 
 			. "' data-zlux-storage='" . json_encode($storage) . "'></span>";
@@ -328,10 +344,14 @@ abstract class ElementFilesPro extends ElementRepeatablePro {
 	 * Adapted to ZOO (ZOOlanders.com)
 	 * Copyright 2011, ZOOlanders.com
 	 */
-	public function getDirectory($allowroot = false)
+	public function getDirectory($allowroot = false, $item = false)
 	{
 		$user = JFactory::getUser();
-		$item = $this->getItem();
+		$item = $item ? $item : $this->getItem();
+
+		// if item is new return temporal path
+		if (!$item->id) return 'tmp/zl-' . $this->identifier;
+		
 
 		// Get base directory as shared parameter
 		$root = $this->config->find('files._source_dir', $this->_joomla_file_path);
@@ -339,7 +359,6 @@ abstract class ElementFilesPro extends ElementRepeatablePro {
 		// Restricted Joomla! folders
 		$restricted = explode(',', 'administrator,cache,components,includes,language,libraries,logs,media,modules,plugins,templates,xmlrpc');
 		
-
 		// Remove whitespace
 		$root = trim($root);
 		// Convert slashes / Strip double slashes
@@ -374,16 +393,16 @@ abstract class ElementFilesPro extends ElementRepeatablePro {
 		$pattern = array(
 			'/\[userid\]/', '/\[username\]/', '/\[usertype\]/',
 			'/\[zooapp\]/', '/\[zooprimarycat\]/', '/\[zooprimarycatid\]/',
-			'/\[zooitemtype\]/',
+			'/\[zooitemtype\]/', '/\[zooitemid\]/',
 			'/\[day\]/', '/\[month\]/', '/\[year\]/'
 		);
 		$replace = array(
 			$user->id, $user->username, $usertype,
 			strtolower($item->getApplication()->name), ($item->getPrimaryCategory() ? $item->getPrimaryCategory()->alias : 'none'), $item->getPrimaryCategoryId(),
-			$this->_item->type,
+			$this->_item->type, $item->id,
 			date('d'), date('m'), date('Y')
 		);
-		
+
 		$root = preg_replace($pattern, $replace, $root);
 
 		// split into path parts to preserve /
@@ -393,14 +412,7 @@ abstract class ElementFilesPro extends ElementRepeatablePro {
 		// join path parts
 		$root = implode('/', $parts);
 		
-		// Create the folder
-		$full = $this->app->zlfilesystem->makePath(JPATH_SITE, $root);
-		if (!$this->config->find('files._s3', 0) && !JFolder::exists($full))
-		{
-			$this->app->zlfilesystem->folderCreate($full);
-			return JFolder::exists($full) ? $root : $this->_joomla_file_path;
-		}
-		
+		// return the result
 		return $root;
 	}
 	
@@ -772,5 +784,4 @@ class FilesProSplFileInfo extends SplFileInfo
 		// return without _ carachter
 		return str_replace('_', ' ', $title);
 	}
-
 }
