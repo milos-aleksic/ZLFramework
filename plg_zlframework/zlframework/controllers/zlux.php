@@ -387,6 +387,9 @@ class ZluxController extends AppController {
 		// clean the destination path
 		$dest = dirname($dest) . '/' . $this->app->zlfilesystem->makeSafe(basename($dest), 'ascii');
 
+		// workaround as the path does not exist yet
+		$dest = dirname($src) . '/' . basename($dest);
+
 		// init storage
 		switch($storage) {
 			case 's3':

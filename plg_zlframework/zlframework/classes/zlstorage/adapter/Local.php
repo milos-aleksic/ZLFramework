@@ -79,10 +79,10 @@ class ZLStorageAdapterLocal extends ZLStorageAdapterBase implements ZLStorageAda
 	public function createFolder($path)
 	{
 		$result = false;
-		$path = $this->app->path->path('root:' . dirname($path)) . '/' . basename($path); // workaround as the path does not exist yet
+		$path = $this->app->path->path('root:') . '/' . $path;
 
-		// clean paths if valid
-		$path = $path ? JPath::clean($path) : false;
+		// clean path
+		$path = JPath::clean($path);
 
 		if (JFolder::exists($path)) {
 			$this->setError('The folder already exists.');
@@ -111,26 +111,24 @@ class ZLStorageAdapterLocal extends ZLStorageAdapterBase implements ZLStorageAda
 	public function move($src, $dest)
 	{
 		$result = false;
-		$src = $this->app->path->path('root:' . $src);
-		$dest = dirname($src) . '/' . basename($dest); // workaround as the path does not exist yet
+		$_src = $this->app->path->path('root:' . $src);
 
-		// clean paths if valid
-		$src = $src ? JPath::clean($src) : false;
-		$dest = $dest ? JPath::clean($dest) : false;
-
-		if (!is_readable($src)) {
+		if (!is_readable($_src)) {
 			$this->setError('Permission denied or object not found.');
 			return $result;
-		} else if (is_file($src)) {
-			$result = JFile::move($src, $dest);
-		} else if (is_dir($src)) {
-			$result = JFolder::move($src, $dest);
+		} else if (is_file($_src)) {
+			$result = JFile::move($src, $dest, $this->app->path->path('root:'));
+		} else if (is_dir($_src)) {
+			$result = JFolder::move($src, $dest, $this->app->path->path('root:'));
 		}
 
 		// if something went wrong, report
-		if ($result !== true) {
-			$result = false;
+		if ($result === false) {
 			$this->setError('Something went wrong, the task was not performed.');
+		} else if ($result !== true) {
+			// report the error message
+			$this->setError($result);
+			$result = false;
 		}
 
 		return $result;
