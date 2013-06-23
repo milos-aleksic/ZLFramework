@@ -59,7 +59,7 @@
 		},
 		initDataTable: function(wrapper) {
 			var $this = this,
-				source = $this.AjaxUrl + '&task=getFilesManagerData';
+				source = $this.AjaxURL() + '&task=getFilesManagerData';
 
 			// set table
 			$('<table cellpadding="0" cellspacing="0" border="0" class="table table-striped table-bordered" />')
@@ -72,7 +72,7 @@
 					"sEmptyTable": "No files found",
 					"sInfoEmpty": ""
 				},
-				"sAjaxUrl": $this.AjaxUrl,
+				"sAjaxUrl": $this.AjaxURL(),
 				"sAjaxSource": source,
 				"sServerMethod": "POST",
 				"sStartRoot": $this.cleanPath($this.options.root),
@@ -448,7 +448,7 @@
 			return $.Deferred(function( defer )
 			{
 				$.ajax({
-					"url": $this.AjaxUrl + "&task=deleteObject",
+					"url": $this.AjaxURL() + "&task=deleteObject",
 					"data": aoData,
 					"dataType": "json",
 					"type": "post"
@@ -501,7 +501,7 @@
 			return $.Deferred(function( defer )
 			{
 				$.ajax({
-					"url": $this.AjaxUrl + "&task=newFolder",
+					"url": $this.AjaxURL() + "&task=newFolder",
 					"data": aoData,
 					"dataType": "json",
 					"type": "post"
@@ -623,7 +623,7 @@
 			return $.Deferred(function( defer )
 			{
 				$.ajax({
-					"url": $this.AjaxUrl + "&task=moveObject",
+					"url": $this.AjaxURL() + "&task=moveObject",
 					"data": aoData,
 					"dataType": "json",
 					"type": "post"
@@ -1127,7 +1127,7 @@
 
 					// validate file name
 					$.ajax({
-						"url": $this.AjaxUrl + '&task=validateObjectName',
+						"url": $this.AjaxURL() + '&task=validateObjectName',
 						"type": 'post',
 						"data":{
 							name: file.name
@@ -1406,13 +1406,13 @@
 				browse_button: $('.zlux-upload-browse', $this.upload)[0],
 				drop_element: $this.dropzone[0], 
 				max_file_size: undefined, // controlled by ZLUX Upload
-				url: $this.AjaxUrl + '&task=upload',
+				url: $this.AjaxURL() + '&task=upload',
 				filters: [ // Specify what files to browse for
 					{title: "Files", extensions: this.options.extensions}
 				],
 
 				// flash runtime settings
-				flash_swf_url: $this.JRoot + 'media/zoo/applications/docs/elements/contentarea/assets/plupload/Moxie.swf'
+				flash_swf_url: $this.JRoot() + 'media/zoo/applications/docs/elements/contentarea/assets/plupload/Moxie.swf'
 			};
 
 			// if S3 storage
@@ -2007,7 +2007,7 @@
 
 				// if preview enabled render a mini preview of the file
 				if (preview) {
-					sThumb = '<div class="zlux-x-image"><img src="' + $this.JRoot + oData.path + '" /></div>'
+					sThumb = '<div class="zlux-x-image"><img src="' + $this.JRoot() + oData.path + '" /></div>'
 				} else {
 					sThumb = '<span class="zlux-x-filetype">' + oData.ext + '</span>';
 				}

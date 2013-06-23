@@ -79,6 +79,9 @@ class zlfwHelperZLUX extends AppHelper {
 
 		// ZL Bootstrap
 		$this->loadBootstrap(true);
+
+		// load Variables
+		$this->loadVariables();
 	}
 
 	/**
@@ -92,6 +95,23 @@ class zlfwHelperZLUX extends AppHelper {
 		// if stated load JS too
 		if ($loadJS) 
 			$this->app->document->addScript('zlfw:zlux/zlbootstrap/js/bootstrap.min.js');
+	}
+
+	/**
+	 * Load JS Variables
+	 */
+	public function loadVariables()
+	{
+		if (!defined('PLG_ZLFRAMEWORK_ZLUX_SCRIPT_DECLARATION'))
+		{
+			define('PLG_ZLFRAMEWORK_ZLUX_SCRIPT_DECLARATION', true);
+
+			// save Joomla root URL
+			$javascript .= "jQuery.fn.zluxMain.prototype.JRoot = '" . JURI::root() . "';";
+
+			// load the script
+			$this->app->document->addScriptDeclaration($javascript);
+		}
 	}
 
 	/**

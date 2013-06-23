@@ -15,10 +15,6 @@
 		options: {},
 		// var for internal events, must be reseted when expanding
 		events: {},
-		// Joomla Root url
-		JRoot: '',
-		// save the AJAX URL
-		AjaxUrl: 'administrator/index.php?option=com_zoo&controller=zlux&format=raw',
 		/**
 		 * A cache factory that will abstract out the actual task to be performed when a key isn't in the cache yet
 		 *
@@ -35,6 +31,18 @@
 				}
 				return cache[ key ].done( callback );
 			};
+		},
+		/**
+		 * Returns the Joomla root URL
+		 */
+		JRoot: function() {
+			return $.fn[Plugin.prototype.name].prototype.JRoot;
+		},
+		/**
+		 * Returns the ZLUX Ajax URL
+		 */
+		AjaxURL: function() {
+			return this.JRoot() + 'administrator/index.php?option=com_zoo&controller=zlux&format=raw';
 		},
 		/**
 		 * Dispatches the specified event name and it's arguments to all listeners.
@@ -175,12 +183,14 @@
 	});
 	// save the plugin for global use
 	$.fn[Plugin.prototype.name] = Plugin;
-	// save the Joomla Root URL
-	if (location.href.match(/^(.+)administrator\/index\.php.*/i)) {
-		var href = location.href.match(/^(.+)administrator\/index\.php.*/i)[1];
-		$.fn[Plugin.prototype.name].prototype.JRoot = href;
-		$.fn[Plugin.prototype.name].prototype.AjaxUrl = href + 'administrator/index.php?option=com_zoo&controller=zlux&format=raw'
-	}
+
+
+	// // save the Joomla Root URL
+	// if (location.href.match(/^(.+)administrator\/index\.php.*/i)) {
+	// 	var href = location.href.match(/^(.+)administrator\/index\.php.*/i)[1];
+	// 	$.fn[Plugin.prototype.name].prototype.JRoot = href;
+	// 	$.fn[Plugin.prototype.name].prototype.AjaxUrl = href + 'administrator/index.php?option=com_zoo&controller=zlux&format=raw'
+	// }
 })(jQuery);
 
 

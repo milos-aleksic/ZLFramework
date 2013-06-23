@@ -57,7 +57,7 @@
 				"sDom": "F<'row-fluid'<'span12't>><'row-fluid'<'span12'p>><'row-fluid zlux-x-info'<'span12'i>>",
 				"bServerSide": true,
 				"iDisplayLength": 20,
-				"sAjaxSource": $this.AjaxUrl + '&task=ItemsManager',
+				"sAjaxSource": $this.AjaxURL() + '&task=ItemsManager',
 				"fnServerParams": function (aoData) {
 					// determine what filter values to use
 					var apps = $this.filter.apps ? $this.filter.apps : $this.options.apps,
