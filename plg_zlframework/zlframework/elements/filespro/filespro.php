@@ -26,8 +26,8 @@ abstract class ElementFilesPro extends ElementRepeatablePro {
 	protected $_jfile_path;
 	protected $_storage;
 	protected $_resources;
-
-	/* this file INDEX - render, edit, file manager, submissions */
+	protected $_uniqid;
+	protected $_directory;
 
 	/*
 	   Function: Constructor
@@ -44,21 +44,54 @@ abstract class ElementFilesPro extends ElementRepeatablePro {
 		// set joomla file path
 		$this->_joomla_file_path = $params->get('file_path') ? $params->get('file_path') : 'images';
 
+		// set the events
 		$this->app->event->dispatcher->connect('item:saved', array($this, 'itemSaved'));
 	}
 
-	/**
-	 * Actions for item:saved event
-	 */
+	/*
+		Function: itemSaved
+			Performs actions after item was saved
+	*/
 	public function itemSaved($event)
 	{
 		$item = $event->getSubject();
-		$new = $event['new'];
-		$element = $item->getElement($this->identifier);
+		$elem = $item->getElement($this->identifier);
 
-		if ($new)
-			// if Item is new, move uploaded files from temp folder. Used with [zooitemid] path var
-			$element->storage()->move('tmp/zl-' . $element->identifier, $element->getDirectory(false, $item));
+		// if the Item is new
+		if ($event['new']) {
+
+			/* when using dynamic var such as [zooitemid] we need to store the files in a temporal
+			   folder as we ignore that var until the item is saved. Then we can move them */
+			$old_path = 'tmp/zl_' . $this->identifier . '_' . $item->elements->find("{$this->identifier}.0.uniqid");
+			$new_path = $elem->getDirectory(false, $item);
+
+			// move uploaded files to new path, if succesfull...
+			if ($elem->storage()->move($old_path, $new_path)) {
+				// update item data
+				$data = $elem->data();
+				foreach ($data as &$instance) {
+					$instance['file'] = str_replace($old_path, $new_path, $instance['file']);
+				}
+				$item->elements->set($this->identifier, $data);
+				$this->app->table->item->save($item);
+			}
+		}
+	}
+
+	/*
+		Function: getUniqueid
+			Returns an unique id used for temporal storage folder
+
+		Returns:
+			String - The ID
+	*/
+	public function getUniqid()
+	{
+		if (!$this->_uniqid && $this->_item->id == 0) {
+			$this->_uniqid = $this->get('uniqid') ? $this->get('uniqid') : uniqid();
+		}
+		
+		return $this->_uniqid;
 	}
 
 	/*
@@ -317,8 +350,14 @@ abstract class ElementFilesPro extends ElementRepeatablePro {
 		// set the storage root
 		$storage['root'] = $this->getDirectory();
 
-		return "<span class=\"zlux-x-filedata\" data-zlux-data='" . json_encode($this->getFileDetails($file, false)) 
+		$html = "<span class=\"zlux-x-filedata\" data-zlux-data='" . json_encode($this->getFileDetails($file, false)) 
 			. "' data-zlux-storage='" . json_encode($storage) . "'></span>";
+
+		if ($uniqid = $this->getUniqid()) {
+			$html .= '<input type="hidden" value="' . $uniqid . '" name="' . $this->getControlName('uniqid') . '">';
+		}
+
+		return $html;
 	}
 	
 	/*
@@ -332,7 +371,7 @@ abstract class ElementFilesPro extends ElementRepeatablePro {
 		$extensions = $this->config->find('files._extensions', $this->_extensions);
 		return str_replace('|', $separator, $extensions);
 	}
-	
+
 	/*
 	 * Return the full directory path
 	 *
@@ -346,74 +385,80 @@ abstract class ElementFilesPro extends ElementRepeatablePro {
 	 */
 	public function getDirectory($allowroot = false, $item = false)
 	{
-		$user = JFactory::getUser();
-		$item = $item ? $item : $this->getItem();
+		if (!$this->_directory)
+		{
+			$user = JFactory::getUser();
+			$item = $item ? $item : $this->getItem();
 
-		// if item is new return temporal path
-		if (!$item->id) return 'tmp/zl-' . $this->identifier;
-		
+			// if item is new return temporal path
+			if (!$item->id) return 'tmp/zl_' . $this->identifier . '_' . $this->getUniqid();
 
-		// Get base directory as shared parameter
-		$root = $this->config->find('files._source_dir', $this->_joomla_file_path);
-		
-		// Restricted Joomla! folders
-		$restricted = explode(',', 'administrator,cache,components,includes,language,libraries,logs,media,modules,plugins,templates,xmlrpc');
-		
-		// Remove whitespace
-		$root = trim($root);
-		// Convert slashes / Strip double slashes
-		$root = preg_replace('/[\\\\]+/', '/', $root);
-		// Remove first leading slash
-		$root = ltrim($root, '/');
-		
-		// Split in parts to better manage
-		$parts = explode('/', $root);
-		// Force default directory if path starts with a variable, a . or is empty
-		if (preg_match('/[\.\[]/', $parts[0]) || (empty($root) && !$allowroot)) {
-			$parts[0] = $this->_joomla_file_path;
+
+			// Get base directory as shared parameter
+			$root = $this->config->find('files._source_dir', $this->_joomla_file_path);
+			
+			// Restricted Joomla! folders
+			$restricted = explode(',', 'administrator,cache,components,includes,language,libraries,logs,media,modules,plugins,templates,xmlrpc');
+			
+			// Remove whitespace
+			$root = trim($root);
+			// Convert slashes / Strip double slashes
+			$root = preg_replace('/[\\\\]+/', '/', $root);
+			// Remove first leading slash
+			$root = ltrim($root, '/');
+			
+			// Split in parts to better manage
+			$parts = explode('/', $root);
+			// Force default directory if path starts with a variable, a . or is empty
+			if (preg_match('/[\.\[]/', $parts[0]) || (empty($root) && !$allowroot)) {
+				$parts[0] = $this->_joomla_file_path;
+			}
+			// Force default if directory is a joomla directory conserving the variables
+			if (!$allowroot && in_array(strtolower($parts[0]), $restricted)) {
+				$parts[0] = $this->_joomla_file_path;
+			}
+			// join back
+			$root = implode('/', $parts);
+			
+			jimport('joomla.user.helper');
+			// Joomla! 1.6+
+			if (method_exists('JUserHelper', 'getUserGroups')) {
+				$groups 	= JUserHelper::getUserGroups($user->id);
+				$groups		= array_keys($groups);
+				$usertype 	= array_shift($groups);												
+			} else {
+				$usertype 	= $user->usertype;
+			}
+
+			// Replace any path variables
+			$pattern = array(
+				'/\[userid\]/', '/\[username\]/', '/\[usertype\]/',
+				// '/\[authorid\]/', '/\[authorname\]/', '/\[authortype\]/',
+				'/\[zooapp\]/', '/\[zooprimarycat\]/', '/\[zooprimarycatid\]/',
+				'/\[zooitemtype\]/', '/\[zooitemid\]/',
+				'/\[day\]/', '/\[month\]/', '/\[year\]/'
+			);
+			$replace = array(
+				$user->id, $user->username, $usertype,
+				strtolower($item->getApplication()->name), ($item->getPrimaryCategory() ? $item->getPrimaryCategory()->alias : 'none'), $item->getPrimaryCategoryId(),
+				$this->_item->type, $item->id,
+				date('d'), date('m'), date('Y')
+			);
+
+			$root = preg_replace($pattern, $replace, $root);
+
+			// split into path parts to preserve /
+			$parts = explode('/', $root);
+			// clean path parts
+			$parts = $this->app->zlfilesystem->makeSafe($parts, 'ascii');
+			// join path parts
+			$root = implode('/', $parts);
+			
+			// return the result
+			$this->_directory = $root;
 		}
-		// Force default if directory is a joomla directory conserving the variables
-		if (!$allowroot && in_array(strtolower($parts[0]), $restricted)) {
-			$parts[0] = $this->_joomla_file_path;
-		}
-		// join back
-		$root = implode('/', $parts);
-		
-		jimport('joomla.user.helper');
-		// Joomla! 1.6+
-		if (method_exists('JUserHelper', 'getUserGroups')) {
-			$groups 	= JUserHelper::getUserGroups($user->id);
-			$groups		= array_keys($groups);
-			$usertype 	= array_shift($groups);												
-		} else {
-			$usertype 	= $user->usertype;
-		}
 
-		// Replace any path variables
-		$pattern = array(
-			'/\[userid\]/', '/\[username\]/', '/\[usertype\]/',
-			'/\[zooapp\]/', '/\[zooprimarycat\]/', '/\[zooprimarycatid\]/',
-			'/\[zooitemtype\]/', '/\[zooitemid\]/',
-			'/\[day\]/', '/\[month\]/', '/\[year\]/'
-		);
-		$replace = array(
-			$user->id, $user->username, $usertype,
-			strtolower($item->getApplication()->name), ($item->getPrimaryCategory() ? $item->getPrimaryCategory()->alias : 'none'), $item->getPrimaryCategoryId(),
-			$this->_item->type, $item->id,
-			date('d'), date('m'), date('Y')
-		);
-
-		$root = preg_replace($pattern, $replace, $root);
-
-		// split into path parts to preserve /
-		$parts = explode('/', $root);
-		// clean path parts
-		$parts = $this->app->zlfilesystem->makeSafe($parts, 'ascii');
-		// join path parts
-		$root = implode('/', $parts);
-		
-		// return the result
-		return $root;
+		return $this->_directory;
 	}
 	
 /* SUBMISSIONS ------------------------------------------------------------------------------------------------------------------------  */
