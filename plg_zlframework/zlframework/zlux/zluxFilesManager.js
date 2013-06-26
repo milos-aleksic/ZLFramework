@@ -561,7 +561,7 @@
 					// and path data
 					$object.dom.attr('data-id', new_name);
 
-					// update the object data, as it's a reference to DT data it will be also updated :)
+					// update the object data, and as it's a reference to DataTables data it will be also updated :)
 					$object.name = new_name;
 					$object.basename = new_name.replace(/\.+[a-zA-Z]+$/g, '');
 					$object.path = $object.path.replace(/(\w|[-.])+$/, new_name);
@@ -862,6 +862,9 @@
 
 						// show the filesmanager view
 						$('.zlux-filesmanager', $this.zluxdialog.content).fadeIn('400');
+
+						// refresh the uploader file list
+						$this.zluxupload._updateFilelist();
 
 						// refresh dialog scroll
 						$this.zluxdialog.scrollbar('refresh');
@@ -1179,6 +1182,23 @@
 
 				// set the OK icon
 				$('.zlux-x-object-icon', $object.dom).removeClass('icon-file-alt').addClass('icon-ok');
+
+				// set the link for inminent selection
+				$('.zlux-x-name', $object.dom).wrapInner('<a class="zlux-x-name-link" href="#" />').end()
+
+				.on('click', 'a', function(){
+
+					// get the uploaded object dom from the files manager
+					var object_dom = $('.zlux-object[data-id="' + $object.name + '"]', $this.filesmanager);
+
+					// get updated object data
+					$object = $this.oTable.fnGetData( object_dom[0] );
+
+					// trigger event 
+					$this.trigger("ObjectSelected", $object);
+
+					return false;
+				});
 			})
 
 			// when file upload fails
@@ -1251,6 +1271,47 @@
 					// disable the upload btn
 					$this.zluxdialog.toolbarBtnState(2, 'start', 'disabled');
 				}
+			})
+
+			// listen to File Errors event
+			.bind("FileError", function($up, $object, message) {
+
+				// resolve the uploading deferrer, if any
+				if ($this.uploading && $this.uploading.state() == 'pending') {
+					$this.uploading.reject(message);
+
+					return;
+				}
+
+				if (!$object.dom[0]) {
+
+					// render the dom
+					$object.dom = $('<tr id="' + $object.id + '" class="zlux-object" />').append(
+
+						$('<td class="column-icon" />').append('<i class="icon-file-alt zlux-x-object-icon" />'),
+
+						$('<td class="column-name" />').append(
+							$this.renderObjectDOM($object)
+						)
+					)
+
+					.appendTo($up.filelist);
+
+					// refresh the filelist
+					$up._updateFilelist();
+				}
+
+				// set the fail icon
+				$('.zlux-x-object-icon', $object.dom).removeClass('icon-file-alt').addClass('icon-warning-sign');
+
+				// render the message
+				var msg = $this.pushMessageToObject($object, message);
+
+				// delete the 'remove' msg option, as this message can not be ignored
+				$('.zlux-x-msg-remove', msg).remove();
+
+				// set status, necesary?
+				// $file.attr('data-zlux-status', 'error');
 			})
 		}
 	});
@@ -1330,31 +1391,6 @@
 			})
 
 			$this.initFilelist();
-			
-			// listen to File Errors event
-			$this.bind("FileError", function(up, $object, message) {
-
-				// resolve the uploading deferrer, if any
-				if ($this.uploading && $this.uploading.state() == 'pending') {
-					$this.uploading.reject(message);
-
-					return;
-				}
-
-				// else render the error message
-
-				// set the fail icon
-				$('.zlux-x-object-icon', $object.dom).removeClass('icon-file-alt').addClass('icon-warning-sign');
-
-				// render the message
-				var msg = $this.pushMessageToObject($object, message);
-
-				// delete the 'remove' msg option, as this message can not be ignored
-				$('.zlux-x-msg-remove', msg).remove();
-
-				// set status, necesary?
-				// $file.attr('data-zlux-status', 'error');
-			})
 
 			// init plupload
 			$this.initPlupload();
@@ -1369,7 +1405,7 @@
 			var $this = this;
 
 			$this.filelist =
-			$('<table cellpadding="0" cellspacing="0" border="0" class="table table-striped table-bordered zlux-upload-filelist"><tbody /></table>')
+			$('<table cellpadding="0" cellspacing="0" border="0" class="zlux-upload-filelist table table-striped table-bordered"><tbody /></table>')
 			.appendTo($this.upload)
 
 			// remove file from files function
@@ -1383,13 +1419,19 @@
 
 				// proceede if file is not being uploaded currently
 				// or if file undefined, could happen if file added twice but deleted once
-				if (file == 'undefined' || file.zlux_status != plupload.STARTED && file.status != plupload.UPLOADING) {
+				if (file && (file == 'undefined' || file.zlux_status != plupload.STARTED && file.status != plupload.UPLOADING)) {
 
 					// remove from upload queue
 					$this.uploader.removeFile(file);
 
 					// remove from dom
 					$object.remove();
+				} else {
+					// just remove from dom
+					$object.remove();
+
+					// refresh list
+					$this._updateFilelist();
 				}
 			})
 		},
@@ -1551,7 +1593,14 @@
 					message += " <br /><i>" + details + "</i>";
 				}
 
-				var $object = file; // set the file as zlux object
+				// prepare object
+				var $object = {
+					name: file.name,
+					basename: file.name.replace(/(\.[a-z0-9]+)$/, ''),
+					type: 'file', // upload folders is not yet posible
+					content_type: file.type,
+					size: {size: file.size, display: plupload.formatSize(file.size)}
+				}
 
 				// add the file dom
 				$object.dom = $('#' + file.id, $this.filelist);
@@ -1617,8 +1666,16 @@
 		 * Fires when a file is to be uploaded by the runtime.
 		 */
 		eventUploadFile: function(file) {
-			var $this = this,
-				$object = file; // set the file as zlux object
+			var $this = this;
+
+			// prepare object
+			var $object = {
+				name: file.name,
+				basename: file.name.replace(/(\.[a-z0-9]+)$/, ''),
+				type: 'file', // upload folders is not yet posible
+				content_type: file.type,
+				size: {size: file.size, display: plupload.formatSize(file.size)}
+			}
 
 			// add the file dom
 			$object.dom = $('#' + file.id, $this.filelist);
@@ -1752,7 +1809,8 @@
 		},
 		_updateFilelist: function() {
 			var $this = this,
-				queued = false;
+				queued = false,
+				objects = $('.zlux-object', $this.filelist); // there could be empty objects, wrong file ext for ex
 
 			// foreach file
 			$.each($this.uploader.files, function(index, file) {
@@ -1770,13 +1828,13 @@
 			})
 
 			// if files left
-			if ($this.uploader.files.length) {
+			if ($this.uploader.files.length || objects.length) {
 				// hide the dropzone msg
 				$('.zlux-upload-dropzone-msg', $this.upload).hide();
 			}
 
 			// if no files left
-			if (!$this.uploader.files.length) {
+			if (!$this.uploader.files.length && !objects.length) {
 
 				// update the upload status
 				$this.upload.attr('data-zlux-status', '');
