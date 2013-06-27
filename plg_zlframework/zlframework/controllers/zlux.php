@@ -510,6 +510,9 @@ class ZluxController extends AppController {
 	 */
 	public function upload()
 	{
+		// load libraries
+		jimport('joomla.filesystem.folder');
+
 		// Make sure file is not cached (as it happens for example on iOS devices)
 		header("Expires: Mon, 26 Jul 1997 05:00:00 GMT");
 		header("Last-Modified: " . gmdate("D, d M Y H:i:s") . " GMT");
@@ -524,7 +527,7 @@ class ZluxController extends AppController {
 		// usleep(5000);
 
 		// Settings
-		$targetDir = ini_get("upload_tmp_dir") . DIRECTORY_SEPARATOR . "plupload";
+		$targetDir = JPATH_ROOT . '/tmp/zlux/uploads'; // temporal upload folder
 		$cleanupTargetDir = true; // Remove old files
 		$maxFileAge = 5 * 3600; // Temp file age in seconds
 
@@ -533,12 +536,12 @@ class ZluxController extends AppController {
 		$fileName = $this->app->zlfilesystem->makeSafe(JRequest::getVar("name", ''), 'ascii');
 
 		// Create target dir
-		if (!file_exists($targetDir)) {
-			@mkdir($targetDir);
+		if (!JFolder::exists($targetDir)) {
+			$this->app->zlfw->filesystem->folderCreate($targetDir);
 		}
 
 		// get file path
-		$filePath = $targetDir . DIRECTORY_SEPARATOR . $fileName;
+		$filePath = $targetDir . '/' . $fileName;
 
 		// get chunking
 		$chunking = isset($_REQUEST["offset"]) && isset($_REQUEST["total"]);
@@ -551,7 +554,7 @@ class ZluxController extends AppController {
 			}
 
 			while (($file = readdir($dir)) !== false) {
-				$tmpfilePath = $targetDir . DIRECTORY_SEPARATOR . $file;
+				$tmpfilePath = $targetDir . '/' . $file;
 
 				// If temp file is current file proceed to the next
 				if ($tmpfilePath == "{$filePath}.part") {
