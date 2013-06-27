@@ -254,9 +254,17 @@
 			.ui-dialog-titlebar-close {
 				width: 13px;
 				right: 0.5em;
+				color: inherit;
+				font-size: 17px;
 
-				&:hover {
-					padding: auto;
+				&.ui-state-hover {
+					background: none;
+					border: none;
+				}
+
+				&:hover,
+				&:focus {
+					text-decoration: none;
 				}
 			}
 		}
@@ -412,8 +420,6 @@
 					}
 				}
 			}
-
-			
 		}
 
 		// Actions Tools
@@ -748,22 +754,6 @@
 		overflow: hidden;
 		position: relative;
 		opacity: 0; // init visibility
-	}
-
-	.ui-dialog-titlebar-close {
-		font-size: 17px;
-		color: inherit;
-
-		&.ui-state-hover {
-			background: none;
-			border: none;
-
-		}
-
-		&:hover,
-		&:focus {
-			text-decoration: none;
-		}
 	}
 
 	// bootstrap rows

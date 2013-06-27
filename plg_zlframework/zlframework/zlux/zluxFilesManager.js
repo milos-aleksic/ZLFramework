@@ -1444,7 +1444,7 @@
 
 			// set basics params
 			params = {
-				runtimes: 'html5',
+				runtimes: 'html5, flash',
 				browse_button: $('.zlux-upload-browse', $this.upload)[0],
 				drop_element: $this.dropzone[0], 
 				max_file_size: undefined, // controlled by ZLUX Upload
