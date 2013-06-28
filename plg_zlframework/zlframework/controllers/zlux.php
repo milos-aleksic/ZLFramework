@@ -546,7 +546,6 @@ class ZluxController extends AppController {
 		// get chunking
 		$chunking = isset($_REQUEST["offset"]) && isset($_REQUEST["total"]);
 
-
 		// Remove old temp files	
 		if ($cleanupTargetDir) {
 			if (!is_dir($targetDir) || !$dir = opendir($targetDir)) {
@@ -603,19 +602,28 @@ class ZluxController extends AppController {
 		// Check if file has been uploaded
 		if (!$chunking || filesize("{$filePath}.part") >= $_REQUEST["total"]) {
 			// Strip the temp .part suffix off 
-			rename("{$filePath}.part", $filePath);
+			$result = JFile::move("{$filePath}.part", $filePath);
 		}
+
+		// get any error / warning
+		$errors = array_merge($storage->getErrors(), $storage->getWarnings());
+
+		// if fails
+		if (!$result) die('{"jsonrpc" : "2.0", "error" : {"code": 101, "message": "' . implode('; ', $errors) . '"}, "id" : "id"}');
 
 		// get paths for the final destination
 		$path = $this->app->request->get('path', 'string', '');
 		$dest = JPATH_ROOT . '/' . $path . '/' . basename($filePath);
 
 		// move to the final destination
-		$storage = new ZLStorage('Local', array('s3' => 'options'));
+		$storage = new ZLStorage('Local');
 		$result = $storage->upload($filePath, $dest);
 
+		// get any error / warning
+		$errors = array_merge($storage->getErrors(), $storage->getWarnings());
+
 		// if fails
-		if (!$result) die('{"jsonrpc" : "2.0", "error" : {"code": 101, "message": "' . $result . '"}, "id" : "id"}');
+		if (!$result) die('{"jsonrpc" : "2.0", "error" : {"code": 101, "message": "' . jimplode('; ', $errors) . '"}, "id" : "id"}');
 
 		// Return Success JSON-RPC response
 		die(json_encode(array('jsonrpc' => '2.0', 'result' => $result, 'id' => 'id')));
