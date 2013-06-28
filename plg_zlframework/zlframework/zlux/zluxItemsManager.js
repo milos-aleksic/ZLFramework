@@ -76,14 +76,14 @@
 					aoData.push({ "name": "filter_tags", "value": tags });
 				},
 				"oLanguage": {
-					"sEmptyTable": "No items found",
+					"sEmptyTable": $this._('IM_NO_ITEMS_FOUND'),
 					"sInfoEmpty": "",
-					"sInfo": "Showing _START_ to _END_ of _TOTAL_ items"
+					"sInfo": $this._('IM_PAGINATION_INFO')
 				},
 				"aoColumns":
 				[
 					{
-						"sTitle": "Name", "mData": "_itemname", "sClass":"column-name",
+						"sTitle": $this._('NAME'), "mData": "_itemname", "sClass":"column-name",
 						"mRender": function ( data, type, full ) {
 							return type == 'display' ? '' : data;
 						},
@@ -207,47 +207,12 @@
 				// set the zlux object
 				$object.dom = object_dom;
 
-				// if ($object.dom.attr('data-zlux-object-status') != 'true') {
-				// 	$object.dom.attr('data-zlux-object-status', 'true');
-
-				// 	// remove selected status from siblings
-				// 	$object.dom.siblings().removeAttr('data-zlux-object-status');
-
-					// trigger event
-					$this.trigger("ObjectSelected", $object);
-				// }
+				// trigger event
+				$this.trigger("ObjectSelected", $object);
 				
 				// prevent default
 				return false;
 			})
-
-			// .on('click', '.zlux-object-name a, .zlux-object-toggle', function(e){
-			// 	var row = $(this).closest('tr');
-
-			// 	if (row.attr('data-zlux-object-status') != 'true') {
-			// 		row.attr('data-zlux-object-status', 'true');
-
-			// 		// change the toggle icon
-			// 		$('.zlux-object-toggle', row).removeClass('icon-check-empty').addClass('icon-check');
-					
-			// 		// trigger event
-			// 		$this.trigger("ItemSelected", row.data('id'), row);
-
-			// 	// perfome deselection only if toggle button clicked
-			// 	} else if ($('.zlux-object-toggle').is(e.target)){
-
-			// 		// set unselect state
-			// 		row.removeAttr('data-zlux-object-status');
-
-			// 		// change the toggle icon
-			// 		$('.zlux-object-toggle', row).removeClass('icon-check').addClass('icon-check-empty');
-					
-			// 		// trigger event
-			// 		$this.trigger("ItemUnselected", row.data('id'), row);
-			// 	}
-				
-			// 	return false;
-			// })
 		},
 		/**
 		 * Render the Object content
@@ -259,13 +224,13 @@
 			
 			// prepare the details
 			aDetails = [
-				{name: 'Route', value: $object.application.name + ' / ' + $object.type.name + ' / ID ' + $object.id},
-				{name: 'Access', value: $object.access},
-				{name: 'Created', value: $object.created}
+				{name: $this._('ROUTE'), value: $object.application.name + ' / ' + $object.type.name + ' / ID ' + $object.id},
+				{name: $this._('ACCESS'), value: $object.access},
+				{name: $this._('CREATED'), value: $object.created}
 			]
 
 			// add Author if known
-			$object.author.name && aDetails.push({name: 'Author', value: $object.author.name});
+			$object.author.name && aDetails.push({name: $this._('AUTHOR'), value: $object.author.name});
 			
 			var sDetails = '';
 			$.each(aDetails, function(i, detail){
@@ -447,18 +412,18 @@
 			// init toolbar
 			$this.zluxdialog.setMainToolbar(
 				[{
-					title : "Apply Filters",
-					icon : "filter",
-					click : function(tool){
+					title: $this._('APPLY_FILTERS'),
+					icon: "filter",
+					click: function(tool){
 						// toggle the subtoolbar visibility
 						$('.zlux-dialog-subtoolbar-filter', $this.zluxdialog.toolbar.wrapper).slideToggle('fast');
 
 						tool.toggleClass('zlux-ui-tool-enabled');
 					}
 				},{
-					title : "Refresh",
-					icon : "refresh",
-					click : function(){
+					title:  $this._('REFRESH'),
+					icon: "refresh",
+					click: function(){
 						// reload the table data
 						$this.reload();
 					}
@@ -485,7 +450,7 @@
 
 				// set filter selects
 				subtoolbar.append(
-					$this.getSelect('aaApps', 'Filter by App', function(value){
+					$this.getSelect('aaApps', $this._('IM_FILTER_BY_APP'), function(value){
 						// apply the filter
 						$this.filter.apps = value;
 
@@ -497,7 +462,7 @@
 						$this.filter.apps = '';
 					}),
 
-					$this.getSelect('aaTypes', 'Filter by Type', function(value){
+					$this.getSelect('aaTypes', $this._('IM_FILTER_BY_TYPE'), function(value){
 						// apply the filter
 						$this.filter.types = value;
 						$('.btn-group[data-id=2]', subtoolbar).attr('data-update', false);
@@ -506,7 +471,7 @@
 						$this.filter.types = '';
 					}),
 
-					$this.getSelect('aaCategories', 'Filter by Category', function(value){
+					$this.getSelect('aaCategories', $this._('IM_FILTER_BY_CATEGORY'), function(value){
 						// apply the filter
 						$this.filter.cats = value;
 					}, function(){
@@ -514,7 +479,7 @@
 						$this.filter.cats = '';
 					}),
 
-					$this.getSelect('aaTags', 'Filter by Tag', function(value){
+					$this.getSelect('aaTags', $this._('IM_FILTER_BY_TAG'), function(value){
 						// apply the filter
 						$this.filter.tags = value;
 					}, function(){
