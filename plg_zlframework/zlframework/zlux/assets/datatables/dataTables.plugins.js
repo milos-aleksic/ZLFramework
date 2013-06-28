@@ -146,7 +146,8 @@ var DT_Breadcrumb = function ( oDTSettings )
 				root = oDTSettings.oInit.sStartRoot, // relative root path
 				path = oDTSettings.sCurrentPath ? oDTSettings.sCurrentPath : '', // current browsed path
 				brcb = [],
-				paths;
+				paths,
+				txtROOT = $.fn.zluxMain.prototype.translate('ROOT').toLowerCase();
 
 			// remove the root, is confidential data
 			path = path.replace(new RegExp('^'+root), '');
@@ -158,10 +159,10 @@ var DT_Breadcrumb = function ( oDTSettings )
 			paths = path.length ? path.split('/') : [];
 
 			// if active path is the root
-			if (!paths.length) brcb.push('<li class="active">root</li>');
+			if (!paths.length) brcb.push('<li class="active">' + txtROOT + '</li>');
 
 			// if not
-			else brcb.push('<li><a href="#" data-path="">root</a><span class="divider">/</span></li>');
+			else brcb.push('<li><a href="#" data-path="">' + txtROOT + '</a><span class="divider">/</span></li>');
 
 			// populate with the other paths
 			path = [];

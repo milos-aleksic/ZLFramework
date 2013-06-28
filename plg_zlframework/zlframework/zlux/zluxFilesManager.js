@@ -53,7 +53,7 @@
 
 			// check storage param
 			if ($this.options.storage == '' || $this.options.storage == undefined || $this.options.storage == null) {
-				$this._ErrorLog(0, "Storage param missing, set by default to 'local'");
+				$this._ErrorLog(0, $this._('STORAGE_PARAM_MISSING'));
 				$this.options.storage = 'local';
 			}
 		},
@@ -69,14 +69,13 @@
 			$this.oTable = $('table', wrapper).dataTable({
 				"sDom": "F<'row-fluid'<'span12'B>><'row-fluid'<'span12't>>",
 				"oLanguage": {
-					"sEmptyTable": "No files found",
+					"sEmptyTable": $this._('EMPTY_FOLDER'),
 					"sInfoEmpty": ""
 				},
 				"sAjaxUrl": $this.AjaxURL(),
 				"sAjaxSource": source,
 				"sServerMethod": "POST",
 				"sStartRoot": $this.cleanPath($this.options.root),
-				// "bServerSide": true,
 				"bPaginate": false,
 				"aoColumns": [
 					{ 
@@ -90,7 +89,7 @@
 						}
 					},
 					{ 
-						"sTitle": "Name", "mData": "name", "sClass": "column-name",
+						"sTitle": $this._('NAME'), "mData": "name", "sClass": "column-name",
 						"mRender": function ( data, type, full ) {
 							return type == 'display' ? '' : data;
 						},
@@ -129,14 +128,13 @@
 
 					// reset and append the object data
 					$('.column-name', $object.dom).html('').removeClass('zlux-ui-open').append(
-
 						// render the object content
 						$this.renderObjectDOM($object)
 					);
 
 					// append the object edit feature to the name
 					$('.zlux-x-name', $object.dom).append(
-						'<i class="zlux-x-name-edit icon-edit-sign" />'
+						'<i class="zlux-x-name-edit icon-edit-sign" title="' + $this._('RENAME') + '" />'
 					)
 				},
 				"fnInitComplete": function(oSettings, data) {
@@ -229,7 +227,7 @@
 
 				// if open, the remove action will delete the file, with confirmation
 				if (TD.hasClass('zlux-ui-open')) {
-					$this.trigger('BeforeDeleteFile', $object);
+					$this.trigger("BeforeDeleteFile", $object);
 				}
 
 				// if closed, will remove the file from selection
@@ -379,15 +377,15 @@
 			if ($object.type == 'folder') {
 
 				aDetails = [
-					{name: 'Name', value: $object.basename}
+					{name: $this._('NAME'), value: $object.basename}
 				]
 
 			} else { // file
 
 				aDetails = [
-					{name: 'Name', value: $object.basename},
-					{name: 'Type', value: $object.content_type},
-					{name: 'Size', value: $object.size.display}
+					{name: $this._('NAME'), value: $object.basename},
+					{name: $this._('TYPE'), value: $object.content_type},
+					{name: $this._('SIZE'), value: $object.size.display}
 				]
 			}
 
@@ -402,7 +400,7 @@
 				// btns
 				'<div class="zlux-x-tools">' +
 					'<i class="zlux-x-details-btn icon-angle-down" />' +
-					'<i class="zlux-x-remove icon-minus-sign" />' +
+					'<i class="zlux-x-remove icon-minus-sign" title="' + $this._('DELETE') + '" />' +
 				'</div>' +
 
 				// name
@@ -420,9 +418,9 @@
 			return content;
 		},
 		/**
-		 * Delete the file from the server
+		 * Delete the object from the server
 		 */
-		deleteObjectFile: function($object) {
+		deleteObject: function($object) {
 			var $this = this,
 				aoData = [],
 
@@ -470,7 +468,7 @@
 
 				.fail(function(){
 					// some unreported error
-					defer.reject('Something went wrong, the task was not performed.');
+					defer.reject($this._('SOMETHING_WENT_WRONG'));
 				})
 
 			}).promise();
@@ -519,7 +517,7 @@
 
 				.fail(function(){
 					// some unreported error
-					defer.reject('Something went wrong, the task was not performed.');
+					defer.reject($this._('SOMETHING_WENT_WRONG'));
 				})
 
 			}).promise();
@@ -537,7 +535,7 @@
 			ext = ext !== null ? ext : '';
 
 			// prepare and display the confirm message
-			var msg = $('<div>Input the new name <br /><input class="zlux-x-input" type="text" value="' + raw_name + '" /> ' + ext + '<br />and <span class="label label-success label-link">confirm</span></div>')
+			var msg = $('<div>' + $this._('INPUT_THE_NEW_NAME') + '<br /><input class="zlux-x-input" type="text" value="' + raw_name + '" /> ' + ext + '<br /><span class="label label-success label-link">' + $this._('CONFIRM').toLowerCase() + '</span></div>')
 
 			// confirm action
 			.on('click', '.label-link', function(){
@@ -641,7 +639,7 @@
 
 				.fail(function(){
 					// some unreported error
-					defer.reject('Something went wrong, the task was not performed.');
+					defer.reject($this._('SOMETHING_WENT_WRONG'));
 				})
 
 			}).promise();
@@ -698,14 +696,8 @@
 			// run initial check
 			$this.initCheck();
 
-			// is allways an input?
-			// if ($this.target[0].tagName == 'INPUT')
-
-			// // set main wrapper arount the input
-			// $this.wrapper = input.wrap($('<div class="zl-bootstrap" />')).parent();
-
 			// set the trigger button after the input
-			$this.dialogTrigger = $('<a title="'+$this.options.title+'" class="btn btn-mini zlux-btn-edit" href="#"><i class="icon-edit"></i></a>')
+			$this.dialogTrigger = $('<a title="' + $this.options.title + '" class="btn btn-mini zlux-btn-edit" href="#"><i class="icon-edit"></i></a>')
 			.insertAfter(input)
 
 			// button events
@@ -821,7 +813,7 @@
 			// set Upload toolbar
 			$this.zluxdialog.newToolbar(
 				[{
-					title : "Add new files to upload",
+					title : $this._('ADD_NEW_FILES'),
 					icon : "plus-sign",
 					id : "add",
 					click : function(){
@@ -830,7 +822,7 @@
 					}
 				},
 				{
-					title : "Start uploading",
+					title : $this._('START_UPLOADING'),
 					icon : "upload disabled",
 					id : "start",
 					click : function(){
@@ -839,7 +831,7 @@
 					}
 				},
 				{
-					title : "Cancel current upload",
+					title : $this._('CANCEL_CURRENT_UPLOAD'),
 					icon : "ban-circle disabled",
 					id : "cancel",
 					click : function(){
@@ -899,8 +891,10 @@
 				// if allready message displayed, abort
 				if ($('.zlux-x-details-message-actions')[0]) return;
 
+				var deleteMSG = $object.type == 'folder' ? 'DELETE_THIS_FOLDER' : 'DELETE_THIS_FILE';
+
 				// prepare and display the confirm message
-				var msg = $('<div>You are about to delete this file, please <span class="label label-warning label-link">confirm</span></div>')
+				var msg = $('<div>' + $this._(deleteMSG) + '<span class="label label-warning label-link">' + $this._('CONFIRM').toLowerCase() + '</span></div>')
 
 				// confirm action
 				.on('click', '.label-link', function(){
@@ -912,7 +906,7 @@
 					$('.column-icon i', $object.dom).addClass('icon-spinner icon-spin');
 
 					// delete the file						
-					var deleting = $this.deleteObjectFile($object);
+					var deleting = $this.deleteObject($object);
 					
 					// if succesfull
 					deleting.done(function(){
@@ -968,9 +962,9 @@
 
 			$this.zluxdialog.setMainToolbar(
 				[{
-					title : "Apply Filters",
-					icon : "filter",
-					click : function(tool){
+					title: $this._('APPLY_FILTERS'),
+					icon: "filter",
+					click: function(tool){
 						// toggle the subtoolbar visibility
 						$this.zluxdialog.toggleSubtoolbar('filter', 'main');
 
@@ -978,16 +972,16 @@
 						tool.toggleClass('zlux-ui-tool-enabled');
 					}
 				},{
-					title : "New folder",
-					icon : "folder-close",
-					subicon : "plus-sign",
-					click : function(tool){
+					title: $this._('NEW_FOLDER'),
+					icon: "folder-close",
+					subicon: "plus-sign",
+					click: function(tool){
 						$this.zluxdialog.toggleSubtoolbar('newfolder', 'main');
 
 						// toggle the subtoolbar visibility
 						$('.zlux-dialog-subtoolbar-newfolder', $this.zluxdialog.toolbar.wrapper).html('').
 						append(
-							$('<input type="text" class="zlux-x-input" placeholder="Folder name" />').on('keypress', function(e){
+							$('<input type="text" class="zlux-x-input" placeholder="' + $this._('FOLDER_NAME') + '" />').on('keypress', function(e){
 								var code = (e.keyCode ? e.keyCode : e.which);
 								if (code == 13) {
 									// Enter key was pressed, create folder
@@ -1012,9 +1006,9 @@
 					}
 				},
 				{
-					title : "Upload files to current folder",
-					icon : "cloud-upload",
-					click : function(){
+					title: $this._('UPLOAD_FILES'),
+					icon: "cloud-upload",
+					click: function(){
 						// show the associated toolbar
 						$this.zluxdialog.showToolbar(2);
 
@@ -1035,9 +1029,9 @@
 					}
 				},
 				{
-					title : "Refresh",
-					icon : "refresh",
-					click : function(){
+					title: $this._('REFRESH'),
+					icon: "refresh",
+					click: function(){
 						$this.reload();
 					}
 				}]
@@ -1119,7 +1113,7 @@
 						$('.icon-file-alt', $object.dom).removeClass('icon-file-alt').addClass('icon-warning-sign');
 						
 						// set msg
-						var msg = $this.pushMessageToObject($object, 'File size error.<br />The file exceeds the maximum allowed size of ' + plupload.formatSize($this.options.max_file_size));
+						var msg = $this.pushMessageToObject($object, $this.sprintf($this._('FILE_SIZE_ERROR'), plupload.formatSize($this.options.max_file_size)));
 
 						// delete the 'remove' msg option, as this message can not be ignored
 						$('.zlux-x-msg-remove', msg).remove();
@@ -1371,9 +1365,7 @@
 
 			// set the dropzone
 			$this.dropzone = $('<div class="zlux-upload-dropzone" />').appendTo($this.upload).append(
-				$('<span class="zlux-upload-dropzone-msg">Drop files here<br />or ' +
-					'<a class="zlux-upload-browse" href="javascript:;">browse & choose</a> them' +
-				'</span>')
+				$('<span class="zlux-upload-dropzone-msg">' + $this.sprintf($this._('DROP_FILES'), 'zlux-upload-browse') + '</span>')
 			)
 
 			// init DnD events
@@ -1516,18 +1508,12 @@
 
 			// workaround to trigger the Init event
 			// perhaps Plupload bug but it's not working as the others
-			$this.uploader.bind('Init', function(){
-				$this.trigger('Init');
+			$this.uploader.bind("Init", function(){
+				$this.trigger("Init");
 			})
 
 			// init the plupload uploader
 			$this.uploader.init();
-		},
-		/*
-		 * Translates the specified string.
-		 */
-		_: function(str) {
-			return plupload.translate(str) || str;
 		},
 		/*
 		 * Fires when a error occurs.
@@ -1549,27 +1535,11 @@
 					
 					switch (err.code) {
 						case plupload.FILE_EXTENSION_ERROR:
-							details = $this._("File: %s").replace('%s', file.name);
-							break;
-						
-						case plupload.FILE_SIZE_ERROR:
-							details = $this.sprintf($this._("File: %s, size: %d, max file size: %d"), file.name, file.size, plupload.parseSize($this.options.max_file_size));
-							break;
-
-						case plupload.FILE_DUPLICATE_ERROR:
-							details = $this._("%s already present in the queue.").replace(/%s/, file.name);
-							break;
-							
-						case plupload.FILE_COUNT_ERROR:
-							details = $this._("Upload element accepts only %d file(s) at a time. Extra files were stripped.").replace('%d', $this.options.max_file_count);
-							break;
-						
-						case plupload.IMAGE_FORMAT_ERROR :
-							details = $this._("Image format either wrong or not supported.");
+							details = $this._('FILE_EXT_ERROR').replace('%s', file.name);
 							break;
 						
 						case plupload.IMAGE_MEMORY_ERROR :
-							details = $this._("Runtime ran out of available memory.");
+							details = $this._('RUNTIME_MEMORY_ERROR');
 							break;
 													
 						case plupload.HTTP_ERROR:
@@ -1579,14 +1549,14 @@
 								
 								if ($this.options.storage_params.bucket.match(/\./g)) {
 									// When using SLL the bucket names can't have dots
-									details = $this._("The bucket name can't contain periods (.).");
+									details = $this._('S3_BUCKET_PERIOD_ERROR');
 								} else {
-									details = $this._("There is some missconfiguration with the Bucket. Checkout the CORS permissions. If the bucket is recently created 24h must pass because of Amazon redirections.");
+									details = $this._('S3_BUCKET_MISSCONFIG_ERROR');
 								}
 
 							// if local storage
 							} else {
-								details = $this._("Upload URL might be wrong or doesn't exist.");
+								details = $this._('UPLOAD_URL_ERROR');
 							}
 							break;
 					}
@@ -1606,7 +1576,7 @@
 				$object.dom = $('#' + file.id, $this.filelist);
 				
 				// trigger file error event
-				$this.trigger('FileError', $object, message);
+				$this.trigger("FileError", $object, message);
 			}
 		},
 		/*
@@ -1660,7 +1630,7 @@
 			$('.zlux-upload-file-btn-remove', $file).removeClass('icon-remove').addClass('icon-spinner icon-spin');
 
 			// trigger event
-			$this.trigger('BeforeUpload', file);
+			$this.trigger("BeforeUpload", file);
 		},
 		/*
 		 * Fires when a file is to be uploaded by the runtime.
@@ -1686,7 +1656,7 @@
 			// if the upload fails
 			.fail(function(msg){
 				// trigger file error event
-				$this.trigger('FileNotUpload', $object, msg);
+				$this.trigger("FileNotUpload", $object, msg);
 			})
 
 			// if succeeds
@@ -1696,7 +1666,7 @@
 				$object.name = result;
 
 				// trigger event
-				$this.trigger('FileUploaded', $object);
+				$this.trigger("FileUploaded", $object);
 			})
 
 			// always
@@ -1754,7 +1724,7 @@
 			var $this = this;
 
 			// trigger event
-			$this.trigger('UploadComplete', file);
+			$this.trigger("UploadComplete", file);
 		},
 		/*
 		 * Fires when the uploading is canceled by the user.
@@ -1763,7 +1733,7 @@
 			var $this = this;
 
 			// trigger event
-			$this.trigger('CancelUpload');
+			$this.trigger("CancelUpload");
 		},
 		/*
 		 * Fires while when the user selects files to upload.
@@ -1772,7 +1742,7 @@
 			var $this = this;
 
 			// trigger event
-			$this.trigger('FilesAdded', files);
+			$this.trigger("FilesAdded", files);
 		},
 		/*
 		 * Fires when the file queue is changed.
@@ -1856,7 +1826,7 @@
 			}
 
 			// fire queue event
-			$this.trigger('QueueChanged', $this.uploader.files);
+			$this.trigger("QueueChanged", $this.uploader.files);
 		},
 		_handleFileStatus: function(file) {
 			var $this = this,

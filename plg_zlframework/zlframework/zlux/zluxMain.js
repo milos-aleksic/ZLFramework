@@ -143,23 +143,6 @@
 			return !!this.events[name.toLowerCase()];
 		},
 		/**
-		 * Pseudo sprintf implementation - simple way to replace tokens with specified values.
-		 *
-		 * @param {String} str String with tokens
-		 * @return {String} String with replaced tokens
-		 */
-		sprintf: function(str) {
-			var args = [].slice.call(arguments, 1), reStr = '';
-
-			str.split(/%[sdf]/).forEach(function(part) {
-				reStr += part;
-				if (args.length) {
-					 reStr += args.shift();
-				}
-			});
-			return reStr;
-		},
-		/**
 		 * Log an error message
 		 *  @param {int} iLevel log error messages, or display them to the user
 		 *  @param {string} sMesg error message
@@ -179,18 +162,45 @@
 			{
 				console.log( sAlert );
 			}
+		},
+		/**
+		 * Translates the specified string by checking for the english string in the language pack lookup.
+		 *
+		 * @param {String} str String to look for.
+		 * @return {String} Translated string or the input string if it wasn't found.
+		 */
+		translate: function(str) {
+			return $.fn[Plugin.prototype.name].translations[str] || str;
+		},
+		/**
+		 * Shortcut for translate function
+		 *
+		 * @param {String} str String to look for.
+		 * @return {String} Translated string or the input string if it wasn't found.
+		 */
+		_: function(str) {
+			return this.translate(str);
+		},
+		/**
+		 * Pseudo sprintf implementation - simple way to replace tokens with specified values.
+		 *
+		 * @param {String} str String with tokens
+		 * @return {String} String with replaced tokens
+		 */
+		sprintf: function(str) {
+			var args = [].slice.call(arguments, 1), reStr = '';
+
+			str.split(/%[sdf]/).forEach(function(part) {
+				reStr += part;
+				if (args.length) {
+					 reStr += args.shift();
+				}
+			});
+			return reStr;
 		}
 	});
 	// save the plugin for global use
 	$.fn[Plugin.prototype.name] = Plugin;
-
-
-	// // save the Joomla Root URL
-	// if (location.href.match(/^(.+)administrator\/index\.php.*/i)) {
-	// 	var href = location.href.match(/^(.+)administrator\/index\.php.*/i)[1];
-	// 	$.fn[Plugin.prototype.name].prototype.JRoot = href;
-	// 	$.fn[Plugin.prototype.name].prototype.AjaxUrl = href + 'administrator/index.php?option=com_zoo&controller=zlux&format=raw'
-	// }
 })(jQuery);
 
 
