@@ -14,19 +14,19 @@ defined('_JEXEC') or die('Restricted access');
 */
 
 /* ZlFilesystemHelper // DEPRICATED CLASS - Use the ZLFW Helper instead */
-App::getInstance('zoo')->loader->register('zlfwHelperFileSystem', 'zlfw:zlfwhelpers/filesystem.php');
+App::getInstance('zoo')->loader->register('zlfwHelperFileSystem', 'zlfw:helpers_zlfw/filesystem.php');
 class ZlFilesystemHelper extends zlfwHelperFileSystem {}
 
 /* ZlStringHelper // DEPRICATED CLASS - Use the ZLFW Helper instead */
-App::getInstance('zoo')->loader->register('zlfwHelperString', 'zlfw:zlfwhelpers/string.php');
+App::getInstance('zoo')->loader->register('zlfwHelperString', 'zlfw:helpers_zlfw/string.php');
 class ZlStringHelper extends zlfwHelperString {}
 
 /* ZlPathHelper // DEPRICATED CLASS - Use the ZLFW Helper instead */
-App::getInstance('zoo')->loader->register('zlfwHelperPath', 'zlfw:zlfwhelpers/path.php');
+App::getInstance('zoo')->loader->register('zlfwHelperPath', 'zlfw:helpers_zlfw/path.php');
 class ZlPathHelper extends zlfwHelperPath {}
 
 /* ZLXmlHelper // DEPRICATED CLASS - Use the ZLFW Helper instead */
-App::getInstance('zoo')->loader->register('zlfwHelperXml', 'zlfw:zlfwhelpers/xml.php');
+App::getInstance('zoo')->loader->register('zlfwHelperXml', 'zlfw:helpers_zlfw/xml.php');
 class ZLXmlHelper extends zlfwHelperXml {}
 
 /*
@@ -73,7 +73,7 @@ class zlfwHelper extends AppHelper {
 		// load class
 		$class = $prefix . $name;
 		
-		$this->app->loader->register($class, 'zlfw:zlfwhelpers/'.strtolower($name).'.php');
+		$this->app->loader->register($class, 'zlfw:helpers_zlfw/'.strtolower($name).'.php');
 		
 		// add helper, if not exists
 		if (!isset($this->_helpers[$name])) {
