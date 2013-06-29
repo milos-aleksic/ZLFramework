@@ -33,11 +33,6 @@ class plgSystemZlframeworkInstallerScript
 			'plugins/system/zoo_zlelements/zoo_zlelements/fields/specific.php',
 
 			// files pro old assets
-			'plugins/system/zlframework/zlframework/elements/filespro/assets/js/filespro.source.js',
-			'plugins/system/zlframework/zlframework/elements/filespro/assets/js/plupload.js',
-			'plugins/system/zlframework/zlframework/elements/filespro/assets/js/plupload.source.js',
-			'plugins/system/zlframework/zlframework/elements/filespro/assets/js/finder.js',
-			'plugins/system/zlframework/zlframework/elements/filespro/assets/js/finder.source.js',
 			'plugins/system/zlframework/zlframework/elements/filespro/assets/filespro.css',
 
 			// moved to ZLFW helpers
@@ -66,6 +61,7 @@ class plgSystemZlframeworkInstallerScript
 			'plugins/system/zlframework/zlframework/zlfwhelpers',
 
 			// filespro old assets
+			'plugins/system/zlframework/zlframework/elements/filespro/assets/js',
 			'plugins/system/zlframework/zlframework/elements/filespro/assets/images',
 			'plugins/system/zlframework/zlframework/elements/filespro/assets/plupload',
 			'plugins/system/zlframework/zlframework/elements/filespro/assets/s3',

@@ -30,11 +30,21 @@
 
 			// apply on each new instances
 			element.on('click', 'p.add a', function () {
-				$this.apply($('input.filespro', element));
+				$this.apply(
+					$('input.filespro', element)
+
+					// fix for media pro
+					.add('input.mediapro-element', element)
+				);
 			});
 			
 			// first time init
-			$this.apply($('input.filespro', element));
+			$this.apply(
+				$('input.filespro', element)
+				
+				// fix for media pro
+				.add('input.mediapro-element', element)
+			);
 		},
 		apply: function (inputs){
 			var $this = this;
