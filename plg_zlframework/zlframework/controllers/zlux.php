@@ -510,8 +510,8 @@ class ZluxController extends AppController {
 	 */
 	public function upload()
 	{
-		// load libraries
-		jimport('joomla.filesystem.folder');
+		// load storage engine
+		$storage = new ZLStorage('Local');
 
 		// Make sure file is not cached (as it happens for example on iOS devices)
 		header("Expires: Mon, 26 Jul 1997 05:00:00 GMT");
@@ -536,12 +536,13 @@ class ZluxController extends AppController {
 		$fileName = $this->app->zlfilesystem->makeSafe(JRequest::getVar("name", ''), 'ascii');
 
 		// Create target dir
-		if (!JFolder::exists($targetDir)) {
+		if (!$storage->exists($this->app->path->relative($targetDir))) {
 			$this->app->zlfw->filesystem->folderCreate($targetDir);
 		}
 
 		// get file path
 		$filePath = $targetDir . '/' . $fileName;
+		$filePath_rel = $this->app->zlfw->path->relative($filePath);
 
 		// get chunking
 		$chunking = isset($_REQUEST["offset"]) && isset($_REQUEST["total"]);
@@ -599,10 +600,13 @@ class ZluxController extends AppController {
 		@fclose($out);
 		@fclose($in);
 
+		// set initial state
+		$result = false;
+
 		// Check if file has been uploaded
 		if (!$chunking || filesize("{$filePath}.part") >= $_REQUEST["total"]) {
 			// Strip the temp .part suffix off 
-			$result = JFile::move("{$filePath}.part", $filePath);
+			$result = $storage->move("{$filePath_rel}.part", $filePath_rel);
 		}
 
 		// get any error / warning
@@ -613,17 +617,16 @@ class ZluxController extends AppController {
 
 		// get paths for the final destination
 		$path = $this->app->request->get('path', 'string', '');
-		$dest = JPATH_ROOT . '/' . $path . '/' . basename($filePath);
+		$dest = $path . '/' . basename($filePath);
 
 		// move to the final destination
-		$storage = new ZLStorage('Local');
-		$result = $storage->upload($filePath, $dest);
+		$result = $storage->upload($filePath_rel, $dest);
 
 		// get any error / warning
 		$errors = array_merge($storage->getErrors(), $storage->getWarnings());
 
 		// if fails
-		if (!$result) die('{"jsonrpc" : "2.0", "error" : {"code": 101, "message": "' . jimplode('; ', $errors) . '"}, "id" : "id"}');
+		if (!$result) die('{"jsonrpc" : "2.0", "error" : {"code": 101, "message": "' . implode('; ', $errors) . '"}, "id" : "id"}');
 
 		// Return Success JSON-RPC response
 		die(json_encode(array('jsonrpc' => '2.0', 'result' => $result, 'id' => 'id')));
