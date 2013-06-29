@@ -320,6 +320,9 @@ class ZLStorageAdapterAmazonS3 extends ZLStorageAdapterBase implements ZLStorage
 		$result = false;
 		$obj = null;
 
+		// check if path is set
+		if (!$path) return false;
+
 		// get info from s3
 		$result = $this->s3->getObjectInfo($this->bucket, $path);
 

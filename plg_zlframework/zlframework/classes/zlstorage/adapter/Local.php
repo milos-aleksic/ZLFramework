@@ -42,8 +42,8 @@ class ZLStorageAdapterLocal extends ZLStorageAdapterBase implements ZLStorageAda
 	 * 
 	 * @return boolean The success of the operation
 	 */
-	public function exists($file) {
-		return JFile::exists($this->app->path->path("root:$file"));
+	public function exists($path) {
+		return is_readable($this->app->path->path("root:$path"));
 	}
 
 	/**
@@ -111,6 +111,16 @@ class ZLStorageAdapterLocal extends ZLStorageAdapterBase implements ZLStorageAda
 	{
 		$result = false;
 		$_src = $this->app->path->path('root:' . $src);
+		$targetDir  = dirname($dest);
+
+		// Make sure the dest folder exists
+		if (!$this->exists($targetDir)) {
+			if(!$this->createFolder($targetDir)) {
+				// if fails abort and report
+				$this->setError(JText::_('PLG_ZLFRAMEWORK_STRG_ERR_SOMETHING_WENT_WRONG'));
+				return false;
+			}
+		}
 
 		if (!is_readable($_src)) {
 			$this->setError(JText::_('PLG_ZLFRAMEWORK_STRG_ERR_OBJECT_ACCESS_DENIED'));
@@ -151,15 +161,6 @@ class ZLStorageAdapterLocal extends ZLStorageAdapterBase implements ZLStorageAda
 
 		// construct filename
 		$fileName = "{$basename}.{$ext}";
-
-		// Make sure the dest folder exists
-		if (!$this->exists($targetDir)) {
-			if(!$this->createFolder($targetDir)) {
-				// if fails abort and report
-				$this->setError(JText::_('PLG_ZLFRAMEWORK_STRG_ERR_SOMETHING_WENT_WRONG'));
-				return false;
-			}
-		}
 
 		// Make sure the fileName is unique
 		if ($this->exists($dest)) {
