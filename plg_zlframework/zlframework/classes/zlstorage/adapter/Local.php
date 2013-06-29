@@ -43,7 +43,7 @@ class ZLStorageAdapterLocal extends ZLStorageAdapterBase implements ZLStorageAda
 	 * @return boolean The success of the operation
 	 */
 	public function exists($file) {
-		return JFile::exists($this->app->path->path($file));
+		return JFile::exists($this->app->path->path("root:$file"));
 	}
 
 	/**
@@ -55,7 +55,7 @@ class ZLStorageAdapterLocal extends ZLStorageAdapterBase implements ZLStorageAda
 	 * @return boolean The success of the operation
 	 */
 	public function write($file, $content, $overwrite = true){
-		return JFile::write($this->app->path->path($file, $content));
+		return JFile::write($this->app->path->path("root:$file"), $content);
 	}
 
 	/**
@@ -85,8 +85,7 @@ class ZLStorageAdapterLocal extends ZLStorageAdapterBase implements ZLStorageAda
 		$path = JPath::clean($path);
 
 		if (JFolder::exists($path)) {
-			$this->setError(JText::_('PPLG_ZLFRAMEWORK_STRG_ERR_OBJECT_ALREADY_EXISTS'));
-			return true;
+			$result = true;
 		} else {
 			$result = JFolder::create($path);
 		}
@@ -148,7 +147,6 @@ class ZLStorageAdapterLocal extends ZLStorageAdapterBase implements ZLStorageAda
 		$result 	= false;
 		$basename 	= basename($file, '.' . JFile::getExt($file));
 		$ext 		= strtolower(JFile::getExt($file));
-		$file		= $this->app->path->path("root:$file");
 		$targetDir  = dirname($dest);
 
 		// construct filename
@@ -164,9 +162,9 @@ class ZLStorageAdapterLocal extends ZLStorageAdapterBase implements ZLStorageAda
 		}
 
 		// Make sure the fileName is unique
-		if (JFile::exists($dest)) {
+		if ($this->exists($dest)) {
 			$count = 1;
-			while (JFile::exists("{$targetDir}/{$basename}_{$count}.{$ext}"))
+			while ($this->exists("{$targetDir}/{$basename}_{$count}.{$ext}"))
 				$count++;
 		
 			$fileName = "{$basename}_{$count}.{$ext}";
@@ -175,8 +173,8 @@ class ZLStorageAdapterLocal extends ZLStorageAdapterBase implements ZLStorageAda
 		// set the final dest path
 		$dest = $targetDir . '/' . $fileName;
 
-		// move the file
-		$result = JFile::move($file, $dest);
+		// move the file to dest
+		$result = $this->move($file, $dest);
 
 		// if something went wrong, report
 		if ($result === false) {
@@ -186,7 +184,7 @@ class ZLStorageAdapterLocal extends ZLStorageAdapterBase implements ZLStorageAda
 			$this->setError($result);
 			$result = false;
 		} else {
-			// succeeded, send the final dest
+			// succeeded, send the final file path
 			$result = $dest;
 		}
 
