@@ -144,12 +144,6 @@ class zlfwHelperPath extends PathHelper {
 		// join path parts
 		$root = implode('/', $parts);
 		
-		// Create the folder
-		$full = $this->app->zlfilesystem->makePath(JPATH_SITE, $root);
-		if (!JFolder::exists($full)){
-			$this->app->zlfilesystem->folderCreate($full);
-		}
-		
 		return $root;
 	}
 
