@@ -145,8 +145,11 @@ class ZLStorageAdapterLocal extends ZLStorageAdapterBase implements ZLStorageAda
 	public function upload($file, $dest)
 	{
 		// init vars
+		$result 	= false;
 		$basename 	= basename($file, '.' . JFile::getExt($file));
 		$ext 		= strtolower(JFile::getExt($file));
+		$file		= $this->app->path->path("root:$file");
+		$dest		= $this->app->path->path("root:$dest");
 		$targetDir  = dirname($dest);
 		
 		// construct filename
@@ -163,9 +166,22 @@ class ZLStorageAdapterLocal extends ZLStorageAdapterBase implements ZLStorageAda
 
 		$dest = $targetDir . '/' . $fileName;
 
-		if (JFile::move($file, $dest)){
-			return $fileName;
-		} else return false;
+		// move the file
+		$result = JFile::move($file, $dest);
+
+		// if something went wrong, report
+		if ($result === false) {
+			$this->setError('Something went wrong, the task was not performed.');
+		} else if ($result !== true) {
+			// report the error message
+			$this->setError($result);
+			$result = false;
+		} else {
+			// succeeded, send the final file name
+			$result = $fileName;
+		}
+
+		return $result;
 	}
 
 	/**
