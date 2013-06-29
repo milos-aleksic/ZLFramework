@@ -32,6 +32,22 @@ class plgSystemZlframeworkInstallerScript
 			'plugins/system/zlframework/zlframework/models/query.php',
 			'plugins/system/zoo_zlelements/zoo_zlelements/fields/specific.php',
 
+			// files pro old assets
+			'plugins/system/zlframework/zlframework/elements/filespro/assets/js/filespro.source.js',
+			'plugins/system/zlframework/zlframework/elements/filespro/assets/js/plupload.js',
+			'plugins/system/zlframework/zlframework/elements/filespro/assets/js/plupload.source.js',
+			'plugins/system/zlframework/zlframework/elements/filespro/assets/js/finder.js',
+			'plugins/system/zlframework/zlframework/elements/filespro/assets/js/finder.source.js',
+			'plugins/system/zlframework/zlframework/elements/filespro/assets/filespro.css',
+
+			// moved to ZLFW helpers
+			'plugins/system/zlframework/zlframework/helpers/zlfilesystem.php',
+			'plugins/system/zlframework/zlframework/helpers/zlpath.php',
+			'plugins/system/zlframework/zlframework/helpers/zlstring.php',
+			'plugins/system/zlframework/zlframework/helpers/zlxmlhelper.php',
+			// 'plugins/system/zlframework/zlframework/assets/js/zldialog.js', // to be checked
+			'plugins/system/zlframework/zlframework/assets/js/zldialog_moved.txt',
+
 			// until complete cleanup of this folder, proceede individually
 			'plugins/system/zlframework/zlframework/fields/example.php',
 			'plugins/system/zlframework/zlframework/fields/fields.php',
@@ -46,7 +62,18 @@ class plgSystemZlframeworkInstallerScript
 		),
 		'folders' => array(
 			'plugins/system/zlframework/zlframework/assets/libraries/zlparams',
-			'plugins/system/zoo_zlelements/zoo_zlelements/elements_core'
+			'plugins/system/zoo_zlelements/zoo_zlelements/elements_core',
+			'plugins/system/zlframework/zlframework/zlfwhelpers',
+
+			// filespro old assets
+			'plugins/system/zlframework/zlframework/elements/filespro/assets/images',
+			'plugins/system/zlframework/zlframework/elements/filespro/assets/plupload',
+			'plugins/system/zlframework/zlframework/elements/filespro/assets/s3',
+
+			// moved to ZLUX
+			'plugins/system/zlframework/zlframework/assets/libraries/bootstrap'
+			// 'plugins/system/zlframework/zlframework/assets/libraries/zlux', // the old zlux
+			// 'plugins/system/zlframework/zlframework/assets/images' // to be checked
 		)
 	);
 
