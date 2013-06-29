@@ -17,6 +17,7 @@
 			width: '300',
 			height: '150',
 			title: 'Dialog'
+			// Any jQuery UI Widget Dialog option declared here will be passed on the Widget init
 		},
 		events: {},
 		initialize: function(options) {

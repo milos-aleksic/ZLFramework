@@ -685,8 +685,9 @@
 	Plugin.prototype = $.extend(Plugin.prototype, $.fn.zluxFilesManager.prototype, {
 		name: 'zluxDialogFilesManager',
 		options: {
-			"title": 'Files Manager',
-			"full_mode": 0
+			title: 'Files Manager',
+			full_mode: 0,
+			dialogClass: ''
 		},
 		events: {},
 		initialize: function(input, options) {
@@ -718,12 +719,17 @@
 		 */
 		initDialog: function() {
 			var $this = this;
+
+			// prepare the dialog class
+			$this.options.dialogClass = 'zl-bootstrap zlux-filesmanager' 
+				+ ($this.options.full_mode ? ' zlux-dialog-full ' : '') 
+				+ ($this.options.dialogClass ? ' ' + $this.options.dialogClass : '');
 			
 			// set the dialog options
 			$this.zluxdialog = $.fn.zluxDialog({
 				title: $this.options.title,
 				width: $this.options.full_mode ? '75%' : 300,
-				dialogClass: 'zl-bootstrap zlux-filesmanager ' + ($this.options.full_mode ? 'zlux-dialog-full' : ''),
+				dialogClass: $this.options.dialogClass,
 				position: ($this.options.full_mode == false ? {
 					of: $this.dialogTrigger,
 					my: 'left top',
