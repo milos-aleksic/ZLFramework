@@ -149,11 +149,19 @@ class ZLStorageAdapterLocal extends ZLStorageAdapterBase implements ZLStorageAda
 		$basename 	= basename($file, '.' . JFile::getExt($file));
 		$ext 		= strtolower(JFile::getExt($file));
 		$file		= $this->app->path->path("root:$file");
-		$dest		= $this->app->path->path("root:$dest");
 		$targetDir  = dirname($dest);
-		
+
 		// construct filename
 		$fileName = "{$basename}.{$ext}";
+
+		// Make sure the dest folder exists
+		if (!$this->exists($targetDir)) {
+			if(!$this->createFolder($targetDir)) {
+				// if fails abort and report
+				$this->setError('Something went wrong, the task was not performed.');
+				return false;
+			}
+		}
 
 		// Make sure the fileName is unique
 		if (JFile::exists($dest)) {
@@ -164,6 +172,7 @@ class ZLStorageAdapterLocal extends ZLStorageAdapterBase implements ZLStorageAda
 			$fileName = "{$basename}_{$count}.{$ext}";
 		}
 
+		// set the final dest path
 		$dest = $targetDir . '/' . $fileName;
 
 		// move the file
@@ -177,8 +186,8 @@ class ZLStorageAdapterLocal extends ZLStorageAdapterBase implements ZLStorageAda
 			$this->setError($result);
 			$result = false;
 		} else {
-			// succeeded, send the final file name
-			$result = $fileName;
+			// succeeded, send the final dest
+			$result = $dest;
 		}
 
 		return $result;
@@ -225,7 +234,7 @@ class ZLStorageAdapterLocal extends ZLStorageAdapterBase implements ZLStorageAda
 	public function getTree($root, $legalExt)
 	{
 		// init vars
-		$root = $this->app->zlpath->getDirectory($root); // if empty, will return joomla image folder
+		$root = $this->app->zlpath->getDirectory($root);
 		$rows = array();
 
 		// dirs

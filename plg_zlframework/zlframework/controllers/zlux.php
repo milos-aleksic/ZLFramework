@@ -629,7 +629,7 @@ class ZluxController extends AppController {
 		if (!$result) die('{"jsonrpc" : "2.0", "error" : {"code": 101, "message": "' . implode('; ', $errors) . '"}, "id" : "id"}');
 
 		// Return Success JSON-RPC response
-		die(json_encode(array('jsonrpc' => '2.0', 'result' => $result, 'id' => 'id')));
+		die(json_encode(array('jsonrpc' => '2.0', 'result' => basename($result), 'id' => 'id')));
 	}
 }
 
