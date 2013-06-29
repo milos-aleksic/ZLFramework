@@ -61,13 +61,13 @@ class ZluxController extends AppController {
 	}
 
 	/*
-		Function: ItemsManager
+		Function: getItemsManagerData
 			Get Item list JSON formatted
 
 		Returns:
 			JSON object
 	*/
-	public function ItemsManager()
+	public function getItemsManagerData()
 	{
 		// init vars
 		$s_apps	 	= explode(',', $this->app->request->get('apps', 'string', ''));
@@ -182,7 +182,7 @@ class ZluxController extends AppController {
 		}
 
 		// ordering
-		$aOrder = "";
+		$aOrder = array();
 		if ( isset( $_GET['iSortCol_0'] ) )
 		{
 			for ( $i=0 ; $i<intval( $_GET['iSortingCols'] ) ; $i++ )

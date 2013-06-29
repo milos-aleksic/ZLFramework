@@ -6,6 +6,7 @@
 @red: #b94a48;
 @green: #468847;
 @blue: #0088cc;
+@black: #333333;
 
 .zl-bootstrap {
 	font: 12px/20px Arial,Helvetica,sans-serif;
@@ -15,6 +16,8 @@
 	}
 
 	.btn {
+
+		color: @black;
 
 		&:focus {
 			outline: 0;
@@ -63,7 +66,7 @@
 }
 
 
-/* normalize Joomla! 3 BS styles
+/* normalize Joomla! styles
 ----------------------------------------------------------------------------------------------------*/
 .zl-bootstrap {
 
@@ -92,6 +95,10 @@
 	}
 }
 
+// Set the top bar index higher than the modals
+body.admin .subhead-collapse .subhead.subhead-fixed {
+	z-index: 1100;
+}
 
 /* ZLUX Upload
 ----------------------------------------------------------------------------------------------------*/
@@ -260,6 +267,7 @@
 				&.ui-state-hover {
 					background: none;
 					border: none;
+					padding: 1px;
 				}
 
 				&:hover,
