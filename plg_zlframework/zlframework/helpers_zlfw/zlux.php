@@ -119,8 +119,12 @@ class zlfwHelperZLUX extends AppHelper {
 		{
 			define('PLG_ZLFRAMEWORK_ZLUX_SCRIPT_DECLARATION', true);
 
-			// save Joomla root URL
-			$javascript = "jQuery.fn.zluxMain.prototype.JRoot = '" . JURI::root() . (JFactory::getApplication()->isAdmin() ? 'administrator/' : '') . "';";
+			// init vars
+			$javascript = '';
+
+			// save Joomla! URLs
+			$javascript .= 'jQuery.fn.zluxMain.prototype.JRoot = "' . JURI::root() . '";';
+			$javascript .= 'jQuery.fn.zluxMain.prototype.JBase = "' . JURI::base() . '";';
 
 			// set translations strings
 			$translations = array

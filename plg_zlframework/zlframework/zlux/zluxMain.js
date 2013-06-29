@@ -33,16 +33,22 @@
 			};
 		},
 		/**
-		 * Returns the Joomla root URL
+		 * Returns the Joomla root URL, for relative assets urls
 		 */
 		JRoot: function() {
 			return $.fn[Plugin.prototype.name].prototype.JRoot;
 		},
 		/**
+		 * Returns the Joomla base URL, for ajax urls
+		 */
+		JBase: function() {
+			return $.fn[Plugin.prototype.name].prototype.JBase;
+		},
+		/**
 		 * Returns the ZLUX Ajax URL
 		 */
 		AjaxURL: function() {
-			return this.JRoot() + 'index.php?option=com_zoo&controller=zlux&format=raw';
+			return this.JBase() + 'index.php?option=com_zoo&controller=zlux&format=raw';
 		},
 		/**
 		 * Dispatches the specified event name and it's arguments to all listeners.
