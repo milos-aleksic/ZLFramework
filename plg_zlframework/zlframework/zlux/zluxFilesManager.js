@@ -809,60 +809,6 @@
 
 			// init the uploaded
 			$this.initUploader();
-
-			// set Upload toolbar
-			$this.zluxdialog.newToolbar(
-				[{
-					title : $this._('ADD_NEW_FILES'),
-					icon : "plus-sign",
-					id : "add",
-					click : function(){
-						// find the upload browse input and trigger it
-						$('.zlux-upload-browse', $this.zluxupload.upload).siblings('.moxie-shim').children('input').trigger('click');
-					}
-				},
-				{
-					title : $this._('START_UPLOADING'),
-					icon : "upload disabled",
-					id : "start",
-					click : function(){
-						$this.zluxupload.uploader.start();
-						return false;
-					}
-				},
-				{
-					title : $this._('CANCEL_CURRENT_UPLOAD'),
-					icon : "ban-circle disabled",
-					id : "cancel",
-					click : function(){
-						// cancel current queue upload
-						$this.zluxupload.uploader.stop();
-
-						// disable the btn
-						$this.zluxdialog.toolbarBtnState(2, 'ban-circle', 'disabled');
-						$this.zluxdialog.toolbarBtnState(2, 'upload', 'enabled');
-						$this.zluxdialog.toolbarBtnState(2, 'plus-sign', 'enabled');
-					}
-				}],
-				2,
-				// back to main function
-				function(){
-					$('.zlux-upload', $this.zluxdialog.content).fadeOut('400', function(){
-
-						// empty possible upload queue
-						$this.zluxupload.emptyQueue();
-
-						// show the filesmanager view
-						$('.zlux-filesmanager', $this.zluxdialog.content).fadeIn('400');
-
-						// refresh the uploader file list
-						$this.zluxupload._updateFilelist();
-
-						// refresh dialog scroll
-						$this.zluxdialog.scrollbar('refresh');
-					})
-				}
-			)
 		},
 		/**
 		 * Init the Main Events
@@ -1043,6 +989,59 @@
 		initUploader: function() {
 			var $this = this;
 
+			// set Upload toolbar
+			$this.zluxdialog.newToolbar(
+				[{
+					title : $this._('ADD_NEW_FILES'),
+					icon : "plus-sign",
+					id : "add",
+					click : function(){
+						// already triggered by plupload
+					}
+				},
+				{
+					title : $this._('START_UPLOADING'),
+					icon : "upload disabled",
+					id : "start",
+					click : function(){
+						$this.zluxupload.uploader.start();
+						return false;
+					}
+				},
+				{
+					title : $this._('CANCEL_CURRENT_UPLOAD'),
+					icon : "ban-circle disabled",
+					id : "cancel",
+					click : function(){
+						// cancel current queue upload
+						$this.zluxupload.uploader.stop();
+
+						// disable the btn
+						$this.zluxdialog.toolbarBtnState(2, 'ban-circle', 'disabled');
+						$this.zluxdialog.toolbarBtnState(2, 'upload', 'enabled');
+						$this.zluxdialog.toolbarBtnState(2, 'plus-sign', 'enabled');
+					}
+				}],
+				2,
+				// back to main function
+				function(){
+					$('.zlux-upload', $this.zluxdialog.content).fadeOut('400', function(){
+
+						// empty possible upload queue
+						$this.zluxupload.emptyQueue();
+
+						// show the filesmanager view
+						$('.zlux-filesmanager', $this.zluxdialog.content).fadeIn('400');
+
+						// refresh the uploader file list
+						$this.zluxupload._updateFilelist();
+
+						// refresh dialog scroll
+						$this.zluxdialog.scrollbar('refresh');
+					})
+				}
+			)
+
 			// set upload engine
 			$this.zluxupload = new $.fn.zluxUpload({
 				path: 'images',
@@ -1050,7 +1049,8 @@
 				storage: $this.options.storage,
 				storage_params: $this.options.storage_params,
 				max_file_size: $this.options.max_file_size,
-				extensions: $this.options.extensions
+				extensions: $this.options.extensions,
+				browse_button: $('.zlux-dialog-toolbar .zlux-dialog-toolbar-2 i[data-id="add"]')
 			});
 
 			// set events
@@ -1352,7 +1352,8 @@
 			max_file_size: '1024kb', // Maximum file size. This string can be in 100b, 10kb, 10mb, 1gb format.
 			wrapper: null,
 			storage: 'local', // local, s3
-			storage_params: {}
+			storage_params: {},
+			browse_button: null
 		},
 		init: function() {
 			var $this = this;
@@ -1365,7 +1366,7 @@
 
 			// set the dropzone
 			$this.dropzone = $('<div class="zlux-upload-dropzone" />').appendTo($this.upload).append(
-				$('<span class="zlux-upload-dropzone-msg">' + $this.sprintf($this._('DROP_FILES'), 'zlux-upload-browse') + '</span>')
+				$('<span class="zlux-upload-dropzone-msg" />')
 			)
 
 			// init DnD events
@@ -1386,6 +1387,17 @@
 
 			// init plupload
 			$this.initPlupload();
+
+			// add drop msg if html5
+			if ($this.uploader.runtime == 'html5') {
+				$('.zlux-upload-dropzone-msg', $this.dropzone).html($this.sprintf($this._('DROP_FILES'), 'zlux-upload-browse'))
+
+				.on('click', 'a', function(){
+					// trigger the upload browse button
+					$this.options.browse_button.trigger('click');
+					return false;
+				})
+			}
 
 			// set init state
 			$this.inited = true;
@@ -1437,7 +1449,7 @@
 			// set basics params
 			params = {
 				runtimes: 'html5, flash',
-				browse_button: $('.zlux-upload-browse', $this.upload)[0],
+				browse_button: $this.options.browse_button[0],
 				drop_element: $this.dropzone[0], 
 				max_file_size: undefined, // controlled by ZLUX Upload
 				url: $this.AjaxURL() + '&task=upload',
