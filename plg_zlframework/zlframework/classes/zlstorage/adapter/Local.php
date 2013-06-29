@@ -85,7 +85,7 @@ class ZLStorageAdapterLocal extends ZLStorageAdapterBase implements ZLStorageAda
 		$path = JPath::clean($path);
 
 		if (JFolder::exists($path)) {
-			$this->setError('The folder already exists.');
+			$this->setError(JText::_('PPLG_ZLFRAMEWORK_STRG_ERR_OBJECT_ALREADY_EXISTS'));
 			return true;
 		} else {
 			$result = JFolder::create($path);
@@ -94,7 +94,7 @@ class ZLStorageAdapterLocal extends ZLStorageAdapterBase implements ZLStorageAda
 		// if something went wrong, report
 		if ($result !== true) {
 			$result = false;
-			$this->setError('Something went wrong, the task was not performed.');
+			$this->setError(JText::_('PLG_ZLFRAMEWORK_STRG_ERR_SOMETHING_WENT_WRONG'));
 		}
 
 		return $result;
@@ -114,7 +114,7 @@ class ZLStorageAdapterLocal extends ZLStorageAdapterBase implements ZLStorageAda
 		$_src = $this->app->path->path('root:' . $src);
 
 		if (!is_readable($_src)) {
-			$this->setError('Permission denied or object not found.');
+			$this->setError(JText::_('PLG_ZLFRAMEWORK_STRG_ERR_OBJECT_ACCESS_DENIED'));
 			return $result;
 		} else if (is_file($_src)) {
 			$result = JFile::move($src, $dest, $this->app->path->path('root:'));
@@ -124,7 +124,7 @@ class ZLStorageAdapterLocal extends ZLStorageAdapterBase implements ZLStorageAda
 
 		// if something went wrong, report
 		if ($result === false) {
-			$this->setError('Something went wrong, the task was not performed.');
+			$this->setError(JText::_('PLG_ZLFRAMEWORK_STRG_ERR_SOMETHING_WENT_WRONG'));
 		} else if ($result !== true) {
 			// report the error message
 			$this->setError($result);
@@ -158,7 +158,7 @@ class ZLStorageAdapterLocal extends ZLStorageAdapterBase implements ZLStorageAda
 		if (!$this->exists($targetDir)) {
 			if(!$this->createFolder($targetDir)) {
 				// if fails abort and report
-				$this->setError('Something went wrong, the task was not performed.');
+				$this->setError(JText::_('PLG_ZLFRAMEWORK_STRG_ERR_SOMETHING_WENT_WRONG'));
 				return false;
 			}
 		}
@@ -180,7 +180,7 @@ class ZLStorageAdapterLocal extends ZLStorageAdapterBase implements ZLStorageAda
 
 		// if something went wrong, report
 		if ($result === false) {
-			$this->setError('Something went wrong, the task was not performed.');
+			$this->setError(JText::_('PLG_ZLFRAMEWORK_STRG_ERR_SOMETHING_WENT_WRONG'));
 		} else if ($result !== true) {
 			// report the error message
 			$this->setError($result);
@@ -206,7 +206,7 @@ class ZLStorageAdapterLocal extends ZLStorageAdapterBase implements ZLStorageAda
 		$fullpath = $this->app->path->path("root:$path");
 
 		if (!$fullpath || !is_readable($fullpath)) {
-			$this->setError('Permission denied or object not found.');
+			$this->setError(JText::_('PLG_ZLFRAMEWORK_STRG_ERR_OBJECT_ACCESS_DENIED'));
 			return $result;
 		} else if (is_file($fullpath)) {
 			$result = JFile::delete($fullpath);
@@ -217,7 +217,7 @@ class ZLStorageAdapterLocal extends ZLStorageAdapterBase implements ZLStorageAda
 		// if something went wrong, report
 		if ($result !== true) {
 			$result = false;
-			$this->setError('Something went wrong, the task was not performed.');
+			$this->setError(JText::_('PLG_ZLFRAMEWORK_STRG_ERR_SOMETHING_WENT_WRONG'));
 		}
 
 		return $result;
@@ -265,7 +265,7 @@ class ZLStorageAdapterLocal extends ZLStorageAdapterBase implements ZLStorageAda
 		$fullpath = $this->app->path->path("root:$path");
 
 		if (!$fullpath || !is_readable($fullpath)) {
-			$this->setError('Permission denied or object not found.');
+			$this->setError(JText::_('PLG_ZLFRAMEWORK_STRG_ERR_OBJECT_ACCESS_DENIED'));
 			return $result;
 
 		// if file
@@ -305,7 +305,7 @@ class ZLStorageAdapterLocal extends ZLStorageAdapterBase implements ZLStorageAda
 
 		// if something went wrong, report
 		if ($result !== true) {
-			$this->setError('Something went wrong, the task was not performed.');
+			$this->setError(JText::_('PLG_ZLFRAMEWORK_STRG_ERR_SOMETHING_WENT_WRONG'));
 
 			return false;
 		}
@@ -328,7 +328,7 @@ class ZLStorageAdapterLocal extends ZLStorageAdapterBase implements ZLStorageAda
 		$fullpath = $this->app->path->path("root:$path");
 
 		if (!$fullpath || !is_readable($fullpath)) {
-			$this->setError('Permission denied or object not found.');
+			$this->setError(JText::_('PLG_ZLFRAMEWORK_STRG_ERR_OBJECT_ACCESS_DENIED'));
 			return $result;
 
 		// if file
@@ -356,7 +356,7 @@ class ZLStorageAdapterLocal extends ZLStorageAdapterBase implements ZLStorageAda
 
 		// if something went wrong, report
 		if ($result !== true) {
-			$this->setError('Something went wrong, the task was not performed.');
+			$this->setError(JText::_('PLG_ZLFRAMEWORK_STRG_ERR_SOMETHING_WENT_WRONG'));
 
 			return false;
 		}

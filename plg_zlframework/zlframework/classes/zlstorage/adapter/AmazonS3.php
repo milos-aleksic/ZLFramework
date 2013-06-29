@@ -112,7 +112,7 @@ class ZLStorageAdapterAmazonS3 extends ZLStorageAdapterBase implements ZLStorage
 		// if something went wrong, report
 		if ($result !== true) {
 			$result = false;
-			$this->setError('Something went wrong, the task was not performed.');
+			$this->setError(JText::_('PLG_ZLFRAMEWORK_STRG_ERR_SOMETHING_WENT_WRONG'));
 		}
 
 		return $result;
@@ -141,7 +141,7 @@ class ZLStorageAdapterAmazonS3 extends ZLStorageAdapterBase implements ZLStorage
 
 			// if they are objects in the folder, cancel
 			if (!empty($objects)) {
-				$this->setError('You must empty the folder content first.');
+				$this->setError(JText::_('PLG_ZLFRAMEWORK_STRG_S3_MUST_EMPTY_FOLDER'));
 				return false;
 			}
 		}
@@ -168,7 +168,7 @@ class ZLStorageAdapterAmazonS3 extends ZLStorageAdapterBase implements ZLStorage
 		// if something went wrong, report
 		if ($result !== true) {
 			$result = false;
-			$this->setError('Something went wrong, the task was not performed.');
+			$this->setError(JText::_('PLG_ZLFRAMEWORK_STRG_ERR_SOMETHING_WENT_WRONG'));
 		}
 
 		return $result;
@@ -225,7 +225,7 @@ class ZLStorageAdapterAmazonS3 extends ZLStorageAdapterBase implements ZLStorage
 
 			// if they are objects in the folder, cancel
 			if (!empty($objects)) {
-				$this->setError('You must empty the folder content first.');
+				$this->setError(JText::_('PLG_ZLFRAMEWORK_STRG_S3_MUST_EMPTY_FOLDER'));
 				return false;
 			}
 		}
@@ -242,7 +242,7 @@ class ZLStorageAdapterAmazonS3 extends ZLStorageAdapterBase implements ZLStorage
 		// if something went wrong, report
 		if ($result !== true) {
 			$result = false;
-			$this->setError('Something went wrong, the task was not performed.');
+			$this->setError(JText::_('PLG_ZLFRAMEWORK_STRG_ERR_SOMETHING_WENT_WRONG'));
 		}
 
 		return $result;
@@ -328,7 +328,7 @@ class ZLStorageAdapterAmazonS3 extends ZLStorageAdapterBase implements ZLStorage
 
 		// if something went wrong, report
 		if ($result == FALSE) {
-			$this->setError('Something went wrong, the task was not performed.');
+			$this->setError(JText::_('PLG_ZLFRAMEWORK_STRG_ERR_SOMETHING_WENT_WRONG'));
 
 			return false;
 		}
