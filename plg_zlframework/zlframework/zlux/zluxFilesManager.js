@@ -1188,6 +1188,9 @@
 
 				.on('click', 'a', function(){
 
+					// until all loaded return
+					if ($this.zluxdialog.spinning) return false;
+
 					// get the uploaded object dom from the files manager
 					var object_dom = $('.zlux-object[data-id="' + $object.name + '"]', $this.filesmanager);
 

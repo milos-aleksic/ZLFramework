@@ -157,10 +157,16 @@
 					$this._spinner.show();
 					$this.scrollbar('hide');
 
+					// set state
+					$this.spinning = true;
+
 				} else { // hide
 					$this.scrollbar('show');
 					$this._spinner.hide();
 					$this.main.add($this.toolbar.wrapper).fadeTo('slow', 1);
+
+					// set state
+					$this.spinning = false;
 				}
 			}
 		},
