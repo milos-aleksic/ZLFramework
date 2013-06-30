@@ -680,58 +680,6 @@ class zlfwHelper extends AppHelper {
 	}
 
 	/*
-	 Function: pluploadTranslation
-	 Translate Plupload script variables
-
-	 Returns:
-	 Translations - json
-	 */
-	public function pluploadTranslation()
-	{
-		if (!defined('PLG_ZLFRAMEWORK_PLUPLOAD_SCRIPT_DECLARATION'))
-		{
-			define('PLG_ZLFRAMEWORK_PLUPLOAD_SCRIPT_DECLARATION', true);
-
-			$translations = array('Select files' => 'PLG_ZLFRAMEWORK_FLP_SELECT_FILES', 'Add files to the upload queue and click the start button.' => 'PLG_ZLFRAMEWORK_FLP_ADD_FILES_TO_QUEUE', 'Upload element accepts only %d file(s) at a time. Extra files were stripped.' => 'PLG_ZLFRAMEWORK_FLP_UPLOAD_ACCEPTS_ONLY', 'Image format either wrong or not supported.' => 'PLG_ZLFRAMEWORK_FLP_WRONG_IMAGE_FORMAT', 'Runtime ran out of available memory.' => 'PLG_ZLFRAMEWORK_FLP_RUNTIME_OUT_OF_MEMORY', 'Resoultion out of boundaries! <b>%s</b> runtime supports images only up to %wx%hpx.' => 'PLG_ZLFRAMEWORK_FLP_RESOLUTION_OUT', 'Filename' => 'PLG_ZLFRAMEWORK_FLP_FILENAME', 'Upload URL might be wrong or doesn\'t exist' => 'PLG_ZLFRAMEWORK_FLP_UPLOAD_URL_WRONG', 'Using runtime: ' => 'PLG_ZLFRAMEWORK_FLP_USING_RUNTIME', 'Status' => 'PLG_ZLFRAMEWORK_FLP_STATUS', 'Size' => 'PLG_ZLFRAMEWORK_FLP_SIZE', 'File: %s' => 'PLG_ZLFRAMEWORK_FLP_FILE', 'Add Files' => 'PLG_ZLFRAMEWORK_FLP_ADD_FILES', 'Stop current upload' => 'PLG_ZLFRAMEWORK_FLP_STOP_CURRENT_UPLOAD', 'Start uploading queue' => 'PLG_ZLFRAMEWORK_FLP_START_CURRENT_UPLOAD', 'Uploaded %d/%d files' => 'PLG_ZLFRAMEWORK_FLP_UPLOADED_FILES', 'N/A' => 'PLG_ZLFRAMEWORK_FLP_NA', 'Drag files here.' => 'PLG_ZLFRAMEWORK_FLP_DRAG_FILES_HERE', 'File extension error.' => 'PLG_ZLFRAMEWORK_FLP_FILE_EXTENSION_ERROR', 'File size error.' => 'PLG_ZLFRAMEWORK_FLP_FILE_SIZE_ERROR', 'Init error.' => 'PLG_ZLFRAMEWORK_FLP_INIT_ERROR', 'HTTP Error.' => 'PLG_ZLFRAMEWORK_FLP_HTTP_ERROR', 'Security error.' => 'PLG_ZLFRAMEWORK_FLP_SECURITY_ERROR', 'Generic error.' => 'PLG_ZLFRAMEWORK_FLP_GENERIC_ERROR', 'File count error.' => 'PLG_ZLFRAMEWORK_FLP_FILE_COUNT_ERROR', 'IO error.' => 'PLG_ZLFRAMEWORK_FLP_IO_ERROR', 'Stop Upload' => 'PLG_ZLFRAMEWORK_FLP_STOP_UPLOAD', 'Start Upload' => 'PLG_ZLFRAMEWORK_FLP_START_UPLOAD', '%d files queued' => 'PLG_ZLFRAMEWORK_FLP_FILES_QUEUED', 'Cancel' => 'PLG_ZLFRAMEWORK_FLP_CANCEL');
-
-			$translations = array_map(array('JText', '_'), $translations);
-			$javascript = 'plupload.addI18n(' . json_encode($translations) . ');';
-
-			$this->app->document->addScriptDeclaration($javascript);
-		}
-	}
-
-	/*
-	 Function: filesproTranslation
-	 Translate FilesPro script variables
-
-	 Returns:
-	 Translations - json
-	 */
-	public function filesproTranslation()
-	{
-
-		if (!defined('PLG_ZLFRAMEWORK_FILESPRO_SCRIPT_DECLARATION'))
-		{
-			define('PLG_ZLFRAMEWORK_FILESPRO_SCRIPT_DECLARATION', true);
-
-			$translations = array('MyFolder' => 'PLG_ZLFRAMEWORK_FLP_MYFOLDER', 'Upload files into the main folder' => 'PLG_ZLFRAMEWORK_FLP_UPLOAD_MAIN_FOLDER', 'Upload files into this folder' => 'PLG_ZLFRAMEWORK_FLP_UPLOAD_INTO_FOLDER', 'Create a new folder into the main folder' => 'PLG_ZLFRAMEWORK_FLP_NEW_FOLDER', 'Create a new subfolder' => 'PLG_ZLFRAMEWORK_FLP_NEW_SUBFOLDER', 'Input a name for the new folder' => 'PLG_ZLFRAMEWORK_FLP_INPUT_NAME_FOLDER', 'Delete' => 'PLG_ZLFRAMEWORK_FLP_DELETE', 'You are about to delete' => 'PLG_ZLFRAMEWORK_FLP_YOU_ARE_ABOUT_TO_DELETE', 'Do you agree' => 'PLG_ZLFRAMEWORK_FLP_DO_YOU_AGREE', 'Confirm' => 'PLG_ZLFRAMEWORK_FLP_OK', 'Cancel' => 'PLG_ZLFRAMEWORK_FLP_CANCEL');
-
-			$translations = array_map(array('JText', '_'), $translations);
-			$javascript = "var filesPro = function() {
-								var translations = " . json_encode($translations) . ";
-								return {
-									translate: function(text) {
-										return (typeof translations[text] === 'undefined') ? text : translations[text];
-									}
-								};
-							}();";
-
-			$this->app->document->addScriptDeclaration($javascript);
-		}
-	}
-
-	/*
 		Function: getCurrentLanguage
 			retrieves the current language
 			
@@ -888,12 +836,11 @@ class zlfwHelper extends AppHelper {
 
 			case 'bootstrap' :
 				// load bootstrap
-				$this->app->document->addStylesheet('zlfw:assets/libraries/bootstrap/css/bootstrap-wrapped.min.css');
-				$this->app->document->addStylesheet('zlfw:assets/libraries/bootstrap/css/bootstrap-responsive-wrapped.min.css');
+				$this->app->zlfw->zlux->loadBootstrap();
 				break;
 			case 'bootstrap-js' :
 				// load bootstrap js
-				$this->app->document->addScript('zlfw:assets/libraries/bootstrap/js/bootstrap.min.js');
+				$this->app->zlfw->zlux->loadBootstrap(true);
 				break;
 
 			case 'zlux' :
@@ -904,9 +851,6 @@ class zlfwHelper extends AppHelper {
 				// load dependent assets
 				$this->loadLibrary('qtip');
 				$this->loadLibrary('bootstrap');
-
-				// init translation
-				$this->app->zlfw->filesproTranslation();
 				break;
 
 			case 'zlux-front' :
