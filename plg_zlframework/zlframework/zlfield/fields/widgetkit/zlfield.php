@@ -25,7 +25,7 @@ require_once(JPATH_ADMINISTRATOR.'/components/com_zoo/config.php');
 	$arguments = array('node' => $node_atr, 'addparams' => array('settings' => $value));
 
 	// parse fields
-	$fields = $zoo->zlfield->parseArray($zoo->zlfield->XMLtoArray($node), false, $arguments);
+	$fields = $zoo->zlfield->parseArray($zoo->zlfw->xml->XMLtoArray($node), false, $arguments);
 
 	// set json
 	$json = '{"fields": {'.implode(",", $fields).'}}';

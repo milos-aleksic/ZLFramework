@@ -63,7 +63,7 @@ class zlfwHelperXml extends AppHelper {
 		}
 	}
 
-		/**
+	/**
 	 * This method adds parmeters to the elements on the fly, reading them from an xml file
 	 * 
 	 * @param	$config 	AppXmlElement	The xml config of the element
@@ -103,5 +103,37 @@ class zlfwHelperXml extends AppHelper {
 			$new_param->addAttribute('group', 'render');
 			$config->addXML($new_param);
 		}
+	}
+
+	/**
+	 * Convert XML node to array data
+	*/
+	public function XMLtoArray($node, $isOption=false)
+	{ 
+		$fields = array(); $i = 0;
+		if(count($node->children())) foreach($node->children() as $child)
+		{
+			// get field atributes
+			$attrs = (array)$child->attributes();
+			$attrs = !empty($attrs) ? array_shift($attrs) : $attrs;
+
+			if($child->getName() == 'options')
+			{
+				$fields[$i]['name'] =  $child->getName();
+				$fields[$i]['attributes'] = $this->XMLtoArray($child, true);
+			}
+			else if($isOption)
+			{
+				$fields[(string)$child] = (string)$child->attributes()->value;
+			}
+			else {
+				$fields[$i]['name'] = $child->getName();
+				$fields[$i]['attributes'] = $attrs;
+				$fields[$i]['childs'] = $this->XMLtoArray($child);
+			}
+
+			$i++;
+		}
+		return $fields;
 	}
 }
