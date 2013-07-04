@@ -776,7 +776,7 @@ class ZlfieldHelper extends AppHelper {
 			$attrs		= '';
 
 			// render field
-			$field = $this->app->zlfieldhtml->_('zlf.'.$type, $id, $name, $value, $specific, $attrs, $getCurrentValue);
+			$field = $this->app->zlfieldhtml->_('zlf.'.$type.'Field', $id, $name, $value, $specific, $attrs, $getCurrentValue);
 
 			if (!empty($field)) return $field;
 		}

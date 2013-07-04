@@ -12,6 +12,10 @@ defined('_JEXEC') or die('Restricted access');
 // load config
 require_once(JPATH_ADMINISTRATOR . '/components/com_zoo/config.php');
 
+	// load WK settings
+	$widget_xml = simplexml_load_file($this->app->path->path('media:widgetkit/widgets/slideset/slideset.xml'));
+	$style_xml = simplexml_load_file($this->app->path->path('media:widgetkit/widgets/slideset/styles/default/config.xml'));
+
 	return 
 	'{"fields": {
 
@@ -31,9 +35,14 @@ require_once(JPATH_ADMINISTRATOR . '/components/com_zoo/config.php');
 						"text":"Settings",
 						"layout":"subsection"
 					},
-					"_style_settings": {
-						"type":"subfield",
-						"path":"zlfw:widgetkit\/widgets\/slideset\/{value}\/settings.php",
+					"_widget_settings": {
+						"type":"wrapper",
+						"fields": {' . $this->app->zlfw->widgetkit->fromSettingsToZLfield($widget_xml->xpath('settings/setting')) . '},
+						"control":"settings"
+					},
+					"_widget_style_settings": {
+						"type":"wrapper",
+						"fields": {' . $this->app->zlfw->widgetkit->fromSettingsToZLfield($style_xml->xpath('settings/setting')) . '},
 						"control":"settings"
 					}
 
