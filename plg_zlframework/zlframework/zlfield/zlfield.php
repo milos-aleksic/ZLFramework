@@ -297,6 +297,7 @@ class ZlfieldHelper extends AppHelper {
 				if(is_file($path)){
 					/* IMPORTANT - this vars are necesary for include function */
 					$subloaded = true; // important to let know it's subloaded
+					$psv = $this->data->create($psv);
 					$json = json_decode(include($path), true);
 					break;
 				}

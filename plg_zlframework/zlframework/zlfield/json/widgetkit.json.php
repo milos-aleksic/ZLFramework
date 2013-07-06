@@ -12,7 +12,6 @@ defined('_JEXEC') or die('Restricted access');
 // load config
 require_once(JPATH_ADMINISTRATOR . '/components/com_zoo/config.php');
 
-	// $widgets = array_merge(array('PLG_ZLFRAMEWORK_SELECT_WIDGET' => ''), $params->get('widgets', array()));
 	$widgets = $params->get('widgets', array());
 
 	return
@@ -39,7 +38,7 @@ require_once(JPATH_ADMINISTRATOR . '/components/com_zoo/config.php');
 
 					"subfield": {
 						"type":"subfield",
-						"path":"zlfw:widgetkit\/widgets\/{value}\/params.php"
+						"path":"zlfield:json\/widgetkit\/style.json.php"
 					}
 					
 				}
