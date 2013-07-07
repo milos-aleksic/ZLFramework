@@ -27,7 +27,7 @@ defined('_JEXEC') or die('Restricted access');
 	}
 
 	// parse fields
-	$fields = $this->app->zlfield->parseArray($this->app->zlfield->XMLtoArray($node), false, $arguments);
+	$fields = $this->app->zlfield->parseArray($this->app->zlfw->xml->XMLtoArray($node), false, $arguments);
 
 	// set json
 	$json = '{"fields": {'.implode(",", $fields).'}}';

@@ -297,6 +297,7 @@ class ZlfieldHelper extends AppHelper {
 				if(is_file($path)){
 					/* IMPORTANT - this vars are necesary for include function */
 					$subloaded = true; // important to let know it's subloaded
+					$psv = $this->data->create($psv);
 					$json = json_decode(include($path), true);
 					break;
 				}
@@ -628,36 +629,6 @@ class ZlfieldHelper extends AppHelper {
 		return $fields;
 	}
 
-	// convert an xml ready for parseArray()
-	public function XMLtoArray($node, $isOption=false)
-	{ 
-		$fields = array(); $i = 0;
-		if(count($node->children())) foreach($node->children() as $child)
-		{
-			// get field atributes
-			$attrs = (array)$child->attributes();
-			$attrs = !empty($attrs) ? array_shift($attrs) : $attrs;
-
-			if($child->getName() == 'options')
-			{
-				$fields[$i]['name'] =  $child->getName();
-				$fields[$i]['attributes'] = $this->XMLtoArray($child, true);
-			}
-			else if($isOption)
-			{
-				$fields[(string)$child] = (string)$child->attributes()->value;
-			}
-			else {
-				$fields[$i]['name'] = $child->getName();
-				$fields[$i]['attributes'] = $attrs;
-				$fields[$i]['childs'] = $this->XMLtoArray($child);
-			}
-
-			$i++;
-		}
-		return $fields;
-	}
-
 	/*
 		Function: renderIf 
 			Render or not depending if specified extension is instaled and enabled
@@ -806,7 +777,7 @@ class ZlfieldHelper extends AppHelper {
 			$attrs		= '';
 
 			// render field
-			$field = $this->app->zlfieldhtml->_('zlf.'.$type, $id, $name, $value, $specific, $attrs, $getCurrentValue);
+			$field = $this->app->zlfieldhtml->_('zlf.'.$type.'Field', $id, $name, $value, $specific, $attrs, $getCurrentValue);
 
 			if (!empty($field)) return $field;
 		}
