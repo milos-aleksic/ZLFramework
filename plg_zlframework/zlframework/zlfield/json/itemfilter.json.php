@@ -31,6 +31,11 @@ defined('_JEXEC') or die('Restricted access');
 	$childs[] = isset($params['itemfilter']) ? '"_filter_fieldset":{
 		"type":"wrapper",
 		"fields": {
+			"_created_by":{
+				"type":"text",
+				"label":"PLG_ZLFRAMEWORK_AUTHOR",
+				"help":"PLG_ZLFRAMEWORK_IFT_AUTHOR_DESC"
+			},
 			"_state":{
 				"type":"select",
 				"label":"PLG_ZLFRAMEWORK_IFT_PUBLISHED_STATE",

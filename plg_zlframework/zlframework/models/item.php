@@ -193,6 +193,24 @@ class ZLModelItem extends ZLModel
 			$query->where( 'a.' . $this->app->user->getDBAccessString());
 		}
 
+		// created_by
+		if ($authors = $this->getState('created_by', array())) {
+			$ids = array();
+			foreach ($authors as $author) $ids[] = $author->get('value');
+			
+			// set query
+			$query->where("a.created_by IN (" . implode(',', $ids) . ")");
+		}
+
+		// modified_by
+		if ($editors = $this->getState('modified_by', array())) {
+			$ids = array();
+			foreach ($editors as $editor) $ids[] = $editor->get('value');
+			
+			// set query
+			$query->where("a.modified_by IN (" . implode(',', $ids) . ")");
+		}
+
 		// created
 		if ($date = $this->getState('created', array()))
 		{
