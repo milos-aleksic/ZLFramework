@@ -390,13 +390,14 @@ abstract class ElementFilesPro extends ElementRepeatablePro {
 			$user = JFactory::getUser();
 			$item = $item ? $item : $this->getItem();
 
-			// if item is new return temporal path
-			if (!$item->id) return 'tmp/zl_' . $this->identifier . '_' . $this->getUniqid();
-
-
 			// Get base directory as shared parameter
 			$root = $this->config->find('files._source_dir', $this->_joomla_file_path);
-			
+
+			// if item is new and the path is using dynamic yet unknown vars, return temporal path
+			if (!$item->id && strpos($root, '[zooitemid]') !== false) {
+				return 'tmp/zl_' . $this->identifier . '_' . $this->getUniqid();
+			} 
+
 			// Restricted Joomla! folders
 			$restricted = explode(',', 'administrator,cache,components,includes,language,libraries,logs,media,modules,plugins,templates,xmlrpc');
 			
