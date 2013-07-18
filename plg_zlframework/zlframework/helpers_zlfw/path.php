@@ -104,14 +104,17 @@ class zlfwHelperPath extends PathHelper {
 		
 		// Split in parts to better manage
 		$parts = explode('/', $root);
-		// Force default directory if path starts with a variable, a . or is empty
+
+		// abort if path starts with a variable, a . or is empty
 		if (preg_match('/[\.\[]/', $parts[0]) || (empty($root) && !$allowroot)) {
 			$parts[0] = $joomla_file_path;
 		}
-		// Force default if directory is a joomla directory conserving the variables
+
+		// abort if path not allowed
 		if (!$allowroot && in_array(strtolower($parts[0]), $restricted)) {
-			$parts[0] = $joomla_file_path;
+			return false;
 		}
+		
 		// join back
 		$root = implode('/', $parts);
 		
