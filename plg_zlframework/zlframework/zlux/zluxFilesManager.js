@@ -48,6 +48,9 @@
 			$.fn.zluxFilesManager.iNextUnique++;
 			$this.ID = $.fn.zluxFilesManager.iNextUnique;
 
+			// save the instance reference
+			$.fn.zluxFilesManager.instances[$this.ID] = $this;
+
 			// Convert settings
 			$this.options.max_file_size = plupload.parseSize($this.options.max_file_size);
 
@@ -58,8 +61,7 @@
 			}
 		},
 		initDataTable: function(wrapper) {
-			var $this = this,
-				source = $this.AjaxURL() + '&task=getFilesManagerData';
+			var $this = this;
 
 			// set table
 			$('<table cellpadding="0" cellspacing="0" border="0" class="table table-striped table-bordered" />')
@@ -73,7 +75,7 @@
 					"sInfoEmpty": ""
 				},
 				"sAjaxUrl": $this.AjaxURL(),
-				"sAjaxSource": source,
+				"sAjaxSource": $this.AjaxURL() + '&task=getFilesManagerData',
 				"sServerMethod": "POST",
 				"sStartRoot": $this.cleanPath($this.options.root),
 				"bPaginate": false,
@@ -161,8 +163,14 @@
 						}
 					})
 
-					// trigger table init event
-					$this.trigger("InitComplete");
+					// save the initial paths
+					oSettings.oInit.sStartRoot = $this.cleanPath($this.options.root);
+					oSettings.sCurrentPath = $this.cleanPath($this.options.root);
+
+					// trigger table init event 50ms after as a workaround if the first ajax call is canceled
+					setTimeout(function() {
+						$this.trigger("InitComplete");
+					}, 50);
 				},
 				"fnPreDrawCallback": function(oSettings) {
 					// show processing
@@ -239,23 +247,45 @@
 				return false;
 			})
 		},
+			reload: function() {
+			var $this = this,
+				oSettings = $this.oTable.fnSettings(),
+				sUrl = oSettings.sAjaxSource;
+
+			// set vars
+			oSettings.bReloading = true;
+
+			// reload
+			$this.oTable.fnReloadAjax(sUrl);
+		},
+		_redrawInstances: function() {
+			var $this = this;
+
+			// redraw instances
+			$.each($.fn.zluxFilesManager.instances, function(index, instance){
+
+				// skip current instance
+				if (index == $this.ID) return true;
+
+				// if table inited
+				if (instance.oTable) {
+
+					// redraw
+					instance.oTable.fnSettings().bRedrawing = true;
+					instance.oTable.fnReloadAjax( $this.oTable.fnSettings().sAjaxSource );
+				}
+			})
+		},
 		_fnServerData: function( sUrl, aoData, fnCallback, oSettings ) {
 			var $this = this,
 				root;
 
-			// create cache object
-			oSettings.aAjaxDataCache = oSettings.aAjaxDataCache ? oSettings.aAjaxDataCache : {};
-
-			// implelment deferred cache system, should we?
-			// if ( !$this.cachedScriptPromises[ path ] ) {
-			// 	$this.cachedScriptPromises[ path ] = $.Deferred(function( defer ) {
-			// 		$.getScript( path ).then( defer.resolve, defer.reject );
-			// 	}).promise();
-			// }
-			// return $this.cachedScriptPromises[ path ].done( callback );
+			/* the Cache Data is stored in the main plugin so it can be shared by all instances */
 
 			// if first time, set start root as current path
-			if ($.isEmptyObject(oSettings.aAjaxDataCache)) oSettings.sCurrentPath = oSettings.oInit.sStartRoot;
+			if (!$this.cacheInited) {
+				oSettings.sCurrentPath = oSettings.oInit.sStartRoot;
+			}
 
 			// set the root
 			root = $this.cleanPath(oSettings.sCurrentPath + '/' + oSettings.sGoToPath);
@@ -275,11 +305,12 @@
 					var cached = false;
 
 					// if not reloading
-					if (!oSettings.bReloading){
+					if (!oSettings.bReloading || oSettings.bRedrawing){
 
 						// check if already cached
-						var json = oSettings.aAjaxDataCache[root];
+						var json = $.fn.zluxFilesManager.aAjaxDataCache[root];
 						if (json) {
+
 							// save root
 							oSettings.sCurrentPath = root;
 
@@ -292,34 +323,22 @@
 						}
 					}
 
+					if (oSettings.bRedrawing) {
+						// reset the param
+						oSettings.bRedrawing = false;
+
+						// save root
+						oSettings.sCurrentPath = root;
+
+						// avoid the ajax call
+						return false;
+					}
+
 					// if cached abort ajax
 					if (cached) return false;
 
 					// else, the ajax proceeds, show the spinner
 					$this.zluxdialog.spinner('show');
-				},
-				"success": function (json) {
-					// manage possible errors
-					if ( json.sError ) oSettings.oApi._fnLog( oSettings, 0, json.sError );
-
-					// if first time, save real root path, as it can be changed for security reasons by the server
-					if ($.isEmptyObject(oSettings.aAjaxDataCache)) oSettings.oInit.sStartRoot = json.root;
-
-					// save new path
-					oSettings.sCurrentPath = json.root;
-
-					// reset cache to 0 if reloading
-					if (oSettings.bReloading) oSettings.aAjaxDataCache = {};
-
-					// upload or save cache
-					oSettings.aAjaxDataCache[json.root] = json;
-
-					// set reloading to false
-					oSettings.bReloading = false;
-
-					// trigger events
-					$(oSettings.oInstance).trigger('xhr', [oSettings, json]);
-					fnCallback( json );
 				},
 				"dataType": "json",
 				"cache": false,
@@ -330,6 +349,39 @@
 							"server could not be parsed. This is caused by a JSON formatting error." );
 					}
 				}
+			})
+
+			.done(function ( json ) {
+				// manage possible errors
+				if (!json.result && json.errors) oSettings.oApi._fnLog( oSettings, 0, json.errors );
+
+				// set json
+				json = json.result;
+
+				// if first time, save real root path, as it can be changed for security reasons by the server
+				if (!$this.cacheInited) oSettings.oInit.sStartRoot = json.root;
+
+				// save new path
+				oSettings.sCurrentPath = json.root;
+
+				// reset cache to 0 if reloading, so each folder is reached again
+				if (oSettings.bReloading) $.fn.zluxFilesManager.aAjaxDataCache = {};
+
+				// cache the data
+				$.fn.zluxFilesManager.aAjaxDataCache[json.root] = json;
+
+				// redraw the other instances
+				$this._redrawInstances();
+
+				// set reloading to false
+				oSettings.bReloading = false;
+
+				// trigger events
+				$(oSettings.oInstance).trigger('xhr', [oSettings, json]);
+				fnCallback( json );
+
+				// set cache state
+				$this.cacheInited = true;
 			});
 		},
 		/**
@@ -667,6 +719,9 @@
 	// save the plugin for global use
 	$.fn[Plugin.prototype.name] = Plugin;
 	$.fn[Plugin.prototype.name].iNextUnique = 0;
+	$.fn[Plugin.prototype.name].aAjaxDataCache = {};
+	$.fn[Plugin.prototype.name].instances = {};
+
 })(jQuery);
 
 
@@ -868,7 +923,8 @@
 							$(this).remove();
 
 							// remove the object from cache
-							var aaData = $this.oTable.fnSettings().aAjaxDataCache[$this.oTable.fnSettings().sCurrentPath].aaData;
+							var aaData = $.fn.zluxFilesManager.aAjaxDataCache[$this.oTable.fnSettings().sCurrentPath].aaData;
+
 							$.each(aaData, function(i, value){
 								if ($object.dom.data('id') == value.name && $object.dom.data('type') == value.type) {
 									// found, remove
@@ -878,6 +934,9 @@
 									return false;
 								}
 							})
+
+							// redraw the other instances
+							$this._redrawInstances();
 						});
 					})
 

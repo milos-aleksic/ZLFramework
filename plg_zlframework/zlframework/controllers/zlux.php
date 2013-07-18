@@ -309,24 +309,46 @@ class ZluxController extends AppController {
 				$storage = new ZLStorage('Local');
 				break;
 		}
-		
+
+		// get root
+		$root = $this->app->zlfw->path->getDirectory($root);
+
+		// if there is some issue with the root
+		if (!$root) {
+			$this->setError('Wrong or not permited root.');
+
+			// get any error / warning
+			$errors = array_merge($storage->getErrors(), $storage->getWarnings());
+
+			echo json_encode(compact('result', 'errors'));
+			return;
+		}
+
 		// retrieve tree
-		$tree = $storage->getTree($root, $legalExt);
-		
+		$result = $storage->getTree($root, $legalExt);
+
+		// get any error / warning
+		$errors = array_merge($storage->getErrors(), $storage->getWarnings());
+
+		if (!$result) {
+			echo json_encode(compact('result', 'errors'));
+			return;
+		}
+
 		/* Array of database columns which should be read and sent back to DataTables. Use a space where
 		   you want to insert a non-database field (for example a counter or static image) */
 		$aColumns = array('type', 'name', 'size', 'path');
 
 		// JSON
-		$JSON = array(
+		$result = array(
 			'iTotalRecords' => 40,
 			'iTotalDisplayRecords' => 40,
 			'sColumns' => implode(', ', $aColumns),
-			'root' => $tree['root'],
-			'aaData' => $tree['rows']
+			'root' => $result['root'],
+			'aaData' => $result['rows']
 		);
 
-		echo json_encode($JSON);
+		echo json_encode(compact('result', 'errors'));
 	}
 
 	/*

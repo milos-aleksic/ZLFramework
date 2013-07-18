@@ -233,7 +233,6 @@ class ZLStorageAdapterLocal extends ZLStorageAdapterBase implements ZLStorageAda
 	public function getTree($root, $legalExt)
 	{
 		// init vars
-		$root = $this->app->zlpath->getDirectory($root);
 		$rows = array();
 
 		// dirs
