@@ -164,7 +164,7 @@ class ZLFieldHTMLHelper extends AppHelper {
 			$hidden_opts = $spec->get('hidden_opts', 0) ? explode('|', $spec->get('hidden_opts', '')) : '';
 			
 			// options file
-			$opt_file = str_replace('{value}', (string)$value, $spec->get('opt_file'));
+			$opt_file = str_replace('{value}', @(string)$value, $spec->get('opt_file'));
 
 			$preoptions = $spec->get('fix_options', array()) + $spec->get('options', array());
 			if (!empty($opt_file) && $path = $this->app->path->path($opt_file))

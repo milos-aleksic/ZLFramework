@@ -404,7 +404,7 @@ class ZlfieldHelper extends AppHelper {
 
 					// replace parent values in paths
 					foreach ((array)$psv as $key => $pvalue) {
-						$paths = str_replace('{'.$key.'}', basename((string)$pvalue, '.php'), $paths);
+						$paths = str_replace('{'.$key.'}', basename(@(string)$pvalue, '.php'), $paths);
 					}
 
 					// build json paths
