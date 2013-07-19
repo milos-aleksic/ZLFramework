@@ -14,18 +14,38 @@ jimport('joomla.form.formfield');
 // load config
 require_once(JPATH_ADMINISTRATOR.'/components/com_zoo/config.php');
 
-class JFormFieldZldummy extends JFormField {
+if (App::getInstance('zoo')->joomla->isVersion('2.5')) {
 
-	protected $type = 'Zldummy';
+	class JFormFieldZldummy extends JFormField {
 
-	// usin Zl Field on modules it's not possible to save the values with no additinal CTRL because Joomla! checks the XML before saving them.
-	// an workaround is to just create an dummy xml with same name as the value wonted to be saved.
+		protected $type = 'Zldummy';
 
-	public function getInput() {
-		return;
+		// usin Zl Field on modules it's not possible to save the values with no additinal CTRL because Joomla! checks the XML before saving them.
+		// an workaround is to just create an dummy xml with same name as the value wonted to be saved.
+
+		public function getInput() {
+			return;
+		}
+
+		// avoid rendering the title
+		public function setup(&$element, $value, $group = null){}
 	}
 
-	// avoid rendering the title
-	public function setup(&$element, $value, $group = null){}
+} else { // Joomla 3+
+
+	class JFormFieldZldummy extends JFormField {
+
+		protected $type = 'Zldummy';
+
+		// usin Zl Field on modules it's not possible to save the values with no additinal CTRL because Joomla! checks the XML before saving them.
+		// an workaround is to just create an dummy xml with same name as the value wonted to be saved.
+
+		public function getInput() {
+			return;
+		}
+
+		// avoid rendering the title
+		public function setup(SimpleXMLElement $element, $value, $group = null){}
+	}
 
 }
