@@ -59,6 +59,12 @@
 				$this._ErrorLog(0, $this._('STORAGE_PARAM_MISSING'));
 				$this.options.storage = 'local';
 			}
+
+			// save the start root
+			$this.sStartRoot = $this._cleanPath($this.options.root);
+
+			// and the current path
+			$this.sCurrentPath = $this.sStartRoot;
 		},
 		initDataTable: function(wrapper) {
 			var $this = this;
@@ -69,7 +75,7 @@
 
 			// init dataTable
 			$this.oTable = $('table', wrapper).dataTable({
-				"sDom": "F<'row-fluid'<'span12'B>><'row-fluid'<'span12't>>",
+				"sDom": "F<'row-fluid'<'span12't>>",
 				"oLanguage": {
 					"sEmptyTable": $this._('EMPTY_FOLDER'),
 					"sInfoEmpty": ""
@@ -77,7 +83,6 @@
 				"sAjaxUrl": $this.AjaxURL(),
 				"sAjaxSource": $this.AjaxURL() + '&task=getFilesManagerData',
 				"sServerMethod": "POST",
-				"sStartRoot": $this.cleanPath($this.options.root),
 				"bPaginate": false,
 				"aoColumns": [
 					{ 
@@ -97,7 +102,7 @@
 						},
 						"fnCreatedCell": function (nTd, sData, oData, iRow, iCol) {
 							// store path in data
-							$(nTd).parent('tr').attr('data-id', $this.cleanPath( oData.name ))
+							$(nTd).parent('tr').attr('data-id', $this._cleanPath( oData.name ))
 						}
 					}
 				],
@@ -163,10 +168,6 @@
 						}
 					})
 
-					// save the initial paths
-					oSettings.oInit.sStartRoot = $this.cleanPath($this.options.root);
-					oSettings.sCurrentPath = $this.cleanPath($this.options.root);
-
 					// trigger table init event 50ms after as a workaround if the first ajax call is canceled
 					setTimeout(function() {
 						$this.trigger("InitComplete");
@@ -181,6 +182,9 @@
 					var oPaging = oSettings.oInstance.fnPagingInfo(),
 						pagination = $('.dataTables_paginate', $(oSettings.nTableWrapper)).closest('.row-fluid');
 					(oPaging.iTotalPages <= 1) && pagination.hide() || pagination.show();
+
+					// trigger event
+					$this.trigger("DrawCallback");
 
 					// update dialog scrollbar
 					$this.zluxdialog.scrollbar('refresh');
@@ -210,10 +214,10 @@
 						$this.oTable.fnSettings();
 
 						// update go to path
-						oSettings.sGoToPath = $object.dom.data('id');
+						$this.sGoToPath = $object.dom.data('id');
 
 						// reload with new path
-						$this.oTable.fnReloadAjax(oSettings.sAjaxSource);
+						$this.oTable.fnReloadAjax();
 					}
 
 					// trigger event
@@ -247,51 +251,17 @@
 				return false;
 			})
 		},
-			reload: function() {
-			var $this = this,
-				oSettings = $this.oTable.fnSettings(),
-				sUrl = oSettings.sAjaxSource;
-
-			// set vars
-			oSettings.bReloading = true;
-
-			// reload
-			$this.oTable.fnReloadAjax(sUrl);
-		},
-		_redrawInstances: function() {
-			var $this = this;
-
-			// redraw instances
-			$.each($.fn.zluxFilesManager.instances, function(index, instance){
-
-				// skip current instance
-				if (index == $this.ID) return true;
-
-				// if table inited
-				if (instance.oTable) {
-
-					// redraw
-					instance.oTable.fnSettings().bRedrawing = true;
-					instance.oTable.fnReloadAjax( $this.oTable.fnSettings().sAjaxSource );
-				}
-			})
-		},
 		_fnServerData: function( sUrl, aoData, fnCallback, oSettings ) {
 			var $this = this,
 				root;
 
 			/* the Cache Data is stored in the main plugin so it can be shared by all instances */
 
-			// if first time, set start root as current path
-			if (!$this.cacheInited) {
-				oSettings.sCurrentPath = oSettings.oInit.sStartRoot;
-			}
-
 			// set the root
-			root = $this.cleanPath(oSettings.sCurrentPath + '/' + oSettings.sGoToPath);
+			root = $this._cleanPath($this.sCurrentPath + '/' + $this.sGoToPath);
 
 			// reset vars
-			oSettings.sGoToPath = '';
+			$this.sGoToPath = '';
 
 			// send root with post data
 			aoData.push({ "name": "root", "value": root });
@@ -305,14 +275,14 @@
 					var cached = false;
 
 					// if not reloading
-					if (!oSettings.bReloading || oSettings.bRedrawing){
+					if (!$this.bReloading || $this.bRedrawing){
 
 						// check if already cached
 						var json = $.fn.zluxFilesManager.aAjaxDataCache[root];
 						if (json) {
 
 							// save root
-							oSettings.sCurrentPath = root;
+							$this.sCurrentPath = root;
 
 							// emulate the xhr events
 							$(oSettings.oInstance).trigger('xhr', [oSettings, json]);
@@ -321,17 +291,18 @@
 							// avoid ajax call
 							cached = true;
 						}
-					}
 
-					if (oSettings.bRedrawing) {
-						// reset the param
-						oSettings.bRedrawing = false;
+						// if redrawing
+						if ($this.bRedrawing) {
+							// reset the param
+							$this.bRedrawing = false;
 
-						// save root
-						oSettings.sCurrentPath = root;
+							// save root
+							$this.sCurrentPath = root;
 
-						// avoid the ajax call
-						return false;
+							// avoid the ajax call
+							return false;
+						}
 					}
 
 					// if cached abort ajax
@@ -358,64 +329,121 @@
 				// set json
 				json = json.result;
 
-				// if first time, save real root path, as it can be changed for security reasons by the server
-				if (!$this.cacheInited) oSettings.oInit.sStartRoot = json.root;
-
 				// save new path
-				oSettings.sCurrentPath = json.root;
+				$this.sCurrentPath = json.root;
 
-				// reset cache to 0 if reloading, so each folder is reached again
-				if (oSettings.bReloading) $.fn.zluxFilesManager.aAjaxDataCache = {};
+				// empty cache if reloading, so the content is retrieved again
+				if ($this.bReloading) $.fn.zluxFilesManager.aAjaxDataCache = {};
 
 				// cache the data
 				$.fn.zluxFilesManager.aAjaxDataCache[json.root] = json;
 
 				// redraw the other instances
-				$this._redrawInstances();
+				$this.redrawInstances();
 
 				// set reloading to false
-				oSettings.bReloading = false;
+				$this.bReloading = false;
 
 				// trigger events
 				$(oSettings.oInstance).trigger('xhr', [oSettings, json]);
 				fnCallback( json );
-
-				// set cache state
-				$this.cacheInited = true;
 			});
 		},
 		/**
-		 * Returns the full path prepended to the passed relative path
+		 * Reload the data
 		 */
-		_getFullPath: function(path) {
-			var sCurrentPath = this.oTable.fnSettings().sCurrentPath;
-			return sCurrentPath ? sCurrentPath + '/' + path : path;
-		},
-		/**
-		 * Clean a path from double / and others
-		 *
-		 * @method cleanPath
-		 * @param {String} path The path to be cleaned
-		 */
-		cleanPath : function(path) {
-			// return path and
-			return path
-
-			// remove undefined
-			.replace(/undefined/g, '')
-
-			// remove double /
-			.replace(/\/\//g, '/')
-
-			// remove / from start and begining
-			.replace(/(^\/|\/$)/g, '');
-		},
-		/**
-		 * Returns the oTable row related to the provided path
-		 */
-		_getRowFromPath: function(path) {
+		reload: function() {
 			var $this = this;
-			return $('tr[data-path="' + path + '"]', $this.oTable);
+
+			// set vars
+			$this.bReloading = true;
+
+			// reload
+			$this.oTable.fnReloadAjax();
+		},
+		/**
+		 * Redraw all other instances
+		 */
+		redrawInstances: function() {
+			var $this = this;
+
+			// redraw instances
+			$.each($.fn.zluxFilesManager.instances, function(index, instance){
+
+				// skip current instance
+				if (index == $this.ID) return true;
+
+				// if table inited
+				if (instance.oTable) {
+
+					// redraw
+					instance.bRedrawing = true;
+					instance.oTable.fnReloadAjax();
+				}
+			})
+		},
+		/**
+		 * Init breadcrumb
+		 */
+		initBreadcrumb: function() {
+			var $this = this;
+
+			// set the breadcrumb wrapper
+			$this.breadcrumb = $('<ul class="breadcrumb" />').prependTo($this.filesmanager)
+
+			// wrap it
+			.wrap('<div class="row-fluid"><div class="span12" /></div>')
+
+			// assign events
+			.on('click', 'a', function(e){
+				// set path values for correct routing
+				$this.sCurrentPath = $this.sStartRoot;
+				$this.sGoToPath = $(this).data('path');
+
+				// reload
+				$this.oTable.fnReloadAjax();
+				return false;
+			});
+
+			// set event
+			$this.bind("DrawCallback initBreadcrumb", function(manager) {
+				var path = $this.sCurrentPath ? $this.sCurrentPath : '', // current browsed path
+					brcb = [],
+					paths,
+					txtROOT = $this._('ROOT').toLowerCase();
+
+				// remove the root, is confidential data
+				path = path.replace(new RegExp('^' + $this.sStartRoot), '');
+
+				// clean the path
+				path = path.replace(/(^\/|\/$)/, '');
+
+				// split the path in folders
+				paths = path.length ? path.split('/') : [];
+
+				// if active path is the root
+				if (!paths.length) brcb.push('<li class="active">' + txtROOT + '</li>');
+
+				// if not
+				else brcb.push('<li><a href="#" data-path="">' + txtROOT + '</a><span class="divider">/</span></li>');
+
+				// populate with the other paths
+				path = [];
+				$.each(paths, function(i, v){
+					path.push(v);
+					if (paths.length == i+1 ) {
+						brcb.push('<li class="active">' + v + '</li>');
+					} else {
+						brcb.push('<li><a href="#" data-path="' + path.join('/') + '">' + v + '</a><span class="divider">/</span></li>');
+					}
+				})
+
+				// update breadcrumb
+				$this.breadcrumb.html(brcb.join(''));
+			})
+
+			// first init
+			.trigger("initBreadcrumb");
 		},
 		/**
 		 * Render the Object content
@@ -616,6 +644,12 @@
 					$object.basename = new_name.replace(/\.+[a-zA-Z]+$/g, '');
 					$object.path = $object.path.replace(/(\w|[-.])+$/, new_name);
 
+					// update the cache
+					$.fn.zluxFilesManager.aAjaxDataCache[$this.sCurrentPath].aaData = $this.oTable.fnGetData();
+
+					// redraw the other instances
+					$this.redrawInstances();
+
 					// remove msg
 					$('.zlux-x-msg', $object.dom).remove();
 				})
@@ -695,6 +729,39 @@
 				})
 
 			}).promise();
+		},
+		/**
+		 * Returns the full path prepended to the passed relative path
+		 */
+		_getFullPath: function(path) {
+			var cp = this.sCurrentPath;
+			return cp ? cp + '/' + path : path;
+		},
+		/**
+		 * Clean a path from double / and others
+		 *
+		 * @method _cleanPath
+		 * @param {String} path The path to be cleaned
+		 */
+		_cleanPath : function(path) {
+			// return path and
+			return path
+
+			// remove undefined
+			.replace(/undefined/g, '')
+
+			// remove double /
+			.replace(/\/\//g, '/')
+
+			// remove / from start and begining
+			.replace(/(^\/|\/$)/g, '');
+		},
+		/**
+		 * Returns the oTable row related to the provided path
+		 */
+		_getRowFromPath: function(path) {
+			var $this = this;
+			return $('tr[data-path="' + path + '"]', $this.oTable);
 		}
 	});
 	// Don't touch
@@ -889,6 +956,9 @@
 				// move the search field to the toolbar
 				$('.zlux-x-filter-input_wrapper', $this.oTable.fnSettings().nTableWrapper).appendTo(subtoolbar);
 
+				// init breadcrumb
+				$this.initBreadcrumb();
+
 				// show the content
 				$this.zluxdialog.initContent();
 			})
@@ -923,7 +993,7 @@
 							$(this).remove();
 
 							// remove the object from cache
-							var aaData = $.fn.zluxFilesManager.aAjaxDataCache[$this.oTable.fnSettings().sCurrentPath].aaData;
+							var aaData = $.fn.zluxFilesManager.aAjaxDataCache[$this.sCurrentPath].aaData;
 
 							$.each(aaData, function(i, value){
 								if ($object.dom.data('id') == value.name && $object.dom.data('type') == value.type) {
@@ -936,7 +1006,7 @@
 							})
 
 							// redraw the other instances
-							$this._redrawInstances();
+							$this.redrawInstances();
 						});
 					})
 
@@ -959,7 +1029,7 @@
 
 			// on object select example
 			// .bind("ObjectSelected", function(manager, $object){
-				// var value = $this.oTable.fnSettings().sCurrentPath + '/' + $object.name;
+				// var value = $this.sCurrentPath + '/' + $object.name;
 
 				// save new value in input
 				// input.val(value).trigger('change');
@@ -1032,7 +1102,7 @@
 							$this.zluxupload.inited || $this.zluxupload.init();
 
 							// update upload path
-							$this.zluxupload.options.path = $this.oTable.fnSettings().sCurrentPath;
+							$this.zluxupload.options.path = $this.sCurrentPath;
 
 							// show the upload view
 							$('.zlux-upload', $this.zluxdialog.content).fadeIn('400');

@@ -86,13 +86,17 @@
 		 * @param {function} func Function to call ones the event gets fired.
 		 * @param {Object} scope Optional scope to execute the specified function in.
 		 */
-		bind: function(name, func, scope) {
-			var list;
+		bind: function(names, func, scope){
+			var $this = this;
 
-			name = name.toLowerCase();
-			list = this.events[name] || [];
-			list.push({func : func, scope : scope || this});
-			this.events[name] = list;
+			names.split(' ').each(function(name){
+				var list;
+
+				name = name.toLowerCase();
+				list = $this.events[name] || [];
+				list.push({func : func, scope : scope || $this});
+				$this.events[name] = list;
+			})
 
 			// chaining
 			return this;
