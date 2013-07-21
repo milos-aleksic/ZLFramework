@@ -207,6 +207,37 @@
 				}
 			});
 			return reStr;
+		},
+		/**
+		 * Clean a path from double / and others
+		 *
+		 * @method cleanPath
+		 * @param {String} path The path to be cleaned
+		 */
+		cleanPath : function(path) {
+			// return path and
+			return path
+
+			// lower it
+			.toLowerCase()
+
+			// remove undefined and / from end
+			.replace(/(undefined|\/$)/g, '')
+
+			// replace double / and \ with /
+			.replace(/(\/\/|\\)/g, '/')
+
+			// recover the http double /
+			.replace(/:\//g, ':\/\/')
+		},
+		/**
+		 * Get a relative url to the passed path
+		 *
+		 * @method getRelURL
+		 * @param {String} path The path to be threated
+		 */
+		getRelURL : function(path) {
+			var path = this.cleanPath(path);
 		}
 	});
 	// save the plugin for global use

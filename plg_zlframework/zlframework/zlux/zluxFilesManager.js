@@ -61,7 +61,7 @@
 			}
 
 			// save the start root
-			$this.sStartRoot = $this._cleanPath($this.options.root);
+			$this.sStartRoot = $this.cleanPath($this.options.root);
 
 			// and the current path
 			$this.sCurrentPath = $this.sStartRoot;
@@ -102,7 +102,7 @@
 						},
 						"fnCreatedCell": function (nTd, sData, oData, iRow, iCol) {
 							// store path in data
-							$(nTd).parent('tr').attr('data-id', $this._cleanPath( oData.name ))
+							$(nTd).parent('tr').attr('data-id', $this.cleanPath( oData.name ))
 						}
 					}
 				],
@@ -258,7 +258,7 @@
 			/* the Cache Data is stored in the main plugin so it can be shared by all instances */
 
 			// set the root
-			root = $this._cleanPath($this.sCurrentPath + '/' + $this.sGoToPath);
+			root = $this.cleanPath($this.sCurrentPath + '/' + $this.sGoToPath);
 
 			// reset vars
 			$this.sGoToPath = '';
@@ -650,6 +650,9 @@
 					// redraw the other instances
 					$this.redrawInstances();
 
+					// remove selected status as the object has changed
+					$object.dom.removeAttr('data-zlux-object-status');
+
 					// remove msg
 					$('.zlux-x-msg', $object.dom).remove();
 				})
@@ -736,25 +739,6 @@
 		_getFullPath: function(path) {
 			var cp = this.sCurrentPath;
 			return cp ? cp + '/' + path : path;
-		},
-		/**
-		 * Clean a path from double / and others
-		 *
-		 * @method _cleanPath
-		 * @param {String} path The path to be cleaned
-		 */
-		_cleanPath : function(path) {
-			// return path and
-			return path
-
-			// remove undefined
-			.replace(/undefined/g, '')
-
-			// remove double /
-			.replace(/\/\//g, '/')
-
-			// remove / from start and begining
-			.replace(/(^\/|\/$)/g, '');
 		},
 		/**
 		 * Returns the oTable row related to the provided path
