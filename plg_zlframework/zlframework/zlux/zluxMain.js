@@ -15,8 +15,9 @@
 		options: {},
 		// var for internal events, must be reseted when expanding
 		events: {},
+		assets: {},
 		/**
-		 * A cache factory that will abstract out the actual task to be performed when a key isn't in the cache yet
+		 * BETA - A cache factory that will abstract out the actual task to be performed when a key isn't in the cache yet
 		 *
 		 * @method createCache
 		 * @param {Function} Function to be abstracted
@@ -31,6 +32,34 @@
 				}
 				return cache[ key ].done( callback );
 			};
+		},
+		/**
+		 * Load Asset and execute callback using Deferrers
+		 */
+		loadAsset: function(asset) {
+			var $this = this;
+
+			if ( !$this.assets[ asset ] ) {
+
+				$this.assets[ asset ] = $.Deferred(function( defer ) {
+
+					yepnope({
+						test: asset,
+						load: asset,
+						callback: function (url, result, key) {
+							if (result) {
+								// if asset loaded resolve
+								defer.resolve();
+							} else {
+								defer.reject();
+							}
+						}
+					})
+
+				})
+			}
+
+			return $this.assets[ asset ].promise();
 		},
 		/**
 		 * Returns the Joomla root URL, for relative assets urls
