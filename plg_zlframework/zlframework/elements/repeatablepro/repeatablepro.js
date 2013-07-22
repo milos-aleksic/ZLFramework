@@ -55,7 +55,12 @@
 
 			}).on('click', '.zlux-x-delete', function () {
 				$(this).closest('li.repeatable-element').fadeOut(200, function () {
+
+					// remove from DOM
 					$(this).remove();
+
+					// trigger event
+					element.trigger('instance.deleted');
 
 					// show back new instance button if limit on
 					if($this.options.instanceLimit)
@@ -129,7 +134,7 @@
 					success : function(data) {
 						$this.addElementInstance(data.replace(/(elements\[\S+])\[(-?\d+)\]/g, '$1[' + count++ + ']'));
 						btn_main.removeClass('btn-working');
-						option.trigger('newinstance'); // custom event for noticing that the new instance is ready
+						element.trigger('instance.added'); // custom event for noticing that the new instance is ready
 					}
 				})
 			})
