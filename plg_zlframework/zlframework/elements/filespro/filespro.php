@@ -454,7 +454,7 @@ abstract class ElementFilesPro extends ElementRepeatablePro {
 			// split into path parts to preserve /
 			$parts = explode('/', $root);
 			// clean path parts
-			$parts = $this->app->zlfilesystem->makeSafe($parts, 'ascii');
+			$parts = $this->app->zlfw->filesystem->makeSafe($parts, 'ascii');
 			// join path parts
 			$root = implode('/', $parts);
 			
@@ -596,7 +596,7 @@ abstract class ElementFilesPro extends ElementRepeatablePro {
 			if ($userfile && $userfile['error'] == 0 && is_array($userfile)) {
 
 				// get filename and make it websafe
-				$fileName = $this->app->zlfilesystem->makeSafe($userfile['name'], 'ascii');
+				$fileName = $this->app->zlfw->filesystem->makeSafe($userfile['name'], 'ascii');
 
 				// init vars
 				$ext 		= strtolower(JFile::getExt($fileName));
@@ -674,7 +674,7 @@ class AppValidatorFilepro extends AppValidatorFile {
 		$parts = explode('/', $value['name']);
 
 		// clean path parts
-		$parts = $this->app->zlfilesystem->makeSafe($parts, 'ascii');
+		$parts = $this->app->zlfw->filesystem->makeSafe($parts, 'ascii');
 
 		// join path parts
 		$value['name'] = implode('/', $parts);

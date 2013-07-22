@@ -143,7 +143,7 @@ class zlfwHelperPath extends PathHelper {
 		// split into path parts to preserve /
 		$parts = explode('/', $root);
 		// clean path parts
-		$parts = $this->app->zlfilesystem->makeSafe($parts, 'utf-8');
+		$parts = $this->app->zlfw->filesystem->makeSafe($parts, 'utf-8');
 		// join path parts
 		$root = implode('/', $parts);
 		

@@ -674,7 +674,7 @@ class zlfwHelper extends AppHelper {
 
 		// clean the resultant HTML code
 		if ($fixHTML)
-			$value = $this->app->zlstring->getFixedHtml($value);
+			$value = $this->app->zlfw->string->getFixedHtml($value);
 
 		return $value;
 	}
@@ -763,7 +763,7 @@ class zlfwHelper extends AppHelper {
 
 		switch ($shortcode) {
 			case '{PHP-MAX_UPLOAD}':
-				return $this->app->zlfilesystem->getUploadValue();
+				return $this->app->zlfw->filesystem->getUploadValue();
 				break;
 
 			case '{ITEM-URL}':

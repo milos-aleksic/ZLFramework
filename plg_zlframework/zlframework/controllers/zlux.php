@@ -407,7 +407,7 @@ class ZluxController extends AppController {
 		$result = false;
 
 		// clean the destination path
-		$dest = dirname($dest) . '/' . $this->app->zlfilesystem->makeSafe(basename($dest), 'ascii');
+		$dest = dirname($dest) . '/' . $this->app->zlfw->filesystem->makeSafe(basename($dest), 'ascii');
 
 		// workaround as the path does not exist yet
 		$dest = dirname($src) . '/' . basename($dest);
@@ -461,7 +461,7 @@ class ZluxController extends AppController {
 		$result = false;
 
 		// clean the destination path
-		$path = dirname($path) . '/' . $this->app->zlfilesystem->makeSafe(basename($path), 'ascii');
+		$path = dirname($path) . '/' . $this->app->zlfw->filesystem->makeSafe(basename($path), 'ascii');
 
 		// init storage
 		switch($storage) {
@@ -510,7 +510,7 @@ class ZluxController extends AppController {
 		$name = $this->app->request->get('name', 'string', '');
 
 		// convert to ASCII		
-		$result = $this->app->zlfilesystem->makeSafe($name, 'ascii');
+		$result = $this->app->zlfw->filesystem->makeSafe($name, 'ascii');
 
 		// lowercase the extension
 		$result = JFile::stripExt($result) . '.' . strtolower( JFile::getExt($result) );
@@ -555,7 +555,7 @@ class ZluxController extends AppController {
 
 		// get filename and make it websafe
 		$fileName = isset($_REQUEST["name"]) ? $_REQUEST["name"] : uniqid("file_");
-		$fileName = $this->app->zlfilesystem->makeSafe(JRequest::getVar("name", ''), 'ascii');
+		$fileName = $this->app->zlfw->filesystem->makeSafe(JRequest::getVar("name", ''), 'ascii');
 
 		// Create target dir
 		if (!$storage->exists($this->app->path->relative($targetDir))) {

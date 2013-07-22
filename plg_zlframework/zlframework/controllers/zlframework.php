@@ -203,7 +203,7 @@ class ZlframeworkController extends AppController {
 	{
 		$legalExt 		= ''; // mp3|mp4
 		$path 			= trim($this->app->request->get('path', 'string'), '/');
-		$root 			= $this->app->zlpath->getDirectory($path); // if empty, will return joomla image folder
+		$root 			= $this->app->zlfw->path->getDirectory($path); // if empty, will return joomla image folder
 		$items 			= array();
 
 		// dirs
@@ -216,7 +216,7 @@ class ZlframeworkController extends AppController {
 		foreach ($this->app->path->files("root:$root", false, '/^.*('.$legalExt.')$/i') as $file)
 		{
 			$path = "$root/$file";
-			$size = $this->app->zlfilesystem->getSourceSize($path);
+			$size = $this->app->zlfw->filesystem->getSourceSize($path);
 			$items[] = array('name' => basename($file), 'type' => 'file', 'path' => $path, 'size' => $size);
 		}
 		

@@ -385,13 +385,13 @@ class ZLStorageAdapterLocal extends ZLStorageAdapterBase implements ZLStorageAda
 	public function getDirectorySize($root, $recursive = true)
 	{
 		// get size of root
-		$total_size = $this->app->zlfilesystem->getSourceSize($root, false);
+		$total_size = $this->app->zlfw->filesystem->getSourceSize($root, false);
 
 		// get size of subdirectories
 		if ($recursive) {
-			$dirs = $this->app->zlfilesystem->readDirectory($this->app->path->path('root:' . $root));
+			$dirs = $this->app->zlfw->filesystem->readDirectory($this->app->path->path('root:' . $root));
 			foreach ($dirs as $dir) {
-				$total_size += $this->app->zlfilesystem->getSourceSize($root . '/' . $dir, false);
+				$total_size += $this->app->zlfw->filesystem->getSourceSize($root . '/' . $dir, false);
 			}
 		}
 

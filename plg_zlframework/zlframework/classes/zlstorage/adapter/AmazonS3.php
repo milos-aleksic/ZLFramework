@@ -297,7 +297,7 @@ class ZLStorageAdapterAmazonS3 extends ZLStorageAdapterBase implements ZLStorage
 			$row['path'] = $name;
 			$row['ext'] = JFile::getExt($row['name']);
 			$row['basename'] = basename($row['name'], '.' . $row['ext']);
-			$row['content_type'] = $this->app->zlfilesystem->getContentType($row['name']);
+			$row['content_type'] = $this->app->zlfw->filesystem->getContentType($row['name']);
 			$row['size']['value'] = $this->app->zlfw->filesystem->returnBytes($obj['size']);
 			$row['size']['display'] = $this->app->zlfw->filesystem->formatFilesize($row['size']['value'], 'KB');
 

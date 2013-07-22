@@ -236,10 +236,10 @@ class ZLFieldHTMLHelper extends AppHelper {
 				$path = trim(@$result[1], '/');
 				$postpath = trim(@$result[2], '/');
 				foreach ($this->app->path->dirs($path) as $dir) {
-					$resources = array_merge($resources, $this->app->zlpath->resources("$path/$dir/$postpath"));
+					$resources = array_merge($resources, $this->app->zlfw->path->resources("$path/$dir/$postpath"));
 				}
 			} else {
-				$resources = array_merge($resources, $this->app->zlpath->resources($path));
+				$resources = array_merge($resources, $this->app->zlfw->path->resources($path));
 			}
 		}
 
