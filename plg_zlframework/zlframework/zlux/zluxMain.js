@@ -39,9 +39,9 @@
 		loadAsset: function(asset) {
 			var $this = this;
 
-			if ( !$this.assets[ asset ] ) {
+			if ( !$.fn.zluxMain.prototype.assets[ asset ] ) {
 
-				$this.assets[ asset ] = $.Deferred(function( defer ) {
+				$.fn.zluxMain.prototype.assets[ asset ] = $.Deferred(function( defer ) {
 
 					yepnope({
 						test: asset,
@@ -59,7 +59,7 @@
 				})
 			}
 
-			return $this.assets[ asset ].promise();
+			return $.fn.zluxMain.prototype.assets[ asset ].promise();
 		},
 		/**
 		 * Returns the Joomla root URL, for relative assets urls
@@ -78,6 +78,12 @@
 		 */
 		AjaxURL: function() {
 			return this.JBase() + 'index.php?option=com_zoo&controller=zlux&format=raw';
+		},
+		/**
+		 * Returns the ZLFW root url
+		 */
+		zlfwURL: function() {
+			return this.JRoot() + 'plugins/system/zlframework/zlframework';
 		},
 		/**
 		 * Dispatches the specified event name and it's arguments to all listeners.
@@ -264,15 +270,6 @@
 
 			// recover the http:// if set
 			.replace(/:\//g, ':\/\/')
-		},
-		/**
-		 * Get a relative url to the passed path
-		 *
-		 * @method getRelURL
-		 * @param {String} path The path to be threated
-		 */
-		getRelURL : function(path) {
-			var path = this.cleanPath(path);
 		}
 	});
 	// save the plugin for global use
