@@ -61,18 +61,27 @@
 					my: 'center',
 					at: 'center',
 					of: window
-				}, $this.options.position)).data('dialog-dragged', 1);
+				}, $this.options.position))
+			});
+
+			// on drag start
+			$this.main.on("dialogdragstart", function(event, ui){
+				$this.widget.data('dialog-dragged', 1);
 			});
 			
 			// set the spinner
 			$this._spinner = $('<i class="zlux-loader-circle-big icon-spinner icon-spin" />').appendTo($this.widget);
 			$this._spinner_area = $this.main;
 
+			
 			// init scrollbar
-			$this.main.addClass('zlux-scroller').nanoScroller({
-				preventPageScrolling: true,
-				contentClass: 'zlux-dialog-content'
-			});
+			$this.loadAsset($this.zlfwURL() + '/zlux/assets/nanoscroller/nanoscroller.min.js')
+			.done(function(){
+				$this.main.addClass('zlux-scroller').nanoScroller({
+					preventPageScrolling: true,
+					contentClass: 'zlux-dialog-content'
+				});
+			})
 
 			// set toolbar
 			$this.toolbar = {};
