@@ -16,69 +16,18 @@ defined('_JEXEC') or die('Restricted access');
 class zlfwHelperZLUX extends AppHelper {
 
 	/**
-	 * Load ZLUX Items Manager assets
-	 */
-	public function loadItemsManagerAssets()
-	{
-		// ZLUX Main
-		$this->loadMainAssets();
-
-		if(!JDEBUG){
-			// DataTables
-			$this->app->document->addScript('zlfw:zlux/assets/datatables/dataTables.with.plugins.min.js');
-			
-		} else { // Site in debug Mode
-			
-			// DataTables
-			$this->app->document->addScript('zlfw:zlux/assets/datatables/dataTables.js');
-			$this->app->document->addScript('zlfw:zlux/assets/datatables/dataTables.plugins.js');
-		}
-
-		// nanoScroller
-		$this->app->document->addScript('zlfw:zlux/assets/nanoscroller/nanoscroller.min.js');
-	}
-
-	/**
-	 * Load ZLUX Files Manager assets
-	 */
-	public function loadFilesManagerAssets()
-	{
-		// ZLUX Core
-		$this->loadMainAssets();
-
-		if(!JDEBUG) {
-			// DataTables
-			$this->app->document->addScript('zlfw:zlux/assets/datatables/dataTables.with.plugins.min.js');
-
-			// plupload
-			$this->app->document->addScript('zlfw:zlux/assets/plupload/plupload.full.min.js');
-		
-		} else { // Site in debug Mode
-
-			// DataTables
-			$this->app->document->addScript('zlfw:zlux/assets/datatables/dataTables.js');
-			$this->app->document->addScript('zlfw:zlux/assets/datatables/dataTables.plugins.js');
-
-			// plupload
-			$this->app->document->addScript('zlfw:zlux/assets/plupload/moxie.js');
-			$this->app->document->addScript('zlfw:zlux/assets/plupload/plupload.dev.js');
-		}
-
-		// nanoScroller
-		$this->app->document->addScript('zlfw:zlux/assets/nanoscroller/nanoscroller.min.js');
-	}
-
-	/**
 	 * Load ZLUX Main assets
 	 */
 	public function loadMainAssets()
 	{
+		// yepnope
+		$this->app->document->addScript('zlfw:assets/js/yepnope.min.js');
+
+		// ZLUX
+		$this->app->document->addStylesheet('zlfw:zlux/zlux.css');
 		if(!JDEBUG) {
-			$this->app->document->addStylesheet('zlfw:zlux/zlux.css');
 			$this->app->document->addScript('zlfw:zlux/zlux.all.min.js');
 		} else {
-			// Site in debug Mode
-			$this->app->document->addStylesheet('zlfw:zlux/zlux.css');
 			$this->app->document->addScript('zlfw:zlux/zluxMain.js');
 			$this->app->document->addScript('zlfw:zlux/zluxDialog.js');
 			$this->app->document->addScript('zlfw:zlux/zluxFilesManager.js');

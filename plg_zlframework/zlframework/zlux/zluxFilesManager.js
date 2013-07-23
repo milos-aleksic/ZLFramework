@@ -69,6 +69,17 @@
 		initDataTable: function(wrapper) {
 			var $this = this;
 
+			// load asset
+			$this.loadAsset($this.zlfwURL() + '/zlux/assets/datatables/dataTables.with.plugins.min.js')
+
+			// once loaded
+			.done(function(){
+				$this._initDataTable(wrapper)
+			})
+		},
+		_initDataTable: function(wrapper) {
+			var $this = this;
+
 			// set table
 			$('<table cellpadding="0" cellspacing="0" border="0" class="table table-striped table-bordered" />')
 			.appendTo(wrapper);
@@ -1267,7 +1278,7 @@
 					$('.zlux-x-name', $object.dom).html(file.name);
 
 					// check file size
-					if (file.size !== undefined && file.size > $this.options.max_file_size) {
+					if (file.size !== undefined && $this.options.max_file_size != '' && file.size > $this.options.max_file_size) {
 						// set icon
 						$('.icon-file-alt', $object.dom).removeClass('icon-file-alt').addClass('icon-warning-sign');
 						
@@ -1547,22 +1558,30 @@
 
 			$this.initFilelist();
 
-			// init plupload
-			$this.initPlupload();
 
-			// add drop msg if html5
-			if ($this.uploader.runtime == 'html5') {
-				$('.zlux-upload-dropzone-msg', $this.dropzone).html($this.sprintf($this._('DROP_FILES'), 'zlux-upload-browse'))
+			// load asset
+			$this.loadAsset($this.zlfwURL() + '/zlux/assets/plupload/plupload.full.min.js')
 
-				.on('click', 'a', function(){
-					// trigger the upload browse button
-					$this.options.browse_button.trigger('click');
-					return false;
-				})
-			}
+			// once loaded
+			.done(function(){
 
-			// set init state
-			$this.inited = true;
+				// init plupload
+				$this.initPlupload();
+
+				// add drop msg if html5
+				if ($this.uploader.runtime == 'html5') {
+					$('.zlux-upload-dropzone-msg', $this.dropzone).html($this.sprintf($this._('DROP_FILES'), 'zlux-upload-browse'))
+
+					.on('click', 'a', function(){
+						// trigger the upload browse button
+						$this.options.browse_button.trigger('click');
+						return false;
+					})
+				}
+
+				// set init state
+				$this.inited = true;
+			})
 		},
 		/*
 		 * Init Filelist

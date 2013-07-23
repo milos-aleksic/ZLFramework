@@ -48,6 +48,17 @@
 		initDataTable: function(wrapper) {
 			var $this = this;
 
+			// load asset
+			$this.loadAsset($this.zlfwURL() + '/zlux/assets/datatables/dataTables.with.plugins.min.js')
+
+			// once loaded
+			.done(function(){
+				$this._initDataTable(wrapper)
+			})
+		},
+		_initDataTable: function(wrapper) {
+			var $this = this;
+
 			// set table
 			$('<table cellpadding="0" cellspacing="0" border="0" class="table table-striped table-bordered" />')
 			.appendTo(wrapper);
