@@ -52,7 +52,7 @@
 			$.fn.zluxFilesManager.instances[$this.ID] = $this;
 
 			// Convert settings
-			$this.options.max_file_size = plupload.parseSize($this.options.max_file_size);
+			$this.options.max_file_size = $this.parseSize($this.options.max_file_size);
 
 			// check storage param
 			if ($this.options.storage == '' || $this.options.storage == undefined || $this.options.storage == null) {
@@ -746,6 +746,34 @@
 		_getRowFromPath: function(path) {
 			var $this = this;
 			return $('tr[data-path="' + path + '"]', $this.oTable);
+		},
+		/**
+			Parses the specified size string into a byte value. For example 10kb becomes 10240.
+			
+			@method parseSize
+			@static
+			@param {String/Number} size String to parse or number to just pass through.
+			@return {Number} Size in bytes.
+		*/
+		parseSize: function(size) {
+			if (typeof(size) !== 'string' || size == '') return size;
+
+			var muls = {
+					t: 1099511627776,
+					g: 1073741824,
+					m: 1048576,
+					k: 1024
+				},
+				mul;
+
+			size = /^([0-9]+)([mgk]?)$/.exec(size.toLowerCase().replace(/[^0-9mkg]/g, ''));
+			mul = size[2];
+			size = +size[1];
+			
+			if (muls.hasOwnProperty(mul)) {
+				size *= muls[mul];
+			}
+			return size;
 		}
 	});
 	// Don't touch
