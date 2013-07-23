@@ -281,8 +281,14 @@
 						var json = $.fn.zluxFilesManager.aAjaxDataCache[root];
 						if (json) {
 
+							// if first time, save real root path, as it can be changed for security reasons by the server
+							if (!$this.bCacheInited) $this.sStartRoot = json.root;
+
 							// save root
 							$this.sCurrentPath = root;
+
+							// set cache status
+							$this.bCacheInited = true;
 
 							// emulate the xhr events
 							$(oSettings.oInstance).trigger('xhr', [oSettings, json]);
@@ -329,6 +335,9 @@
 				// set json
 				json = json.result;
 
+				// if first time, save real root path, as it can be changed for security reasons by the server
+				if (!$this.bCacheInited) $this.sStartRoot = json.root;
+
 				// save new path
 				$this.sCurrentPath = json.root;
 
@@ -343,6 +352,9 @@
 
 				// set reloading to false
 				$this.bReloading = false;
+
+				// set cache status
+				$this.bCacheInited = true;
 
 				// trigger events
 				$(oSettings.oInstance).trigger('xhr', [oSettings, json]);

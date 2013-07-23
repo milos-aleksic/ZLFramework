@@ -250,13 +250,19 @@
 			// lower it
 			.toLowerCase()
 
-			// remove undefined and / from end
-			.replace(/(undefined|\/$)/g, '')
+			// replace \ with /
+			.replace(/\\/g, '/')
 
-			// replace double / and \ with /
-			.replace(/(\/\/|\\)/g, '/')
+			// replace // with /
+			.replace(/\/\//g, '/')
 
-			// recover the http double /
+			// remove undefined
+			.replace(/undefined/g, '')
+
+			// remove / from end
+			.replace(/\/$/g, '')
+
+			// recover the http:// if set
 			.replace(/:\//g, ':\/\/')
 		},
 		/**
