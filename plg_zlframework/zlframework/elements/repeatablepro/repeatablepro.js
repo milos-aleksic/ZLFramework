@@ -27,6 +27,7 @@
 			// save some references
 			$this.element = element;
 			$this.list = list;
+			$this.count = count;
 
 			// save Add Instance current text
 			$this.options.msgAddInstance = $('p.add a', element).html();
@@ -110,35 +111,37 @@
 				if ($this.options.instanceLimit && $this.options.instanceLimit <= list.children().length) 
 					return false;
 
-				$this.addElementInstance(hidden.html().replace(/(elements\[\S+])\[(-?\d+)\]/g, '$1[' + count++ + ']'));
+				$this.addElementInstance(hidden.html().replace(/(elements\[\S+])\[(-?\d+)\]/g, '$1[' + $this.count++ + ']'));
 
 				// if limit reached change button state
 				if ($this.options.instanceLimit && $this.options.instanceLimit <= list.children().length)
 					$('p.add a', element).addClass('disabled').html($this.options.msgLimitReached);
 			});
+		},
+		/**
+			Load by Ajax an Element instance
 
-			// ADD INSTANCE extended way, multilple layouts possible
-			$('.btn-group.ajax-add-instance .dropdown-menu a', element).on('click', function()
-			{
-				var option = $(this),
-					btn_main = option.closest('.btn-group').find('.btn.dropdown-toggle').addClass('btn-working'),
-					layout = option.data('layout');
+			@layout string The instance layout
+		*/
+		loadElementInstance: function(layout) {
+			var $this = this;
 
-				$.ajax({
-					url: $this.options.ajax_url + '&task=callelement',
-					type: 'POST',
-					data: {
-						method: 'loadeditlayout',
-						layout: layout
-					},
-					success : function(data) {
-						$this.addElementInstance(data.replace(/(elements\[\S+])\[(-?\d+)\]/g, '$1[' + count++ + ']'));
-						btn_main.removeClass('btn-working');
-						element.trigger('instance.added'); // custom event for noticing that the new instance is ready
-					}
-				})
+			$.ajax({
+				url: $this.options.ajax_url + '&task=callelement',
+				type: 'POST',
+				data: {
+					method: 'loadeditlayout',
+					layout: layout
+				},
+				success : function(data) {
+					$this.addElementInstance(data.replace(/(elements\[\S+])\[(-?\d+)\]/g, '$1[' + $this.count++ + ']'));
+					$this.element.trigger('instance.added'); // custom event for noticing that the new instance is ready
+				}
 			})
 		},
+		/**
+			Add the Element instance
+		*/
 		addElementInstance: function(instance) {
 			var $this = this,
 				instance = $('<li class="repeatable-element" />').html(instance);
@@ -156,6 +159,9 @@
 			instance.appendTo($this.list);
 			instance.children('div.repeatable-content').effect('highlight', {}, 1E3)
 		},
+		/**
+			Attach tools btns to instance
+		*/
 		attachButtons: function(instance) {
 			
 			// if btns already present, abort
