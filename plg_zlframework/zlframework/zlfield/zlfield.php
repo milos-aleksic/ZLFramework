@@ -659,7 +659,7 @@ class ZlfieldHelper extends AppHelper {
 		$pattern = $replace = array(); $i=1;
 		foreach((array)$vars as $var){
 			$pattern[] = "/%s$i/"; $i++;
-			$replace[] = preg_match('/{ZL_/', $var) ? $this->app->zlfw->shortCode($var) : JText::_($var);
+			$replace[] = preg_match('/^{/', $var) ? $this->app->zlfw->shortCode($var) : JText::_($var);
 		}
 
 		return preg_replace($pattern, $replace, $string);
