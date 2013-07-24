@@ -53,6 +53,7 @@
 
 			// Convert settings
 			$this.options.max_file_size = $this.parseSize($this.options.max_file_size);
+			$this.options.extensions = $this.options.extensions.replace(/\|/, ',');
 
 			// check storage param
 			if ($this.options.storage == '' || $this.options.storage == undefined || $this.options.storage == null) {
