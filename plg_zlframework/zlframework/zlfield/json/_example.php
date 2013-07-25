@@ -58,7 +58,7 @@ defined('_JEXEC') or die('Restricted access');
 				"_id":{}
 			},
 			"control":"control_name", './* set the control of the subfields, if necesary */'
-			"layout":"wrapper/control_wrapper/fieldset/toggle" './* all 3 are diferent kind of wrappers sharing same 
+			"layout":"default/control_wrapper/fieldset/toggle" './* all 3 are diferent kind of wrappers sharing same 
 		},
 
 
