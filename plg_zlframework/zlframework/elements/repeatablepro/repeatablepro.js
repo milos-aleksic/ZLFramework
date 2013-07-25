@@ -111,7 +111,7 @@
 				if ($this.options.instanceLimit && $this.options.instanceLimit <= list.children().length) 
 					return false;
 
-				$this.addElementInstance(hidden.html().replace(/(elements\[\S+])\[(-?\d+)\]/g, '$1[' + $this.count++ + ']'));
+				$this.addElementInstance(hidden.html());
 
 				// if limit reached change button state
 				if ($this.options.instanceLimit && $this.options.instanceLimit <= list.children().length)
@@ -122,8 +122,9 @@
 			Load by Ajax an Element instance
 
 			@layout string The instance layout
+			@ref string Reference or name of the layout
 		*/
-		loadElementInstance: function(layout) {
+		loadElementInstance: function(layout, ref) {
 			var $this = this;
 
 			$.ajax({
@@ -133,9 +134,9 @@
 					method: 'loadeditlayout',
 					layout: layout
 				},
-				success : function(data) {
-					$this.addElementInstance(data.replace(/(elements\[\S+])\[(-?\d+)\]/g, '$1[' + $this.count++ + ']'));
-					$this.element.trigger('instance.added'); // custom event for noticing that the new instance is ready
+				success : function(instance) {
+					$this.addElementInstance(instance);
+					$this.element.trigger('instance.added', [instance, ref]); // custom event for notifyng that the new instance is ready
 				}
 			})
 		},
@@ -143,11 +144,13 @@
 			Add the Element instance
 		*/
 		addElementInstance: function(instance) {
-			var $this = this,
-				instance = $('<li class="repeatable-element" />').html(instance);
+			var $this = this;
 
-			// wrap content
-			instance.children().wrapAll($('<div>').addClass('repeatable-content'));
+			// increase index
+			instance = instance.replace(/(elements\[\S+])\[(-?\d+)\]/g, '$1[' + $this.count++ + ']');
+
+			// set wrappers
+			instance = $('<li class="repeatable-element"><div class="repeatable-content">' + instance + '</div></li>')
 
 			// attach btns
 			$this.attachButtons(instance);
