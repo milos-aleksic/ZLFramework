@@ -174,13 +174,13 @@
 				} else { // hide
 					$this.options.scrollbar && $this.scrollbar('show');
 					$this._spinner.hide();
-					var selection = $this.main;
+					var collection = $this.main;
 
-					// add toolbar to selection if any
-					if ($this.toolbar) selection.add($this.toolbar.wrapper);
+					// add toolbar to collection if any
+					if ($this.toolbar) collection = collection.add($this.toolbar.wrapper);
 
 					// fade
-					selection.fadeTo('slow', 1);
+					collection.fadeTo('slow', 1);
 
 					// set state
 					$this.spinning = false;
@@ -198,7 +198,7 @@
 
 			// set toolbar
 			if (!$this.toolbar) {
-				$this.toolbar = $this.toolbar ? $this.toolbar : {};
+				$this.toolbar = {};
 				$this.toolbar.wrapper = $('<div class="zlux-dialog-toolbar" />').hide().insertAfter($this.widget.children()[0]);
 			}
 			
