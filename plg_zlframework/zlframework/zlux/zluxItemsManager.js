@@ -31,9 +31,9 @@
 			// save target
 			$this.target = target;
 
-			// init filesmanager
-			$this.filesmanager = $('<div class="zl-bootstrap zlux-itemsmanager" />').appendTo(target);
-			$this.initDataTable($this.filesmanager);
+			// init itemsmanager
+			$this.itemsmanager = $('<div class="zl-bootstrap zlux-itemsmanager" />').appendTo(target);
+			$this.initDataTable($this.itemsmanager);
 		},
 		/**
 		 * Performs initial tasks
@@ -357,7 +357,7 @@
 			var $this = this;
 
 			// prepare the dialog class
-			$this.options.dialogClass = 'zl-bootstrap zlux-filesmanager' 
+			$this.options.dialogClass = 'zl-bootstrap zlux-itemsmanager' 
 				+ ($this.options.full_mode ? ' zlux-dialog-full ' : '') 
 				+ ($this.options.dialogClass ? ' ' + $this.options.dialogClass : '');
 
@@ -381,6 +381,9 @@
 				$this.eventDialogLoaded();
 			});
 		},
+		/*
+		 * Fires when the dialog has finished it's initial tasks
+		 */
 		eventDialogLoaded: function() {
 			var $this = this;
 

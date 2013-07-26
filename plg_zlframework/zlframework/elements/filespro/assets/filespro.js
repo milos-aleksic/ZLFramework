@@ -71,8 +71,14 @@
 
 					var storage = $('span.zlux-x-filedata', $wrapper).data('zlux-storage');
 
+					// set the trigger button
+					$this.dialogTrigger = $('<a title="' + $this.options.title + '" class="btn btn-mini zlux-btn-edit" href="#"><i class="icon-edit"></i></a>')
+
+					// add it to dom
+					.appendTo($wrapper)
+
 					// init the file manager
-					$input.zluxDialogFilesManager({
+					$this.dialogTrigger.zluxDialogFilesManager({
 						root: $this.options.images,
 						extensions: $this.options.extensions,
 						storage: 'local',
@@ -91,7 +97,7 @@
 						if ($this.options.fileMode == 'folders' && $object.type != 'folder') return;
 
 						// prepare the value
-						var value = $input.data('zluxDialogFilesManager')._getFullPath($object.name);
+						var value = $this.dialogTrigger.data('zluxDialogFilesManager')._getFullPath($object.name);
 
 						// save new value in input
 						$input.val(value).trigger('change');

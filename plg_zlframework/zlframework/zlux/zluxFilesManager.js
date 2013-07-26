@@ -848,19 +848,18 @@
 			dialogClass: ''
 		},
 		events: {},
-		initialize: function(input, options) {
+		initialize: function(dialogTrigger, options) {
 			this.options = $.extend({}, $.fn.zluxFilesManager.prototype.options, this.options, options);
 			var $this = this;
 
 			// run initial check
 			$this.initCheck();
 
-			// set the trigger button after the input
-			$this.dialogTrigger = $('<a title="' + $this.options.title + '" class="btn btn-mini zlux-btn-edit" href="#"><i class="icon-edit"></i></a>')
-			.insertAfter(input)
+			// dialogTrigger example, it should be set by the caller script
+			// $('<a title="' + $this.options.title + '" class="btn btn-mini zlux-btn-edit" href="#"><i class="icon-edit"></i></a>')
 
-			// button events
-			.on('click', function(){
+			// set the trigger button event
+			$this.dialogTrigger = dialogTrigger.on('click', function(){
 				
 				// toggle the dialog
 				$this.zluxdialog.toggle();

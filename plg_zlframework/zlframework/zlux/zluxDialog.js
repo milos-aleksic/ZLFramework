@@ -75,7 +75,7 @@
 
 			
 			// init scrollbar
-			$this.loadAsset($this.zlfwURL() + '/zlux/assets/nanoscroller/nanoscroller.min.js')
+			var loadingScrollbar = $this.loadAsset($this.zlfwURL() + '/zlux/assets/nanoscroller/nanoscroller.min.js')
 			.done(function(){
 				$this.main.addClass('zlux-scroller').nanoScroller({
 					preventPageScrolling: true,
@@ -90,8 +90,14 @@
 			// change the close icon
 			$('.ui-dialog-titlebar-close', $this.widget).html('<i class="icon-remove" />');
 
-			// resolved
-			$this.creatingDialog.resolve();
+			
+			// when assets loaded
+			loadingScrollbar.done(function(){
+
+				// resolve
+				$this.creatingDialog.resolve();
+			})
+			
 
 			// TODO, reject if any issue during init
 			// $this.creatingDialog.reject();
