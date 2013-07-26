@@ -16,7 +16,8 @@
 		options: {
 			width: '300',
 			height: '150',
-			title: 'Dialog'
+			title: 'Dialog',
+			scrollbar: true
 			// Any jQuery UI Widget Dialog option declared here will be passed on the Widget init
 		},
 		events: {},
@@ -75,17 +76,16 @@
 
 			
 			// init scrollbar
-			var loadingScrollbar = $this.loadAsset($this.zlfwURL() + '/zlux/assets/nanoscroller/nanoscroller.min.js')
-			.done(function(){
-				$this.main.addClass('zlux-scroller').nanoScroller({
-					preventPageScrolling: true,
-					contentClass: 'zlux-dialog-content'
-				});
-			})
-
-			// set toolbar
-			$this.toolbar = {};
-			$this.toolbar.wrapper = $('<div class="zlux-dialog-toolbar" />').hide().insertAfter($this.widget.children()[0]);
+			var loadingScrollbar = $.Deferred().resolve(); // by default is resolved
+			if ($this.options.scrollbar) {
+				loadingScrollbar = $this.loadAsset($this.zlfwURL() + '/zlux/assets/nanoscroller/nanoscroller.min.js')
+				.done(function(){
+					$this.main.addClass('zlux-scroller').nanoScroller({
+						preventPageScrolling: true,
+						contentClass: 'zlux-dialog-content'
+					});
+				})
+			}
 
 			// change the close icon
 			$('.ui-dialog-titlebar-close', $this.widget).html('<i class="icon-remove" />');
@@ -97,10 +97,6 @@
 				// resolve
 				$this.creatingDialog.resolve();
 			})
-			
-
-			// TODO, reject if any issue during init
-			// $this.creatingDialog.reject();
 		},
 		/**
 		 * Called from the outside when the content is ready to be shown
@@ -115,7 +111,7 @@
 			$this.widget.attr('data-zlux-status', 'ready');
 
 			// init dialog scrollbar
-			$this.scrollbar('refresh');
+			$this.options.scrollbar && $this.scrollbar('refresh');
 
 			// set init state
 			$this.inited = true;
@@ -170,15 +166,21 @@
 				if (action == 'show') {
 					$this.main.fadeTo(0, 0.5);
 					$this._spinner.show();
-					$this.scrollbar('hide');
+					$this.options.scrollbar && $this.scrollbar('hide');
 
 					// set state
 					$this.spinning = true;
 
 				} else { // hide
-					$this.scrollbar('show');
+					$this.options.scrollbar && $this.scrollbar('show');
 					$this._spinner.hide();
-					$this.main.add($this.toolbar.wrapper).fadeTo('slow', 1);
+					var selection = $this.main;
+
+					// add toolbar to selection if any
+					if ($this.toolbar) selection.add($this.toolbar.wrapper);
+
+					// fade
+					selection.fadeTo('slow', 1);
 
 					// set state
 					$this.spinning = false;
@@ -194,6 +196,12 @@
 		newToolbar: function(tools, alias, backtomain) {
 			var $this = this;
 
+			// set toolbar
+			if (!$this.toolbar) {
+				$this.toolbar = $this.toolbar ? $this.toolbar : {};
+				$this.toolbar.wrapper = $('<div class="zlux-dialog-toolbar" />').hide().insertAfter($this.widget.children()[0]);
+			}
+			
 			// set the wrapper
 			var toolbar = $('<div class="zlux-dialog-toolbar-' + alias + '"><ul class="inline" /></div>').appendTo($this.toolbar.wrapper);
 
