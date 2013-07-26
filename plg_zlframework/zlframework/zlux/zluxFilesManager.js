@@ -53,7 +53,7 @@
 
 			// Convert settings
 			$this.options.max_file_size = $this.parseSize($this.options.max_file_size);
-			$this.options.extensions = $this.options.extensions.replace(/\|/, ',');
+			$this.options.extensions = $this.options.extensions.replace(/\|/g, ',');
 
 			// check storage param
 			if ($this.options.storage == '' || $this.options.storage == undefined || $this.options.storage == null) {
@@ -1635,7 +1635,7 @@
 				max_file_size: undefined, // controlled by ZLUX Upload
 				url: $this.AjaxURL() + '&task=upload',
 				filters: [ // Specify what files to browse for
-					{title: "Files", extensions: this.options.extensions}
+					{title: "Files", extensions: $this.options.extensions}
 				],
 
 				// flash runtime settings
