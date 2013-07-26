@@ -89,7 +89,7 @@
 	}
 
 	.btn-small {
-		border-radius: 3px 3px 3px 3px;
+		.border-radius(3px);
 		font-size: 11.9px;
 		padding: 2px 10px;
 	}
@@ -236,9 +236,7 @@ body.admin .subhead-collapse .subhead.subhead-fixed {
 		border: 1px solid rgba(0, 0, 0, 0.3);
 		overflow: hidden;
 		*border: 1px solid #999;
-		-webkit-border-radius: 6px;
-		 -moz-border-radius: 6px;
-			  border-radius: 6px;
+		.border-radius(6px);
 		-webkit-box-shadow: 0 3px 7px rgba(0, 0, 0, 0.3);
 		 -moz-box-shadow: 0 3px 7px rgba(0, 0, 0, 0.3);
 			  box-shadow: 0 3px 7px rgba(0, 0, 0, 0.3);
@@ -302,7 +300,7 @@ body.admin .subhead-collapse .subhead.subhead-fixed {
 		position: relative;
 		text-align: center;
 		border-bottom: 1px solid #EEE;
-		border-radius: 2px;
+		.border-radius(2px);
 		padding: 4px 0;
 
 		// tools
@@ -449,6 +447,154 @@ body.admin .subhead-collapse .subhead.subhead-fixed {
 					position: absolute;
 				}
 			}
+		}
+	}
+}
+
+
+/* ZLUX Dates Manager
+----------------------------------------------------------------------------------------------------*/
+.zlux-datesmanager {
+
+	&.zlux-dialog {
+		.zlux-manager-dialog-tmpl();
+
+		// override heights
+
+		// date
+		&.zlux-datesmanager-date {
+			min-height: 245px;
+
+			.ui-dialog-content {
+				height: 245px !important;
+				max-height: 245px !important;
+			}
+		}
+
+		// time
+		&.zlux-datesmanager-time {
+			min-height: 142px;
+
+			.ui-dialog-content {
+				height: 142px !important;
+				max-height: 142px !important;
+			}
+
+			.ui-datepicker .ui-widget-header {
+				display: none;
+			}
+		}
+
+		// datetime
+		&.zlux-datesmanager-datetime {
+			min-height: 395px;
+
+			.ui-dialog-content {
+				height: 395px !important;
+				max-height: 395px !important;
+			}
+
+			.ui-timepicker-div {
+				margin-top: 30px;
+			}
+		}
+	}
+
+	// Datepicker
+	.ui-datepicker.ui-widget {
+
+		// let it expand
+		width: auto;
+
+		// remove the wrapper border
+		&.ui-widget-content {
+			border: none;
+		}
+
+		// set the grid border
+		.ui-state-default {
+			box-shadow: 0 1px 0 rgba(255, 255, 255, 0.2) inset, 0 1px 2px rgba(0, 0, 0, 0.05);
+		}
+
+		table.ui-datepicker-calendar {
+			font-size: 12px;
+		}
+
+		// remove outlines
+		a.ui-state-default,
+		a.ui-slider-handle:focus {
+			outline: none;
+		}
+
+		// set headerstyle
+		.ui-widget-header {
+			background: none repeat scroll 0 center #F5F5F5;
+			.border-radius(4px);
+			padding: 8px 15px;
+			width: auto;
+
+			// override UI icon
+			.ui-datepicker-prev,
+			.ui-datepicker-next {
+				color: @black;
+				top: 9px;
+				height: inherit;
+				width: inherit;
+
+				&.ui-state-hover {
+					background: none;
+					border: none;
+				}
+
+				&:hover {
+					text-decoration: none;
+					cursor: pointer;
+				}
+
+				.ui-icon {
+					display: inline;
+					position: static;
+					background: none;
+					text-indent: 0;
+					height: inherit;
+					width: inherit;
+					margin: 0;
+
+					&:before {
+						font-family: FontAwesome;
+						font-size: 23px;
+						content: "\f138"; // icon-chevron-sign-right
+					}
+				}
+			}
+
+			.ui-datepicker-prev {
+				left: 9px;
+				.ui-icon:before {
+					content: "\f137"; // icon-chevron-sign-left
+				}
+			}
+
+			.ui-datepicker-next {
+				right: 9px;
+				.ui-icon:before {
+					content: "\f138"; // icon-chevron-sign-right
+				}
+			}
+		}
+
+		// remove the done btn
+		.ui-datepicker-close {
+			display: none;
+		}
+
+		.ui-datepicker-current {
+			opacity: 1;
+			background-color: #F5F5F5;
+			background-image: linear-gradient(to bottom, #FFFFFF, #E6E6E6);
+			border-color: #CCCCCC #CCCCCC #B3B3B3;
+			.border-radius(4px);
+			color: #333333;
 		}
 	}
 }
@@ -625,6 +771,57 @@ body.admin .subhead-collapse .subhead.subhead-fixed {
 }
 
 
+/* ZLUX Preview
+----------------------------------------------------------------------------------------------------*/
+.zlux-preview {
+	overflow: hidden;
+
+	// thumbnail
+	.zlux-x-thumbnail {
+		overflow: hidden;
+		height: 95px;
+		width: 130px;
+		float: left;
+		text-align: center;
+		margin-right: 30px;
+
+		// file/folder
+		.zlux-x-filetype,
+		.zlux-x-folder {
+			background: url(assets/img/zlux_sprite.png) no-repeat scroll 0 0 transparent;
+			display: inline-block;
+			height: 91px;
+			width: 81px;
+			margin: 0;
+		}
+
+		.zlux-x-filetype {
+			font-size: 15px;
+			line-height: 111px;
+			text-align: left;
+			text-indent: 13px;
+			color: white;
+		}
+
+		.zlux-x-folder {
+			background-position: -86px 0;
+			width: 100px;
+		}
+
+		// image
+		.zlux-x-image {
+			margin: 0 auto;
+			width: 115px;
+		}
+	}
+
+	// details
+	.zlux-x-details {
+		margin-top: 30px;
+	}
+}
+
+
 /* LESS Mixtins
 ----------------------------------------------------------------------------------------------------*/
 
@@ -668,7 +865,7 @@ body.admin .subhead-collapse .subhead.subhead-fixed {
 				display: block;
 				background-color: white;
 				background-image: none;
-				border-radius: 4px;
+				.border-radius(4px);
 				box-shadow: none;
 				text-shadow: none;
 				color: #444;
@@ -857,54 +1054,140 @@ body.admin .subhead-collapse .subhead.subhead-fixed {
 	}
 }
 
+// Border Radius
+.border-radius(@radius) {
+  -webkit-border-radius: @radius;
+     -moz-border-radius: @radius;
+          border-radius: @radius;
+}
 
-/* ZLUX Preview
+/* ZLUX Datepicker Theme
 ----------------------------------------------------------------------------------------------------*/
-.zlux-preview {
-	overflow: hidden;
+.zl-bootstrap {
 
-	// thumbnail
-	.zlux-x-thumbnail {
-		overflow: hidden;
-		height: 95px;
-		width: 130px;
-		float: left;
-		text-align: center;
-		margin-right: 30px;
+	/*
+	 * jQuery UI Datepicker 1.9.0
+	 *
+	 * Copyright 2012-10-11, AUTHORS.txt (http://jqueryui.com/about)
+	 * Dual licensed under the MIT or GPL Version 2 licenses.
+	 * http://jquery.org/license
+	 *
+	 * http://jqueryui.com/datepicker/
+	 */
+	.ui-datepicker { width: 17em; padding: .2em .2em 0; display: none; }
+	.ui-datepicker .ui-datepicker-header { position:relative; padding:.2em 0; border:0px; font-weight: bold; width: 100%; padding: 4px 0; background-color: #f5f5f5; color: #808080; }
+	.ui-datepicker .ui-datepicker-prev, .ui-datepicker .ui-datepicker-next { position:absolute; top: 2px; width: 1.8em; height: 1.8em; }
 
-		// file/folder
-		.zlux-x-filetype,
-		.zlux-x-folder {
-			background: url(assets/img/zlux_sprite.png) no-repeat scroll 0 0 transparent;
-			display: inline-block;
-			height: 91px;
-			width: 81px;
-			margin: 0;
-		}
+	.ui-datepicker .ui-datepicker-prev-hover, .ui-datepicker .ui-datepicker-next-hover { /*top: 1px;*/ }
+	.ui-datepicker .ui-datepicker-prev { left:2px; }
+	.ui-datepicker .ui-datepicker-next { right:2px; }
 
-		.zlux-x-filetype {
-			font-size: 15px;
-			line-height: 111px;
-			text-align: left;
-			text-indent: 13px;
-			color: white;
-		}
+	.ui-datepicker .ui-datepicker-prev-hover { /*left:1px;*/ }
+	.ui-datepicker .ui-datepicker-next-hover { /*right:1px;*/ }
 
-		.zlux-x-folder {
-			background-position: -86px 0;
-			width: 100px;
-		}
+	.ui-datepicker .ui-datepicker-prev span, .ui-datepicker .ui-datepicker-next span { display: block; position: absolute; left: 50%; margin-left: -8px; top: 50%; margin-top: -8px;  }
+	.ui-datepicker .ui-datepicker-title { margin: 0 2.3em; line-height: 1.8em; text-align: center; }
+	.ui-datepicker .ui-datepicker-title select { font-size:1em; margin:1px 0; }
+	.ui-datepicker select.ui-datepicker-month-year {width: 100%;}
+	.ui-datepicker select.ui-datepicker-month,
+	.ui-datepicker select.ui-datepicker-year { width: 49%;}
+	.ui-datepicker table {width: 100%; font-size: .9em; border-collapse: collapse; margin:0 0 .4em; }
+	.ui-datepicker th { padding: .7em .3em; text-align: center; font-weight: bold; border: 0;  }
+	.ui-datepicker td { border: 0; padding: 1px; }
+	.ui-datepicker td span, .ui-datepicker td a { display: block; padding: .2em; text-align: right; text-decoration: none; }
+	.ui-datepicker .ui-datepicker-buttonpane { background-image: none; margin: .7em 0 0 0; padding:0 .2em; border-left: 0; border-right: 0; border-bottom: 0; }
+	.ui-datepicker .ui-datepicker-buttonpane button { float: right; margin: .5em .2em .4em; cursor: pointer; padding: .2em .6em .3em .6em; width:auto; overflow:visible; }
+	.ui-datepicker .ui-datepicker-buttonpane button.ui-datepicker-current { float:left; }
 
-		// image
-		.zlux-x-image {
-			margin: 0 auto;
-    		width: 115px;
-		}
+	/* with multiple calendars */
+	.ui-datepicker.ui-datepicker-multi { width:auto; }
+	.ui-datepicker-multi .ui-datepicker-group { float:left; }
+	.ui-datepicker-multi .ui-datepicker-group table { width:95%; margin:0 auto .4em; }
+	.ui-datepicker-multi-2 .ui-datepicker-group { width:50%; }
+	.ui-datepicker-multi-3 .ui-datepicker-group { width:33.3%; }
+	.ui-datepicker-multi-4 .ui-datepicker-group { width:25%; }
+	.ui-datepicker-multi .ui-datepicker-group-last .ui-datepicker-header { border-left-width:0; }
+	.ui-datepicker-multi .ui-datepicker-group-middle .ui-datepicker-header { border-left-width:0; }
+	.ui-datepicker-multi .ui-datepicker-buttonpane { clear:left; }
+	.ui-datepicker-row-break { clear:both; width:100%; font-size:0em; }
+
+	/* RTL support */
+	.ui-datepicker-rtl { direction: rtl; }
+	.ui-datepicker-rtl .ui-datepicker-prev { right: 2px; left: auto; }
+	.ui-datepicker-rtl .ui-datepicker-next { left: 2px; right: auto; }
+	.ui-datepicker-rtl .ui-datepicker-prev:hover { right: 1px; left: auto; }
+	.ui-datepicker-rtl .ui-datepicker-next:hover { left: 1px; right: auto; }
+	.ui-datepicker-rtl .ui-datepicker-buttonpane { clear:right; }
+	.ui-datepicker-rtl .ui-datepicker-buttonpane button { float: left; }
+	.ui-datepicker-rtl .ui-datepicker-buttonpane button.ui-datepicker-current { float:right; }
+	.ui-datepicker-rtl .ui-datepicker-group { float:right; }
+	.ui-datepicker-rtl .ui-datepicker-group-last .ui-datepicker-header { border-right-width:0; border-left-width:1px; }
+	.ui-datepicker-rtl .ui-datepicker-group-middle .ui-datepicker-header { border-right-width:0; border-left-width:1px; }
+
+	.ui-datepicker th{
+	  font-weight: bold;
+	  color: gray;
 	}
 
-	// details
-	.zlux-x-details {
-		margin-top: 30px;
+	.ui-datepicker-today a:hover{
+	  background-color: #808080;
+	  color: #ffffff;
+
+	}
+	.ui-datepicker-today a{
+	  background-color: #BFBFBF;
+	  cursor: pointer;
+	  padding: 0 4px;
+	  margin-bottom:0px;
+
+	}
+
+	.ui-datepicker td a{
+	  margin-bottom:0px;
+	  border:0px;
+	}
+
+	.ui-datepicker td:hover{
+	    color: #ffffff;
+	}
+
+	.ui-datepicker td .ui-state-default {
+	  border:0px;
+	  background:none;
+	  margin-bottom:0px;
+	  padding:5px;
+	  color:gray;
+	  text-align: center;
+	  filter:none;
+	}
+
+
+	.ui-datepicker td .ui-state-active{
+	  background:#BFBFBF;
+	  margin-bottom:0px;
+	  font-size:normal;
+	  text-shadow: 0px;
+	  color: #ffffff;
+	  .border-radius(4px);
+	}
+
+	.ui-datepicker td .ui-state-hover {
+	    color: #ffffff;
+	    background: #0064cd;
+	    background-color: #0064cd;
+	    background-repeat: repeat-x;
+	    background-image: -khtml-gradient(linear, left top, left bottom, from(#049cdb), to(#0064cd));
+	    background-image: -moz-linear-gradient(top, #049cdb, #0064cd);
+	    background-image: -ms-linear-gradient(top, #049cdb, #0064cd);
+	    background-image: -webkit-gradient(linear, left top, left bottom, color-stop(0%, #049cdb), color-stop(100%, #0064cd));
+	    background-image: -webkit-linear-gradient(top, #049cdb, #0064cd);
+	    background-image: -o-linear-gradient(top, #049cdb, #0064cd);
+	    background-image: linear-gradient(top, #049cdb, #0064cd);
+	    filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#049cdb', endColorstr='#0064cd', GradientType=0);
+	    text-shadow: 0 -1px 0 rgba(0, 0, 0, 0.25);
+	    border-color: #0064cd #0064cd #003f81;
+	    border-color: rgba(0, 0, 0, 0.1) rgba(0, 0, 0, 0.1) rgba(0, 0, 0, 0.25);
+	    .border-radius(4px);
 	}
 }
 
@@ -929,39 +1212,35 @@ body.admin .subhead-collapse .subhead.subhead-fixed {
   right: 0;
   bottom: 0;
   left: 0;
-    &:focus {
-      outline: thin dotted;
-    }
-    &::-webkit-scrollbar {
-      visibility: hidden;
-    }
+	&:focus {
+	  outline: thin dotted;
+	}
+	&::-webkit-scrollbar {
+	  visibility: hidden;
+	}
   }
   > .@{paneClass} {
-    background: rgba(0,0,0,.25);
-    position:absolute;
-    width:10px;
-    right:0;
-    top:0;
-    bottom:0;
-    /* Target only IE7 and IE8 with this hack */
-    visibility:hidden\9; 
-    opacity: .01; 
-    -webkit-transition: .2s;
-    -moz-transition: .2s;
-    -o-transition: .2s;
-    transition: .2s;
-    -moz-border-radius: 5px;
-    -webkit-border-radius: 5px;  
-    border-radius: 5px;
-    > .@{sliderClass} {
-      background: #444;
-      background: rgba(0,0,0,.5);
-      position: relative;
-      margin : 0 1px;
-      -moz-border-radius: 3px;
-      -webkit-border-radius: 3px;  
-      border-radius: 3px;
-    }
+	background: rgba(0,0,0,.25);
+	position:absolute;
+	width:10px;
+	right:0;
+	top:0;
+	bottom:0;
+	/* Target only IE7 and IE8 with this hack */
+	visibility:hidden\9; 
+	opacity: .01; 
+	-webkit-transition: .2s;
+	-moz-transition: .2s;
+	-o-transition: .2s;
+	transition: .2s;
+	.border-radius(5px);
+	> .@{sliderClass} {
+	  background: #444;
+	  background: rgba(0,0,0,.5);
+	  position: relative;
+	  margin : 0 1px;
+	  .border-radius(3px);
+	}
   }
 }
 

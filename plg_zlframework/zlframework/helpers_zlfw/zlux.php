@@ -32,6 +32,7 @@ class zlfwHelperZLUX extends AppHelper {
 			$this->app->document->addScript('zlfw:zlux/zluxDialog.js');
 			$this->app->document->addScript('zlfw:zlux/zluxFilesManager.js');
 			$this->app->document->addScript('zlfw:zlux/zluxItemsManager.js');
+			$this->app->document->addScript('zlfw:zlux/zluxDatesManager.js');
 		}
 
 		// ZL Bootstrap
@@ -140,6 +141,9 @@ class zlfwHelperZLUX extends AppHelper {
 
 			// load the script
 			$this->app->document->addScriptDeclaration($javascript);
+
+			// execute zoo calendar field in order to auto translate the Datepicker vars
+			$this->app->html->_('zoo.calendar', '', '', '');
 		}
 	}
 
