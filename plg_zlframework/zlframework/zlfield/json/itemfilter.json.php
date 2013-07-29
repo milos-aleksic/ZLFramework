@@ -49,6 +49,17 @@ defined('_JEXEC') or die('Restricted access');
 					}
 				}
 			},
+			"_frontpage":{
+				"type":"select",
+				"label":"PLG_ZLFRAMEWORK_IFT_FRONTPAGE_STATE",
+				"help":"PLG_ZLFRAMEWORK_IFT_FRONTPAGE_STATE_DESC",
+				"specific":{
+					"options":{
+						"PLG_ZLFRAMEWORK_ANY":"",
+						"PLG_ZLFRAMEWORK_ENABLED":"1"
+					}
+				}
+			},
 			"_offset":{
 				"type": "text",
 				"label": "PLG_ZLFRAMEWORK_FT_OFFSET",
