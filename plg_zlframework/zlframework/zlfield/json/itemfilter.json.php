@@ -44,7 +44,8 @@ defined('_JEXEC') or die('Restricted access');
 				"specific":{
 					"options":{
 						"PLG_ZLFRAMEWORK_ENABLED":"1",
-						"PLG_ZLFRAMEWORK_DISABLED":"0"
+						"PLG_ZLFRAMEWORK_DISABLED":"0",
+						"PLG_ZLFRAMEWORK_ANY":""
 					}
 				}
 			},
