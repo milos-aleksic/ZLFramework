@@ -16,22 +16,48 @@
 		// var for internal events, must be reseted when expanding
 		events: {},
 		assets: {},
+		/* JRoot: Joomla root URL, for assets urls. Its set within zlux helper */
+		/* JBase: Joomla base URL, for ajax urls. Its set within zlux helper */
 		/**
-		 * BETA - A cache factory that will abstract out the actual task to be performed when a key isn't in the cache yet
-		 *
-		 * @method createCache
-		 * @param {Function} Function to be abstracted
+		 * Initialize the called plugin
 		 */
-		createCache: function(requestFunction) {
-			var cache = {};
-			return function( key, callback ) {
-				if ( !cache[ key ] ) {
-					cache[ key ] = $.Deferred(function( defer ) {
-						requestFunction( defer, key );
-					}).promise();
-				}
-				return cache[ key ].done( callback );
-			};
+		initialize: function(target, zluxPlugin, options) {
+			var $this = this;
+
+			// prepare plugin name
+			var pluginName = zluxPlugin.match(/(Files|Items|Dates|Fields|Dialog$)/).shift(), // get the asset name from the plugin name
+				callName = 'zlux' + zluxPlugin;
+
+			// load related assets and init plugin
+			return $.Deferred(function( defer ) {
+
+				Plugin.prototype.loadAsset(Plugin.prototype.zlfwURL() + 'zlux/zlux' + pluginName + 'Manager.js')
+				.done(function(){
+
+					// check if function exists
+					if ($.fn[callName]) {
+
+						// if target provided init plugin on it
+						if (target[0]) {
+							target[callName](options);
+							defer.resolve();
+
+						// else init the plugin and return it
+						} else {
+
+							defer.resolve( new $.fn[callName](options) );						
+						}
+
+					} else {
+						// reject the deffer, something went wrong
+						defer.reject();
+					}
+				})
+				
+			})
+
+			// send a promise
+			.promise();
 		},
 		/**
 		 * Load Asset and execute callback using Deferrers
@@ -39,9 +65,14 @@
 		loadAsset: function(asset) {
 			var $this = this;
 
-			if ( !$.fn.zluxMain.prototype.assets[ asset ] ) {
+			// if asset undefined reject
+			if (asset == undefined || asset == '') return $.Deferred().reject().promise();
 
-				$.fn.zluxMain.prototype.assets[ asset ] = $.Deferred(function( defer ) {
+			// if asset not already loaded
+			if ( !Plugin.prototype.assets[ asset ] ) {
+
+				// prepare deferred and load
+				Plugin.prototype.assets[ asset ] = $.Deferred(function( defer ) {
 
 					yepnope({
 						test: asset,
@@ -59,31 +90,20 @@
 				})
 			}
 
-			return $.fn.zluxMain.prototype.assets[ asset ].promise();
-		},
-		/**
-		 * Returns the Joomla root URL, for relative assets urls
-		 */
-		JRoot: function() {
-			return $.fn[Plugin.prototype.name].prototype.JRoot;
-		},
-		/**
-		 * Returns the Joomla base URL, for ajax urls
-		 */
-		JBase: function() {
-			return $.fn[Plugin.prototype.name].prototype.JBase;
+			// send a promise
+			return Plugin.prototype.assets[ asset ].promise();
 		},
 		/**
 		 * Returns the ZLUX Ajax URL
 		 */
 		AjaxURL: function() {
-			return this.JBase() + 'index.php?option=com_zoo&controller=zlux&format=raw';
+			return Plugin.prototype.JBase + 'index.php?option=com_zoo&controller=zlux&format=raw';
 		},
 		/**
 		 * Returns the ZLFW root url
 		 */
 		zlfwURL: function() {
-			return this.JRoot() + 'plugins/system/zlframework/zlframework';
+			return Plugin.prototype.JRoot + 'plugins/system/zlframework/zlframework/';
 		},
 		/**
 		 * Dispatches the specified event name and it's arguments to all listeners.
@@ -95,12 +115,12 @@
 		trigger : function(name) {
 			var list = this.events[name.toLowerCase()], i, args;
 
-			// console.log(name, arguments);
+			// Replace name with sender in args
+			args = Array.prototype.slice.call(arguments);
+			args[0] = this;
 
+			// if event was binded
 			if (list) {
-				// Replace name with sender in args
-				args = Array.prototype.slice.call(arguments);
-				args[0] = this;
 
 				// Dispatch event to all listeners
 				for (i = 0; i < list.length; i++) {
@@ -110,6 +130,9 @@
 					}
 				}
 			}
+
+			// always trigger target for external binds with zlux. namespace
+			this.target && this.target.trigger('zlux.' + name, args);
 
 			return true;
 		},
@@ -272,8 +295,22 @@
 			.replace(/:\//g, ':\/\/')
 		}
 	});
-	// save the plugin for global use
+	// Save the Main Plugin as prototype
 	$.fn[Plugin.prototype.name] = Plugin;
+
+	// Set an special ZLUX Init function for zluxPlugins Ex: $('selector').zlux("zluxFilesManager", {arguments}) or $.fn.zlux("zluxFilesPreview");
+	$.fn['zlux'] = function() {
+		var args = arguments;
+		// if target valid
+		if (this[0]) {
+			return this.each(function() {
+				var target = $(this);
+				Plugin.prototype["initialize"].apply(Plugin, $.merge([target], args));
+			})
+		} else {
+			return Plugin.prototype["initialize"].apply(Plugin, $.merge([this], args));
+		}
+	};
 })(jQuery);
 
 

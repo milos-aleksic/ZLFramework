@@ -25,15 +25,7 @@ class zlfwHelperZLUX extends AppHelper {
 
 		// ZLUX
 		$this->app->document->addStylesheet('zlfw:zlux/zlux.css');
-		if(!JDEBUG) {
-			$this->app->document->addScript('zlfw:zlux/zlux.all.min.js');
-		} else {
-			$this->app->document->addScript('zlfw:zlux/zluxMain.js');
-			$this->app->document->addScript('zlfw:zlux/zluxDialog.js');
-			$this->app->document->addScript('zlfw:zlux/zluxFilesManager.js');
-			$this->app->document->addScript('zlfw:zlux/zluxItemsManager.js');
-			$this->app->document->addScript('zlfw:zlux/zluxDatesManager.js');
-		}
+		$this->app->document->addScript('zlfw:zlux/zluxMain.js');
 
 		// ZL Bootstrap
 		$this->loadBootstrap(true);

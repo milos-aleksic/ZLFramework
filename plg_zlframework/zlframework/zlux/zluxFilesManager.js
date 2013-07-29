@@ -824,7 +824,6 @@
 	$.fn[Plugin.prototype.name].iNextUnique = 0;
 	$.fn[Plugin.prototype.name].aAjaxDataCache = {};
 	$.fn[Plugin.prototype.name].instances = {};
-
 })(jQuery);
 
 
@@ -855,6 +854,9 @@
 			// run initial check
 			$this.initCheck();
 
+			// save target
+			$this.target = dialogTrigger;
+
 			// dialogTrigger example, it should be set by the caller script
 			// $('<a title="' + $this.options.title + '" class="btn btn-mini zlux-btn-edit" href="#"><i class="icon-edit"></i></a>')
 
@@ -882,8 +884,9 @@
 				+ ($this.options.full_mode ? ' zlux-dialog-full ' : '') 
 				+ ($this.options.dialogClass ? ' ' + $this.options.dialogClass : '');
 			
-			// set the dialog options
-			$this.zluxdialog = $.fn.zluxDialog({
+
+			// init the dialog plugin
+			$.fn.zlux("Dialog", {
 				title: $this.options.title,
 				width: $this.options.full_mode ? '75%' : 300,
 				dialogClass: $this.options.dialogClass,
@@ -894,12 +897,21 @@
 				} : null)
 			})
 
-			.done(function(){
-				// set the dialog unique ID
-				$this.zluxdialog.widget.attr('id', 'zluxFilesManager_' + $this.ID);
+			// when plugin ready, save reference
+			.done(function(plugin){
 
-				// init dialog related functions
-				$this.eventDialogLoaded();
+				// save dialog reference
+				$this.zluxdialog = plugin;
+
+				// set events
+				$this.zluxdialog.bind("InitComplete", function() {
+
+					// set the dialog unique ID
+					$this.zluxdialog.widget.attr('id', 'zluxFilesManager_' + $this.ID);
+
+					// init dialog related functions
+					$this.eventDialogLoaded();
+				})
 			});
 		},
 		/**
@@ -1560,7 +1572,7 @@
 
 
 			// load asset
-			$this.loadAsset($this.zlfwURL() + '/zlux/assets/plupload/plupload.full.min.js')
+			$this.loadAsset($this.zlfwURL() + 'zlux/assets/plupload/plupload.full.min.js')
 
 			// once loaded
 			.done(function(){
@@ -1639,7 +1651,7 @@
 				],
 
 				// flash runtime settings
-				flash_swf_url: $this.JRoot() + 'plugins/system/zlframework/zlframework/zlux/assets/plupload/Moxie.swf'
+				flash_swf_url: $this.JRoot + 'plugins/system/zlframework/zlframework/zlux/assets/plupload/Moxie.swf'
 			};
 
 			// if S3 storage
@@ -2177,7 +2189,7 @@
 			});
 		}
 	});
-	// save the plugin for global use
+	// Don't touch
 	$.fn[Plugin.prototype.name] = Plugin;
 })(jQuery);
 
@@ -2195,7 +2207,7 @@
 		this.events = {};
 	};
 	Plugin.prototype = $.extend(Plugin.prototype, $.fn.zluxMain.prototype, {
-		name: 'zluxPreview',
+		name: 'zluxFilesPreview',
 		options: {},
 		events: {},
 		initialize: function(input, options) {
@@ -2203,7 +2215,7 @@
 			var $this = this;
 
 			// save the deferred
-			$this.creatingDialog = $.Deferred();
+			$this.creatingDialog = $.Deferred().resolve($this);
 
 			// return a promise events attached to current object
 			// in order to allow allready start adding events
@@ -2228,7 +2240,7 @@
 
 				// if preview enabled render a mini preview of the file
 				if (preview) {
-					sThumb = '<div class="zlux-x-image"><img src="' + $this.JRoot() + oData.path + '" /></div>'
+					sThumb = '<div class="zlux-x-image"><img src="' + $this.JRoot + oData.path + '" /></div>'
 				} else {
 					sThumb = '<span class="zlux-x-filetype">' + oData.ext + '</span>';
 				}
@@ -2257,11 +2269,5 @@
 		}
 	});
 	// Don't touch
-	$.fn[Plugin.prototype.name] = function() {
-		var args   = arguments;
-		var plugin = new Plugin();
-		if (Plugin.prototype['initialize']) {
-			return plugin.initialize.apply(plugin, args);
-		}
-	};
+	$.fn[Plugin.prototype.name] = Plugin;
 })(jQuery);
