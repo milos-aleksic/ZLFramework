@@ -331,6 +331,9 @@
 			// run initial check
 			$this.initCheck();
 
+			// save target
+			$this.target = dialogTrigger;
+
 			// set the filter param
 			$this.filter = {};
 
@@ -362,7 +365,7 @@
 				+ ($this.options.dialogClass ? ' ' + $this.options.dialogClass : '');
 
 			// set the dialog options
-			$this.zluxdialog = new $.fn.zluxDialog({
+			$.fn.zlux("Dialog", {
 				title: $this.options.title,
 				width: $this.options.full_mode ? '75%' : 300,
 				dialogClass: $this.options.dialogClass,
@@ -373,12 +376,21 @@
 				}, $this.options.position)
 			})
 
-			.done(function(){
-				// set the dialog unique ID
-				$this.zluxdialog.widget.attr('id', 'zluxItemsManager_' + $this.ID);
+			// when plugin ready, save reference
+			.done(function(plugin){
 
-				// init dialog related functions
-				$this.eventDialogLoaded();
+				// save dialog reference
+				$this.zluxdialog = plugin;
+
+				// set events
+				$this.zluxdialog.bind("InitComplete", function() {
+
+					// set the dialog unique ID
+					$this.zluxdialog.widget.attr('id', 'zluxItemsManager_' + $this.ID);
+
+					// init dialog related functions
+					$this.eventDialogLoaded();
+				});
 			});
 		},
 		/*

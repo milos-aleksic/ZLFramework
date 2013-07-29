@@ -1,5 +1,5 @@
 /* ===================================================
- * ZLUX zluxDatesManager
+ * ZLUX Dates Manager
  * https://zoolanders.com/extensions/zl-framework
  * ===================================================
  * Copyright (C) JOOlanders SL 
@@ -19,18 +19,14 @@
 			this.options = $.extend({}, this.options, options);
 			var $this = this;
 
-			// set the filter param
-			$this.filter = {};
-
 			// run the initial check
 			$this.initCheck();
 
 			// save target
 			$this.target = target;
 
-			// init filesmanager
+			// set wrapper
 			$this.date = $('<div class="zl-bootstrap zlux-datesmanager" />').appendTo(target);
-			$this.initDataTable($this.filesmanager);
 		},
 		/**
 		 * Performs initial tasks
@@ -39,8 +35,8 @@
 			var $this = this;
 
 			// set ID
-			$.fn.zluxItemsManager.iNextUnique++;
-			$this.ID = $.fn.zluxItemsManager.iNextUnique;
+			$.fn.zluxDatesManager.iNextUnique++;
+			$this.ID = $.fn.zluxDatesManager.iNextUnique;
 		}
 	});
 	// save the plugin for global use
@@ -50,7 +46,7 @@
 
 
 /* ===================================================
- * ZLUX Dialog Date
+ * ZLUX Dialog Dates Manager
  * https://zoolanders.com/extensions/zl-framework
  * ===================================================
  * Copyright (C) JOOlanders SL 
@@ -78,6 +74,9 @@
 
 			// run initial check
 			$this.initCheck();
+
+			// save target
+			$this.target = dialogTrigger;
 
 			// dialogTrigger example, it should be set by the caller script
 			// $('<a title="' + $this.options.title + '" class="btn btn-mini zlux-btn-edit" href="#"><i class="icon-edit"></i></a>')
@@ -108,7 +107,7 @@
 				+ ($this.options.dialogClass ? ' ' + $this.options.dialogClass : '');
 
 			// set the dialog options
-			$this.zluxdialog = new $.fn.zluxDialog({
+			$.fn.zlux("Dialog", {
 				title: $this.options.title,
 				width: $this.options.full_mode ? '75%' : 300,
 				dialogClass: $this.options.dialogClass,
@@ -120,12 +119,21 @@
 				}, $this.options.position)
 			})
 
-			.done(function(){
-				// set the dialog unique ID
-				$this.zluxdialog.widget.attr('id', 'zluxDatesManager_' + $this.ID);
+			// when plugin ready, save reference
+			.done(function(plugin){
 
-				// init dialog related functions
-				$this.eventDialogLoaded();
+				// save dialog reference
+				$this.zluxdialog = plugin;
+
+				// set events
+				$this.zluxdialog.bind("InitComplete", function() {
+
+					// set the dialog unique ID
+					$this.zluxdialog.widget.attr('id', 'zluxDatesManager_' + $this.ID);
+
+					// init dialog related functions
+					$this.eventDialogLoaded();
+				});
 			});
 		},
 		/*

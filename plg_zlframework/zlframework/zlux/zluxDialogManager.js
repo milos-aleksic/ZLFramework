@@ -21,17 +21,6 @@
 			// Any jQuery UI Widget Dialog option declared here will be passed on the Widget init
 		},
 		events: {},
-		initialize: function(options) {
-			this.options = $.extend({}, this.options, options);
-			var $this = this;
-
-			// save the deferred
-			$this.creatingDialog = $.Deferred();
-
-			// return a promise events attached to current object
-			// in order to allow allready start adding events
-			return $this.creatingDialog.promise($this);
-		},
 		initDialog: function() {
 			var $this = this;
 
@@ -76,9 +65,9 @@
 
 			
 			// init scrollbar
-			var loadingScrollbar = $.Deferred().resolve(); // by default is resolved
+			var loadingScrollbar = $.Deferred().resolve(); // by default is resolved as could be not necesary to load it
 			if ($this.options.scrollbar) {
-				loadingScrollbar = $this.loadAsset($this.zlfwURL() + '/zlux/assets/nanoscroller/nanoscroller.min.js')
+				loadingScrollbar = $this.loadAsset($this.zlfwURL() + 'zlux/assets/nanoscroller/nanoscroller.min.js')
 				.done(function(){
 					$this.main.addClass('zlux-scroller').nanoScroller({
 						preventPageScrolling: true,
@@ -94,8 +83,11 @@
 			// when assets loaded
 			loadingScrollbar.done(function(){
 
+				// set init state
+				$this.inited = true;
+
 				// resolve
-				$this.creatingDialog.resolve();
+				$this.trigger("InitComplete");
 			})
 		},
 		/**
@@ -114,7 +106,7 @@
 			$this.options.scrollbar && $this.scrollbar('refresh');
 
 			// set init state
-			$this.inited = true;
+			$this.contentinited = true;
 
 			// hide the spinner, must go after the state
 			$this.spinner('hide');
@@ -122,11 +114,11 @@
 		toggle: function() {
 			var $this = this;
 
-			// state is pending, load the dialog
-			if ($this.creatingDialog.state() == 'pending') $this.initDialog();
+			// if not yet inited, start it
+			if (!$this.inited) $this.initDialog();
 
-			// if allready loaded, open it
-			else if ($this.creatingDialog.state() == 'resolved') $this.dialog($this.dialog("isOpen") ? "close" : "open");
+			// if allready inited, toggle
+			else $this.dialog($this.dialog("isOpen") ? "close" : "open");
 		},
 		dialog: function(method) {
 			return this.main.dialog(method);
@@ -162,7 +154,7 @@
 		spinner: function(action) {
 			var $this = this;
 
-			if ($this.inited) {
+			if ($this.contentinited) {
 				if (action == 'show') {
 					$this.main.fadeTo(0, 0.5);
 					$this._spinner.show();
@@ -306,11 +298,12 @@
 		}
 	});
 	// Don't touch
-	$.fn[Plugin.prototype.name] = function() {
-		var args   = arguments;
-		var plugin = new Plugin();
-		if (Plugin.prototype['initialize']) {
-			return plugin.initialize.apply(plugin, args);
-		}
-	};
+	$.fn[Plugin.prototype.name] = Plugin;
+	// $.fn[Plugin.prototype.name] = function() {
+	// 	var args   = arguments;
+	// 	var plugin = new Plugin();
+	// 	if (Plugin.prototype['initialize']) {
+	// 		return plugin.initialize.apply(plugin, args);
+	// 	}
+	// };
 })(jQuery);

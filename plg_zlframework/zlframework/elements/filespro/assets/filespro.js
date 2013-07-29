@@ -48,79 +48,80 @@
 		},
 		apply: function (inputs){
 			var $this = this;
-				
-			inputs.each(function(index, input)
-			{
-				var $input = $(input);
 
-				if (!$(input).data('initialized'))
+			// load preview engine
+			$.fn.zlux("FilesPreview").done(function(zluxpreview){
+				
+				inputs.each(function(index, input)
 				{
-					var id = 'filespro-element-' + index,
+					var $input = $(input);
 
-						// set main wrapper arount the input
-						$wrapper = $input.closest('.row').addClass('zl-bootstrap'),
+					if (!$(input).data('initialized'))
+					{
+						var id = 'filespro-element-' + index,
 
-						// should the preview render a mini file preview?
-						filePreview = $input.hasClass('image-element') ? true : false;
+							// set main wrapper arount the input
+							$wrapper = $input.closest('.row').addClass('zl-bootstrap'),
 
-					// set input id
-					$input.attr('id', id);
+							// should the preview render a mini file preview?
+							filePreview = $input.hasClass('image-element') ? true : false;
 
-					// init preview engine
-					$this.zluxpreview = $.fn.zluxPreview();
+						// set input id
+						$input.attr('id', id);
 
-					var storage = $('span.zlux-x-filedata', $wrapper).data('zlux-storage');
+						var storage = $('span.zlux-x-filedata', $wrapper).data('zlux-storage');
 
-					// set the trigger button
-					$this.dialogTrigger = $('<a title="' + $this.options.title + '" class="btn btn-mini zlux-btn-edit" href="#"><i class="icon-edit"></i></a>')
+						// set the trigger button
+						$this.dialogTrigger = $('<a title="' + $this.options.title + '" class="btn btn-mini zlux-btn-edit" href="#"><i class="icon-edit"></i></a>')
 
-					// add it to dom
-					.appendTo($wrapper)
+						// add it to dom
+						.appendTo($wrapper);
 
-					// init the file manager
-					$this.dialogTrigger.zluxDialogFilesManager({
-						root: $this.options.images,
-						extensions: $this.options.extensions,
-						storage: 'local',
-						max_file_size: '1024kb',
-						title: $this.options.title,
-						storage: storage.engine,
-						storage_params: storage,
-						root: storage.root
-					})
+						// init the file manager
+						$this.dialogTrigger.zlux("DialogFilesManager", {
+							root: $this.options.images,
+							extensions: $this.options.extensions,
+							storage: 'local',
+							max_file_size: '1024kb',
+							title: $this.options.title,
+							storage: storage.engine,
+							storage_params: storage,
+							root: storage.root
+						})
 
-					// on object select event
-					.data('zluxDialogFilesManager').bind("ObjectSelected", function(manager, $object){
+						// on object select event
+						.on("zlux.ObjectSelected", function(e, manager, $object){
 
-						// abort if file mode incompatible
-						if ($this.options.fileMode == 'files' && $object.type != 'file') return;
-						if ($this.options.fileMode == 'folders' && $object.type != 'folder') return;
+							// abort if file mode incompatible
+							if ($this.options.fileMode == 'files' && $object.type != 'file') return;
+							if ($this.options.fileMode == 'folders' && $object.type != 'folder') return;
 
-						// prepare the value
-						var value = $this.dialogTrigger.data('zluxDialogFilesManager')._getFullPath($object.name);
+							// prepare the value
+							var value = $this.dialogTrigger.data('zluxDialogFilesManager')._getFullPath($object.name);
 
-						// save new value in input
-						$input.val(value).trigger('change');
+							// save new value in input
+							$input.val(value).trigger('change');
 
-						// update preview
-						$('.zlux-preview', $wrapper).remove();
-						$wrapper.append($this.zluxpreview.renderPreviewDOM($object, filePreview));
-					});
+							// update preview
+							$('.zlux-preview', $wrapper).remove();
+							$wrapper.append(zluxpreview.renderPreviewDOM($object, filePreview));
+						});
 
-					// set the initial preview
-					var oData = $('span.zlux-x-filedata', $wrapper).data('zlux-data');
-					if (!$.isEmptyObject(oData) && $input.val()) {
-						$wrapper.append($this.zluxpreview.renderPreviewDOM(oData, filePreview));	
-					}
+						// set the initial preview
+						var oData = $('span.zlux-x-filedata', $wrapper).data('zlux-data');
+						if (!$.isEmptyObject(oData) && $input.val()) {
+							$wrapper.append(zluxpreview.renderPreviewDOM(oData, filePreview));	
+						}
 
-					// create cancel button
-					$('<i class="icon-remove zlux-x-cancel-btn" />').insertAfter($input).on('click', function () {
-						$input.val('');
-						$('.zlux-preview', $wrapper).remove();
-					});
-				
-				} $input.data('initialized', !0);
-			});
+						// create cancel button
+						$('<i class="icon-remove zlux-x-cancel-btn" />').insertAfter($input).on('click', function () {
+							$input.val('');
+							$('.zlux-preview', $wrapper).remove();
+						});
+					
+					} $input.data('initialized', !0);
+				});
+			})
 		}
 	});
 	// Don't touch
