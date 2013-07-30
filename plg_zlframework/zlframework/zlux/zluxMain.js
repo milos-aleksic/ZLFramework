@@ -273,6 +273,10 @@
 		 * @param {String} path The path to be cleaned
 		 */
 		cleanPath : function(path) {
+
+			// be sure provided path is string
+			if (typeof path != 'string') return;
+			
 			// return path and
 			return path
 
