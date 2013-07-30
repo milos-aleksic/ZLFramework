@@ -177,7 +177,7 @@
 			} else {
 
 				$this.datesmanager.datetimepicker($.extend(settings, {
-					timeFormat: 'hh:mm:ss',
+					timeFormat: 'HH:mm:ss',
 					showSecond: false,
 					timeOnly: $this.options.mode == 'time' ? true : false // will hide date if time mode
 				}))
