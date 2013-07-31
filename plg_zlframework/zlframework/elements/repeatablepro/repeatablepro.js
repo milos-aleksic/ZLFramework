@@ -131,7 +131,7 @@
 				url: $this.options.ajax_url + '&task=callelement',
 				type: 'POST',
 				data: {
-					method: 'loadeditlayout',
+					method: 'getemptylayout',
 					layout: layout
 				},
 				success : function(instance) {
