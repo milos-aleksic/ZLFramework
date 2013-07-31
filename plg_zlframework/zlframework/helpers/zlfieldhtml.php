@@ -32,9 +32,6 @@ class ZLFieldHTMLHelper extends AppHelper {
 				return call_user_func_array(array($this, $func), $args);
 			}
 		}
-
-		return call_user_func_array(array('JHTML', '_'), $args);
-
 	}
 
 	public function cmp($a, $b){
