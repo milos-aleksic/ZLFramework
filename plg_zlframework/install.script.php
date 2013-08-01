@@ -152,6 +152,13 @@ class plgSystemZlframeworkInstallerScript
     }
 
     /**
+	 * method to update the component
+	 *
+	 * @return void
+	 */
+	function update($parent) {}
+
+    /**
 	 * Called on uninstallation
 	 *
 	 * @param   object  $parent  The object responsible for running this script
