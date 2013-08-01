@@ -375,7 +375,9 @@ class zlfwHelper extends AppHelper {
 				$view->params = $app->getParams('site');
 			}
 
-			return $renderer->render($prefix . $layoutName, array('item' => $item, 'view' => $view));
+			if (in_array($layoutName, $renderer->getLayouts($path))) {
+				return $renderer->render($prefix . $layoutName, array('item' => $item, 'view' => $view));
+			}
 		}
 		else
 		{
