@@ -53,7 +53,10 @@ class plgSystemZlframeworkInstallerScript
 			'plugins/system/zlframework/zlframework/fields/zlapplication.php',
 			'plugins/system/zlframework/zlframework/fields/zlinfo.php',
 			'plugins/system/zlframework/zlframework/fields/zllayout.php',
-			'plugins/system/zlframework/zlframework/fields/zlspacer.php'
+			'plugins/system/zlframework/zlframework/fields/zlspacer.php',
+
+			// deprecated assets
+			'plugins/system/zlframework/zlframework/assets/js/yepnope.min.js'
 		),
 		'folders' => array(
 			'plugins/system/zlframework/zlframework/assets/libraries/zlparams',

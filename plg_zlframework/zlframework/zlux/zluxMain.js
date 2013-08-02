@@ -15,7 +15,7 @@
 		options: {},
 		// var for internal events, must be reseted when expanding
 		events: {},
-		assets: {},
+		_ress: {}, // requested assets
 		/* JRoot: Joomla root URL, for assets urls. Its set within zlux helper */
 		/* JBase: Joomla base URL, for ajax urls. Its set within zlux helper */
 		/**
@@ -31,8 +31,7 @@
 			// load related assets and init plugin
 			return $.Deferred(function( defer ) {
 
-				Plugin.prototype.loadAsset(Plugin.prototype.zlfwURL() + 'zlux/zlux' + pluginName + 'Manager.js')
-				.done(function(){
+				Plugin.prototype.requireAsset(Plugin.prototype.zlfwURL() + 'zlux/zlux' + pluginName + 'Manager.js', function(){
 
 					// check if function exists
 					if ($.fn[callName]) {
@@ -60,38 +59,69 @@
 			.promise();
 		},
 		/**
-		 * Load Asset and execute callback using Deferrers
+		 * Load requested assets and execute callback
+		 *
+		 * @ress String or Array
 		 */
-		loadAsset: function(asset) {
-			var $this = this;
+		requireAsset: function(ress, callback, failcallback) {
+			var req  = [],
+				ress = $.isArray(ress) ? ress:[ress];
 
-			// if asset undefined reject
-			if (asset == undefined || asset == '') return $.Deferred().reject().promise();
+			for (var i=0, len=ress.length; i<len; i++) {
 
-			// if asset not already loaded
-			if ( !Plugin.prototype.assets[ asset ] ) {
+				if(!ress[i]) continue;
 
-				// prepare deferred and load
-				Plugin.prototype.assets[ asset ] = $.Deferred(function( defer ) {
-
-					yepnope({
-						test: asset,
-						load: asset,
-						callback: function (url, result, key) {
-							if (result) {
-								// if asset loaded resolve
-								defer.resolve();
-							} else {
-								defer.reject();
-							}
-						}
-					})
-
-				})
+				if (!this._ress[ress[i]]) {
+					if (ress[i].match(/\.js$/)) {
+						this._ress[ress[i]] = this.getScript(ress[i]);
+					} else {
+						this._ress[ress[i]] = this.getCss(ress[i]);
+					}
+				}
+				req.push(this._ress[ress[i]]);
 			}
 
-			// send a promise
-			return Plugin.prototype.assets[ asset ].promise();
+			return $.when.apply($, req).done(callback).fail(function(){
+				failcallback ? failcallback() : $.error("Require failed: \n"+ress.join(",\n"));
+			});
+		},
+		getScript: function(url, callback) {
+			var d = $.Deferred(), script = document.createElement('script');
+
+			script.async = true;
+
+			script.onload = function() {
+				d.resolve();
+				if(callback) { callback(script); }
+			};
+
+			script.onerror = function() {
+				d.reject(url);
+			};
+
+			script.src = url;
+
+			document.getElementsByTagName('head')[0].appendChild(script);
+
+			return d.promise();
+		},
+		getCss: function(url, callback){
+			var d         = $.Deferred(),
+				link      = document.createElement('link');
+				link.type = 'text/css';
+				link.rel  = 'stylesheet';
+				link.href = url;
+
+			document.getElementsByTagName('head')[0].appendChild(link);
+
+			var img = document.createElement('img');
+				img.onerror = function(){
+					d.resolve();
+					if(callback) callback(link);
+				};
+				img.src = url;
+
+			return d.promise();
 		},
 		/**
 		 * Returns the ZLUX Ajax URL
@@ -274,8 +304,7 @@
 		 */
 		cleanPath : function(path) {
 
-			// be sure provided path is string
-			if (typeof path != 'string') return;
+			if (!path) return;
 			
 			// return path and
 			return path

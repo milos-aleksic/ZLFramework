@@ -67,8 +67,7 @@
 			// init scrollbar
 			var loadingScrollbar = $.Deferred().resolve(); // by default is resolved as could be not necesary to load it
 			if ($this.options.scrollbar) {
-				loadingScrollbar = $this.loadAsset($this.zlfwURL() + 'zlux/assets/nanoscroller/nanoscroller.min.js')
-				.done(function(){
+				loadingScrollbar = $this.requireAsset($this.zlfwURL() + 'zlux/assets/nanoscroller/nanoscroller.min.js', function(){
 					$this.main.addClass('zlux-scroller').nanoScroller({
 						preventPageScrolling: true,
 						contentClass: 'zlux-dialog-content'

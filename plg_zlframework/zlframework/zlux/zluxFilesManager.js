@@ -71,10 +71,7 @@
 			var $this = this;
 
 			// load asset
-			$this.loadAsset($this.zlfwURL() + '/zlux/assets/datatables/dataTables.with.plugins.min.js')
-
-			// once loaded
-			.done(function(){
+			$this.requireAsset($this.zlfwURL() + 'zlux/assets/datatables/dataTables.with.plugins.min.js', function(){
 				$this._initDataTable(wrapper)
 			})
 		},
@@ -1572,10 +1569,7 @@
 
 
 			// load asset
-			$this.loadAsset($this.zlfwURL() + 'zlux/assets/plupload/plupload.full.min.js')
-
-			// once loaded
-			.done(function(){
+			$this.requireAsset($this.zlfwURL() + 'zlux/assets/plupload/plupload.full.min.js', function(){
 
 				// init plupload
 				$this.initPlupload();

@@ -20,9 +20,6 @@ class zlfwHelperZLUX extends AppHelper {
 	 */
 	public function loadMainAssets()
 	{
-		// yepnope
-		$this->app->document->addScript('zlfw:assets/js/yepnope.min.js');
-
 		// ZLUX
 		$this->app->document->addStylesheet('zlfw:zlux/zlux.css');
 		$this->app->document->addScript('zlfw:zlux/zluxMain.js');
