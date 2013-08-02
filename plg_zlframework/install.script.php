@@ -56,7 +56,8 @@ class plgSystemZlframeworkInstallerScript
 			'plugins/system/zlframework/zlframework/fields/zlspacer.php',
 
 			// deprecated assets
-			'plugins/system/zlframework/zlframework/assets/js/yepnope.min.js'
+			'plugins/system/zlframework/zlframework/assets/js/yepnope.min.js',
+			'plugins/system/zlframework/zlframework/zlux/zlux.css'
 		),
 		'folders' => array(
 			'plugins/system/zlframework/zlframework/assets/libraries/zlparams',

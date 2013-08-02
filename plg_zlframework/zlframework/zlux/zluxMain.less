@@ -1,0 +1,167 @@
+/* Copyright (C) JOOlanders SL http://www.gnu.org/licenses/gpl-2.0.html GNU/GPLv2 only */
+
+// import main file
+@import "zlux.less";
+
+
+/* Common style
+----------------------------------------------------------------------------------------------------*/
+.zl-bootstrap {
+	font: 12px/20px Arial,Helvetica,sans-serif;
+
+	a {
+		color: @blue;
+	}
+
+	.btn {
+
+		color: @black;
+
+		&:focus {
+			outline: 0;
+		}
+
+		[class^="icon-"],
+		[class*=" icon-"] {
+			margin-right: 6px;
+		}
+
+		.caret {
+			margin-left: 6px;
+		}
+
+		&.btn-mini [class^="icon-"],
+		&.btn-mini [class*=" icon-"] {
+			margin-top: 0;
+		}
+	}
+
+	.btn.zlux-btn-edit {
+		margin-bottom: 9px;
+		margin-left: 6px;
+		font-size: 14px;
+		padding: 3px 6px 2px 8px;
+
+		[class^="icon-"],
+		[class*=" icon-"] {
+			margin-right: 0
+		}
+	}
+
+	// make a label act as an link
+	.label-link {
+		cursor: pointer;
+	}
+
+	// Input Cancel button
+	.zlux-x-cancel-btn {
+		cursor: pointer;
+		font-size: 13px;
+		display: inline-block !important;
+		margin: 8px 13px 0 -21px !important;
+		vertical-align: top !important;
+	}
+}
+
+
+/* normalize Joomla! styles
+----------------------------------------------------------------------------------------------------*/
+.zl-bootstrap {
+
+	[class^="icon-"]:before,
+	[class*=" icon-"]:before {
+		font-family: FontAwesome;
+		color: inherit;
+	}
+
+	ul.inline,
+	ol.inline {
+		list-style: none outside none;
+		margin-left: 0;
+
+		& > li {
+			display: inline-block;
+			padding-left: 5px;
+			padding-right: 5px;
+		}
+	}
+
+	.btn-small {
+		.border-radius(3px);
+		font-size: 11.9px;
+		padding: 2px 10px;
+	}
+}
+
+// Set the top bar index higher than the modals
+body.admin .subhead-collapse .subhead.subhead-fixed {
+	z-index: 1100;
+}
+
+
+/* ZLUX DataTables
+----------------------------------------------------------------------------------------------------*/
+.zlux-datatables {
+
+	// wrapper
+	&.dataTables_wrapper {
+		position: relative;
+		clear: both;
+		// min-height: 225px;
+		padding-bottom: 3px;
+
+		a:focus {
+			outline: none;
+		}
+	}
+
+	// pagination
+	div.dataTables_paginate {
+		margin: 0;
+	}
+
+	// table
+	table.dataTable {
+
+		// sorting
+		thead {
+			.sorting, // both
+			.sorting_asc,
+			.sorting_desc,
+			.sorting_asc_disabled,
+			.sorting_desc_disabled {
+				cursor: pointer;
+				*cursor: hand;
+				position: relative;
+
+				&:after {
+					font-family: FontAwesome;
+					font-style: normal;
+					font-weight: normal;
+					font-size: 14px;
+					float: right;
+				}
+			}
+
+			.sorting_asc:after,
+			.sorting_asc_disabled:after {
+				content: "\f0de"; // icon-sort-up
+			}
+			
+			.sorting_desc:after,
+			.sorting_desc_disabled:after {
+				content: "\f0dd"; // icon-sort-down
+			}
+
+			.sorting:after {
+				content: "\f0dc"; // icon-sort
+				color: #DCDCDC;
+			}
+
+			.sorting_asc_disabled:after,
+			.sorting_desc_disabled:after { 
+				color: #DCDCDC;
+			}
+		}
+	}
+}

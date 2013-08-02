@@ -21,7 +21,7 @@ class zlfwHelperZLUX extends AppHelper {
 	public function loadMainAssets()
 	{
 		// ZLUX
-		$this->app->document->addStylesheet('zlfw:zlux/zlux.css');
+		$this->app->document->addStylesheet('zlfw:zlux/zluxMain.css');
 		$this->app->document->addScript('zlfw:zlux/zluxMain.js');
 
 		// ZL Bootstrap

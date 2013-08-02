@@ -31,7 +31,10 @@
 			// load related assets and init plugin
 			return $.Deferred(function( defer ) {
 
-				Plugin.prototype.requireAsset(Plugin.prototype.zlfwURL() + 'zlux/zlux' + pluginName + 'Manager.js', function(){
+				var css = Plugin.prototype.zlfwURL() + 'zlux/zlux' + pluginName + 'Manager.css',
+					js  = Plugin.prototype.zlfwURL() + 'zlux/zlux' + pluginName + 'Manager.js';
+
+				Plugin.prototype.requireAsset([css, js], function(){
 
 					// check if function exists
 					if ($.fn[callName]) {

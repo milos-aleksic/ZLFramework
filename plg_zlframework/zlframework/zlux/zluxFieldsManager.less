@@ -1,0 +1,115 @@
+/* Copyright (C) JOOlanders SL http://www.gnu.org/licenses/gpl-2.0.html GNU/GPLv2 only */
+
+// import main file
+@import "zlux.less";
+
+/* ZLUX Fields
+----------------------------------------------------------------------------------------------------*/
+
+[data-type="options"] .zl-label,
+[data-type="options"] .zl-field {
+	float: none !important;
+}
+
+div.zlfield [data-type="options"] .zl-label + .zl-field * {
+    float: none;
+}
+
+// Option field
+div.zlfield [data-type="options"] .zlux-field-option {
+
+	//
+	.name-input,
+	.value-input {
+		margin: 0px 5px;
+	}
+
+	.value-input {
+		margin-left: 10px;
+
+		label {
+			float: none !important;
+		}
+		.trigger {
+			display: block;
+			float: none !important;
+			margin-top: 6px;
+		}
+	}
+
+
+	// label
+	label[for="name"] {
+		display: block;
+		color: #666666;
+		float: none !important;
+		margin-bottom: 0px;
+	}
+	
+	// panel
+	div.panel {
+		margin-left: 5px;
+		display: none;
+		float: none !important;
+
+		&.active { 
+			display: block;
+		}
+
+		.btns {
+			display: block;
+			float: none !important;
+		}
+
+		input.accept {
+			margin: 5px 0px 0px 5px;
+		}
+
+		a.cancel {
+			margin: 5px 0px 0px 5px;
+			color: #BC0B0B;
+			cursor: pointer;
+		}
+	}
+
+	// add btn
+	div.add {
+		margin: 0px 0px 0px 10px;
+		padding: 5px;
+		border: 1px solid #CCCCCC;
+		background: url(../assets/images/add.png) 5px 4px no-repeat;
+		text-indent: 20px;
+		cursor: pointer;
+		float: left;
+		.border-radius(4px);
+	}
+
+	// list
+	ul {
+		float: none !important;
+
+		li {
+			padding: 10px 5px;
+			position: relative;
+			width: 100%;
+		}
+	}
+
+	// tools
+	.tools {
+		position: absolute;
+		right: 9px;
+		visibility: hidden;
+	}
+
+	.sort-handle,
+	.delete { 
+		cursor: pointer;
+	}
+
+	li:hover {
+		.tools { visibility: visible; }
+
+		.sort-handle { cursor: move; }
+	}
+}

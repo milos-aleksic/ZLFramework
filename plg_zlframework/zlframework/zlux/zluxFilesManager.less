@@ -1,0 +1,249 @@
+/* Copyright (C) JOOlanders SL http://www.gnu.org/licenses/gpl-2.0.html GNU/GPLv2 only */
+
+// import main file
+@import "zlux.less";
+
+/* ZLUX Files Manager
+----------------------------------------------------------------------------------------------------*/
+.zlux-filesmanager {
+
+	// bredcrumb
+	ul.breadcrumb {
+		margin: 0;
+	}
+
+	table.dataTable {
+
+		// icon column ordering img fix
+		thead th:nth-child(1) {
+			background-position: center 7px;
+
+			&:after {
+				padding-left: 10px;
+				float: none;
+				padding: 4px;
+			}
+		}
+
+		width: 100% !important; // IE8 fix
+	}
+
+	// DIALOG
+	&.zlux-dialog {
+		.zlux-manager-dialog-tmpl();
+
+		// TOOLBAR
+		&.zlux-dialog [class^="zlux-dialog-toolbar-"] {
+
+			> ul.inline {
+				[class*=" icon-"],
+				[class^="icon-"] {
+
+					// new folder plus icon
+					.icon-plus-sign {
+						font-size: 10px;
+						top: -3px;
+						right: -5px;
+						position: absolute;
+					}
+				}
+			}
+		}
+
+		// Actions Tools
+		ul.action_tools {
+			text-align: center;
+
+			[class^="icon-"],
+			[class*=" icon-"] {
+				cursor: pointer;
+				position: relative;
+
+				// new folder plus icon
+				[class^="icon-"],
+				[class*=" icon-"] {
+					font-size: 10px;
+					left: 28px;
+					top: 3px;
+					position: absolute;
+				}
+			}
+		}
+	}
+}
+
+
+/* ZLUX Upload
+----------------------------------------------------------------------------------------------------*/
+.zlux-upload {
+
+	// DROPZONE
+	.zlux-upload-dropzone {
+		border: 4px dashed transparent;
+		border-radius: 3px;
+		width: 287px;
+		height: 343px;
+		top: -3px;
+		left: 0;
+		margin: 4px 0 0 3px;
+		position: absolute;
+		display: none;
+
+		&[data-zlux-draghover="true"] {
+			display: block;
+			border-color: #CFCFCF; // CFCFCF
+			background-color: white;
+			opacity: .7;
+		}
+
+		.zlux-upload-dropzone-msg {
+			display: none; // by default don't display
+			text-align: center;
+			left: 50%;
+			margin-left: -80px;
+			margin-top: -28px;
+			position: absolute;
+			top: 50%;
+			width: 160px;
+		}
+	}
+
+	// if zlux upload status = ''
+	&[data-zlux-status=""] .zlux-upload-dropzone {
+		display: block;
+
+		.zlux-upload-dropzone-msg {
+			display: block;
+		}
+	}
+
+
+	// FILE LIST
+	.zlux-upload-filelist {
+
+		// OBJECT FILE
+		.zlux-object {
+
+			.icon-warning-sign {
+				color: @red;
+			}
+
+			// file upload progress
+			.zlux-upload-file-progress {
+				display: none;
+				float: right;
+			}
+
+			// if status = started / uploading
+			&[data-zlux-status="started"],
+			&[data-zlux-status="uploading"] {
+
+				// set the loading icon
+				.zlux-upload-file-btn-remove {
+					cursor: default;
+				}
+
+				// show progress
+				.zlux-upload-file-progress {
+					display: block;
+				}
+			}
+
+			// if status = error
+			&[data-zlux-status="error"] {
+
+				// show the error
+				.zlux-upload-file-details-error {
+					display: block;
+				}
+
+				// set icon color
+				.zlux-upload-file-btn-details {
+					color: @red;					
+				}
+			}
+
+			// if status = done
+			&[data-zlux-status="done"] {
+
+				// remove icon
+				.zlux-upload-file-btn-remove {
+					color: #468847;
+				}
+
+				// show the progress
+				.zlux-upload-file-progress {
+					display: block;
+				}
+			}
+
+			// if status = validating
+			&[data-zlux-status="validating"] {
+
+				.zlux-upload-file-name {
+					min-height: 20px;
+
+					i.icon-spinner {
+						float: left;
+					}
+				}
+			}
+		}
+	}
+
+	// if zlux upload status = ''
+	&[data-zlux-status=""] .zlux-upload-filelist {
+		display: none !important;
+	}
+}
+
+
+/* ZLUX Preview
+----------------------------------------------------------------------------------------------------*/
+.zlux-preview {
+	overflow: hidden;
+
+	// thumbnail
+	.zlux-x-thumbnail {
+		overflow: hidden;
+		height: 95px;
+		width: 130px;
+		float: left;
+		text-align: center;
+		margin-right: 30px;
+
+		// file/folder
+		.zlux-x-filetype,
+		.zlux-x-folder {
+			background: url(assets/img/zlux_sprite.png) no-repeat scroll 0 0 transparent;
+			display: inline-block;
+			height: 91px;
+			width: 81px;
+			margin: 0;
+		}
+
+		.zlux-x-filetype {
+			font-size: 15px;
+			line-height: 111px;
+			text-align: left;
+			text-indent: 13px;
+			color: white;
+		}
+
+		.zlux-x-folder {
+			background-position: -86px 0;
+			width: 100px;
+		}
+
+		// image
+		.zlux-x-image {
+			margin: 14px auto 0;
+			width: 115px;
+		}
+	}
+
+	// details
+	.zlux-x-details {
+		margin-top: 30px;
+	}
+}

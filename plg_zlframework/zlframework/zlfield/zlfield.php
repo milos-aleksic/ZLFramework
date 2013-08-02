@@ -736,12 +736,12 @@ class ZlfieldHelper extends AppHelper {
 			$this->app->document->addScript('zlfw:assets/js/jquery.plugins/jquery.migrate.min.js');
 
 			// load libraries
+			$this->app->zlfw->zlux->loadMainAssets();
 			$this->app->zlfw->loadLibrary('qtip');
-			// $this->app->zlfw->loadLibrary('zlux'); // in progress
 			$this->app->document->addStylesheet('zlfw:assets/libraries/zlux/zlux.css');
 
 			// init scripts
-			$javascript = "jQuery(function($){ $('body').ZLfield({ url: '{$url}', type: '{$this->type}', enviroment: '{$this->enviroment}', enviroment_args: '{$enviroment_args}' }) });";
+			$javascript = "jQuery(function($){ $('body').ZLfield({ url: '{$url}', type: '{$this->type}', enviroment: '{$this->enviroment}', enviroment_args: '{$enviroment_args}' }); $.fn.zlux('FieldsManager') });";
 			$this->app->document->addScriptDeclaration($javascript);
 
 			// don't load them twice

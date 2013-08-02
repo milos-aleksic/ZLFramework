@@ -32,6 +32,9 @@ class ZLFieldHTMLHelper extends AppHelper {
 				return call_user_func_array(array($this, $func), $args);
 			}
 		}
+
+		return call_user_func_array(array('JHTML', '_'), $args);
+
 	}
 
 	public function cmp($a, $b){
@@ -172,8 +175,7 @@ class ZLFieldHTMLHelper extends AppHelper {
 			$options = array(); // prepare options
 			foreach ($preoptions as $text => $val) {
 				if (empty($hidden_opts) || !in_array($val, $hidden_opts)) {
-					// if no object, convert it to
-					$options[] = is_object($val) ? $val : $this->app->html->_('select.option', $val, JText::_($text));
+					$options[] = $this->app->html->_('select.option', $val, JText::_($text));
 				}
 			}
 
@@ -450,9 +452,9 @@ class ZLFieldHTMLHelper extends AppHelper {
 			$list = $this->app->tree->buildList(0, $app->getCategoryTree(), array(), '- ', '.   ', '  ');
 
 			// create options
-			$options[] = $this->app->html->_('select.option', 0, '-- -- -- '.$app->name.' ROOT -- -- --');
+			$options['-- -- -- '.$app->name.' ROOT -- -- --'] = 0;
 			foreach ($list as $category) {
-				$options[] = $this->app->html->_('select.option', $category->id, $category->treename);
+				$options[$category->treename] = $category->id;
 			}
 		}
 
@@ -499,6 +501,72 @@ class ZLFieldHTMLHelper extends AppHelper {
 
 		$spec->set('options', $options);		
 		return $this->selectField($id, $name, $value, $spec, $attrs, $returnRawValue);
+	}
+
+	/*
+		Function: options - Returns options field html string
+	*/
+	public function optionsField($id, $name, $value, $spec, $attrs, $returnRawValue){
+		// set value as data
+		$value = is_array($value) ? $value : array();
+
+		// init vars
+		$html = array();
+		$num = 0;
+
+		$html[] = '<div class="zlux-field-option">';
+			$html[] = '<ul>';
+	
+				// render current options
+				foreach ($value as $opt) {
+					$num++;
+					$html[] = '<li>' . $this->_optionsFieldOption($name, $num, $opt) . '</li>';
+				}
+	
+				$html[] = '<li class="hidden">';
+						$html[] = $this->_optionsFieldOption($name, $num, '');
+				$html[] = '</li>';
+
+			$html[] = '</ul>';
+			$html[] = '<div class="add">' . JText::_('Add Option') . '</div>';
+		$html[] = '</div>';
+
+		return implode('', $html);
+	}
+
+	protected function _optionsFieldOption($name, $num, $opt) {
+		// init vars
+		$html = array();
+
+		$html[] = '<div class="name-input">';
+			$html[] = '<label for="name">Name</label>';
+			$html[] = '<input type="text" name="' .$name.'['.$num.'][name]'. '" value="' . @$opt['name'] .'" />';
+		$html[] = '</div>';
+
+		$html[] = '<div class="value-input">';
+			$html[] = '<label for="value">Value</label>';
+			$html[] = '<a class="trigger" href="#" title="' . JText::_('Edit Option Value') . '">' . @$opt['value'] . '</a>';
+
+			$html[] = '<div class="panel">';
+				$html[] = '<input type="text" name="' . $name.'['.$num.'][value]' . '" value="' . @$opt['value'] . '" />';
+				$html[] = '<div class="btns">';
+					$html[] = '<input type="button" class="accept" value="' . JText::_('Accept') . '">';
+					$html[] = '<a href="#" class="cancel">' . JText::_('Cancel') . '</a>';
+				$html[] = '</div>';
+			$html[] = '</div>';
+		$html[] = '</div>';
+	
+		$html[] = '<div class="tools">';
+			$html[] = '<div class="delete" title="' . JText::_('Delete option') . '">';
+				$html[] = '<img alt="' . JText::_('Delete option') . '" src="' . $this->app->path->url('assets:images/delete.png') . '"/>';
+			$html[] = '</div>';
+	
+			$html[] = '<div class="sort-handle" title="' . JText::_('Sort option') . '">';
+				$html[] = '<img alt="' . JText::_('Sort option') . '" src="' . $this->app->path->url('assets:images/sort.png') . '"/>';
+			$html[] = '</div>';
+		$html[] = '</div>';
+
+		return implode('', $html);
 	}
 
 
