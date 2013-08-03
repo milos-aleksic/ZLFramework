@@ -11,26 +11,44 @@
 		this.events = {};
 		var $this = this;
 
-		// init optionField
-		$('.zlux-field-option').each(function(){
-			$this.optionField($(this));
-		})
+		// init Options Field
+		$('.zlux-field-option').zluxFieldOptions();
 	};
 	Plugin.prototype = $.extend(Plugin.prototype, $.fn.zluxManager.prototype, {
 		name: 'zluxFieldsManager',
+		options: {}
+	});
+	// Don't touch
+	$.fn[Plugin.prototype.name] = Plugin;
+})(jQuery);
+
+
+/* ===================================================
+ * ZLUX Field Options
+ * https://zoolanders.com/extensions/zl-framework
+ * ===================================================
+ * Copyright (C) JOOlanders SL 
+ * http://www.gnu.org/licenses/gpl-2.0.html GNU/GPLv2 only
+ * ========================================================== */
+(function ($) {
+	var Plugin = function(options){
+		this.options = $.extend({}, this.options, options);
+		this.events = {};
+	};
+	Plugin.prototype = $.extend(Plugin.prototype, $.fn.zluxMain.prototype, {
+		name: 'zluxFieldOptions',
 		options: {},
-		/**
-		 * 
-		 */
-		optionField: function(field) {
+		events: {},
+		initialize: function(target, options) {
+			this.options = $.extend({}, $.fn.zluxMain.prototype.options, this.options, options);
 			var $this = this;
 
 			// init vars
-			$this.list = field.children('ul');
+			$this.list = target.children('ul');
 			$this.hidden = $('li.hidden', $this.list).detach();
 
 
-			field.on('click', '.delete', function() {
+			target.on('click', '.delete', function() {
 				$(this).closest('li').slideUp(400, function() {
 					$(this).remove();
 					$this.orderOptions();
@@ -144,8 +162,25 @@
 		removeOptionPanel: function(option){
 			option.find('div.panel input:text').val(option.find('a.trigger').show().text());
 			option.find('div.panel').removeClass('active');
-		},
+		}
 	});
 	// Don't touch
-	$.fn[Plugin.prototype.name] = Plugin;
+	$.fn[Plugin.prototype.name] = function() {
+		var args   = arguments;
+		var method = args[0] ? args[0] : null;
+		return this.each(function() {
+			var element = $(this);
+			if (Plugin.prototype[method] && element.data(Plugin.prototype.name) && method != 'initialize') {
+				element.data(Plugin.prototype.name)[method].apply(element.data(Plugin.prototype.name), Array.prototype.slice.call(args, 1));
+			} else if (!method || $.isPlainObject(method)) {
+				var plugin = new Plugin();
+				if (Plugin.prototype['initialize']) {
+					plugin.initialize.apply(plugin, $.merge([element], args));
+				}
+				element.data(Plugin.prototype.name, plugin);
+			} else {
+				$.error('Method ' +  method + ' does not exist on jQuery.' + Plugin.name);
+			}
+		});
+	};
 })(jQuery);
