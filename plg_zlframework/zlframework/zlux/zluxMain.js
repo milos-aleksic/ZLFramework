@@ -31,8 +31,8 @@
 			// load related assets and init plugin
 			return $.Deferred(function( defer ) {
 
-				var css = Plugin.prototype.zlfwURL() + 'zlux/zlux' + pluginName + 'Manager.css',
-					js  = Plugin.prototype.zlfwURL() + 'zlux/zlux' + pluginName + 'Manager.js';
+				var css = Plugin.prototype.zlfwURL() + 'zlux/' + pluginName + 'Manager/style.css',
+					js  = Plugin.prototype.zlfwURL() + 'zlux/' + pluginName + 'Manager/plugin.js';
 
 				Plugin.prototype.requireAsset([css, js], function(){
 
