@@ -91,14 +91,11 @@
 					$('.file-details', ui.item).show();
 					list.height(''); // reset height to default
 					
-					// reset the name index
-					$('.repeatable-element', $(event.target)).each(function(index){
-						$('input, textarea', $(this)).each(function(){
-							
-							if($(this).attr('name')) {
-								var name = $(this).attr('name').replace(/(elements\[\S+])\[(-?\d+)\]/g, '$1[' + index + ']');
-								$(this).attr('name', name);	
-							}
+					// reset the instances fields name index
+					$('.repeatable-element', $(event.target)).each(function(instance_index){
+						$('[name^="elements"]', $(this)).each(function(){
+							var name = $(this).attr('name').replace(/(elements\[\S+])\[(-?\d+)\]/g, '$1[' + instance_index + ']');
+							$(this).attr('name', name);	
 						})
 					})
 				}
