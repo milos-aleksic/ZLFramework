@@ -1365,7 +1365,7 @@
 					if ($this.zluxdialog.spinning) return false;
 
 					// get the uploaded object dom from the files manager
-					var object_dom = $('.zlux-object[data-id="' + $object.name + '"]', $this.filesmanager);
+					var object_dom = $('.zlux-object[data-id="' + $object.name.toLowerCase() + '"]', $this.filesmanager);
 
 					// get updated object data
 					$object = $this.oTable.fnGetData( object_dom[0] );
