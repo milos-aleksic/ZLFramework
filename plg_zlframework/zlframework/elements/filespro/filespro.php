@@ -374,14 +374,6 @@ abstract class ElementFilesPro extends ElementRepeatablePro {
 
 	/*
 	 * Return the full directory path
-	 *
-	 * Original Credits:
-	 * @package   	JCE
-	 * @copyright 	Copyright ¬© 2009-2011 Ryan Demmer. All rights reserved.
-	 * @license   	GNU/GPL 2 or later - http://www.gnu.org/licenses/old-licenses/gpl-2.0.html
-	 * 
-	 * Adapted to ZOO (ZOOlanders.com)
-	 * Copyright 2011, ZOOlanders.com
 	 */
 	public function getDirectory($allowroot = false, $item = false)
 	{
@@ -424,31 +416,54 @@ abstract class ElementFilesPro extends ElementRepeatablePro {
 			// join back
 			$root = implode('/', $parts);
 			
-			jimport('joomla.user.helper');
-			// Joomla! 1.6+
-			if (method_exists('JUserHelper', 'getUserGroups')) {
-				$groups 	= JUserHelper::getUserGroups($user->id);
-				$groups		= array_keys($groups);
-				$usertype 	= array_shift($groups);												
-			} else {
-				$usertype 	= $user->usertype;
-			}
 
-			// Replace any path variables
+			// set path variables
+			jimport('joomla.user.helper');
+
+			// user
+			$groups = JUserHelper::getUserGroups($user->id);
+			$groups = array_keys($groups);
+			// get the first group
+			$usergroupid = array_shift($groups);
+			// usergroup table				
+			$group = JTable::getInstance('Usergroup', 'JTable');
+			$group->load($usergroupid);
+			// usertype	
+			$usergroup = $group->title;
+			
+			// author
+			$author = $this->app->user->get($item->created_by);
+			$groups = JUserHelper::getUserGroups($author->id);
+			$groups = array_keys($groups);
+			// get the first group
+			$authorgroupid = array_shift($groups);
+			// usergroup table				
+			$group = JTable::getInstance('Usergroup', 'JTable');
+			$group->load($authorgroupid);
+			// usertype	
+			$authorgroup = $group->title;
+
+			// zoo
+			$zooapp 	= strtolower($item->getApplication()->name);
+			$zooprimarycat = $item->getPrimaryCategory() ? $item->getPrimaryCategory()->alias : 'none';
+			$zooprimarycatid = $item->getPrimaryCategoryId();
+
+
+			// Replace variables
 			$pattern = array(
-				'/\[userid\]/', '/\[username\]/', '/\[usertype\]/',
-				// '/\[authorid\]/', '/\[authorname\]/', '/\[authortype\]/',
+				'/\[userid\]/', '/\[username\]/', '/\[usergroup\]/', '/\[usergroupid\]/',
+				'/\[authorid\]/', '/\[authorname\]/', '/\[authorgroup\]/', '/\[authorgroupid\]/',
 				'/\[zooapp\]/', '/\[zooprimarycat\]/', '/\[zooprimarycatid\]/',
 				'/\[zooitemtype\]/', '/\[zooitemid\]/',
 				'/\[day\]/', '/\[month\]/', '/\[year\]/'
 			);
 			$replace = array(
-				$user->id, $user->username, $usertype,
-				strtolower($item->getApplication()->name), ($item->getPrimaryCategory() ? $item->getPrimaryCategory()->alias : 'none'), $item->getPrimaryCategoryId(),
-				$this->_item->type, $item->id,
+				$user->id, $user->username, $usergroup, $usergroupid,
+				$author->id, $author->username, $authorgroup, $authorgroupid,
+				$zooapp, $zooprimarycat, $zooprimarycatid,
+				$item->type, $item->id,
 				date('d'), date('m'), date('Y')
 			);
-
 			$root = preg_replace($pattern, $replace, $root);
 
 			// split into path parts to preserve /
