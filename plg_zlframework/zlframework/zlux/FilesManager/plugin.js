@@ -526,7 +526,7 @@
 				aoData = [],
 
 			// save object path
-			path = $this._getFullPath($object.name);
+			path = $this.getFullPath($object.name);
 
 			// push the storage related data
 			aoData = $this.pushStorageData(aoData);
@@ -582,7 +582,7 @@
 				aoData = [],
 
 			// save folder path
-			path = $this._getFullPath(name);
+			path = $this.getFullPath(name);
 
 			// push the storage related data
 			aoData = $this.pushStorageData(aoData);
@@ -707,8 +707,8 @@
 			var $this = this,
 				aoData = [],
 
-			src = $this._getFullPath($object.name);
-			dest = $this._getFullPath(name);
+			src = $this.getFullPath($object.name);
+			dest = $this.getFullPath(name);
 
 			// push the storage related data
 			aoData = $this.pushStorageData(aoData);
