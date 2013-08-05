@@ -312,9 +312,6 @@
 			// return path and
 			return path
 
-			// lower it
-			.toLowerCase()
-
 			// replace \ with /
 			.replace(/\\/g, '/')
 

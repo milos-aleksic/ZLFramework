@@ -311,10 +311,10 @@ class ZluxController extends AppController {
 		}
 
 		// get root
-		$root = $this->app->zlfw->path->getDirectory($root);
+		$root = $this->app->zlfw->path->getDirectory($root, true);
 
 		// if there is some issue with the root
-		if (!$root) {
+		if ($root === false) {
 			$this->setError('Wrong or not permited root.');
 
 			// get any error / warning

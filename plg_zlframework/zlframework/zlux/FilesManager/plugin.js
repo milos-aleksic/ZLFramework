@@ -453,9 +453,9 @@
 				$.each(paths, function(i, v){
 					path.push(v);
 					if (paths.length == i+1 ) {
-						brcb.push('<li class="active">' + v + '</li>');
+						brcb.push('<li class="active">' + v.toLowerCase() + '</li>');
 					} else {
-						brcb.push('<li><a href="#" data-path="' + path.join('/') + '">' + v + '</a><span class="divider">/</span></li>');
+						brcb.push('<li><a href="#" data-path="' + path.join('/') + '">' + v.toLowerCase() + '</a><span class="divider">/</span></li>');
 					}
 				})
 
@@ -1364,8 +1364,8 @@
 					// until all loaded return
 					if ($this.zluxdialog.spinning) return false;
 
-					// get the uploaded object dom from the files manager
-					var object_dom = $('.zlux-object[data-id="' + $object.name.toLowerCase() + '"]', $this.filesmanager);
+					// get the uploaded object dom from the files manager, keep the name unmodified
+					var object_dom = $('.zlux-object[data-id="' + $object.name + '"]', $this.filesmanager);
 
 					// get updated object data
 					$object = $this.oTable.fnGetData( object_dom[0] );
