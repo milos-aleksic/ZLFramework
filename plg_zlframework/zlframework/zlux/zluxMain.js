@@ -130,7 +130,7 @@
 		 * Returns the ZLUX Ajax URL
 		 */
 		AjaxURL: function() {
-			return Plugin.prototype.JBase + 'index.php?option=com_zoo&controller=zlux&format=raw';
+			return Plugin.prototype.ajax;
 		},
 		/**
 		 * Returns the ZLFW root url
