@@ -795,6 +795,22 @@
 				size *= muls[mul];
 			}
 			return size;
+		},
+		/**
+		 * Push the necesary storage DATA
+		 */
+		pushStorageData: function(aoData) {
+			var $this = this;
+
+			// if S3 storage
+			if($this.options.storage == 's3') {
+				aoData.push({ "name": "storage", "value": "s3" });
+				aoData.push({ "name": "accesskey", "value": $this.options.storage_params.accesskey });
+				aoData.push({ "name": "key", "value": $this.options.storage_params.secretkey });
+				aoData.push({ "name": "bucket", "value": $this.options.storage_params.bucket });
+			}
+
+			return aoData;
 		}
 	});
 	// Don't touch
