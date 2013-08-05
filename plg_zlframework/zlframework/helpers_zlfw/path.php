@@ -89,8 +89,7 @@ class zlfwHelperPath extends PathHelper {
      */
 	public function getDirectory($root, $allowroot = false)
 	{
-		$user 				= JFactory::getUser();
-		$joomla_file_path 	= JComponentHelper::getParams('com_media')->get('file_path');
+		$user = JFactory::getUser();
 
 		// Restricted Joomla! folders
 		$restricted = explode(',', 'administrator,cache,components,includes,language,libraries,logs,media,modules,plugins,templates,xmlrpc');
@@ -107,7 +106,7 @@ class zlfwHelperPath extends PathHelper {
 
 		// abort if path starts with a variable, a . or is empty
 		if (preg_match('/[\.\[]/', $parts[0]) || (empty($root) && !$allowroot)) {
-			$parts[0] = $joomla_file_path;
+			return false;
 		}
 
 		// abort if path not allowed
@@ -118,23 +117,27 @@ class zlfwHelperPath extends PathHelper {
 		// join back
 		$root = implode('/', $parts);
 		
+		// set path variables
 		jimport('joomla.user.helper');
-		// Joomla! 1.6+
-		if (method_exists('JUserHelper', 'getUserGroups')) {
-			$groups 	= JUserHelper::getUserGroups($user->id);
-			$groups		= array_keys($groups);
-			$usertype 	= array_shift($groups);												
-		} else {
-			$usertype 	= $user->usertype;
-		}
+
+		// user
+		$groups = JUserHelper::getUserGroups($user->id);
+		$groups = array_keys($groups);
+		// get the first group
+		$usergroupid = array_shift($groups);
+		// usergroup table				
+		$group = JTable::getInstance('Usergroup', 'JTable');
+		$group->load($usergroupid);
+		// usertype	
+		$usergroup = $group->title;
 
 		// Replace any path variables
 		$pattern = array(
-			'/\[userid\]/', '/\[username\]/', '/\[usertype\]/',
+			'/\[userid\]/', '/\[username\]/', '/\[usergroup\]/', '/\[usergroupid\]/',
 			'/\[day\]/', '/\[month\]/', '/\[year\]/'
 		);
 		$replace = array(
-			$user->id, $user->username, $usertype,
+			$user->id, $user->username, $usergroup, $usergroupid,
 			date('d'), date('m'), date('Y')
 		);
 		
