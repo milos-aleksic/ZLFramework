@@ -200,6 +200,15 @@ class ZLStorage {
 	}
 
 	/**
+	 * Add an error message
+	 * 
+	 * @param string $error The error message
+	 */
+	public function setError($error) {
+		return $this->adapter->setError($error);
+	}
+
+	/**
 	 * Get the reported errors
 	 * 
 	 * @param string $root The path to the root folder

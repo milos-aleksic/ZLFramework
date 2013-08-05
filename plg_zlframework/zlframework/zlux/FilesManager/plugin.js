@@ -757,7 +757,7 @@
 		/**
 		 * Returns the full path prepended to the passed relative path
 		 */
-		_getFullPath: function(path) {
+		getFullPath: function(path) {
 			var cp = this.sCurrentPath;
 			return cp ? cp + '/' + path : path;
 		},

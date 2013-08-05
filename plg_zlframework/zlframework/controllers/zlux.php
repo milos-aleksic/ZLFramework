@@ -303,25 +303,18 @@ class ZluxController extends AppController {
 				$accesskey 	= urldecode($this->app->request->get('accesskey', 'string'));
 				$secretkey 	= $this->app->zlfw->crypt(urldecode($this->app->request->get('key', 'string')), 'decrypt');
 				$storage = new ZLStorage('AmazonS3', array('secretkey' => $secretkey, 'accesskey' => $accesskey, 'bucket' => $bucket));
+				
+				// get root
+				$root = $this->app->zlfw->path->getDirectory($root, true);
 				break;
 
 			default:
 				$storage = new ZLStorage('Local');
+
+				// get root, if false use joomla default
+				if (!$root = $this->app->zlfw->path->getDirectory($root))
+					$root = JComponentHelper::getParams('com_media')->get('file_path');
 				break;
-		}
-
-		// get root
-		$root = $this->app->zlfw->path->getDirectory($root, true);
-
-		// if there is some issue with the root
-		if ($root === false) {
-			$this->setError('Wrong or not permited root.');
-
-			// get any error / warning
-			$errors = array_merge($storage->getErrors(), $storage->getWarnings());
-
-			echo json_encode(compact('result', 'errors'));
-			return;
 		}
 
 		// retrieve tree

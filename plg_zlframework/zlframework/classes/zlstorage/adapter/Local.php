@@ -271,7 +271,7 @@ class ZLStorageAdapterLocal extends ZLStorageAdapterBase implements ZLStorageAda
 
 			$obj = array('type' => 'file');
 			$obj['name'] = basename($path);
-			$obj['path'] = $path;
+			// $obj['path'] = $path;
 			$obj['ext']  = JFile::getExt($obj['name']);
 			$obj['basename'] = basename($obj['name'], '.' . $obj['ext']);
 			$obj['content_type'] = $this->app->zlfw->filesystem->getContentType($obj['name']);
@@ -291,7 +291,7 @@ class ZLStorageAdapterLocal extends ZLStorageAdapterBase implements ZLStorageAda
 
 			$obj = array('type' => 'folder');
 			$obj['name'] = basename($path);
-			$obj['path'] = $path;
+			// $obj['path'] = $path;
 			$obj['basename'] = $obj['name'];
 			$obj['size']['value'] = $this->app->zlfw->filesystem->getSourceSize($path, false);
 			$obj['size']['display'] = $this->app->zlfw->filesystem->formatFilesize($obj['size']['value'], 'KB');

@@ -97,10 +97,13 @@
 							if ($this.options.fileMode == 'folders' && $object.type != 'folder') return;
 
 							// prepare the value
-							var value = $this.dialogTrigger.data('zluxDialogFilesManager')._getFullPath($object.name);
+							var value = manager.getFullPath($object.name);
 
 							// save new value in input
 							$input.val(value).trigger('change');
+
+							// store the path for the preview
+							$object.path = value;
 
 							// update preview
 							$('.zlux-preview', $wrapper).remove();
@@ -110,6 +113,8 @@
 						// set the initial preview
 						var oData = $('span.zlux-x-filedata', $wrapper).data('zlux-data');
 						if (!$.isEmptyObject(oData) && $input.val()) {
+							// store the path for the preview
+							oData.path = $input.val();
 							$wrapper.append(zluxpreview.renderPreviewDOM(oData, filePreview));	
 						}
 
