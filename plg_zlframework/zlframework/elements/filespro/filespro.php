@@ -228,13 +228,20 @@ abstract class ElementFilesPro extends ElementRepeatablePro {
 		Returns:
 			Array or resources
 	*/
+	protected $_valid_resources = array();
 	public function getValidResources($path = null)
 	{
 		// get final path
 		$path = $path ? $path : $this->getDefaultSource();
 
-		// get the valid resources from the path
-		return $this->storage()->getValidResources($path, $this->getLegalExtensions());
+		// use resouce cache if exist
+		if (!array_key_exists($path, $this->_valid_resources))
+		{
+			// get the valid resources from the path
+			$this->_valid_resources[$path] = $this->storage()->getValidResources($path, $this->getLegalExtensions());
+		}
+		
+		return $this->_valid_resources[$path];
 	}
 
 	/*
