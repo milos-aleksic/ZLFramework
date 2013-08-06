@@ -32,14 +32,14 @@ class ZLStorageAdapterAmazonS3 extends ZLStorageAdapterBase implements ZLStorage
 	 *
 	 * @var s3
 	 */
-	protected $s3;
+	public $s3;
 
 	/**
 	 * A reference to the Amazon S3 Bucket
 	 *
 	 * @var Bucket
 	 */
-	protected $bucket;
+	public $bucket;
 
 	/**
 	 * Class Constructor
@@ -368,11 +368,11 @@ class ZLStorageAdapterAmazonS3 extends ZLStorageAdapterBase implements ZLStorage
 	public function getValidResources($path, $legalExt)
 	{
 		$resources = array();
-		
-		// if folder
-		if (preg_match('/\.+[a-zA-Z]+$/', $path) == 0) { // folders have no extension
 
-			// they to need a slash at the end, adding if missing
+		// if folder
+		if (preg_match('/\.+[a-zA-Z0-9]+$/', $path) == 0) { // folders have no extension
+
+			// they do need a slash at the end, adding if missing
 			if (preg_match('/\/$/', $path) == 0) $path = $path . '/';
 
 			// get range of objects
