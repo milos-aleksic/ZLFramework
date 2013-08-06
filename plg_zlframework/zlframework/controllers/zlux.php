@@ -183,15 +183,15 @@ class ZluxController extends AppController {
 
 		// ordering
 		$aOrder = array();
-		if ( isset( $_GET['iSortCol_0'] ) )
+		if ( isset( $_POST['iSortCol_0'] ) )
 		{
-			for ( $i=0 ; $i<intval( $_GET['iSortingCols'] ) ; $i++ )
+			for ( $i=0 ; $i<intval( $_POST['iSortingCols'] ) ; $i++ )
 			{
-				if ( $_GET[ 'bSortable_'.intval($_GET['iSortCol_'.$i]) ] == "true" )
+				if ( $_POST[ 'bSortable_'.intval($_POST['iSortCol_'.$i]) ] == "true" )
 				{
-					$iColumnIndex = array_search( $_GET['mDataProp_'.$_GET['iSortCol_'.$i]], $aColumns );
+					$iColumnIndex = array_search( $_POST['mDataProp_'.$_POST['iSortCol_'.$i]], $aColumns );
 					$aOrder[] = $aColumns[ $iColumnIndex ];
-					$aOrder[] = $_GET['sSortDir_'.$i] == 'desc' ? '_reversed' : '';
+					$aOrder[] = $_POST['sSortDir_'.$i] == 'desc' ? '_reversed' : '';
 				}
 			}
 		}
@@ -200,24 +200,25 @@ class ZluxController extends AppController {
 		$model->setState('order_by', $aOrder);
 
 		// paging
-		if ( isset( $_GET['iDisplayStart'] ) && $_GET['iDisplayLength'] != '-1' )
+		if ( isset( $_POST['iDisplayStart'] ) && $_POST['iDisplayLength'] != '-1' )
 		{
-			$model->setState('limitstart', $_GET['iDisplayStart'], true);
-			$model->setState('limit', $_GET['iDisplayLength'], true);
+
+			$model->setState('limitstart', $_POST['iDisplayStart'], true);
+			$model->setState('limit', $_POST['iDisplayLength'], true);
 		}
 
 		// Input search filtering
-		if ( isset($_GET['sSearch']) && $_GET['sSearch'] != "" )
+		if ( isset($_POST['sSearch']) && $_POST['sSearch'] != "" )
 		{
 			for ( $i=0 ; $i<count($aColumns) ; $i++ )
 			{
-				if ( isset($_GET['bSearchable_'.$i]) && $_GET['bSearchable_'.$i] == "true" )
+				if ( isset($_POST['bSearchable_'.$i]) && $_POST['bSearchable_'.$i] == "true" )
 				{
 					/* === Core: Name element === */
 					if( strlen( trim( $aColumns[$i] == '_itemname' ) ) )
 					{
 						$name = array(
-							'value' => trim( $_GET['sSearch'] ),
+							'value' => trim( $_POST['sSearch'] ),
 							'logic' => 'AND'
 						);
 						
