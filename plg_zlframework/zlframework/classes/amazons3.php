@@ -20,7 +20,7 @@ defined('_JEXEC') or die('Restricted access');
 App::getInstance('zoo')->loader->register('ZLErrorHandlerAbstractObject', 'classes:errorhandler.php');
 
 /**
- * Main Amazon S3 Utility class
+ * Main Amazon S3 Utility class, untouched Nicholas version
  */
 class MainAEUtilAmazons3 extends ZLErrorHandlerAbstractObject
 {
@@ -1005,12 +1005,15 @@ final class AEUtilsS3Request {
 
 
 /**
- * Amazon S3 Utility class
+ * Amazon S3 Utility class, extended Nicholas version
  */
 class AEUtilAmazons3 extends MainAEUtilAmazons3
 {
 	const STORAGE_CLASS_STANDARD = 'STANDARD';
 	const STORAGE_CLASS_RRS = 'REDUCED_REDUNDANCY';
+
+	private static $__signingKeyPairId = null; // AWS Key Pair ID
+	private static $__signingKeyResource = false; // Key resource, freeSigningKey() must be called to clear it from memory
 
 	/**
 	* Copy an object
@@ -1073,5 +1076,75 @@ class AEUtilAmazons3 extends MainAEUtilAmazons3
 			return false;
 		}
 		return $rest->code == 200 ? $returnInfo ? $rest->headers : true : false;
+	}
+
+	/**
+	* Set signing key
+	*
+	* @param string $keyPairId AWS Key Pair ID
+	* @param string $signingKey Private Key
+	* @param boolean $isFile Load private key from file, set to false to load string
+	* @return boolean
+	*/
+	public static function setSigningKey($keyPairId, $signingKey, $isFile = true)
+	{
+		self::$__signingKeyPairId = $keyPairId;
+		if ((self::$__signingKeyResource = openssl_pkey_get_private($isFile ?
+		file_get_contents($signingKey) : $signingKey)) !== false) return true;
+
+		$o = self::getInstance();
+		$o->setWarning(sprintf(__CLASS__."::ssetSigningKey(): Unable to open load private key: %s",
+		$signingKey));
+		return false;
+	}
+
+	/**
+	* Free signing key from memory, MUST be called if you are using setSigningKey()
+	*
+	* @return void
+	*/
+	public static function freeSigningKey()
+	{
+		if (self::$__signingKeyResource !== false)
+			openssl_free_key(self::$__signingKeyResource);
+	}
+
+	/**
+	* Get a CloudFront signed policy URL
+	*
+	* @param array $policy Policy
+	* @return string
+	*/
+	public static function getSignedPolicyURL($policy)
+	{
+		$data = json_encode($policy);
+		$signature = '';
+		if (!openssl_sign($data, $signature, self::$__signingKeyResource)) return false;
+
+		$encoded = str_replace(array('+', '='), array('-', '_', '~'), base64_encode($data));
+		$signature = str_replace(array('+', '='), array('-', '_', '~'), base64_encode($signature));
+
+		$url = $policy['Statement'][0]['Resource'] . '?';
+		foreach (array('Policy' => $encoded, 'Signature' => $signature, 'Key-Pair-Id' => self::$__signingKeyPairId) as $k => $v)
+			$url .= $k.'='.str_replace('%2F', '/', rawurlencode($v)).'&';
+		return substr($url, 0, -1);
+	}
+
+	/**
+	* Get a CloudFront canned policy URL
+	*
+	* @param string $string URL to sign
+	* @param integer $lifetime URL lifetime
+	* @return string
+	*/
+	public static function getSignedCannedURL($url, $lifetime)
+	{
+		return self::getSignedPolicyURL(array(
+			'Statement' => array(
+				array('Resource' => $url, 'Condition' => array(
+					'DateLessThan' => array('AWS:EpochTime' => time() + $lifetime)
+				))
+			)
+		));
 	}
 }
