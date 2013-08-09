@@ -636,6 +636,12 @@ class ZLModelItem extends ZLModel
 			}
 		}
 
+		// replace vars
+		$value = preg_replace(array('/\[today\]/'), array(date('Y-m-d')), $value);
+		$value_from = preg_replace(array('/\[today\]/'), array(date('Y-m-d')), $value_from);
+		$value_to = preg_replace(array('/\[today\]/'), array(date('Y-m-d')), $value_to);
+
+		// set values
 		$wrapper = isset($wrapper) ? $wrapper : false;
 		$period_mode = isset($period_mode) ? $period_mode : 'static';
 		$search_type = $search_type == 'range' ? 'period' : $search_type; // workaround
