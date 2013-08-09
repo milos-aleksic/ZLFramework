@@ -216,13 +216,18 @@ class ZLFieldHTMLHelper extends AppHelper {
 		$mode	 = $spec->get('mode', 'files'); // OR folders
 		$regex	 = $spec->get('regex', '^([_A-Za-z0-9]*)');
 		$options = (array)$spec->get('options', array());
+		$path 	 = $spec->get('path');
 
 		// dynamic values {}
-		$path = str_replace('{value}', (string)$value, $spec->get('path'));
+		if (!is_array($value)) {
+			$path = str_replace('{value}', (string)$value, $path);
+		}
 
 		// replace parent values in path
 		foreach ((array)$psv as $key => $pvalue) {
-			$path = str_replace('{'.$key.'}', basename($pvalue, '.php'), $path);
+			if (!is_array($pvalue)) {
+				$path = str_replace('{'.$key.'}', basename($pvalue, '.php'), $path);
+			}
 		}
 
 		// get all resources
