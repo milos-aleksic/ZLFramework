@@ -64,6 +64,9 @@ class plgSystemZlframeworkInstallerScript
 			'plugins/system/zoo_zlelements/zoo_zlelements/elements_core',
 			'plugins/system/zlframework/zlframework/zlfwhelpers',
 
+			// moved to zlux/assets
+			'plugins/system/zlframework/zlframework/zlux/zlbootstrap',
+
 			// filespro old assets
 			'plugins/system/zlframework/zlframework/elements/filespro/assets/js',
 			'plugins/system/zlframework/zlframework/elements/filespro/assets/images',

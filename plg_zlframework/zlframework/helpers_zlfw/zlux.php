@@ -37,15 +37,15 @@ class zlfwHelperZLUX extends AppHelper {
 	public function loadBootstrap($loadJS = false)
 	{
 		if ($this->app->joomla->isVersion('2.5')) {
-			$this->app->document->addStylesheet('zlfw:zlux/zlbootstrap/css/bootstrap-zl.min.css');
-			$this->app->document->addStylesheet('zlfw:zlux/zlbootstrap/css/bootstrap-zl-responsive.min.css');
+			$this->app->document->addStylesheet('zlfw:zlux/assets/zlbootstrap/css/bootstrap-zl.min.css');
+			$this->app->document->addStylesheet('zlfw:zlux/assets/zlbootstrap/css/bootstrap-zl-responsive.min.css');
 
 			// if stated load JS too
-			if ($loadJS) $this->app->document->addScript('zlfw:zlux/zlbootstrap/js/bootstrap.min.js');
+			if ($loadJS) $this->app->document->addScript('zlfw:zlux/assets/zlbootstrap/js/bootstrap.min.js');
 
 		// j3
 		} else {
-			$this->app->document->addStylesheet('zlfw:zlux/zlbootstrap/css/font-awesome-zl.min.css');
+			$this->app->document->addStylesheet('zlfw:zlux/assets/zlbootstrap/css/font-awesome-zl.min.css');
 		}
 	}
 
