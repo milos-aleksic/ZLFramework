@@ -22,7 +22,7 @@ class zlfwHelperZLUX extends AppHelper {
 	{
 		// ZLUX
 		$this->app->document->addStylesheet('zlfw:zlux/zluxMain.css');
-		$this->app->document->addScript('zlfw:zlux/zluxMain.js');
+		$this->app->document->addScript('zlfw:zlux/zluxMain.min.js');
 
 		// ZL Bootstrap
 		$this->loadBootstrap(true);
