@@ -6,10 +6,10 @@
  * http://www.gnu.org/licenses/gpl-2.0.html GNU/GPLv2 only
  * ========================================================== */
 (function ($) {
+	"use strict";
 	var Plugin = function(options){
 		this.options = $.extend({}, this.options, options);
 		this.events = {};
-		var $this = this;
 
 		// init Options Field
 		$('.zlux-field-option').zluxFieldOptions();
@@ -31,6 +31,7 @@
  * http://www.gnu.org/licenses/gpl-2.0.html GNU/GPLv2 only
  * ========================================================== */
 (function ($) {
+	"use strict";
 	var Plugin = function(options){
 		this.options = $.extend({}, this.options, options);
 		this.events = {};
@@ -67,7 +68,7 @@
 				var option = $(this).closest('li');
 				var text = option.find('.panel input:text');
 
-				if ($(this).val() != '' && text.val() == '') {
+				if ($(this).val() !== '' && text.val() === '') {
 					var alias = '';
 					$this.getAlias($(this).val(), function(data){
 						alias = data ? data : '42';
@@ -79,8 +80,8 @@
 
 			.on('keydown', '.panel input:text', function(event) {
 				event.stopPropagation();
-				if (event.which == 13) { $this.setOptionValue($(this).closest('li')); }
-				if (event.which == 27) { $this.removeOptionPanel($(this).closest('li')); }
+				if (event.which === 13) { $this.setOptionValue($(this).closest('li')); }
+				if (event.which === 27) { $this.removeOptionPanel($(this).closest('li')); }
 			})
 
 			.on('click', 'input.accept', function () { 
@@ -116,7 +117,7 @@
 					ui.placeholder.height(ui.helper.height());
 					$this.list.sortable('refreshPositions');
 				},
-				stop: function(event, ui) {
+				stop: function() {
 					$this.orderOptions();
 				}
 			});
@@ -126,7 +127,7 @@
 			var text  = option.find('div.panel input:text');
 
 			var alias = text.val();
-			if (alias == '') {
+			if (alias === '') {
 				alias = option.find('div.name-input input').val();
 			}
 
@@ -150,9 +151,8 @@
 			});
 		},
 		getAlias: function(name, callback) {
-			var $this = this;
-
 			var url = $.fn.zluxMain.prototype.JBase + 'index.php?option=com_zoo&controller=manager&format=raw&task=getalias&force_safe=1';
+			
 			$.getJSON(url, { name: name }, 
 				function(data) {
 					callback(data);
@@ -170,11 +170,11 @@
 		var method = args[0] ? args[0] : null;
 		return this.each(function() {
 			var element = $(this);
-			if (Plugin.prototype[method] && element.data(Plugin.prototype.name) && method != 'initialize') {
+			if (Plugin.prototype[method] && element.data(Plugin.prototype.name) && method !== 'initialize') {
 				element.data(Plugin.prototype.name)[method].apply(element.data(Plugin.prototype.name), Array.prototype.slice.call(args, 1));
 			} else if (!method || $.isPlainObject(method)) {
 				var plugin = new Plugin();
-				if (Plugin.prototype['initialize']) {
+				if (Plugin.prototype.initialize) {
 					plugin.initialize.apply(plugin, $.merge([element], args));
 				}
 				element.data(Plugin.prototype.name, plugin);

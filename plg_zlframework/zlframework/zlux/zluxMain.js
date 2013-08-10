@@ -6,6 +6,7 @@
  * http://www.gnu.org/licenses/gpl-2.0.html GNU/GPLv2 only
  * ========================================================== */
 (function ($) {
+	"use strict";
 	var Plugin = function(options){
 		this.options = $.extend({}, this.options, options);
 		this.events = {};
@@ -22,7 +23,6 @@
 		 * Initialize the called plugin
 		 */
 		initialize: function(target, zluxPlugin, options) {
-			var $this = this;
 
 			// prepare plugin name
 			var pluginName = zluxPlugin.match(/(Files|Items|Dates|Fields|Dialog$)/).shift(), // get the asset name from the plugin name
@@ -54,7 +54,7 @@
 						// reject the deffer, something went wrong
 						defer.reject();
 					}
-				})
+				});
 				
 			})
 
@@ -67,8 +67,10 @@
 		 * @ress String or Array
 		 */
 		requireAsset: function(ress, callback, failcallback) {
-			var req  = [],
-				ress = $.isArray(ress) ? ress:[ress];
+			var req  = [];
+			
+			// clean vars
+			ress = $.isArray(ress) ? ress:[ress];
 
 			for (var i=0, len=ress.length; i<len; i++) {
 
@@ -85,7 +87,11 @@
 			}
 
 			return $.when.apply($, req).done(callback).fail(function(){
-				failcallback ? failcallback() : $.error("Require failed: \n"+ress.join(",\n"));
+				if (failcallback) {
+					failcallback();
+				} else {
+					$.error("Require failed: \n" + ress.join(",\n"));
+				}
 			});
 		},
 		getScript: function(url, callback) {
@@ -165,7 +171,7 @@
 			}
 
 			// always trigger target for external binds with zlux. namespace
-			this.target && this.target.trigger('zlux.' + name, args);
+			if (this.target) this.target.trigger('zlux.' + name, args);
 
 			return true;
 		},
@@ -187,7 +193,7 @@
 				list = $this.events[name] || [];
 				list.push({func : func, scope : scope || $this});
 				$this.events[name] = list;
-			})
+			});
 
 			// chaining
 			return this;
@@ -205,7 +211,7 @@
 			var list = this.events[name], i, func = arguments[1];
 
 			if (list) {
-				if (func !== undef) {
+				if (func !== undefined) {
 					for (i = list.length - 1; i >= 0; i--) {
 						if (list[i].func === func) {
 							list.splice(i, 1);
@@ -230,7 +236,7 @@
 		unbindAll : function() {
 			var $this = this;
 			
-			plupload.each(events, function(list, name) {
+			$.each($this.events, function(list, name) {
 				$this.unbind(name);
 			});
 		},
@@ -294,7 +300,7 @@
 			str.split(/%[sdf]/).forEach(function(part) {
 				reStr += part;
 				if (args.length) {
-					 reStr += args.shift();
+					reStr += args.shift();
 				}
 			});
 			return reStr;
@@ -325,23 +331,23 @@
 			.replace(/\/$/g, '')
 
 			// recover the http:// if set
-			.replace(/:\//g, ':\/\/')
+			.replace(/:\//g, ':\/\/');
 		}
 	});
 	// Save the Main Plugin as prototype
 	$.fn[Plugin.prototype.name] = Plugin;
 
 	// Set an special ZLUX Init function for zluxPlugins Ex: $('selector').zlux("zluxFilesManager", {arguments}) or $.fn.zlux("zluxFilesPreview");
-	$.fn['zlux'] = function() {
+	$.fn.zlux = function() {
 		var args = arguments;
 		// if target valid
 		if (this[0]) {
 			return this.each(function() {
 				var target = $(this);
-				Plugin.prototype["initialize"].apply(Plugin, $.merge([target], args));
-			})
+				Plugin.prototype.initialize.apply(Plugin, $.merge([target], args));
+			});
 		} else {
-			return Plugin.prototype["initialize"].apply(Plugin, $.merge([this], args));
+			return Plugin.prototype.initialize.apply(Plugin, $.merge([this], args));
 		}
 	};
 })(jQuery);
@@ -355,6 +361,7 @@
  * http://www.gnu.org/licenses/gpl-2.0.html GNU/GPLv2 only
  * ========================================================== */
 (function ($) {
+	"use strict";
 	var Plugin = function(options){
 		this.options = $.extend({}, this.options, options);
 		this.events = {};
@@ -363,10 +370,6 @@
 		name: 'zluxManager',
 		options: {},
 		events: {},
-		initialize: function(target, options) {
-			this.options = $.extend({}, this.options, options);
-			var $this = this;
-		},
 		/**
 		 * Reloads the Table content
 		 */
@@ -384,18 +387,17 @@
 		 * Push a Message specific to the object and manage old ones
 		 */
 		pushMessageToObject: function($object, message) {
-			var $this = this;
 
 			// wrap if message is plain text
-			if (typeof(message) == 'string') {
-				message = $('<div>' + message + '</div>')
+			if (typeof(message) === 'string') {
+				message = $('<div>' + message + '</div>');
 			}
 
 			// if more than one message wrap in separate divs
 			else if (message.length > 1) {
 				$.each(message, function(i, v){
 					message[i] = $('<div>' + v + '</div>');
-				})
+				});
 			}
 
 			// get current siblings
@@ -424,31 +426,11 @@
 				siblings.fadeOut('slow', function(){
 					$(this).remove();
 				});
-			})
+			});
 
 			return msg;
 		}
 	});
-	// Don't touch
-	$.fn[Plugin.prototype.name] = function() {
-		if (this.data(Plugin.prototype.name)) return; // standart check to avoid duplicate inits
-		var args   = arguments;
-		var method = args[0] ? args[0] : null;
-		return this.each(function() {
-			var element = $(this);
-			if (Plugin.prototype[method] && element.data(Plugin.prototype.name) && method != 'initialize') {
-				element.data(Plugin.prototype.name)[method].apply(element.data(Plugin.prototype.name), Array.prototype.slice.call(args, 1));
-			} else if (!method || $.isPlainObject(method)) {
-				var plugin = new Plugin();
-				if (Plugin.prototype['initialize']) {
-					plugin.initialize.apply(plugin, $.merge([element], args));
-				}
-				element.data(Plugin.prototype.name, plugin);
-			} else {
-				$.error('Method ' +  method + ' does not exist on jQuery.' + Plugin.name);
-			}
-		});
-	};
 	// save the plugin for global use
 	$.fn[Plugin.prototype.name] = Plugin;
 })(jQuery);
@@ -462,6 +444,7 @@
  * http://www.gnu.org/licenses/gpl-2.0.html GNU/GPLv2 only
  * ========================================================== */
 (function ($) {
+	"use strict";
 	var Plugin = function(){};
 	Plugin.prototype = $.extend(Plugin.prototype, {
 		name: 'zluxSaveElement',
@@ -484,9 +467,10 @@
 
 				$.post(
 					$this.AjaxUrl + '&task=saveelement&item_id=' + $this.options.item_id + '&elm_id=' + $this.options.elm_id, 
-					postData, function(data) {
-					button.removeClass('btn-working');
-				});
+					postData, function() {
+						button.removeClass('btn-working');
+					}
+				);
 			}
 			).appendTo(element.find('.btn-toolbar'));
 		}
@@ -497,11 +481,11 @@
 		var method = args[0] ? args[0] : null;
 		return this.each(function() {
 			var element = $(this);
-			if (Plugin.prototype[method] && element.data(Plugin.prototype.name) && method != 'initialize') {
+			if (Plugin.prototype[method] && element.data(Plugin.prototype.name) && method !== 'initialize') {
 				element.data(Plugin.prototype.name)[method].apply(element.data(Plugin.prototype.name), Array.prototype.slice.call(args, 1));
 			} else if (!method || $.isPlainObject(method)) {
 				var plugin = new Plugin();
-				if (Plugin.prototype['initialize']) {
+				if (Plugin.prototype.initialize) {
 					plugin.initialize.apply(plugin, $.merge([element], args));
 				}
 				element.data(Plugin.prototype.name, plugin);
@@ -520,6 +504,7 @@
  * http://www.gnu.org/licenses/gpl-2.0.html GNU/GPLv2 only
  * ========================================================== */
 (function ($) {
+	"use strict";
 	var Plugin = function(options){
 		this.options = $.extend({}, this.options, options);
 		this.events = {};
@@ -548,11 +533,11 @@
 		var method = args[0] ? args[0] : null;
 		return this.each(function() {
 			var element = $(this);
-			if (Plugin.prototype[method] && element.data(Plugin.prototype.name) && method != 'initialize') {
+			if (Plugin.prototype[method] && element.data(Plugin.prototype.name) && method !== 'initialize') {
 				element.data(Plugin.prototype.name)[method].apply(element.data(Plugin.prototype.name), Array.prototype.slice.call(args, 1));
 			} else if (!method || $.isPlainObject(method)) {
 				var plugin = new Plugin();
-				if (Plugin.prototype['initialize']) {
+				if (Plugin.prototype.initialize) {
 					plugin.initialize.apply(plugin, $.merge([element], args));
 				}
 				element.data(Plugin.prototype.name, plugin);

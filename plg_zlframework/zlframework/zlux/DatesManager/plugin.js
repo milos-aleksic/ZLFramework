@@ -6,15 +6,14 @@
  * http://www.gnu.org/licenses/gpl-2.0.html GNU/GPLv2 only
  * ========================================================== */
 (function ($) {
+	"use strict";
 	var Plugin = function(options){
 		this.options = $.extend({}, this.options, options);
 		this.events = {};
 	};
 	Plugin.prototype = $.extend(Plugin.prototype, $.fn.zluxManager.prototype, {
 		name: 'zluxDatesManager',
-		options: {
-
-		},
+		options: {},
 		initialize: function(target, options) {
 			this.options = $.extend({}, this.options, options);
 			var $this = this;
@@ -53,6 +52,7 @@
  * http://www.gnu.org/licenses/gpl-2.0.html GNU/GPLv2 only
  * ========================================================== */
 (function ($) {
+	"use strict";
 	var Plugin = function(options){
 		this.options = $.extend({}, $.fn.zluxDatesManager.prototype.options, this.options, options);
 		this.events = {};
@@ -89,7 +89,7 @@
 
 				// avoid default
 				return false;
-			})
+			});
 
 			$this.initDialog();
 			$this.initMainEvents();
@@ -101,10 +101,10 @@
 			var $this = this;
 
 			// prepare the dialog class
-			$this.options.dialogClass = 'zl-bootstrap zlux-datesmanager' 
-				+ ' zlux-datesmanager-' + $this.options.mode
-				+ ($this.options.full_mode ? ' zlux-dialog-full ' : '') 
-				+ ($this.options.dialogClass ? ' ' + $this.options.dialogClass : '');
+			$this.options.dialogClass = 'zl-bootstrap zlux-datesmanager' +
+				' zlux-datesmanager-' + $this.options.mode +
+				($this.options.full_mode ? ' zlux-dialog-full ' : '') +
+				($this.options.dialogClass ? ' ' + $this.options.dialogClass : '');
 
 			// set the dialog options
 			$.fn.zlux("Dialog", {
@@ -148,7 +148,11 @@
 			// set global close event
 			$('html').on('mousedown', function(event) {
 				// close if target is not the trigger or the dialog it self
-				$this.zluxdialog.dialog('isOpen') && !$this.dialogTrigger.is(event.target) && !$this.dialogTrigger.find(event.target).length && !$this.zluxdialog.widget.find(event.target).length && !$this.zluxdialog.widget.is(event.target) && $this.zluxdialog.dialog('close')
+				if ($this.zluxdialog.dialog('isOpen') && !$this.dialogTrigger.is(event.target) && !$this.dialogTrigger.find(event.target).length &&
+						!$this.zluxdialog.widget.find(event.target).length && !$this.zluxdialog.widget.is(event.target)) {
+
+					$this.zluxdialog.dialog('close');
+				}
 			});
 
 			// set the settings options
@@ -158,14 +162,14 @@
 				prevText: '', // important as icons have been modified
 				nextText: '', // idem
 				firstDay: $this.options.firstDay,
-				onSelect: function(dateText, ins){
+				onSelect: function(dateText){
 					// trigger event
 					$this.trigger("DateSelected", dateText);
 				}
 			};
 
 			// load date mode
-			if ($this.options.mode == 'date') {
+			if ($this.options.mode === 'date') {
 
 				// init
 				$this.datesmanager.datepicker(settings)
@@ -179,7 +183,7 @@
 				$this.datesmanager.datetimepicker($.extend(settings, {
 					timeFormat: $.ui.timepicker.version = '1.0.1' ? 'hh:mm:ss' : 'HH:mm:ss',
 					showSecond: false,
-					timeOnly: $this.options.mode == 'time' ? true : false // will hide date if time mode
+					timeOnly: $this.options.mode === 'time' ? true : false // will hide date if time mode
 				}))
 
 				// show it
@@ -196,7 +200,7 @@
 			var $this = this;
 
 			// on manager init
-			$this.bind("InitComplete", function(manager) {
+			$this.bind("InitComplete", function() {
 
 				// show the content
 				$this.zluxdialog.initContent();
@@ -209,11 +213,11 @@
 		var method = args[0] ? args[0] : null;
 		return this.each(function() {
 			var element = $(this);
-			if (Plugin.prototype[method] && element.data(Plugin.prototype.name) && method != 'initialize') {
+			if (Plugin.prototype[method] && element.data(Plugin.prototype.name) && method !== 'initialize') {
 				element.data(Plugin.prototype.name)[method].apply(element.data(Plugin.prototype.name), Array.prototype.slice.call(args, 1));
 			} else if (!method || $.isPlainObject(method)) {
 				var plugin = new Plugin();
-				if (Plugin.prototype['initialize']) {
+				if (Plugin.prototype.initialize) {
 					plugin.initialize.apply(plugin, $.merge([element], args));
 				}
 				element.data(Plugin.prototype.name, plugin);

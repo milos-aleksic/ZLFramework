@@ -7,6 +7,7 @@
  * http://www.gnu.org/licenses/gpl-2.0.html GNU/GPLv2 only
  * ========================================================== */
 (function ($) {
+	"use strict";
 	var Plugin = function(options){
 		this.options = $.extend({}, this.options, options);
 		this.events = {};
@@ -45,17 +46,19 @@
 			$this.widget = $this.main.dialog('widget');
 
 			// on dialog open
-			$this.main.on("dialogopen", function(event, ui){
-				$this.widget.data('dialog-dragged') || // once dragged keep the position
-				$this.widget.position($.extend({
-					my: 'center',
-					at: 'center',
-					of: window
-				}, $this.options.position))
+			$this.main.on("dialogopen", function(){
+				// once dragged keep the position
+				if (!$this.widget.data('dialog-dragged')) {
+					$this.widget.position($.extend({
+						my: 'center',
+						at: 'center',
+						of: window
+					}, $this.options.position));
+				}
 			});
 
 			// on drag start
-			$this.main.on("dialogdragstart", function(event, ui){
+			$this.main.on("dialogdragstart", function(){
 				$this.widget.data('dialog-dragged', 1);
 			});
 			
@@ -72,7 +75,7 @@
 						preventPageScrolling: true,
 						contentClass: 'zlux-dialog-content'
 					});
-				})
+				});
 			}
 
 			// change the close icon
@@ -87,7 +90,7 @@
 
 				// resolve
 				$this.trigger("InitComplete");
-			})
+			});
 		},
 		/**
 		 * Called from the outside when the content is ready to be shown
@@ -102,7 +105,7 @@
 			$this.widget.attr('data-zlux-status', 'ready');
 
 			// init dialog scrollbar
-			$this.options.scrollbar && $this.scrollbar('refresh');
+			if ($this.options.scrollbar) $this.scrollbar('refresh');
 
 			// set init state
 			$this.contentinited = true;
@@ -125,7 +128,7 @@
 		scrollbar: function(action) {
 			var $this = this;
 
-			if (action == 'refresh') {
+			if (action === 'refresh') {
 				var $scroll_y = $('.pane .slider', $this.main);
 
 				$this.scrollbar('show'); // let's be sure is visible
@@ -137,10 +140,10 @@
 					$this.scrollbar('hide');
 				}
 
-			} else if (action == 'hide') {
+			} else if (action === 'hide') {
 				$this.main.nanoScroller({ stop: true });
 				// $this.main.addClass('noscroll'); // is necesary ?
-			} else if (action == 'show') {
+			} else if (action === 'show') {
 				$this.main.nanoScroller({ stop: false }); 
 				// $this.main.removeClass('noscroll'); // is necesary ?
 			} else {
@@ -154,16 +157,16 @@
 			var $this = this;
 
 			if ($this.contentinited) {
-				if (action == 'show') {
+				if (action === 'show') {
 					$this.main.fadeTo(0, 0.5);
 					$this._spinner.show();
-					$this.options.scrollbar && $this.scrollbar('hide');
+					if ($this.options.scrollbar) $this.scrollbar('hide');
 
 					// set state
 					$this.spinning = true;
 
 				} else { // hide
-					$this.options.scrollbar && $this.scrollbar('show');
+					if ($this.options.scrollbar) $this.scrollbar('show');
 					$this._spinner.hide();
 					var collection = $this.main;
 
@@ -212,12 +215,12 @@
 						})
 					)
 				);
-			})
+			});
 
 			// set the action when back to main button is clicked
 			$('.zlux-dialog-toolbar-backtomain', $this.toolbar.wrapper).on('click', function(){
 				backtomain();
-			})
+			});
 		},
 		/**
 		 * Set a Dialog Sub Toolbar
@@ -226,7 +229,7 @@
 			var $this = this;
 
 			// set the wrapper
-			var subtoolbar = $('<div class="zlux-dialog-subtoolbar-' + alias + '" />').hide().appendTo(
+			$('<div class="zlux-dialog-subtoolbar-' + alias + '" />').hide().appendTo(
 				$('.zlux-dialog-toolbar-' + parent, $this.toolbar.wrapper)
 			);
 		},
@@ -240,7 +243,7 @@
 			$this.toolbar.wrapper.prepend(
 				$('<i class="zlux-dialog-toolbar-backtomain icon-reply icon-border" title="Back to Main view" />').on('click', function(){
 					
-					$('[class^="zlux-dialog-toolbar-"]', $this.toolbar.wrapper).hide()
+					$('[class^="zlux-dialog-toolbar-"]', $this.toolbar.wrapper).hide();
 					$('.zlux-dialog-toolbar-main', $this.toolbar.wrapper).show();
 					
 				})
@@ -265,14 +268,18 @@
 		 * Toggle the Subtoolbar visibility
 		 */
 		toggleSubtoolbar: function(alias, parent) {
-			var $this = this,
-				parent = $('.zlux-dialog-toolbar-' + parent, $this.toolbar.wrapper),
-				subtoolbar = $('.zlux-dialog-subtoolbar-' + alias, parent);
+			var $this = this;
+
+			// get parent
+			parent = $('.zlux-dialog-toolbar-' + parent, $this.toolbar.wrapper);
+
+			// get toolbar
+			var subtoolbar = $('.zlux-dialog-subtoolbar-' + alias, parent);
 
 			// hide all siblings toolbars, unhide the current
 			subtoolbar.siblings('div').slideUp('fast', function(){
 				subtoolbar.slideToggle('fast');
-			})
+			});
 		},
 		/*
 		 * Toggle Toolbar button
@@ -281,28 +288,23 @@
 			var $this = this,
 				tool = $('.zlux-dialog-toolbar-' + toolbar_alias + ' i[data-id="' + id + '"]', $this.toolbar.wrapper);
 
-			if (state == 'disabled') {
+			if (state === 'disabled') {
 				tool.animate({
 					color: '#C0C0C0'
 					}, 200, function() {
-					tool.addClass('disabled')
-				});
+						tool.addClass('disabled');
+					}
+				);
 			} else {
 				tool.animate({
 					color: '#444'
 					}, 200, function() {
-					tool.removeClass('disabled')
-				});
+						tool.removeClass('disabled');
+					}
+				);
 			}
 		}
 	});
 	// Don't touch
 	$.fn[Plugin.prototype.name] = Plugin;
-	// $.fn[Plugin.prototype.name] = function() {
-	// 	var args   = arguments;
-	// 	var plugin = new Plugin();
-	// 	if (Plugin.prototype['initialize']) {
-	// 		return plugin.initialize.apply(plugin, args);
-	// 	}
-	// };
 })(jQuery);

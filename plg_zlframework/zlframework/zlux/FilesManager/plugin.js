@@ -6,6 +6,7 @@
  * http://www.gnu.org/licenses/gpl-2.0.html GNU/GPLv2 only
  * ========================================================== */
 (function ($) {
+	"use strict";
 	var Plugin = function(options){
 		this.options = $.extend({}, this.options, options);
 		this.events = {};
@@ -56,7 +57,7 @@
 			$this.options.extensions = $this.options.extensions.replace(/\|/g, ',');
 
 			// check storage param
-			if ($this.options.storage == '' || $this.options.storage == undefined || $this.options.storage == null) {
+			if ($this.options.storage === '' || $this.options.storage === undefined || $this.options.storage === null) {
 				$this._ErrorLog(0, $this._('STORAGE_PARAM_MISSING'));
 				$this.options.storage = 'local';
 			}
@@ -72,8 +73,8 @@
 
 			// load asset
 			$this.requireAsset($this.zlfwURL() + 'zlux/assets/datatables/dataTables.with.plugins.min.js', function(){
-				$this._initDataTable(wrapper)
-			})
+				$this._initDataTable(wrapper);
+			});
 		},
 		_initDataTable: function(wrapper) {
 			var $this = this;
@@ -96,9 +97,9 @@
 				"aoColumns": [
 					{ 
 						"sTitle": "", "mData": "type", "bSearchable": false, "sWidth": "14px", "sClass": "column-icon",
-						"mRender": function ( data, type, full ) {
-							if (type == 'display') {
-								return '<i class="icon-' + (data == 'folder' ? 'folder-close' : 'file-alt') + '"></i>';
+						"mRender": function ( data, type ) {
+							if (type === 'display') {
+								return '<i class="icon-' + (data === 'folder' ? 'folder-close' : 'file-alt') + '"></i>';
 							} else {
 								return data;
 							}
@@ -106,12 +107,12 @@
 					},
 					{ 
 						"sTitle": $this._('NAME'), "mData": "name", "sClass": "column-name",
-						"mRender": function ( data, type, full ) {
-							return type == 'display' ? '' : data;
+						"mRender": function ( data, type ) {
+							return type === 'display' ? '' : data;
 						},
-						"fnCreatedCell": function (nTd, sData, oData, iRow, iCol) {
+						"fnCreatedCell": function (nTd, sData, oData) {
 							// store path in data
-							$(nTd).parent('tr').attr('data-id', $this.cleanPath( oData.name ))
+							$(nTd).parent('tr').attr('data-id', $this.cleanPath( oData.name ));
 						}
 					}
 				],
@@ -126,14 +127,14 @@
 					aoData.push({ "name": "extensions", "value": $this.options.extensions });
 
 					// if S3 storage
-					if($this.options.storage == 's3') {
+					if($this.options.storage === 's3') {
 						aoData.push({ "name": "storage", "value": "s3" });
 						aoData.push({ "name": "accesskey", "value": $this.options.storage_params.accesskey });
 						aoData.push({ "name": "key", "value": $this.options.storage_params.secretkey });
 						aoData.push({ "name": "bucket", "value": $this.options.storage_params.bucket });
 					}
 				},
-				"fnRowCallback": function( nRow, aData, iDisplayIndex, iDisplayIndexFull ) {
+				"fnRowCallback": function(nRow, aData) {
 					var $object = aData;
 					
 					// save object dom
@@ -151,9 +152,9 @@
 					// append the object edit feature to the name
 					$('.zlux-x-name', $object.dom).append(
 						'<i class="zlux-x-name-edit icon-edit-sign" title="' + $this._('RENAME') + '" />'
-					)
+					);
 				},
-				"fnInitComplete": function(oSettings, data) {
+				"fnInitComplete": function() {
 					var input_filter = $('.zlux-x-filter-input_wrapper', wrapper)
 					
 					.append(
@@ -170,19 +171,19 @@
 
 					// set search events
 					$('input', input_filter).on('keyup', function(){
-						if ($(this).val() == '') {
+						if ($(this).val() === '') {
 							$('.zlux-ui-dropdown-unselect', input_filter).hide();
 						} else {
 							$('.zlux-ui-dropdown-unselect', input_filter).show();
 						}
-					})
+					});
 
 					// trigger table init event 50ms after as a workaround if the first ajax call is canceled
 					setTimeout(function() {
 						$this.trigger("InitComplete");
 					}, 50);
 				},
-				"fnPreDrawCallback": function(oSettings) {
+				"fnPreDrawCallback": function() {
 					// show processing
 					$this.zluxdialog.spinner('show');
 				},
@@ -190,7 +191,8 @@
 					// pagination hide/show
 					var oPaging = oSettings.oInstance.fnPagingInfo(),
 						pagination = $('.dataTables_paginate', $(oSettings.nTableWrapper)).closest('.row-fluid');
-					(oPaging.iTotalPages <= 1) && pagination.hide() || pagination.show();
+					
+					if (oPaging.iTotalPages <= 1) pagination.hide(); else pagination.show();
 
 					// trigger event
 					$this.trigger("DrawCallback");
@@ -206,20 +208,19 @@
 			// Trigger Object Selected event
 			.on('click', '.zlux-object .zlux-x-name a', function(){
 				var object_dom = $(this).closest('tr.zlux-object'),
-					$object = $this.oTable.fnGetData( object_dom[0] ),
-					oSettings = $this.oTable.fnSettings();
+					$object = $this.oTable.fnGetData( object_dom[0] );
 
 				// set the zlux object
 				$object.dom = object_dom;
 
-				if ($object.dom.attr('data-zlux-object-status') != 'true') {
+				if ($object.dom.attr('data-zlux-object-status') !== 'true') {
 					$object.dom.attr('data-zlux-object-status', 'true');
 
 					// remove selected status from siblings
 					$object.dom.siblings().removeAttr('data-zlux-object-status');
 
 					// if folder
-					if ($object.dom.data('type') == 'folder') {
+					if ($object.dom.data('type') === 'folder') {
 						$this.oTable.fnSettings();
 
 						// update go to path
@@ -250,15 +251,10 @@
 				if (TD.hasClass('zlux-ui-open')) {
 					$this.trigger("BeforeDeleteFile", $object);
 				}
-
-				// if closed, will remove the file from selection
-				else {
-					row.removeAttr('data-checked');
-				}
 				
 				// prevent default
 				return false;
-			})
+			});
 		},
 		_fnServerData: function( sUrl, aoData, fnCallback, oSettings ) {
 			var $this = this,
@@ -279,7 +275,7 @@
 			oSettings.jqXHR = $.ajax({
 				"url": sUrl,
 				"data": aoData,
-				"beforeSend": function(jqXHR, settings){
+				"beforeSend": function(){
 					// check if the data is cached
 					var cached = false;
 
@@ -329,8 +325,8 @@
 				"dataType": "json",
 				"cache": false,
 				"type": oSettings.sServerMethod,
-				"error": function (xhr, error, thrown) {
-					if ( error == "parsererror" ) {
+				"error": function (xhr, error) {
+					if ( error === "parsererror" ) {
 						oSettings.oApi._fnLog( oSettings, 0, "DataTables warning: JSON data from "+
 							"server could not be parsed. This is caused by a JSON formatting error." );
 					}
@@ -392,7 +388,7 @@
 			$.each($.fn.zluxFilesManager.instances, function(index, instance){
 
 				// skip current instance
-				if (index == $this.ID) return true;
+				if (index === $this.ID) return true;
 
 				// if table inited
 				if (instance.oTable) {
@@ -401,7 +397,7 @@
 					instance.bRedrawing = true;
 					instance.oTable.fnReloadAjax();
 				}
-			})
+			});
 		},
 		/**
 		 * Init breadcrumb
@@ -416,7 +412,7 @@
 			.wrap('<div class="row-fluid"><div class="span12" /></div>')
 
 			// assign events
-			.on('click', 'a', function(e){
+			.on('click', 'a', function(){
 				// set path values for correct routing
 				$this.sCurrentPath = $this.sStartRoot;
 				$this.sGoToPath = $(this).data('path');
@@ -427,7 +423,7 @@
 			});
 
 			// set event
-			$this.bind("DrawCallback initBreadcrumb", function(manager) {
+			$this.bind("DrawCallback initBreadcrumb", function() {
 				var path = $this.sCurrentPath ? $this.sCurrentPath : '', // current browsed path
 					brcb = [],
 					paths,
@@ -452,12 +448,12 @@
 				path = [];
 				$.each(paths, function(i, v){
 					path.push(v);
-					if (paths.length == i+1 ) {
+					if (paths.length === i+1 ) {
 						brcb.push('<li class="active">' + v.toLowerCase() + '</li>');
 					} else {
 						brcb.push('<li><a href="#" data-path="' + path.join('/') + '">' + v.toLowerCase() + '</a><span class="divider">/</span></li>');
 					}
-				})
+				});
 
 				// update breadcrumb
 				$this.breadcrumb.html(brcb.join(''));
@@ -471,15 +467,14 @@
 		 */
 		renderObjectDOM: function($object) {
 			var $this = this,
-				sName,
 				aDetails;
 
 			// set the details
-			if ($object.type == 'folder') {
+			if ($object.type === 'folder') {
 
 				aDetails = [
 					{name: $this._('NAME'), value: $object.basename}
-				]
+				];
 
 			} else { // file
 
@@ -487,14 +482,14 @@
 					{name: $this._('NAME'), value: $object.basename},
 					{name: $this._('TYPE'), value: $object.content_type},
 					{name: $this._('SIZE'), value: $object.size.display}
-				]
+				];
 			}
 
 			// prepare the details
 			var sDetails = '';
 			$.each(aDetails, function(i, detail){
 				sDetails += '<li><strong>' + detail.name + '</strong>: <span>' + detail.value + '</span></li>';
-			})
+			});
 
 			// set entry details
 			var content = $(
@@ -514,7 +509,7 @@
 						'<ul class="unstyled">' + sDetails + '</ul>' +
 					'</div>' +
 				'</div>'
-			)
+			);
 
 			return content;
 		},
@@ -532,10 +527,10 @@
 			aoData = $this.pushStorageData(aoData);
 
 			// if S3 storage
-			if($this.options.storage == 's3') {
+			if($this.options.storage === 's3') {
 
 				// add a slash if folder
-				if($object.type == 'folder') {
+				if($object.type === 'folder') {
 					path = path + '/';
 				}
 			}
@@ -570,7 +565,7 @@
 				.fail(function(){
 					// some unreported error
 					defer.reject($this._('SOMETHING_WENT_WRONG'));
-				})
+				});
 
 			}).promise();
 		},
@@ -588,7 +583,7 @@
 			aoData = $this.pushStorageData(aoData);
 
 			// if S3 storage
-			if($this.options.storage == 's3') {
+			if($this.options.storage === 's3') {
 				// add a slash, needed for folders
 				path = path + '/';
 			}
@@ -619,7 +614,7 @@
 				.fail(function(){
 					// some unreported error
 					defer.reject($this._('SOMETHING_WENT_WRONG'));
-				})
+				});
 
 			}).promise();
 		},
@@ -647,7 +642,7 @@
 				$('.column-icon i', $object.dom).addClass('icon-spinner icon-spin');
 
 				// change the object name
-				var processing = $this._changeObjectName($object, $('input', msg).val() + ext)
+				$this._changeObjectName($object, $('input', msg).val() + ext)
 				
 				// if succesfull
 				.done(function(new_name)
@@ -684,19 +679,19 @@
 				})
 
 				// on result
-				.always(function(json) {
+				.always(function() {
 					// remove spinner
 					$('.column-icon i', $object.dom).removeClass('icon-spinner icon-spin');
-				})
+				});
 			})
 
 			.on('keypress', 'input', function(e){
 				var code = (e.keyCode ? e.keyCode : e.which);
-				if (code == 13) {
+				if (code === 13) {
 					// Enter key was pressed, emulate click event
 					$('.label-link', msg).trigger('click');
 				}
-			})
+			});
 
 			$this.pushMessageToObject($object, msg);
 		},
@@ -706,18 +701,17 @@
 		_changeObjectName: function($object, name) {
 			var $this = this,
 				aoData = [],
-
-			src = $this.getFullPath($object.name);
-			dest = $this.getFullPath(name);
+				src = $this.getFullPath($object.name),
+				dest = $this.getFullPath(name);
 
 			// push the storage related data
 			aoData = $this.pushStorageData(aoData);
 
 			// if S3 storage
-			if($this.options.storage == 's3') {
+			if($this.options.storage === 's3') {
 
 				// add a slash if folder
-				if($object.type == 'folder') {
+				if($object.type === 'folder') {
 					src = src + '/';
 					dest = dest + '/';
 				}
@@ -750,7 +744,7 @@
 				.fail(function(){
 					// some unreported error
 					defer.reject($this._('SOMETHING_WENT_WRONG'));
-				})
+				});
 
 			}).promise();
 		},
@@ -777,7 +771,7 @@
 			@return {Number} Size in bytes.
 		*/
 		parseSize: function(size) {
-			if (typeof(size) !== 'string' || size == '') return size;
+			if (typeof(size) !== 'string' || size === '') return size;
 
 			var muls = {
 					t: 1099511627776,
@@ -803,7 +797,7 @@
 			var $this = this;
 
 			// if S3 storage
-			if($this.options.storage == 's3') {
+			if($this.options.storage === 's3') {
 				aoData.push({ "name": "storage", "value": "s3" });
 				aoData.push({ "name": "accesskey", "value": $this.options.storage_params.accesskey });
 				aoData.push({ "name": "key", "value": $this.options.storage_params.secretkey });
@@ -813,25 +807,6 @@
 			return aoData;
 		}
 	});
-	// Don't touch
-	$.fn[Plugin.prototype.name] = function() {
-		var args   = arguments;
-		var method = args[0] ? args[0] : null;
-		return this.each(function() {
-			var element = $(this);
-			if (Plugin.prototype[method] && element.data(Plugin.prototype.name) && method != 'initialize') {
-				element.data(Plugin.prototype.name)[method].apply(element.data(Plugin.prototype.name), Array.prototype.slice.call(args, 1));
-			} else if (!method || $.isPlainObject(method)) {
-				var plugin = new Plugin();
-				if (Plugin.prototype['initialize']) {
-					plugin.initialize.apply(plugin, $.merge([element], args));
-				}
-				element.data(Plugin.prototype.name, plugin);
-			} else {
-				$.error('Method ' +  method + ' does not exist on jQuery.' + Plugin.name);
-			}
-		});
-	};
 	// save the plugin for global use
 	$.fn[Plugin.prototype.name] = Plugin;
 	$.fn[Plugin.prototype.name].iNextUnique = 0;
@@ -848,6 +823,7 @@
  * http://www.gnu.org/licenses/gpl-2.0.html GNU/GPLv2 only
  * ========================================================== */
 (function ($) {
+	"use strict";
 	var Plugin = function(options){
 		this.options = $.extend({}, this.options, options);
 		this.events = {};
@@ -871,7 +847,7 @@
 			$this.target = dialogTrigger;
 
 			// dialogTrigger example, it should be set by the caller script
-			// $('<a title="' + $this.options.title + '" class="btn btn-mini zlux-btn-edit" href="#"><i class="icon-edit"></i></a>')
+			// $('<a title="' + $this.options.title + '" class="btn btn-mini zlux-btn-edit" href="#"><i class="icon-edit"></i></a>');
 
 			// set the trigger button event
 			$this.dialogTrigger = dialogTrigger.on('click', function(){
@@ -881,7 +857,7 @@
 				
 				// avoid default
 				return false;
-			})
+			});
 
 			$this.initDialog();
 			$this.initMainEvents();
@@ -893,9 +869,9 @@
 			var $this = this;
 
 			// prepare the dialog class
-			$this.options.dialogClass = 'zl-bootstrap zlux-filesmanager' 
-				+ ($this.options.full_mode ? ' zlux-dialog-full ' : '') 
-				+ ($this.options.dialogClass ? ' ' + $this.options.dialogClass : '');
+			$this.options.dialogClass = 'zl-bootstrap zlux-filesmanager' +
+				($this.options.full_mode ? ' zlux-dialog-full ' : '') +
+				($this.options.dialogClass ? ' ' + $this.options.dialogClass : '');
 			
 
 			// init the dialog plugin
@@ -903,7 +879,7 @@
 				title: $this.options.title,
 				width: $this.options.full_mode ? '75%' : 300,
 				dialogClass: $this.options.dialogClass,
-				position: ($this.options.full_mode == false ? {
+				position: ($this.options.full_mode === false ? {
 					of: $this.dialogTrigger,
 					my: 'left top',
 					at: 'right bottom'
@@ -924,7 +900,7 @@
 
 					// init dialog related functions
 					$this.eventDialogLoaded();
-				})
+				});
 			});
 		},
 		/**
@@ -952,7 +928,7 @@
 					// scroll to the Object with animation
 					$this.zluxdialog.content.stop().animate({
 						'scrollTop': $object.get(0).offsetTop
-					}, 900, 'swing')
+					}, 900, 'swing');
 
 					// open, when done...
 					details.slideDown('fast', function(){
@@ -967,11 +943,12 @@
 						$this.zluxdialog.scrollbar('refresh');
 					});
 				}
-			})
+			});
 
 			// trigger Object rename event on click
 			$this.zluxdialog.main.on('click', '.icon-edit-sign', function(){
-				var object_dom = $(this).closest('tr.zlux-object');
+				var object_dom = $(this).closest('tr.zlux-object'),
+					$object;
 
 				// set zlux object
 				$object = $this.oTable.fnGetData( object_dom[0] );
@@ -979,12 +956,16 @@
 
 				// rename
 				$this.renameObject($object);
-			})
+			});
 
 			// set global close event
 			$('html').on('mousedown', function(event) {
 				// close if target is not the trigger or the dialog it self
-				$this.zluxdialog.dialog('isOpen') && !$this.dialogTrigger.is(event.target) && !$this.dialogTrigger.find(event.target).length && !$this.zluxdialog.widget.find(event.target).length && $this.zluxdialog.dialog('close')
+				if ($this.zluxdialog.dialog('isOpen') && !$this.dialogTrigger.is(event.target) &&
+						!$this.dialogTrigger.find(event.target).length && !$this.zluxdialog.widget.find(event.target).length) {
+
+					$this.zluxdialog.dialog('close');
+				}
 			});
 
 
@@ -1005,7 +986,7 @@
 			var $this = this;
 
 			// on manager init
-			$this.bind("InitComplete", function(manager) {
+			$this.bind("InitComplete", function() {
 
 				// init dialog scrollbar
 				$this.zluxdialog.scrollbar('refresh');
@@ -1028,7 +1009,7 @@
 				// if allready message displayed, abort
 				if ($('.zlux-x-details-message-actions')[0]) return;
 
-				var deleteMSG = $object.type == 'folder' ? 'DELETE_THIS_FOLDER' : 'DELETE_THIS_FILE';
+				var deleteMSG = $object.type === 'folder' ? 'DELETE_THIS_FOLDER' : 'DELETE_THIS_FILE';
 
 				// prepare and display the confirm message
 				var msg = $('<div>' + $this._(deleteMSG) + '<span class="label label-warning label-link">' + $this._('CONFIRM').toLowerCase() + '</span></div>')
@@ -1056,14 +1037,14 @@
 							var aaData = $.fn.zluxFilesManager.aAjaxDataCache[$this.sCurrentPath].aaData;
 
 							$.each(aaData, function(i, value){
-								if ($object.dom.data('id') == value.name && $object.dom.data('type') == value.type) {
+								if ($object.dom.data('id') === value.name && $object.dom.data('type') === value.type) {
 									// found, remove
 									aaData.splice(i, 1);
 
 									// stop iteration
 									return false;
 								}
-							})
+							});
 
 							// redraw the other instances
 							$this.redrawInstances();
@@ -1077,15 +1058,15 @@
 					})
 
 					// on result
-					.always(function(json) {
+					.always(function() {
 						// remove spinner
 						$('.column-icon i', $object.dom).removeClass('icon-spinner icon-spin');
-					})
+					});
 				});
 
 				// show the message
 				$this.pushMessageToObject($object, msg);
-			})
+			});
 
 			// on object select example
 			// .bind("ObjectSelected", function(manager, $object){
@@ -1124,7 +1105,7 @@
 						append(
 							$('<input type="text" class="zlux-x-input" placeholder="' + $this._('FOLDER_NAME') + '" />').on('keypress', function(e){
 								var code = (e.keyCode ? e.keyCode : e.which);
-								if (code == 13) {
+								if (code === 13) {
 									// Enter key was pressed, create folder
 									$this.createFolder($(this).val());
 
@@ -1132,12 +1113,12 @@
 									$this.zluxdialog.spinner('show');
 
 									// start creating the folder
-									var processing = $this.createFolder($(this).val())
+									$this.createFolder($(this).val())
 
 									// on result
-									.always(function(json) {
+									.always(function() {
 										$this.reload();
-									})
+									});
 								}
 							})
 						);
@@ -1159,14 +1140,14 @@
 						$('.zlux-filesmanager', $this.zluxdialog.content).fadeOut('400', function(){
 
 							// init ZLUX Upload
-							$this.zluxupload.inited || $this.zluxupload.init();
+							if (!$this.zluxupload.inited) $this.zluxupload.init();
 
 							// update upload path
 							$this.zluxupload.options.path = $this.sCurrentPath;
 
 							// show the upload view
 							$('.zlux-upload', $this.zluxdialog.content).fadeIn('400');
-						})
+						});
 					}
 				},
 				{
@@ -1233,9 +1214,9 @@
 
 						// refresh dialog scroll
 						$this.zluxdialog.scrollbar('refresh');
-					})
+					});
 				}
-			)
+			);
 
 			// set upload engine
 			$this.zluxupload = new $.fn.zluxUpload({
@@ -1252,7 +1233,7 @@
 			$this.zluxupload
 
 			// when queue files changes
-			.bind('QueueChanged', function(up){
+			.bind('QueueChanged', function(){
 				// refresh scroll
 				$this.zluxdialog.scrollbar('refresh');
 			})
@@ -1279,7 +1260,7 @@
 						type: 'file', // upload folders is not yet posible
 						content_type: file.type,
 						size: {size: file.size, display: plupload.formatSize(file.size)}
-					}
+					};
 
 					// render the dom
 					$object.dom = $('<tr id="' + file.id + '" class="zlux-object" data-zlux-status="validating" />').append(
@@ -1297,13 +1278,13 @@
 					// append the file upload progress bar
 					$('.zlux-x-tools', $object.dom).append(
 						$('<span class="zlux-upload-file-progress"/>')
-					)
+					);
 
 					// remove the name link, not needed here
 					$('.zlux-x-name', $object.dom).html(file.name);
 
 					// check file size
-					if (file.size !== undefined && $this.options.max_file_size != '' && file.size > $this.options.max_file_size) {
+					if (file.size !== undefined && $this.options.max_file_size !== '' && file.size > $this.options.max_file_size) {
 						// set icon
 						$('.icon-file-alt', $object.dom).removeClass('icon-file-alt').addClass('icon-warning-sign');
 						
@@ -1326,7 +1307,7 @@
 						},
 						"dataType": "json",
 						"cache": false,
-						"beforeSend": function(jqXHR, settings){
+						"beforeSend": function(){
 							// set spinner
 							$('.column-icon i', $object.dom).addClass('icon-spinner icon-spin');
 						},
@@ -1349,12 +1330,12 @@
 							// refresh the filelist
 							$up._updateFilelist();
 						}
-					})
-				})
+					});
+				});
 			})
 
 			// toogle the buttons on upload events
-			.bind('BeforeUpload', function(up){
+			.bind('BeforeUpload', function(){
 				$this.zluxdialog.toolbarBtnState(2, 'cancel', 'enabled');
 				$this.zluxdialog.toolbarBtnState(2, 'start', 'disabled');
 				$this.zluxdialog.toolbarBtnState(2, 'add', 'disabled');
@@ -1415,7 +1396,7 @@
 			})
 
 			// when all files uploaded
-			.bind('UploadComplete', function(up){
+			.bind('UploadComplete', function(){
 				// toogle the toolbar buttons
 				$this.zluxdialog.toolbarBtnState(2, 'cancel', 'disabled');
 				$this.zluxdialog.toolbarBtnState(2, 'start', 'disabled');
@@ -1426,7 +1407,7 @@
 			})
 
 			// when uploading canceled by the user
-			.bind('CancelUpload', function(up){
+			.bind('CancelUpload', function(){
 				// toogle the toolbar buttons
 				$this.zluxdialog.toolbarBtnState(2, 'cancel', 'disabled');
 				$this.zluxdialog.toolbarBtnState(2, 'add', 'enabled');
@@ -1440,10 +1421,10 @@
 				$.each(files, function(index, file) {
 					
 					// check if there are files left to upload
-					if (file.status != plupload.DONE && file.status != 'validating') {
+					if (file.status !== plupload.DONE && file.status !== 'validating') {
 						queued = true;
 					}
-				})
+				});
 
 				// if no files left
 				if (!files.length) {
@@ -1469,7 +1450,7 @@
 			.bind("FileError", function($up, $object, message) {
 
 				// resolve the uploading deferrer, if any
-				if ($this.uploading && $this.uploading.state() == 'pending') {
+				if ($this.uploading && $this.uploading.state() === 'pending') {
 					$this.uploading.reject(message);
 
 					return;
@@ -1504,7 +1485,7 @@
 
 				// set status, necesary?
 				// $file.attr('data-zlux-status', 'error');
-			})
+			});
 		}
 	});
 	// Don't touch
@@ -1513,11 +1494,11 @@
 		var method = args[0] ? args[0] : null;
 		return this.each(function() {
 			var element = $(this);
-			if (Plugin.prototype[method] && element.data(Plugin.prototype.name) && method != 'initialize') {
+			if (Plugin.prototype[method] && element.data(Plugin.prototype.name) && method !== 'initialize') {
 				element.data(Plugin.prototype.name)[method].apply(element.data(Plugin.prototype.name), Array.prototype.slice.call(args, 1));
 			} else if (!method || $.isPlainObject(method)) {
 				var plugin = new Plugin();
-				if (Plugin.prototype['initialize']) {
+				if (Plugin.prototype.initialize) {
 					plugin.initialize.apply(plugin, $.merge([element], args));
 				}
 				element.data(Plugin.prototype.name, plugin);
@@ -1537,6 +1518,7 @@
  * http://www.gnu.org/licenses/gpl-2.0.html GNU/GPLv2 only
  * ========================================================== */
 (function ($) {
+	"use strict";
 	var Plugin = function(options){
 		this.options = $.extend({}, this.options, options);
 		this.events = {};
@@ -1565,21 +1547,21 @@
 			// set the dropzone
 			$this.dropzone = $('<div class="zlux-upload-dropzone" />').appendTo($this.upload).append(
 				$('<span class="zlux-upload-dropzone-msg" />')
-			)
+			);
 
 			// init DnD events
 			$this.initDnDevents();
 
 			// bind DnD events
-			$this.bind("WindowDragHoverStart", function(up, target) {
+			$this.bind("WindowDragHoverStart", function() {
 				// set draghover attr
 				$this.dropzone.attr('data-zlux-draghover', true);
 			});
 
-			$this.bind("WindowDragHoverEnd", function(up, target) {
+			$this.bind("WindowDragHoverEnd", function() {
 				// set draghover attr
 				$this.dropzone.attr('data-zlux-draghover', false);
-			})
+			});
 
 			$this.initFilelist();
 
@@ -1591,19 +1573,19 @@
 				$this.initPlupload();
 
 				// add drop msg if html5
-				if ($this.uploader.runtime == 'html5') {
+				if ($this.uploader.runtime === 'html5') {
 					$('.zlux-upload-dropzone-msg', $this.dropzone).html($this.sprintf($this._('DROP_FILES'), 'zlux-upload-browse'))
 
 					.on('click', 'a', function(){
 						// trigger the upload browse button
 						$this.options.browse_button.trigger('click');
 						return false;
-					})
+					});
 				}
 
 				// set init state
 				$this.inited = true;
-			})
+			});
 		},
 		/*
 		 * Init Filelist
@@ -1619,14 +1601,14 @@
 			.on('click', '.zlux-x-remove', function(){
 
 				// abort if it's being uploaded
-				if ($(this).closest('.zlux-object').data('zlux-status') == 'uploding') return;
+				if ($(this).closest('.zlux-object').data('zlux-status') === 'uploding') return;
 
 				var $object = $(this).closest('.zlux-object'),
 					file = $this.uploader.getFile($object[0].id);
 
 				// proceede if file is not being uploaded currently
 				// or if file undefined, could happen if file added twice but deleted once
-				if (file && (file == 'undefined' || file.zlux_status != plupload.STARTED && file.status != plupload.UPLOADING)) {
+				if (file && (file === 'undefined' || file.zlux_status !== plupload.STARTED && file.status !== plupload.UPLOADING)) {
 
 					// remove from upload queue
 					$this.uploader.removeFile(file);
@@ -1640,7 +1622,7 @@
 					// refresh list
 					$this._updateFilelist();
 				}
-			})
+			});
 		},
 		/*
 		 * Init the Plupload plugin
@@ -1665,7 +1647,7 @@
 			};
 
 			// if S3 storage
-			if($this.options.storage == 's3') {
+			if($this.options.storage === 's3') {
 				params = $.extend(params, {
 					url: 'http://' + $this.options.storage_params.bucket + '.s3.amazonaws.com',
 					multipart: true,
@@ -1700,13 +1682,13 @@
 					UploadComplete: function(up, files) {
 						$this.eventUploadComplete(files);
 					},
-					CancelUpload: function(up) {
+					CancelUpload: function() {
 						$this.eventCancelUpload();
 					},
 					FilesAdded: function(up, files) {
 						$this.eventFilesAdded(files);
 					},
-					QueueChanged: function(up) {
+					QueueChanged: function() {
 						$this.eventQueueChanged();
 					},
 					StateChanged: function() {
@@ -1725,7 +1707,7 @@
 			// perhaps Plupload bug but it's not working as the others
 			$this.uploader.bind("Init", function(){
 				$this.trigger("Init");
-			})
+			});
 
 			// init the plupload uploader
 			$this.uploader.init();
@@ -1760,7 +1742,7 @@
 						case plupload.HTTP_ERROR:
 
 							// if S3 storage
-							if($this.options.storage == 's3') {
+							if($this.options.storage === 's3') {
 								
 								if ($this.options.storage_params.bucket.match(/\./g)) {
 									// When using SLL the bucket names can't have dots
@@ -1785,7 +1767,7 @@
 					type: 'file', // upload folders is not yet posible
 					content_type: file.type,
 					size: {size: file.size, display: plupload.formatSize(file.size)}
-				}
+				};
 
 				// add the file dom
 				$object.dom = $('#' + file.id, $this.filelist);
@@ -1820,13 +1802,13 @@
 				$file = $('#' + file.id, $this.filelist);
 			
 			// if local storage
-			if($this.options.storage == 'local') {
+			if($this.options.storage === 'local') {
 				// update the upload path
 				$this.uploader.settings.url = $this.uploader.settings.url + '&path=' + $this.options.path;
 			}
 
 			// if S3 storage
-			if($this.options.storage == 's3') {
+			if($this.options.storage === 's3') {
 				// update the upload path and file name
 				var folder = $this.options.path ? $this.options.path + '/' : '';
 				$this.uploader.settings.multipart_params.key = folder + file.name;
@@ -1860,7 +1842,7 @@
 				type: 'file', // upload folders is not yet posible
 				content_type: file.type,
 				size: {size: file.size, display: plupload.formatSize(file.size)}
-			}
+			};
 
 			// add the file dom
 			$object.dom = $('#' + file.id, $this.filelist);
@@ -1885,10 +1867,10 @@
 			})
 
 			// always
-			.always(function(result){
+			.always(function(){
 				// update file status
 				$this._handleFileStatus(file);
-			})
+			});
 		},
 		/*
 		 * Fires while a file is being uploaded.
@@ -1910,26 +1892,26 @@
 		 */
 		eventFileUploaded: function(file, info) {
 			var $this = this,
-				$file = $('#' + file.id, $this.filelist);
+				response;
 
 			// if local storage
-			if($this.options.storage == 'local') {
-				var response = $.parseJSON(info.response);
+			if($this.options.storage === 'local') {
+				response = $.parseJSON(info.response);
 
 				// resolve/reject the deferrer
 				if (response.error) {
-					$this.uploading.reject(response.error.message)
+					$this.uploading.reject(response.error.message);
 				} else {
-					$this.uploading.resolve(response.result)
+					$this.uploading.resolve(response.result);
 				}
 			}
 
 			// if s3 storage
-			else if($this.options.storage == 's3') {
-				var response = $(info.response);
+			else if($this.options.storage === 's3') {
+				response = $(info.response);
 
 				// resolve/reject the deferrer
-				$this.uploading.resolve(response.find('Key').html())
+				$this.uploading.resolve(response.find('Key').html());
 			}
 		},
 		/*
@@ -1944,7 +1926,7 @@
 		/*
 		 * Fires when the uploading is canceled by the user.
 		 */
-		eventCancelUpload: function(file) {
+		eventCancelUpload: function() {
 			var $this = this;
 
 			// trigger event
@@ -1977,8 +1959,8 @@
 
 			// add the file preview
 			$.each($this.uploader.files, function(index, file) {
-				if (file.status != plupload.DONE && file.status != 'validating') files.push(file);
-			})
+				if (file.status !== plupload.DONE && file.status !== 'validating') files.push(file);
+			});
 
 			return files;
 		},
@@ -2001,16 +1983,16 @@
 			$.each($this.uploader.files, function(index, file) {
 				
 				// check if there are files left to upload
-				if (file.status != plupload.DONE && file.status != 'validating') {
+				if (file.status !== plupload.DONE && file.status !== 'validating') {
 					queued = true;
 				}
 
 				// check for stopped files
-				if (file.status == plupload.STOPPED) {
+				if (file.status === plupload.STOPPED) {
 					// refresh file statut
 					$this._handleFileStatus(file);
 				}
-			})
+			});
 
 			// if files left
 			if ($this.uploader.files.length || objects.length) {
@@ -2049,7 +2031,7 @@
 				status = '';
 
 			// check custom status
-			if (file.zlux_status == plupload.STARTED) {
+			if (file.zlux_status === plupload.STARTED) {
 				status = 'started';
 
 				// unset the status to avoid further conflicts
@@ -2058,23 +2040,23 @@
 			// else check default status
 			} else {
 
-				if (file.status == plupload.DONE) {
+				if (file.status === plupload.DONE) {
 					status = 'done';
 				}
 
-				if (file.status == plupload.FAILED) {
+				if (file.status === plupload.FAILED) {
 					status = 'failed';
 				}
 
-				if (file.status == plupload.QUEUED) {
+				if (file.status === plupload.QUEUED) {
 					status = 'queued';
 				}
 
-				if (file.status == plupload.UPLOADING) {
+				if (file.status === plupload.UPLOADING) {
 					status = 'uploading';
 				}
 
-				if (file.status == plupload.STOPPED) {
+				if (file.status === plupload.STOPPED) {
 					// reset the file upload progress
 					$('.zlux-upload-file-progress', $file).html('');
 				}
@@ -2090,11 +2072,11 @@
 
 			Original idea - http://stackoverflow.com/a/10310815/698289
 		*/
-		initDnDevents: function(element) {
+		initDnDevents: function() {
 			var $this = this,
 			collection = $(),
 			dz_collection = $(),
-			inWindow = false;
+			inWindow = false,
 			inDZ = false;
 
 			// Make sure if we drop something on the page we don't navigate away
@@ -2212,6 +2194,7 @@
  * http://www.gnu.org/licenses/gpl-2.0.html GNU/GPLv2 only
  * ========================================================== */
 (function ($) {
+	"use strict";
 	var Plugin = function(options){
 		this.options = $.extend({}, this.options, options);
 		this.events = {};
@@ -2237,20 +2220,20 @@
 				aDetails = [];
 
 			// set defaults
-			preview = preview == undefined ? false : preview;
-			oData.size = oData.size == undefined ? false : oData.size;
+			preview = preview === undefined ? false : preview;
+			oData.size = oData.size === undefined ? false : oData.size;
 
 			// set name
 			aDetails.push({name: 'name', value: oData.basename});
 
 			// prepare the details
-			if (oData.type == 'folder') {
+			if (oData.type === 'folder') {
 				sThumb = '<span class="zlux-x-folder"></span>';
 			} else { // file
 
 				// if preview enabled render a mini preview of the file
 				if (preview) {
-					sThumb = '<div class="zlux-x-image"><img src="' + $this.JRoot + oData.path + '" /></div>'
+					sThumb = '<div class="zlux-x-image"><img src="' + $this.JRoot + oData.path + '" /></div>';
 				} else {
 					sThumb = '<span class="zlux-x-filetype">' + oData.ext + '</span>';
 				}
@@ -2262,7 +2245,7 @@
 			var sDetails = '';
 			$.each(aDetails, function(i, detail){
 				sDetails += '<li>' + detail.value + '</li>';
-			})
+			});
 				
 			// set and return the DOM
 			return $(
@@ -2275,7 +2258,7 @@
 					// details
 					'<ul class="zlux-x-details unstyled">' + sDetails + '</ul>' +
 				'</div>'
-			)
+			);
 		}
 	});
 	// Don't touch

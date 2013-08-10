@@ -6,6 +6,7 @@
  * http://www.gnu.org/licenses/gpl-2.0.html GNU/GPLv2 only
  * ========================================================== */
 (function ($) {
+	"use strict";
 	var Plugin = function(options){
 		this.options = $.extend({}, this.options, options);
 		this.events = {};
@@ -50,8 +51,8 @@
 
 			// load asset
 			$this.requireAsset($this.zlfwURL() + 'zlux/assets/datatables/dataTables.with.plugins.min.js', function(){
-				$this._initDataTable(wrapper)
-			})
+				$this._initDataTable(wrapper);
+			});
 		},
 		_initDataTable: function(wrapper) {
 			var $this = this;
@@ -71,7 +72,7 @@
 					// determine what filter values to use
 					var apps = $this.filter.apps ? $this.filter.apps : $this.options.apps,
 						types = $this.filter.types ? $this.filter.types : $this.options.types,
-						cats = $this.filter.cats ? $this.filter.cats : $this.options.categories;
+						cats = $this.filter.cats ? $this.filter.cats : $this.options.categories,
 						tags = $this.filter.tags ? $this.filter.tags : $this.options.tags;
 
 					// push the values
@@ -93,29 +94,29 @@
 				[
 					{
 						"sTitle": $this._('NAME'), "mData": "_itemname", "sClass":"column-name",
-						"mRender": function ( data, type, full ) {
-							return type == 'display' ? '' : data;
+						"mRender": function ( data, type ) {
+							return type === 'display' ? '' : data;
 						},
-						"fnCreatedCell": function (nTd, sData, oData, iRow, iCol) {
-							$(nTd).parent('tr').attr('data-id', oData.id)
+						"fnCreatedCell": function (nTd, sData, oData) {
+							$(nTd).parent('tr').attr('data-id', oData.id);
 						}
 					},
 					{ 
 						"sTitle": "App", "mData": "application", "bSortable": false,
-						"mRender": function ( data, type, full ) {
-							return type == 'display' ? data.name : data.id;
+						"mRender": function ( data, type ) {
+							return type === 'display' ? data.name : data.id;
 						}
 					},
 					{ 
 						"sTitle": "Type", "mData": "type", "bSortable": false,
-						"mRender": function ( data, type, full ) {
-							return type == 'display' ? data.name : data.id;
+						"mRender": function ( data, type ) {
+							return type === 'display' ? data.name : data.id;
 						}
 					},
 					{ "sTitle": "Access", "mData": "access", "bSearchable": false, "bSortable": false },
 					{ "sTitle": "Author", "mData": "author", "bSearchable": false, "bSortable": false,
-						"mRender": function ( data, type, full ) {
-							return type == 'display' ? data.name : data.id;
+						"mRender": function ( data, type ) {
+							return type === 'display' ? data.name : data.id;
 						}
 					},
 					{
@@ -123,8 +124,8 @@
 					},
 					{
 						"sTitle": "", "mData": "type", "bSortable": false, "bSearchable": false, "sWidth": "14px", "sClass": "column-icon",
-						"mRender": function ( data, type, full ) {
-							if (type == 'display') {
+						"mRender": function ( data, type ) {
+							if (type === 'display') {
 								return '<i class="icon-file-alt"></i>';
 							} else {
 								return data;
@@ -135,7 +136,7 @@
 				"aoColumnDefs": [
 					{ "bVisible": false, "aTargets": [ 1, 2, 3, 4, 5 ] }
 				],
-				"fnInitComplete": function(oSettings, data) {
+				"fnInitComplete": function() {
 					var input_filter = $('.zlux-x-filter-input_wrapper', wrapper)
 					
 					.append(
@@ -152,12 +153,12 @@
 
 					// set search events
 					$('input', input_filter).on('keyup', function(){
-						if ($(this).val() == '') {
+						if ($(this).val() === '') {
 							$('.zlux-ui-dropdown-unselect', input_filter).hide();
 						} else {
 							$('.zlux-ui-dropdown-unselect', input_filter).show();
 						}
-					})
+					});
 
 					// fix the header column order
 					$('thead tr th:last', $this.oTable).prependTo($('thead tr', $this.oTable));
@@ -165,7 +166,7 @@
 					// trigger table init event
 					$this.trigger("InitComplete");
 				},
-				"fnRowCallback": function( nRow, aData, iDisplayIndex, iDisplayIndexFull ) {
+				"fnRowCallback": function( nRow, aData ) {
 					var $object = aData;
 					
 					// save object dom
@@ -182,7 +183,7 @@
 
 						// render the object content
 						$this.renderObjectDOM($object)
-					)
+					);
 				},
 				"fnPreDrawCallback": function(oSettings) {
 					// show processing
@@ -195,7 +196,9 @@
 					// pagination hide/show
 					var oPaging = oSettings.oInstance.fnPagingInfo(),
 						pagination = $('.dataTables_paginate', $(oSettings.nTableWrapper)).closest('.row-fluid');
-					(oPaging.iTotalPages <= 1) && pagination.hide() || pagination.show();
+					
+					// hide/show the pagination
+					if (oPaging.iTotalPages <= 1) pagination.hide(); else pagination.show();
 
 					// update dialog scrollbar
 					$this.zluxdialog.scrollbar('refresh');
@@ -221,14 +224,13 @@
 				
 				// prevent default
 				return false;
-			})
+			});
 		},
 		/**
 		 * Render the Object content
 		 */
 		renderObjectDOM: function($object) {
 			var $this = this,
-				sName,
 				aDetails;
 			
 			// prepare the details
@@ -236,15 +238,15 @@
 				{name: $this._('ROUTE'), value: $object.application.name + ' / ' + $object.type.name + ' / ID ' + $object.id},
 				{name: $this._('ACCESS'), value: $object.access},
 				{name: $this._('CREATED'), value: $object.created}
-			]
+			];
 
 			// add Author if known
-			$object.author.name && aDetails.push({name: $this._('AUTHOR'), value: $object.author.name});
+			if ($object.author.name) aDetails.push({name: $this._('AUTHOR'), value: $object.author.name});
 			
 			var sDetails = '';
 			$.each(aDetails, function(i, detail){
 				sDetails += '<li><strong>' + detail.name + '</strong>: <span>' + detail.value + '</span></li>';
-			})
+			});
 
 			// set object dom
 			var content = $(
@@ -264,7 +266,7 @@
 						'<ul class="unstyled">' + sDetails + '</ul>' +
 					'</div>' +
 				'</div>'
-			)
+			);
 
 			return content;
 		},
@@ -275,25 +277,6 @@
 			this.oTable.fnReloadAjax();
 		}
 	});
-	// Don't touch
-	$.fn[Plugin.prototype.name] = function() {
-		var args   = arguments;
-		var method = args[0] ? args[0] : null;
-		return this.each(function() {
-			var element = $(this);
-			if (Plugin.prototype[method] && element.data(Plugin.prototype.name) && method != 'initialize') {
-				element.data(Plugin.prototype.name)[method].apply(element.data(Plugin.prototype.name), Array.prototype.slice.call(args, 1));
-			} else if (!method || $.isPlainObject(method)) {
-				var plugin = new Plugin();
-				if (Plugin.prototype['initialize']) {
-					plugin.initialize.apply(plugin, $.merge([element], args));
-				}
-				element.data(Plugin.prototype.name, plugin);
-			} else {
-				$.error('Method ' +  method + ' does not exist on jQuery.' + Plugin.name);
-			}
-		});
-	};
 	// save the plugin for global use
 	$.fn[Plugin.prototype.name] = Plugin;
 	$.fn[Plugin.prototype.name].iNextUnique = 0;
@@ -308,6 +291,7 @@
  * http://www.gnu.org/licenses/gpl-2.0.html GNU/GPLv2 only
  * ========================================================== */
 (function ($) {
+	"use strict";
 	var Plugin = function(options){
 		this.options = $.extend({}, $.fn.zluxItemsManager.prototype.options, this.options, options);
 		this.events = {};
@@ -345,7 +329,7 @@
 
 				// avoid default
 				return false;
-			})
+			});
 
 			$this.initDialog();
 			$this.initMainEvents();
@@ -357,9 +341,9 @@
 			var $this = this;
 
 			// prepare the dialog class
-			$this.options.dialogClass = 'zl-bootstrap zlux-itemsmanager' 
-				+ ($this.options.full_mode ? ' zlux-dialog-full ' : '') 
-				+ ($this.options.dialogClass ? ' ' + $this.options.dialogClass : '');
+			$this.options.dialogClass = 'zl-bootstrap zlux-itemsmanager' +
+				($this.options.full_mode ? ' zlux-dialog-full ' : '') +
+				($this.options.dialogClass ? ' ' + $this.options.dialogClass : '');
 
 			// set the dialog options
 			$.fn.zlux("Dialog", {
@@ -416,7 +400,7 @@
 					// scroll to the Object with animation
 					$this.zluxdialog.content.stop().animate({
 						'scrollTop': $object.get(0).offsetTop
-					}, 900, 'swing')
+					}, 900, 'swing');
 
 					// open, when done...
 					details.slideDown('fast', function(){
@@ -431,12 +415,16 @@
 						$this.zluxdialog.scrollbar('refresh');
 					});
 				}
-			})
+			});
 
 			// set global close event
 			$('html').on('mousedown', function(event) {
 				// close if target is not the trigger or the dialog it self
-				$this.zluxdialog.dialog('isOpen') && !$this.dialogTrigger.is(event.target) && !$this.dialogTrigger.find(event.target).length && !$this.zluxdialog.widget.find(event.target).length && !$this.zluxdialog.widget.is(event.target) && $this.zluxdialog.dialog('close')
+				if ($this.zluxdialog.dialog('isOpen') && !$this.dialogTrigger.is(event.target) && !$this.dialogTrigger.find(event.target).length &&
+						!$this.zluxdialog.widget.find(event.target).length && !$this.zluxdialog.widget.is(event.target)) {
+
+					$this.zluxdialog.dialog('close');
+				}
 			});
 
 			// init toolbar
@@ -470,7 +458,7 @@
 			var $this = this;
 
 			// on manager init
-			$this.bind("InitComplete", function(manager) {
+			$this.bind("InitComplete", function() {
 
 				// init dialog scrollbar
 				$this.zluxdialog.scrollbar('refresh');
@@ -525,12 +513,12 @@
 				$this.zluxdialog.initContent();
 			});
 
-			// on item select
+			/* EXAMPLE events
 			$this.bind("ItemSelected", function(manager, id, row){
 				// if multiple selection allowed - TODO
 
 				// else unset siblings check
-				row.siblings('[data-checked]').removeAttr('data-checked')
+				row.siblings('[data-checked]').removeAttr('data-checked');
 
 				// set item value
 				input.val(id).trigger('change');
@@ -540,7 +528,7 @@
 			$this.bind("ItemUnselected", function(manager, id, row){
 				// unset item value
 				input.val('').trigger('change');
-			});
+			}); */
 		},
 		getSelect: function(dataName, text, onChangeCallback, onUnselectCallback) {
 			var $this = this,
@@ -569,7 +557,7 @@
 				removeBtn.hide();
 
 				// execute on unselect callback
-				$.isFunction(onUnselectCallback) && onUnselectCallback();
+				if ($.isFunction(onUnselectCallback)) onUnselectCallback();
 
 				// reload
 				$this.reload();
@@ -584,7 +572,7 @@
 			}
 
 			// set tooggle event
-			toggle.on('click', function(e) {
+			toggle.on('click', function() {
 				// if disabled, do nothing
 				if (toggle.hasClass('disabled')) return false;
 			});
@@ -607,7 +595,7 @@
 				.data('selected-value', value);
 
 				// execute on change callback
-				$.isFunction(onChangeCallback) && onChangeCallback(value);
+				if ($.isFunction(onChangeCallback)) onChangeCallback(value);
 
 				// reload
 				$this.reload();
@@ -615,7 +603,7 @@
 			});
 
 			// set update event
-			$this.bind("TableDrawCallback", function(manager, oSettings) {
+			$this.bind("TableDrawCallback", function() {
 				// update options
 				var options = $.parseJSON($this.oTable.fnSettings().jqXHR.responseText)[ dataName ];
 				dropdown.empty().append($this._getSelectOptions(options));
@@ -628,7 +616,7 @@
 				// check if the new options have on it the current selected value
 				var match = false;
 				$.each(options, function(index, value){
-					if (value.id == toggle.data('selected-value')) {
+					if (value.id === toggle.data('selected-value')) {
 						match = true;
 					}
 				});
@@ -644,10 +632,9 @@
 			return btnGroup;
 		},
 		_getSelectOptions: function(options) {
-			var $this = this,
-				options, i,
-				iLen = options.length,
-				asResultData = new Array();
+			var iLen = options.length,
+				asResultData = [],
+				i;
 
 			// set options
 			for ( i=0 ; i<iLen ; i++ )
@@ -669,11 +656,11 @@
 		var method = args[0] ? args[0] : null;
 		return this.each(function() {
 			var element = $(this);
-			if (Plugin.prototype[method] && element.data(Plugin.prototype.name) && method != 'initialize') {
+			if (Plugin.prototype[method] && element.data(Plugin.prototype.name) && method !== 'initialize') {
 				element.data(Plugin.prototype.name)[method].apply(element.data(Plugin.prototype.name), Array.prototype.slice.call(args, 1));
 			} else if (!method || $.isPlainObject(method)) {
 				var plugin = new Plugin();
-				if (Plugin.prototype['initialize']) {
+				if (Plugin.prototype.initialize) {
 					plugin.initialize.apply(plugin, $.merge([element], args));
 				}
 				element.data(Plugin.prototype.name, plugin);
