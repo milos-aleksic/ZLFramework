@@ -1,5 +1,6 @@
 # Build and Release content
 node_modules/
 build/
+.idea
 plg_zlframework.zip
 plg_zlframework.tar.gz

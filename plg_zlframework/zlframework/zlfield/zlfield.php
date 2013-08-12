@@ -133,13 +133,27 @@ class ZlfieldHelper extends AppHelper {
 	
 	protected function initConfigMode()
 	{
+		// get application
+		$this->application = $this->app->zoo->getApplication();
+
 		$this->config = array();
 		if(!empty($this->type) && $type = $this->application->getType($this->type))
 		{
 			// get params from type.config file
 			$config = json_decode(file_get_contents($type->getConfigFile()), true);
 			$this->config = isset($config['elements']) ? $config['elements'] : $this->config;
-		} 
+		}
+
+		// custom handle for ZOOcart Address type:
+		if(empty($type) && $this->type=='address')
+		{
+			$zoocart = JPluginHelper::getPlugin('system','zoocart');
+			if(!empty($zoocart) && $this->application->getParams()->get('global.zoocart.enable_cart'))
+			{
+				$config = json_decode(file_get_contents(JPATH_PLUGINS.'/'.$zoocart->type.'/'.$zoocart->name.'/zoocart/config/addresses/'.$this->application->getGroup().'-'.$this->application->id.'/'.$this->type.'.json'), true);
+				$this->config = isset($config['elements']) ? $config['elements'] : $this->config;
+			}
+		}
 		
 		$this->config = $this->data->create($this->config);
 
