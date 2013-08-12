@@ -148,7 +148,7 @@ class ZlfieldHelper extends AppHelper {
 		if(empty($type) && $this->type=='address')
 		{
 			$zoocart = JPluginHelper::getPlugin('system','zoocart');
-			if(!empty($zoocart) && $this->application->getParams()->get('global.zoocart.enable_cart'))
+			if(!empty($zoocart) && JPluginHelper::isEnabled('system','zoocart') && $this->application->getParams()->get('global.zoocart.enable_cart'))
 			{
 				$config = json_decode(file_get_contents(JPATH_PLUGINS.'/'.$zoocart->type.'/'.$zoocart->name.'/zoocart/config/addresses/'.$this->application->getGroup().'-'.$this->application->id.'/'.$this->type.'.json'), true);
 				$this->config = isset($config['elements']) ? $config['elements'] : $this->config;
