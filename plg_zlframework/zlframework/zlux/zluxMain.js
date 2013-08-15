@@ -32,7 +32,7 @@
 			return $.Deferred(function( defer ) {
 
 				var css = Plugin.prototype.zlfwURL() + 'zlux/' + pluginName + 'Manager/style.css',
-					js  = Plugin.prototype.zlfwURL() + 'zlux/' + pluginName + 'Manager/plugin.min.js';
+					js  = Plugin.prototype.zlfwURL() + 'zlux/' + pluginName + 'Manager/plugin.js';
 
 				Plugin.prototype.requireAsset([css, js], function(){
 

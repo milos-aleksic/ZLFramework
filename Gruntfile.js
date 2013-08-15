@@ -15,6 +15,22 @@ module.exports = function(grunt) {
 				files: [
 					{expand: true, cwd: '<%= meta.pluginPath %>', src: ['**'], dest: '<%= meta.buildPath %>'} // makes all src relative to cwd
 				]
+			},
+
+			// save JS scripts as dev uncompressed versions
+			dev: {
+				files: [
+					{
+						expand: true, 
+						cwd: '<%= meta.buildPath %>', 
+						src: [
+							'**/zlframework/zlux/**/*.js', // all ZLUX plugins
+							'!**/*zlux/assets/**/*.js' // discart assets
+						],
+						dest: '<%= meta.buildPath %>',
+						ext: '.dev.js'
+					}
+				]
 			}
 		},
 
@@ -49,10 +65,11 @@ module.exports = function(grunt) {
 						cwd: '<%= meta.buildPath %>', 
 						src: [
 							'**/zlframework/zlux/**/*.js', // all ZLUX plugins
-							'!**/*zlux/assets/**/*.js' // discart assets
+							'!**/*zlux/assets/**/*.js', // discart assets
+							'!**/*.dev.js' // discart dev versions
 						],
-						dest: '<%= meta.buildPath %>', 
-						ext: '.min.js'}
+						dest: '<%= meta.buildPath %>'
+					}
 				]
 			}
 		},
