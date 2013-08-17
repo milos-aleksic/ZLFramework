@@ -72,14 +72,14 @@ defined('_JEXEC') or die('Restricted access');
 					}
 				},
 
-				'/* Published */.'
-				"published_wrapper":{
+				'/* Published up */.'
+				"published_up_wrapper":{
 					"type":"control_wrapper",
 					"control":"published",
 					"fields": {
 						"_filter":{
 							"type":"checkbox",
-							"label":"Published",
+							"label":"PLG_ZLFRAMEWORK_PUBLISHED_UP",
 							"specific":{
 								"label":"PLG_ZLFRAMEWORK_FILTER"
 							},
@@ -87,6 +87,34 @@ defined('_JEXEC') or die('Restricted access');
 							"layout":"separator"
 						},
 						"published_wrapper":{
+							"type":"wrapper",
+							"fields": {
+
+								"date": {
+									"type":"subfield",
+									"path":"zlfield:json/itemfilter/_date.json.php"
+								}
+								
+							}
+						}
+					}
+				},
+
+				'/* Published down */.'
+				"published_down_wrapper":{
+					"type":"control_wrapper",
+					"control":"published_down",
+					"fields": {
+						"_filter":{
+							"type":"checkbox",
+							"label":"PLG_ZLFRAMEWORK_PUBLISHED_DOWN",
+							"specific":{
+								"label":"PLG_ZLFRAMEWORK_FILTER"
+							},
+							"dependents":"published_down_wrapper > 1",
+							"layout":"separator"
+						},
+						"published_down_wrapper":{
 							"type":"wrapper",
 							"fields": {
 

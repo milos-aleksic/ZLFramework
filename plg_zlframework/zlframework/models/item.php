@@ -262,6 +262,23 @@ class ZLModelItem extends ZLModel
 			$query->where($this->getDateSearch(compact('sql_value', 'value', 'value_from', 'value_to', 'search_type', 'period_mode', 'interval', 'interval_unit')));
 		}
 
+		// published down
+		if ($date = $this->getState('published_down', array()))
+		{
+			$date = array_shift($date);
+
+			$sql_value 		= "a.publish_down";
+			$value 			= $date->get('value', '');
+			$value_from		= !empty($value) ? $value : '';
+			$value_to 		= $date->get('value_to', '');
+			$search_type 	= $date->get('type', false);
+			$period_mode 	= $date->get('period_mode', 'static');
+			$interval 		= $date->get('interval', 0);
+			$interval_unit 	= $date->get('interval_unit', '');
+
+			$query->where($this->getDateSearch(compact('sql_value', 'value', 'value_from', 'value_to', 'search_type', 'period_mode', 'interval', 'interval_unit')));
+		}
+
 		// default publication up
 		if (!$this->getState('created') && !$this->getState('modified')) {
 			$where = array();
@@ -271,10 +288,12 @@ class ZLModelItem extends ZLModel
 		}
 
 		// default publication down
-		$where = array();
-		$where[] = 'a.publish_down = '.$null;
-		$where[] = 'a.publish_down >= '.$now;
-		$query->where('('.implode(' OR ', $where).')');
+		if (!$this->getState('published_down')) {
+			$where = array();
+			$where[] = 'a.publish_down = '.$null;
+			$where[] = 'a.publish_down >= '.$now;
+			$query->where('('.implode(' OR ', $where).')');
+		}
 	}
 
 	/**
