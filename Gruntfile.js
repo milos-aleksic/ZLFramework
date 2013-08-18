@@ -93,8 +93,8 @@ module.exports = function(grunt) {
 		compress: {
 			main: {
 				options: {
-					archive: 'plg_zlframework.tar.gz', // .tar.gz, .zip
-					mode: 'tgz' // tgz, zip
+					archive: 'plg_zlframework.zip', // .tar.gz, .zip
+					mode: 'zip' // tgz, zip
 				},
 				files: [
 					{expand: true, cwd: '<%= meta.buildPath %>', src: ['**'], dest: '/'} // makes all src relative to cwd
