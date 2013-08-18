@@ -64,9 +64,13 @@ class ZlfieldHelper extends AppHelper {
 			$this->type = $this->joomla->getUserState('plg_zlfw_zlfieldtype', '');
 		}
 
-		// create application object
-		$this->application = $this->app->object->create('Application');
-		$this->application->setGroup($this->group);
+		// retrieve application object
+		if ($this->group) {
+			$this->application = $this->app->object->create('Application');
+			$this->application->setGroup($this->group);
+		} else {
+			$this->application = $this->app->zoo->getApplication();
+		}
 
 		// get url params
 		$this->controller = $this->req->getString('controller');
@@ -133,9 +137,6 @@ class ZlfieldHelper extends AppHelper {
 	
 	protected function initConfigMode()
 	{
-		// get application
-		$this->application = $this->app->zoo->getApplication();
-
 		$this->config = array();
 		if(!empty($this->type) && $type = $this->application->getType($this->type))
 		{
