@@ -138,7 +138,7 @@ class ZlfieldHelper extends AppHelper {
 	protected function initConfigMode()
 	{
 		$this->config = array();
-		if(!empty($this->type) && $type = $this->application->getType($this->type))
+		if($this->controller == 'manager' && !empty($this->type) && $type = $this->application->getType($this->type))
 		{
 			// get params from type.config file
 			$config = json_decode(file_get_contents($type->getConfigFile()), true);
@@ -146,16 +146,24 @@ class ZlfieldHelper extends AppHelper {
 		}
 
 		// custom handle for ZOOcart Address type:
-		if(empty($type) && $this->type=='address')
+		else if($this->controller == 'addresses' && $this->type == 'address')
 		{
 			$zoocart = JPluginHelper::getPlugin('system','zoocart');
-			if(!empty($zoocart) && JPluginHelper::isEnabled('system','zoocart') && $this->application->getParams()->get('global.zoocart.enable_cart'))
+			if(!empty($zoocart) && JPluginHelper::isEnabled('system','zoocart') 
+				&& $this->application->getParams()->get('global.zoocart.enable_cart'))
 			{
-				$config = json_decode(file_get_contents(JPATH_PLUGINS.'/'.$zoocart->type.'/'.$zoocart->name.'/zoocart/config/addresses/'.$this->application->getGroup().'-'.$this->application->id.'/'.$this->type.'.json'), true);
-				$this->config = isset($config['elements']) ? $config['elements'] : $this->config;
+				// register and load the Address Type
+				$this->app->loader->register('AddressType', 'plugins:system/zoocart/zoocart/classes/addresstype.php');
+				$address = $this->app->object->create('AddressType', array('address', $this->application));
+
+				if (($file = $address->getConfigFile()) && JFile::exists($file)) {
+					$config = json_decode(file_get_contents($file), true);
+					$this->config = isset($config['elements']) ? $config['elements'] : $this->config;
+				}
 			}
 		}
 		
+		// wrap the data with data object
 		$this->config = $this->data->create($this->config);
 
 		// use as params in config mode
