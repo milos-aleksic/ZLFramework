@@ -92,6 +92,7 @@ class plgSystemZlframeworkInstallerScript
 	{
 		// init vars
 		$db = JFactory::getDBO();
+		$type = strtolower($type);
 		$this->_src = $parent->getParent()->getPath('source'); // tmp folder
 		$this->_target = JPATH_ROOT.'/plugins/system/zlframework'; // install folder
 		$this->_ext_version = $parent->get( "manifest" )->version;
@@ -189,13 +190,14 @@ class plgSystemZlframeworkInstallerScript
 	public function postflight($type, $parent)
 	{
 		// init vars
+		$type = strtolower($type);
 		$release = $parent->get( "manifest" )->version;
 
-		if(strtolower($type) == 'install'){
+		if($type == 'install'){
 			echo JText::sprintf('PLG_ZLFRAMEWORK_SYS_INSTALL', $this->_ext_name, $release);
 		}
 
-		if(strtolower($type) == 'update'){
+		if($type == 'update'){
 			echo JText::sprintf('PLG_ZLFRAMEWORK_SYS_UPDATE', $this->_ext_name, $release);
 		}
 
