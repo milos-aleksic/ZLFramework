@@ -321,6 +321,10 @@ class ZLStorageAdapterLocal extends ZLStorageAdapterBase implements ZLStorageAda
 	 */
 	public function getValidResources($path, $legalExt)
 	{
+		// basic check
+		if (empty($path)) return false;
+
+		// init vars
 		$result = false;
 		$resources = array();
 		$fullpath = $this->app->path->path("root:$path");

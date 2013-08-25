@@ -367,6 +367,10 @@ class ZLStorageAdapterAmazonS3 extends ZLStorageAdapterBase implements ZLStorage
 	 */
 	public function getValidResources($path, $legalExt)
 	{
+		// basic check
+		if (empty($path)) return false;
+
+		// init vars
 		$resources = array();
 
 		// if folder
