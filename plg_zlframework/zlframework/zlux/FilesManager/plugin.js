@@ -388,7 +388,7 @@
 			$.each($.fn.zluxFilesManager.instances, function(index, instance){
 
 				// skip current instance
-				if (index === $this.ID) return true;
+				if (parseInt(index) === $this.ID) return true;
 
 				// if table inited
 				if (instance.oTable) {
