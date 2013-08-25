@@ -262,19 +262,20 @@ class zlfwHelper extends AppHelper {
 	 */
 	public function checkExt($ext = null)
 	{
-		if (!empty($ext) && $name = str_replace('com_', '', $ext))// it's component
+		if (strpos($ext, 'com_') === 0) // it's component
 		{
+			$name = str_replace('com_', '', $ext);
+
 			jimport('joomla.filesystem.file');
 			if (JFile::exists(JPATH_ADMINISTRATOR . '/components/' . $ext . '/classes/' . $name . '.php') && JComponentHelper::getComponent($ext, true)->enabled)
 			{
 				return true;
 			}
 		}
-		else
-		if ($this->app->zlfw->getPlugin($ext)->enabled)
+		else if (strpos($ext, 'plg_') === 0) // it's plugin
 		{
-			// else should be plugin
-			return true;
+			$name = str_replace('plg_', '', $ext);
+			return $this->app->zlfw->getPlugin($name)->enabled;
 		}
 
 		return false;
