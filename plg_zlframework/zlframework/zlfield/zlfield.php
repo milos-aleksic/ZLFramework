@@ -413,7 +413,9 @@ class ZlfieldHelper extends AppHelper {
 					}
 
 					// render layout
-					if ($layout = $this->getLayout("wrapper/{$layout}.php")) {
+					if ($this->renderIf($fld->get('renderif')) // render check
+							&& $layout = $this->getLayout("wrapper/{$layout}.php")) {
+
 						$result[] = $this->app->zlfw->renderLayout($layout, compact('id', 'content', 'fld'));
 					}
 					

@@ -21,7 +21,7 @@ defined('_JEXEC') or die('Restricted access');
 			},
 			"control": "custom_control", './* wrapp any individual or group fields with a control */'
 			"renderif":{
-				"com_widgetkit":"0" './* component/plugin name : 0, 1 - render if not/render if */'
+				"ext_name":"0" './* extension name : 0, 1 - render if not/render if */'
 			},
 			"class":"rowCustomClass",
 			"layout":"default/separator" './* The field layout. Optional */'
@@ -58,7 +58,10 @@ defined('_JEXEC') or die('Restricted access');
 				"_id":{}
 			},
 			"control":"control_name", './* set the control of the subfields, if necesary */'
-			"layout":"default/control_wrapper/fieldset/toggle" './* all 3 are diferent kind of wrappers sharing same 
+			"layout":"default/control_wrapper/fieldset/toggle", './* all 3 are diferent kind of wrappers sharing same */ '
+			"renderif":{
+				"ext_name":"0" './* extension name : 0, 1 - render if not/render if */'
+			}
 		},
 
 
