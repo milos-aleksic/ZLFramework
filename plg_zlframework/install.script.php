@@ -67,6 +67,9 @@ class plgSystemZlframeworkInstallerScript
 			// moved to zlux/assets
 			'plugins/system/zlframework/zlframework/zlux/zlbootstrap',
 
+			// moved to helpers folder
+			'plugins/system/zlframework/zlframework/helpers_zlfw',
+
 			// filespro old assets
 			'plugins/system/zlframework/zlframework/elements/filespro/assets/js',
 			'plugins/system/zlframework/zlframework/elements/filespro/assets/images',
