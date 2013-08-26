@@ -79,10 +79,8 @@
 
 						// init the file manager
 						$this.dialogTrigger.zlux("DialogFilesManager", {
-							root: $this.options.images,
 							extensions: $this.options.extensions,
-							storage: 'local',
-							max_file_size: '1024kb',
+							max_file_size: $this.options.max_file_size,
 							title: $this.options.title,
 							storage: storage.engine,
 							storage_params: storage,
