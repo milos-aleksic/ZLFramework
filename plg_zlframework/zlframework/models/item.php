@@ -656,9 +656,12 @@ class ZLModelItem extends ZLModel
 		}
 
 		// replace vars
-		$value = preg_replace(array('/\[today\]/'), array(date('Y-m-d')), $value);
-		$value_from = preg_replace(array('/\[today\]/'), array(date('Y-m-d')), $value_from);
-		$value_to = preg_replace(array('/\[today\]/'), array(date('Y-m-d')), $value_to);
+		if (is_string($value))
+			$value = preg_replace(array('/\[today\]/'), array(date('Y-m-d')), $value);
+		if (is_string($value_from))
+			$value_from = preg_replace(array('/\[today\]/'), array(date('Y-m-d')), $value_from);
+		if (is_string($value_to))
+			$value_to = preg_replace(array('/\[today\]/'), array(date('Y-m-d')), $value_to);
 
 		// set values
 		$wrapper = isset($wrapper) ? $wrapper : false;
