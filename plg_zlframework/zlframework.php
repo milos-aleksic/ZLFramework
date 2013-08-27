@@ -162,8 +162,6 @@ class plgSystemZlframework extends JPlugin {
 	 */
 	public function coreConfig( $event, $arguments = array() ){
 		$config = $event->getReturnValue();
-		// keep static content linek in case ZOOtools is not installed
-		$config['_staticcontent'] = array('name' => 'Static Content', 'type' => 'staticcontent');
 		$config['_itemlinkpro'] = array('name' => 'Item Link Pro', 'type' => 'itemlinkpro');
 		$event->setReturnValue($config);
 	}
