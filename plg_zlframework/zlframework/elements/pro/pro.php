@@ -28,6 +28,10 @@ abstract class ElementPro extends Element {
 
 		// set callbacks
 		$this->registerCallback('returndata');
+
+		// load default and current language 
+		$this->app->system->language->load('plg_system_zoo_zlelements_'.$this->getElementType(), JPATH_ADMINISTRATOR, 'en-GB', true);
+		$this->app->system->language->load('plg_system_zoo_zlelements_'.$this->getElementType(), JPATH_ADMINISTRATOR, null, true);
 	}
 	
 	/*
