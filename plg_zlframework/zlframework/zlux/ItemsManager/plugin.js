@@ -15,9 +15,10 @@
 		name: 'zluxItemsManager',
 		options: {
 			apps: '', // comma separated values
-			types: '', // comma separated values
-			categories: '', // comma separated values
-			tags: '' // comma separated values
+			types: '', // idem
+			categories: '', // idem
+			tags: '', // idem
+			authors: '' // idem
 		},
 		initialize: function(target, options) {
 			this.options = $.extend({}, this.options, options);
@@ -73,13 +74,17 @@
 					var apps = $this.filter.apps ? $this.filter.apps : $this.options.apps,
 						types = $this.filter.types ? $this.filter.types : $this.options.types,
 						cats = $this.filter.cats ? $this.filter.cats : $this.options.categories,
-						tags = $this.filter.tags ? $this.filter.tags : $this.options.tags;
+						tags = $this.filter.tags ? $this.filter.tags : $this.options.tags,
+						authors = $this.filter.authors ? $this.filter.authors : $this.options.authors;
 
-					// push the values
-					aoData.push({ "name": "apps", "value": $this.options.apps }); // allways send the original app selection
-					aoData.push({ "name": "types", "value": $this.options.types }); // allways send the original type selection
-					aoData.push({ "name": "categories", "value": $this.options.categories }); // allways send the original cat selection
-					aoData.push({ "name": "tags", "value": $this.options.tags }); // allways send the original tag selection
+					// push the preset filter values
+					aoData.push({ "name": "apps", "value": $this.options.apps });
+					aoData.push({ "name": "types", "value": $this.options.types });
+					aoData.push({ "name": "categories", "value": $this.options.categories });
+					aoData.push({ "name": "tags", "value": $this.options.tags });
+					aoData.push({ "name": "authors", "value": $this.options.authors });
+
+					// push the new filter values
 					aoData.push({ "name": "filter_apps", "value": apps });
 					aoData.push({ "name": "filter_types", "value": types });
 					aoData.push({ "name": "filter_cats", "value": cats });

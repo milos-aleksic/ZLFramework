@@ -74,6 +74,7 @@ class ZluxController extends AppController {
 		$s_types	= explode(',', $this->app->request->get('types', 'string', ''));
 		$s_cats		= explode(',', $this->app->request->get('categories', 'string', ''));
 		$s_tags		= explode(',', $this->app->request->get('tags', 'string', ''));
+		$s_authors	= explode(',', $this->app->request->get('authors', 'string', ''));
 
 		$g_apps	 	= explode(',', $this->app->request->get('filter_apps', 'string', ''));
 		$g_types 	= explode(',', $this->app->request->get('filter_types', 'string', ''));
@@ -92,6 +93,7 @@ class ZluxController extends AppController {
 		$s_types = array_filter($s_types);
 		$s_cats = array_filter($s_cats);
 		$s_tags = array_filter($s_tags);
+		$s_authors = array_filter($s_authors);
 
 		$g_apps = array_filter($g_apps);
 		$g_types = array_filter($g_types);
@@ -179,6 +181,11 @@ class ZluxController extends AppController {
 				}
 			}
 			$aaTags = array_merge($aaTags, $tags);
+
+			// authors filtering
+			if (isset($s_authors) && !empty($s_authors)) {
+				$model->created_by(array('value' => implode(',', $s_authors)));
+			}
 		}
 
 		// ordering
