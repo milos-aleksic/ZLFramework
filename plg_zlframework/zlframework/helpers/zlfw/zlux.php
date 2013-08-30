@@ -129,7 +129,7 @@ class zlfwHelperZLUX extends AppHelper {
 			$translations = array_map(array('JText', '_'), $translations);
 
 			// add to script
-			$javascript .= "jQuery.fn.zluxMain.translations = " . json_encode($translations) . ";";
+			$javascript .= "jQuery.fn.zluxMain.prototype.addTranslations(" . json_encode($translations) . ");";
 
 			// load the script
 			$this->app->document->addScriptDeclaration($javascript);

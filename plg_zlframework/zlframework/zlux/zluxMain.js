@@ -16,6 +16,7 @@
 		options: {},
 		// var for internal events, must be reseted when expanding
 		events: {},
+		translations: {}, // translated strings
 		_ress: {}, // requested assets
 		/* JRoot: Joomla root URL, for assets urls. Its set within zlux helper */
 		/* JBase: Joomla base URL, for ajax urls. Its set within zlux helper */
@@ -269,6 +270,17 @@
 			{
 				console.log( sAlert );
 			}
+		},
+		/**
+		 * Add translated strings to the translation object
+		 *
+		 * @param {Object} translations Translated string in JSON object.
+		 */
+		addTranslations: function(translations) {
+			$.fn[Plugin.prototype.name].translations = $.extend(
+				$.fn[Plugin.prototype.name].translations,
+				translations
+			);
 		},
 		/**
 		 * Translates the specified string by checking for the english string in the language pack lookup.
