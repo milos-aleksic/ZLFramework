@@ -69,10 +69,12 @@
 			$this.sCurrentPath = $this.sStartRoot;
 		},
 		initDataTable: function(wrapper) {
-			var $this = this;
+			var $this = this,
+				js_dt = $this.zlfwURL() + 'assets/js/jquery.plugins/jquery.datatables.min.js',
+				js_dtp = $this.zlfwURL() + 'zlux/assets/js/datatables.plugins.js';
 
 			// load asset
-			$this.requireAsset($this.zlfwURL() + 'zlux/assets/datatables/dataTables.with.plugins.min.js', function(){
+			$this.requireAsset([js_dt, js_dtp]).done(function(){
 				$this._initDataTable(wrapper);
 			});
 		},
