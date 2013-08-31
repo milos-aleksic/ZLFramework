@@ -182,9 +182,22 @@ class ZlfieldHelper extends AppHelper {
 		$this->path = $this->task == 'assignelements' ? JPATH_ROOT.'/'.urldecode($this->req->getVar('path')) : '';
 		$this->path = $this->task == 'assignsubmission' ? $this->application->getPath().'/templates/'.$this->req->getString('template') : $this->path;
 
-		// get params from position.config file
-		$renderer = $this->app->renderer->create('item')->addPath($this->path);
-		$this->params = $this->data->create($renderer->getConfig('item')->get($this->group.'.'.$this->application->getType($this->type)->id.'.'.$this->layout));
+		// custom handle for ZOOcart Address type:
+		if($this->controller == 'addresses' && $this->type == 'address')
+		{
+			$this->path = JPATH_ROOT.'/'.urldecode($this->req->getVar('path'));
+
+			// get params from position.config file
+			$renderer = $this->app->renderer->create('address')->addPath($this->path);
+			$this->params = $this->data->create($renderer->getConfig('address')->get($this->application->getGroup().'.'.$this->application->id.'.'.$this->type.'.'.$this->layout));
+
+		// default
+		} else {
+
+			// get params from position.config file
+			$renderer = $this->app->renderer->create('item')->addPath($this->path);
+			$this->params = $this->data->create($renderer->getConfig('item')->get($this->group.'.'.$this->type.'.'.$this->layout));
+		}
 
 		// submissions workaround
 		if($this->task == 'assignsubmission')
