@@ -1,11 +1,5 @@
-/* ===================================================
- * ZLUX DataTable Plugins
- * https://zoolanders.com/extensions/zl-framework
- * ===================================================
- * Copyright (C) JOOlanders SL 
- * http://www.gnu.org/licenses/gpl-2.0.html GNU/GPLv2 only
- * ========================================================== */
 (function ($) {
+
 /*
  * Function: fnGetColumnData
  * Purpose:  Return an array of table values from a particular column.

@@ -48,12 +48,10 @@
 			$this.ID = $.fn.zluxItemsManager.iNextUnique;
 		},
 		initDataTable: function(wrapper) {
-			var $this = this,
-				js_dt = $this.zlfwURL() + 'assets/js/jquery.plugins/jquery.datatables.min.js',
-				js_dtp = $this.zlfwURL() + 'zlux/assets/js/datatables.plugins.js';
+			var $this = this;
 
 			// load asset
-			$this.requireAsset([js_dt, js_dtp]).done(function(){
+			$this.requireAsset($this.zlfwURL() + 'zlux/assets/datatables/dataTables.with.plugins.min.js', function(){
 				$this._initDataTable(wrapper);
 			});
 		},
@@ -61,11 +59,12 @@
 			var $this = this;
 
 			// set table
-			$('<table class="uk-table uk-table-striped uk-table-condensed" />').appendTo(wrapper);
+			$('<table cellpadding="0" cellspacing="0" border="0" class="table table-striped table-bordered" />')
+			.appendTo(wrapper);
 
 			// init dataTable
 			$this.oTable = $('table', wrapper).dataTable({
-				"sDom": "Ftpi",
+				"sDom": "F<'row-fluid'<'span12't>><'row-fluid'<'span12'p>><'row-fluid zlux-x-info'<'span12'i>>",
 				"bServerSide": true,
 				"iDisplayLength": 20,
 				"sAjaxSource": $this.AjaxURL() + '&task=getItemsManagerData',

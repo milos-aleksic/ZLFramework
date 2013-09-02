@@ -67,9 +67,6 @@ class plgSystemZlframeworkInstallerScript
 			// moved to zlux/assets
 			'plugins/system/zlframework/zlframework/zlux/zlbootstrap',
 
-			// moved to general asset folder
-			'plugins/system/zlframework/zlframework/zlux/assets/datatables',
-
 			// moved to helpers folder
 			'plugins/system/zlframework/zlframework/helpers_zlfw',
 
