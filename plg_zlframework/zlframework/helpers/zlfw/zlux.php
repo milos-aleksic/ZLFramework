@@ -45,6 +45,10 @@ class zlfwHelperZLUX extends AppHelper {
 
 		// j3
 		} else {
+			
+			// load the BS assets
+			JHtml::_('bootstrap.framework');
+
 			$this->app->document->addStylesheet('zlfw:zlux/assets/zlbootstrap/css/font-awesome-zl.min.css');
 		}
 	}
