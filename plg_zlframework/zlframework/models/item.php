@@ -182,9 +182,7 @@ class ZLModelItem extends ZLModel
 		
 		// published state
 		$state = $this->getState('state');
-		if (isset($state[0]) && !empty($state[0]) && $state[0]->get('value') != null) {
-			$query->where('a.state = ' . $state[0]->get('value', 1));
-		}
+		if (isset($state[0])) $query->where('a.state = ' . (int)$state[0]->get('value', 1));
 
 		// accessible
 		if ($user = $this->_db->escape( $this->getState('user') )){
