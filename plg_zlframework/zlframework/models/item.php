@@ -185,11 +185,10 @@ class ZLModelItem extends ZLModel
 		if (isset($state[0])) $query->where('a.state = ' . (int)$state[0]->get('value', 1));
 
 		// accessible
-		if ($user = $this->_db->escape( $this->getState('user') )){
-			$query->where( 'a.' . $this->app->user->getDBAccessString($this->app->user->get($user)));
-		} else {
-			$query->where( 'a.' . $this->app->user->getDBAccessString());
-		}
+		$user = $this->getState('user');
+		$user = isset($user[0]) ? $this->app->user->get($this->_db->escape( $user[0] )) : null;
+
+		$query->where('a.' . $this->app->user->getDBAccessString($user));
 
 		// created_by
 		if ($authors = $this->getState('created_by', array())) {
