@@ -524,6 +524,22 @@
 					});
 				}); // Load Field
 
+				/* 
+				 * Items selector
+				 */
+				$('[data-type=items] .zl-field', $dom).each(function(){
+					var $field = $(this),
+						cname = $('input.zlux-x-dummy', $field).val();
+
+					// remove dummy input
+					$('input.zlux-x-dummy', $field).remove();
+
+					$field.zlux("FieldItems", {
+						controlName: cname
+					});
+
+				}); // Items selector END
+
 			$dom.data('zlfield-actions-init', !0)}
 		},
 
