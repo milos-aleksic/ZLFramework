@@ -816,7 +816,7 @@
 
 
 /* ===================================================
- * ZLUX Dialog Files Manager
+ * ZLUX Files Dialog Manager
  * https://zoolanders.com/extensions/zl-framework
  * ===================================================
  * Copyright (C) JOOlanders SL 
@@ -829,7 +829,7 @@
 		this.events = {};
 	};
 	Plugin.prototype = $.extend(Plugin.prototype, $.fn.zluxFilesManager.prototype, {
-		name: 'zluxDialogFilesManager',
+		name: 'zluxFilesDialogManager',
 		options: {
 			title: 'Files Manager',
 			full_mode: 0,

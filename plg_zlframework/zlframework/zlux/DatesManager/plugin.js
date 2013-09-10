@@ -45,7 +45,7 @@
 
 
 /* ===================================================
- * ZLUX Dialog Dates Manager
+ * ZLUX Dates Dialog Manager
  * https://zoolanders.com/extensions/zl-framework
  * ===================================================
  * Copyright (C) JOOlanders SL 
@@ -58,7 +58,7 @@
 		this.events = {};
 	};
 	Plugin.prototype = $.extend(Plugin.prototype, $.fn.zluxDatesManager.prototype, {
-		name: 'zluxDialogDatesManager',
+		name: 'zluxDatesDialogManager',
 		options: {
 			title: 'Dates Manager',
 			position: {}, // override the Dialog position

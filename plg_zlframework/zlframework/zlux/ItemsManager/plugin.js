@@ -289,7 +289,7 @@
 
 
 /* ===================================================
- * ZLUX Dialog Items Manager
+ * ZLUX Items Dialog Manager
  * https://zoolanders.com/extensions/zl-framework
  * ===================================================
  * Copyright (C) JOOlanders SL 
@@ -302,7 +302,7 @@
 		this.events = {};
 	};
 	Plugin.prototype = $.extend(Plugin.prototype, $.fn.zluxItemsManager.prototype, {
-		name: 'zluxDialogItemsManager',
+		name: 'zluxItemsDialogManager',
 		options: {
 			title: 'Items Manager',
 			position: {}, // override the Dialog position
