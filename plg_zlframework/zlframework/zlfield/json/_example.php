@@ -203,7 +203,8 @@ defined('_JEXEC') or die('Restricted access');
 		"_id":{
 			"type":"items",
 			"specific": {
-				"apps":"group id", './* App filter, separete by space */'
+				"apps":"id id2", './* App filter, separete by space */'
+				"types":"type type2", './* Type filter, separete by space */'
 			}
 		},
 

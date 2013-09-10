@@ -779,7 +779,7 @@ class ZlfieldHelper extends AppHelper {
 			$this->app->document->addStylesheet('zlfw:assets/libraries/zlux/zlux.css');
 
 			// init scripts
-			$javascript = "jQuery(function($){ $('body').ZLfield({ url: '{$url}', type: '{$this->type}', enviroment: '{$this->enviroment}', enviroment_args: '{$enviroment_args}' }); $.fn.zlux('FieldsManager') });";
+			$javascript = "jQuery(function($){ $('body').ZLfield({ url: '{$url}', type: '{$this->type}', enviroment: '{$this->enviroment}', enviroment_args: '{$enviroment_args}' }); });";
 			$this->app->document->addScriptDeclaration($javascript);
 
 			// don't load them twice

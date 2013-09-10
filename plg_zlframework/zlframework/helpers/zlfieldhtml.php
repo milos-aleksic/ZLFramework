@@ -480,18 +480,15 @@ class ZLFieldHTMLHelper extends AppHelper {
 		$apps = array_merge( $pv->get('apps', array()), explode(' ', $spec->get('apps', '')) );
 		$types = array_merge( $pv->get('types', array()), explode(' ', $spec->get('types', '')) );
 
-		// convert apps IDs to group
-		foreach ($apps as &$app) if(is_numeric($app)) {
-			$app = $this->app->table->application->get($app);
-			$app = (is_object($app)) ? $app->getGroup() : null;
-		}
-
 		// clean duplicates
 		$apps = array_unique($apps);
 
 		// clean values
 		$apps = array_filter($apps);
 		$types = array_filter($types);
+
+		// set field JS params
+		$params = compact('apps', 'types');
 
 		// validate data
 		settype($value, 'array');
@@ -513,12 +510,15 @@ class ZLFieldHTMLHelper extends AppHelper {
 
 			// set the form values
 			foreach ($value as $item_id) {
-				$html[] = '<input type="hidden" name="'.$name.'" value="'.$item_id.'" data-info=\''.json_encode($objects[$item_id]).'\' />';
+				$html[] = "<div class=\"zlux-x-item\" data-info='".json_encode($objects[$item_id])."'>";
+					$html[] = $objects[$item_id]['name'];
+					$html[] = '<input type="hidden" name="'.$name.'" value="'.$item_id.'"  />';
+				$html[] = '</div>';
 			}
 		}
 
-		// render the control name
-		$html[] = '<input class="zlux-x-dummy" type="hidden" value="'.$name.'" />';
+		// render the field control name and params
+		$html[] = "<input class=\"zlux-x-dummy\" type=\"hidden\" value=\"{$name}\" data-params='".json_encode($params)."' />";
 
 		return implode('', $html);
 	}

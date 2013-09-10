@@ -529,14 +529,18 @@
 				 */
 				$('[data-type=items] .zl-field', $dom).each(function(){
 					var $field = $(this),
-						cname = $('input.zlux-x-dummy', $field).val();
+						info = $('input.zlux-x-dummy', $field),
+						cname = info.val(),
+						params = info.data('params');
 
 					// remove dummy input
-					$('input.zlux-x-dummy', $field).remove();
+					info.remove();
 
-					$field.zlux("FieldItems", {
+					// load the field JS
+					$field.zlux("FieldsLoader", $.extend({}, params, {
+						field: 'items',
 						controlName: cname
-					});
+					}));
 
 				}); // Items selector END
 

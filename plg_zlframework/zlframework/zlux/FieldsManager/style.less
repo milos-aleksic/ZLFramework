@@ -113,3 +113,53 @@ div.zlfield [data-type="options"] .zlux-field-option {
 		.sort-handle { cursor: move; }
 	}
 }
+
+// Items field
+div.zlfield div.zl-row[data-type="items"] {
+
+	.zl-label,
+	.zl-field {
+		float: none;
+	}
+
+	ul.zlux-field-items {
+		position: relative;
+		margin: 0;
+
+		li.zlux-x-item {
+			position: relative;
+			padding: 5px 0;
+			left: 0;
+
+			&:hover .zlux-x-tools {
+				visibility: visible;
+			}
+
+			.zlux-x-tools {
+				visibility: hidden;
+				position: absolute;
+				right: 0;
+				top: 12px;
+
+				.zlux-x-sort,
+				.zlux-x-delete {
+					cursor: pointer;
+					margin: 0 4px;
+				}
+			}
+
+			.zlux-x-info {
+				margin-left: 5px;
+			}
+		}
+
+		li.dragging {
+			padding: 4px 0;
+		}
+	}
+
+	.btn {
+		display: block;
+		margin-top: 10px;
+	}
+}
