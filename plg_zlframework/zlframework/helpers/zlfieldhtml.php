@@ -469,6 +469,62 @@ class ZLFieldHTMLHelper extends AppHelper {
 	}
 
 	/*
+		Function: items - Returns zoo items html string field
+	*/
+	public function itemsField($id, $name, $value, $spec, $attrs, $returnRawValue)
+	{
+		// init vars
+		$html = array();
+		$pv = $this->app->data->create( $this->trslValues($spec->get('parents_val'), $spec->get('value_map')) );
+
+		// merge parent with specific declared values
+		$apps = array_merge( $pv->get('apps', array()), explode(' ', $spec->get('apps', '')) );
+		$types = array_merge( $pv->get('types', array()), explode(' ', $spec->get('types', '')) );
+
+		// clean duplicates
+		$apps = array_unique($apps);
+
+		// clean values
+		$apps = array_filter($apps);
+		$types = array_filter($types);
+
+		// set field JS params
+		$params = compact('apps', 'types');
+
+		// validate data
+		settype($value, 'array');
+
+		// if multi
+		$name = $name.'[]';
+
+		// if value
+		if(!empty($value)) {
+
+			// set model and query
+			$model = $this->app->zlmodel->getNew('item')->setState('select', 'DISTINCT a.*')->id($value);
+
+			// perform the query
+			$items = $model->getList();
+
+			// get Items object
+			$objects = $this->app->zlfw->zlux->getItemObject($items);
+
+			// set the form values
+			foreach ($value as $item_id) {
+				$html[] = "<div class=\"zlux-x-item\" data-info='".json_encode($objects[$item_id])."'>";
+					$html[] = $objects[$item_id]['name'];
+					$html[] = '<input type="hidden" name="'.$name.'" value="'.$item_id.'"  />';
+				$html[] = '</div>';
+			}
+		}
+
+		// render the field control name and params
+		$html[] = "<input class=\"zlux-x-dummy\" type=\"hidden\" value=\"{$name}\" data-params='".json_encode($params)."' />";
+
+		return implode('', $html);
+	}
+
+	/*
 		Function: modulelist - Returns module list
 	*/
 	public function modulelistField($id, $name, $value, $specific=array(), $attribs='') {

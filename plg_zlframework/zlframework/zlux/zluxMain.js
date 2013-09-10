@@ -26,7 +26,7 @@
 		initialize: function(target, zluxPlugin, options) {
 
 			// prepare plugin name
-			var pluginName = zluxPlugin.match(/(Files|Items|Dates|Fields|Dialog$)/).shift(), // get the asset name from the plugin name
+			var pluginName = zluxPlugin.match(/^[A-Z][a-z]+/g).shift(), // get the asset name from the plugin name first word
 				callName = 'zlux' + zluxPlugin;
 
 			// load related assets and init plugin

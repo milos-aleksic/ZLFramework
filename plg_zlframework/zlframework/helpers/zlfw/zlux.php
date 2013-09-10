@@ -175,4 +175,53 @@ class zlfwHelperZLUX extends AppHelper {
 		// return
 		return array('signature' => $signature, 'policy' => $policy);
 	}
+
+	/**
+	 * Convert an Item ZOO Object to ZLUX one
+	 * 
+	 * @param array $items List of ZOO Items Objects
+	 * 
+	 * @return array List of ZLUX Items Objects
+	 */
+	public function getItemObject($items)
+	{
+		// validate data
+		settype($items, 'array');
+
+		$objects = array();
+		foreach ($items as $item)
+		{
+			// prepare author data
+			$author = $item->created_by_alias;
+			$author_id = $item->created_by;
+			$users  = $this->app->table->item->getUsers($item->application_id);
+			if (!$author && isset($users[$item->created_by])) {
+				$author = $users[$item->created_by]->name;
+				$author_id = $users[$item->created_by]->id;
+			}
+
+			// set object
+			$objects[$item->id] = array(
+				'id' => $item->id,
+				'name' => $item->name,
+				'_itemname' => $item->name, // necesary
+				'application' => array(
+					'name' => $item->getApplication()->name, 
+					'id' => $item->getApplication()->id
+				),
+				'type' => array(
+					'name' => $item->getType()->name,
+					'id' => $item->getType()->id
+				),
+				'access' => JText::_($this->app->zoo->getGroup($item->access)->name),
+				'created' => $item->created,
+				'author' => array(
+					'name' => $author,
+					'id' => $author_id
+				)
+			);
+		}
+
+		return $objects;
+	}
 }

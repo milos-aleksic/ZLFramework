@@ -78,7 +78,7 @@
 						.appendTo($wrapper);
 
 						// init the file manager
-						$this.dialogTrigger.zlux("DialogFilesManager", {
+						$this.dialogTrigger.zlux("FilesDialogManager", {
 							extensions: $this.options.extensions,
 							max_file_size: $this.options.max_file_size,
 							title: $this.options.title,

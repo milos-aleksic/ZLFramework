@@ -199,6 +199,15 @@ defined('_JEXEC') or die('Restricted access');
 			}
 		},
 
+		'./* items - html form renders ZOO items as options */'
+		"_id":{
+			"type":"items",
+			"specific": {
+				"apps":"id id2", './* App filter, separete by space */'
+				"types":"type type2", './* Type filter, separete by space */'
+			}
+		},
+
 		'./* elements - html select input renders ZOO elements as options */'
 		"_id":{
 			"type":"elements",
