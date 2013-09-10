@@ -172,7 +172,8 @@ class ZLFieldHTMLHelper extends AppHelper {
 			$options = array(); // prepare options
 			foreach ($preoptions as $text => $val) {
 				if (empty($hidden_opts) || !in_array($val, $hidden_opts)) {
-					$options[] = $this->app->html->_('select.option', $val, JText::_($text));
+					// if no object, convert it to
+					$options[] = is_object($val) ? $val : $this->app->html->_('select.option', $val, JText::_($text));
 				}
 			}
 
@@ -454,9 +455,9 @@ class ZLFieldHTMLHelper extends AppHelper {
 			$list = $this->app->tree->buildList(0, $app->getCategoryTree(), array(), '- ', '.   ', '  ');
 
 			// create options
-			$options['-- -- -- '.$app->name.' ROOT -- -- --'] = 0;
+			$options[] = $this->app->html->_('select.option', 0, '-- -- -- '.$app->name.' ROOT -- -- --');
 			foreach ($list as $category) {
-				$options[$category->treename] = $category->id;
+				$options[] = $this->app->html->_('select.option', $category->id, $category->treename);
 			}
 		}
 
