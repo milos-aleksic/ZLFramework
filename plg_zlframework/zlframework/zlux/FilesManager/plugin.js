@@ -15,7 +15,7 @@
 		name: 'zluxFilesManager',
 		options: {
 			root: 'images', // relative path to the root
-			extensions: '', // comma separated values
+			extensions: '', // Array or comma separated values
 			storage: 'local',
 			storage_params: {},
 			max_file_size: ''
@@ -1526,7 +1526,7 @@
 	Plugin.prototype = $.extend(Plugin.prototype, $.fn.zluxMain.prototype, {
 		name: 'zluxUpload',
 		options: {
-			extensions: '', // comma separated values
+			extensions: '', // Array or comma separated values
 			path: null,
 			fileMode: 'files',
 			max_file_size: '1024kb', // Maximum file size. This string can be in 100b, 10kb, 10mb, 1gb format.

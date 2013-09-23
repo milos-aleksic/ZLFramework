@@ -14,7 +14,7 @@
 	Plugin.prototype = $.extend(Plugin.prototype, $.fn.zluxManager.prototype, {
 		name: 'zluxItemsManager',
 		options: {
-			apps: '', // comma separated values
+			apps: '', // Array or comma separated values
 			types: '', // idem
 			categories: '', // idem
 			tags: '', // idem
