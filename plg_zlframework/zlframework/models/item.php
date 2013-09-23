@@ -805,9 +805,10 @@ class ZLModelItem extends ZLModel
 			unset($order[$index]);
 		}
 
-		// item priority
+		// save item priority state
+		$priority = false;
 		if (($index = array_search('_priority', $order)) !== false) {
-			$result[1] = "a.priority DESC, ";
+			$priority = true;
 			unset($order[$index]);
 		}
 
@@ -842,6 +843,9 @@ class ZLModelItem extends ZLModel
 				$result[1] = $reversed == 'ASC' ? "s.value" : "s.value DESC";
 			}
 		}
+
+		// set priority at the end
+		if ($priority) $result[1] = "a.priority DESC, " . $result[1];
 
 		return $result;
 	}
