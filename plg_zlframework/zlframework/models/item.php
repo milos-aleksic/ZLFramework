@@ -653,12 +653,32 @@ class ZLModelItem extends ZLModel
 		}
 
 		// replace vars
-		if (is_string($value))
-			$value = preg_replace(array('/\[today\]/'), array(date('Y-m-d')), $value);
-		if (is_string($value_from))
-			$value_from = preg_replace(array('/\[today\]/'), array(date('Y-m-d')), $value_from);
-		if (is_string($value_to))
-			$value_to = preg_replace(array('/\[today\]/'), array(date('Y-m-d')), $value_to);
+		$tzoffset = $this->app->date->getOffset();
+		$yesterday = $this->app->date->create('yesterday', $tzoffset);
+		$today = $this->app->date->create('today', $tzoffset);
+		$tomorrow = $this->app->date->create('tomorrow', $tzoffset);
+
+		if (is_string($value)) $value = preg_replace(
+			array('/\[yesterday\]/', '/\[today\]/', '/\[tomorrow\]/'),
+			array($yesterday, $today, $tomorrow),
+			$value
+		);
+		if (is_string($value_from)) $value_from = preg_replace(
+			array('/\[yesterday\]/', '/\[today\]/', '/\[tomorrow\]/'),
+			array($yesterday, $today, $tomorrow),
+			$value_from
+		);
+		if (is_string($value_to)) {
+			$yesterday = substr($yesterday, 0, 10).' 23:59:59';
+			$today = substr($today, 0, 10).' 23:59:59';
+			$tomorrow = substr($tomorrow, 0, 10).' 23:59:59';
+
+			$value_to = preg_replace(
+				array('/\[yesterday\]/', '/\[today\]/', '/\[tomorrow\]/'),
+				array($yesterday, $today, $tomorrow),
+				$value_to
+			);
+		}
 
 		// set values
 		$wrapper = isset($wrapper) ? $wrapper : false;
