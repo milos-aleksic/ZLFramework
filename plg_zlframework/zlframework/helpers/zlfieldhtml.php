@@ -573,21 +573,22 @@ class ZLFieldHTMLHelper extends AppHelper {
 		$html = array();
 		$num = 0;
 
-		$html[] = '<div class="zlux-field-option">';
+		$html[] = '<div class="zlux-field-options">';
 			$html[] = '<ul>';
 	
 				// render current options
 				foreach ($value as $opt) {
 					$num++;
-					$html[] = '<li>' . $this->_optionsFieldOption($name, $num, $opt) . '</li>';
+					$html[] = '<li class="zlux-x-option">' . $this->_optionsFieldOption($name, $num, $opt) . '</li>';
 				}
 	
-				$html[] = '<li class="hidden">';
+				$html[] = '<li class="zlux-x-option hidden">';
 						$html[] = $this->_optionsFieldOption($name, $num, '');
 				$html[] = '</li>';
 
 			$html[] = '</ul>';
-			$html[] = '<div class="add">' . JText::_('Add Option') . '</div>';
+
+			$html[] = '<button type="button" class="btn btn-mini zlux-x-add"><i class="icon-plus-sign"></i>' . JText::_('Add Option') . '</button>';
 		$html[] = '</div>';
 
 		return implode('', $html);
@@ -597,12 +598,12 @@ class ZLFieldHTMLHelper extends AppHelper {
 		// init vars
 		$html = array();
 
-		$html[] = '<div class="name-input">';
+		$html[] = '<div class="zlux-x-name">';
 			$html[] = '<label for="name">Name</label>';
 			$html[] = '<input type="text" name="' .$name.'['.$num.'][name]'. '" value="' . @$opt['name'] .'" />';
 		$html[] = '</div>';
 
-		$html[] = '<div class="value-input">';
+		$html[] = '<div class="zlux-x-value">';
 			$html[] = '<label for="value">Value</label>';
 			$html[] = '<a class="trigger" href="#" title="' . JText::_('Edit Option Value') . '">' . @$opt['value'] . '</a>';
 
@@ -615,14 +616,9 @@ class ZLFieldHTMLHelper extends AppHelper {
 			$html[] = '</div>';
 		$html[] = '</div>';
 	
-		$html[] = '<div class="tools">';
-			$html[] = '<div class="delete" title="' . JText::_('Delete option') . '">';
-				$html[] = '<img alt="' . JText::_('Delete option') . '" src="' . $this->app->path->url('assets:images/delete.png') . '"/>';
-			$html[] = '</div>';
-	
-			$html[] = '<div class="sort-handle" title="' . JText::_('Sort option') . '">';
-				$html[] = '<img alt="' . JText::_('Sort option') . '" src="' . $this->app->path->url('assets:images/sort.png') . '"/>';
-			$html[] = '</div>';
+		$html[] = '<div class="zlux-x-tools">';
+			$html[] = '<i class="zlux-x-delete icon-remove-circle" title="' .JText::_('Delete option'). '"></i>';
+			$html[] = '<i class="zlux-x-sort icon-move" title="' .JText::_('Sort option'). '"></i>';
 		$html[] = '</div>';
 
 		return implode('', $html);

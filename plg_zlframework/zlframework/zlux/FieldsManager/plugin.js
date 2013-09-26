@@ -74,11 +74,13 @@
 			var $this = this;
 
 			// init vars
-			$this.list = target.children('ul');
+			$this.list = $('ul', target);
 			$this.hidden = $('li.hidden', $this.list).detach();
 
+			// set the styling class
+			target.addClass('zl-bootstrap');
 
-			target.on('click', '.delete', function() {
+			target.on('click', '.zlux-x-delete', function() {
 				$(this).closest('li').slideUp(400, function() {
 					$(this).remove();
 					$this.orderOptions();
@@ -87,12 +89,12 @@
 				return false;
 			})
 
-			.on('click', '.add', function() {
+			.on('click', '.zlux-x-add', function() {
 				$this.hidden.clone().removeClass('hidden').appendTo($this.list).slideDown(200).effect('highlight', {}, 1000).find('input:first').focus();
 				$this.orderOptions();
 			})
 
-			.on('blur', '.name-input input', function() {
+			.on('blur', '.zlux-x-name input', function() {
 				var option = $(this).closest('li');
 				var text = option.find('.panel input:text');
 
@@ -132,7 +134,7 @@
 
 
 			this.list.sortable({
-				handle: 'div.sort-handle',
+				handle: '.zlux-x-sort',
 				containment: this.list.parent().parent(),
 				placeholder: 'dragging',
 				axis: 'y',
@@ -156,7 +158,7 @@
 
 			var alias = text.val();
 			if (alias === '') {
-				alias = option.find('div.name-input input').val();
+				alias = option.find('div.zlux-x-name input').val();
 			}
 
 			this.getAlias(alias, function(data) {
