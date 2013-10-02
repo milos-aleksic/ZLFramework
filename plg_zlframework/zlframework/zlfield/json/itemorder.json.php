@@ -9,15 +9,20 @@
 // no direct access
 defined('_JEXEC') or die('Restricted access');
 
-	$node = $this->data->create($node);
-	$psv  = $this->data->create($psv);
+	// avaible when integrated trough json as subfield
+	$params = isset($params) ? $params : $this->app->data->create(array());
 
 	// init vars
 	$json = array();
-	$allowed_types = array_filter((array)$psv->get('_chosentypes', array()));
+	$node = $this->data->create($node);
+	$psv  = $this->data->create($psv);
 
-	// get parent apps value
-	$apps = array_filter((array)$psv->get('_chosenapps', array()));
+	$apps = (array)$psv->get('_chosenapps', $params->get('apps', array()));
+	$allowed_types = (array) $psv->get('_chosentypes', $params->get('types', array()));
+
+	// clean values
+	$apps = array_filter($apps);
+	$allowed_types = array_filter($allowed_types);
 
 	// get apps
 	$applications = array();
@@ -25,19 +30,10 @@ defined('_JEXEC') or die('Restricted access');
 		$applications = $this->app->zlfw->getApplications($apps);
 	} else if ($group = $this->app->request->getString('group', false)) {
 		$applications = array($this->app->object->create('Application')->setGroup($group));
-	} else {
-		// get all apps then
-		foreach ($this->app->table->application->all(array('order' => 'name')) as $app){
-			$applications[] = $app;
-		}
 	}
 
 	// depricated method beacuse in modules for ex will not work
 	// $applications = array($this->app->zoo->getApplication());
-
-	// check if at least one app is loaded
-	if (empty($applications)) return;
-
 
 	/* add general options */
 	$json[] =
@@ -66,84 +62,87 @@ defined('_JEXEC') or die('Restricted access');
 		}
 	}';
 
-
-	/* add core elements */
-	$elements = $this->app->object->create('Type', array('_core', $applications[0]))->getCoreElements();
-	
-	// filter orderable elements
-	$elements = array_filter($elements, create_function('$element', 'return $element->getMetaData("orderable") == "true";'));
-
-	$options = array();
-	foreach ($elements as $element) {
-		$options[$element->config->name ? $element->config->name : $element->getMetaData('name')] = $element->identifier;
-	}
-	
-	if ($node->get('add_default')) {
-		array_unshift($options, array(JText::_('default') => ''));
-	}
-
-	$json[] =
-	'"_core":{
-		"type":"select",
-		"label":"PLG_ZLFRAMEWORK_CORE",
-		"specific": {
-			"options":'.json_encode($options).'
-		}
-	}';
-
-
-	/* add type elements, if at least one app selected */
-	if(!empty($apps)) foreach ($applications as $application)
+	// if at least one app selected
+	if (!empty($applications))
 	{
-		// get types
-		$types = $application->getTypes();
+		/* add core elements */
+		$elements = $this->app->object->create('Type', array('_core', $applications[0]))->getCoreElements();
+		
+		// filter orderable elements
+		$elements = array_filter($elements, create_function('$element', 'return $element->getMetaData("orderable") == "true";'));
 
-		// filter types
-		$types = !empty($allowed_types) ? array_filter($types, create_function('$type', 'return in_array($type->id, array(\''.implode('\', \'', $allowed_types).'\'));')) : $types;
-
-		$type_json = array();
-		if(!empty($types)) foreach ($types as $type)
-		{
-			$element_json = array();
-			$elements = $type->getElements();
-			$options = array('- '.JText::_('PLG_ZLFRAMEWORK_SELECT_ELEMENT').' -' => false);
-			
-			// filter orderable elements
-			$elements = array_filter($elements, create_function('$element', 'return $element->getMetaData("orderable") == "true";'));
-
-			if(!empty($elements))
-			{
-				// create element options
-				foreach ($elements as $element) {
-					$options[$element->config->name ? $element->config->name : $element->getMetaData('name')] = $element->identifier;
-				}
-
-				// elements
-				$type_json[] =
-				'"_'.$type->id.'":{
-					"type":"select",
-					"label":"'.$type->name.'",
-					"specific": {
-						"options":'.json_encode($options).'
-					}
-				}';
-
-			} // end if Elements
-		} // end Type foreach
+		$options = array();
+		foreach ($elements as $element) {
+			$options[$element->config->name ? $element->config->name : $element->getMetaData('name')] = $element->identifier;
+		}
+		
+		if ($node->get('add_default')) {
+			array_unshift($options, array(JText::_('default') => ''));
+		}
 
 		$json[] =
-		'"_'.$application->id.'_fieldset":{
-			"type":"wrapper",
-			"fields": {'.implode(",", $type_json).'},
-			"specific":{
-				"toggle":{
-					"label":"PLG_ZLFRAMEWORK_NAME_APP_ELEMENTS||'.$application->name.'"
-				}
-			},
-			"layout":"fieldset"
+		'"_core":{
+			"type":"select",
+			"label":"PLG_ZLFRAMEWORK_CORE",
+			"specific": {
+				"options":'.json_encode($options).'
+			}
 		}';
 
-	} // end App foreach
+		/* add type elements */
+		foreach ($applications as $application)
+		{
+			// get types
+			$types = $application->getTypes();
+
+			// filter types
+			$types = !empty($allowed_types) ? array_filter($types, create_function('$type', 'return in_array($type->id, array(\''.implode('\', \'', $allowed_types).'\'));')) : $types;
+
+			$type_json = array();
+			if(!empty($types)) foreach ($types as $type)
+			{
+				$element_json = array();
+				$elements = $type->getElements();
+				$options = array('- '.JText::_('PLG_ZLFRAMEWORK_SELECT_ELEMENT').' -' => false);
+				
+				// filter orderable elements
+				$elements = array_filter($elements, create_function('$element', 'return $element->getMetaData("orderable") == "true";'));
+
+				if(!empty($elements))
+				{
+					// create element options
+					foreach ($elements as $element) {
+						$options[$element->config->name ? $element->config->name : $element->getMetaData('name')] = $element->identifier;
+					}
+
+					// elements
+					$type_json[] =
+					'"_'.$type->id.'":{
+						"type":"select",
+						"label":"'.$type->name.'",
+						"specific": {
+							"options":'.json_encode($options).'
+						}
+					}';
+
+				} // end if Elements
+			} // end Type foreach
+
+			$json[] =
+			'"_'.$application->id.'_fieldset":{
+				"type":"wrapper",
+				"fields": {'.implode(",", $type_json).'},
+				"specific":{
+					"toggle":{
+						"label":"PLG_ZLFRAMEWORK_NAME_APP_ELEMENTS||'.$application->name.'"
+					}
+				},
+				"layout":"fieldset"
+			}';
+
+		} // end App foreach
+
+	}
 	else
 	{
 		// if no apps return message instead
