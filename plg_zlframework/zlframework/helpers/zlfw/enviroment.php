@@ -37,8 +37,9 @@ class zlfwHelperEnviroment extends AppHelper {
 		Function: get
 			returns the current enviroment
 
-		Enviroments:
+		Example enviroments:
 			Item Full View - site.com_zoo.item
+			ZOO manager - admin.com_zoo.manager
 
 		Returns:
 			string - the enviroment route
@@ -56,6 +57,9 @@ class zlfwHelperEnviroment extends AppHelper {
 
 		// set extension
 		$enviroment[] = $this->app->request->getCmd('option', null);
+
+		// set controller
+		$enviroment[] = $this->app->request->getCmd('controller', null);
 
 		// if zoo item full view
 		if ($task == 'item') {
