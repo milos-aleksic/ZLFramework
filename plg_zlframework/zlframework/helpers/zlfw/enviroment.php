@@ -16,7 +16,7 @@ defined('_JEXEC') or die('Restricted access');
 class zlfwHelperEnviroment extends AppHelper {
 
 	public $joomla;
-	public $app;
+	public $params;
 
 	/*
 	   Function: Constructor
@@ -28,6 +28,9 @@ class zlfwHelperEnviroment extends AppHelper {
 
 		// set Joomla instance
 		$this->joomla = JFactory::getApplication();
+
+		// set params as DATA class
+		$this->params = $this->app->data->create(array());
 	}
 
 	/*
@@ -44,7 +47,6 @@ class zlfwHelperEnviroment extends AppHelper {
 	{
 		// init vars
 		$enviroment = array();
-		$params = array();
 		$Itemid = $this->app->request->getCmd('Itemid', null);
 		$task = $this->app->request->getCmd('task', '');
 		$view = $this->app->request->getCmd('view', '');
@@ -58,43 +60,26 @@ class zlfwHelperEnviroment extends AppHelper {
 		// if zoo item full view
 		if ($task == 'item') {
 			$enviroment[] = 'item';
-			$params['item_id'] = $this->app->request->getCmd('item_id');
+			$this->params->set('item_id', $this->app->request->getCmd('item_id'));
 		} else if ($view == 'item') { // if joomla item menu route
 			$enviroment[] = 'item';
-			$params['item_id'] = $this->joomla->getMenu()->getItem($Itemid)->params->get('item_id');
+			$this->params->set('item_id', $this->joomla->getMenu()->getItem($Itemid)->params->get('item_id'));
 		}
 
 		// if zoo cat
 		if ($task == 'category') {
 			$enviroment[] = 'category';
-			$params['category_id'] = $this->app->request->getCmd('category_id');
+			$this->params->set('category_id', $this->app->request->getCmd('category_id'));
 		} else if ($view == 'category') { // if joomla item menu route
 			$enviroment[] = 'category';
-			$params['category_id'] = $this->joomla->getMenu()->getItem($Itemid)->params->get('category');
+			$this->params->set('category_id', $this->joomla->getMenu()->getItem($Itemid)->params->get('category'));
 		}
 
 		// clean values
 		$enviroment = array_filter($enviroment);
 
-		// set point format
-		$enviroment = implode('.', $enviroment);
-
-		// save params in session
-		$this->app->system->session->set($enviroment, $params);
-
-		return $enviroment;
-	}
-	
-	/*
-		Function: getParams
-			get the enviroment related params
-
-		Returns:
-			array
-	*/
-	public function getParams($enviroment)
-	{
-		return $this->app->data->create($this->app->system->session->get($enviroment));
+		// return result in point format
+		return implode('.', $enviroment);
 	}
 
 	/*
