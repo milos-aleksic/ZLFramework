@@ -49,34 +49,39 @@ class zlfwHelperEnviroment extends AppHelper {
 		// init vars
 		$enviroment = array();
 		$Itemid = $this->app->request->getCmd('Itemid', null);
-		$task = $this->app->request->getCmd('task', '');
-		$view = $this->app->request->getCmd('view', '');
+		$component = $this->app->request->getCmd('option', null);
+		$task = $this->app->request->getCmd('task', null);
+		$view = $this->app->request->getCmd('view', null);
 
 		// set back or frontend
 		$enviroment[] = $this->joomla->isAdmin() ? 'admin' : 'site';
 
-		// set extension
-		$enviroment[] = $this->app->request->getCmd('option', null);
+		// set component
+		$enviroment[] = $component;
 
 		// set controller
 		$enviroment[] = $this->app->request->getCmd('controller', null);
 
-		// if zoo item full view
-		if ($task == 'item') {
-			$enviroment[] = 'item';
-			$this->params->set('item_id', $this->app->request->getCmd('item_id'));
-		} else if ($view == 'item') { // if joomla item menu route
-			$enviroment[] = 'item';
-			$this->params->set('item_id', $this->joomla->getMenu()->getItem($Itemid)->params->get('item_id'));
-		}
+		// if ZOO
+		if ($component == 'com_zoo'){
 
-		// if zoo cat
-		if ($task == 'category') {
-			$enviroment[] = 'category';
-			$this->params->set('category_id', $this->app->request->getCmd('category_id'));
-		} else if ($view == 'category') { // if joomla item menu route
-			$enviroment[] = 'category';
-			$this->params->set('category_id', $this->joomla->getMenu()->getItem($Itemid)->params->get('category'));
+			// if zoo item full view
+			if ($task == 'item') {
+				$enviroment[] = 'item';
+				$this->params->set('item_id', $this->app->request->getCmd('item_id'));
+			} else if ($view == 'item') { // if joomla item menu route
+				$enviroment[] = 'item';
+				$this->params->set('item_id', $this->app->menu->getActive()->params->get('item_id'));
+			}
+
+			// if zoo cat
+			if ($task == 'category') {
+				$enviroment[] = 'category';
+				$this->params->set('category_id', $this->app->request->getCmd('category_id'));
+			} else if ($view == 'category') { // if joomla item menu route
+				$enviroment[] = 'category';
+				$this->params->set('category_id', $this->app->menu->getActive()->params->get('category'));
+			}
 		}
 
 		// clean values
