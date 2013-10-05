@@ -171,15 +171,16 @@ class plgSystemZlframework extends JPlugin {
 	 */
 	public function checkInstallation()
 	{
-		if($this->joomla->isAdmin())
+		// if in ZOO or Plugin manager views
+		if($this->app->zlfw->enviroment->is('admin.com_zoo.manager') || $this->app->zlfw->enviroment->is('admin.com_plugins'))
 		{
-			// checks if ZOO and ZL Extensions are up to date only on ZOO and Plugin views
-			$option = $this->app->request->getVar('option');
-			if($option == 'com_zoo' || $option == 'com_plugins'){
-				if(!$this->app->zldependency->check("zlfw:dependencies.config")){
-					return;
-				}
+			// checks if ZOO and ZL Extensions are up to date
+			if(!$this->app->zldependency->check("zlfw:dependencies.config")){
+				return;
 			}
+
+			// set plugins order
+			$this->app->zlfw->checkPluginOrder(null);
 		}
 		
 		return true;

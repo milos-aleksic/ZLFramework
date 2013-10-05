@@ -227,31 +227,31 @@ class zlfwHelper extends AppHelper {
 		return $db->loadObject();
 	}
 
-	public function checkPluginOrder($plugin_name, $type = 'system')
+	/**
+	 * Fix plugins order
+	 */
+	public function checkPluginOrder()
 	{
-		$fw = $this->getPlugin('zlframework', 'system');
-		$p = $this->getPlugin($plugin_name, $type);
-		// Fix for aksubs
-		$paks = $this->getPlugin('aksubs', 'system');
+		// init vars
+		$db = JFactory::getDBO();
+		$zf = $this->app->zlfw->getPlugin('zlframework', 'system');
+		$order = (int)$zf->ordering;
+		
+		// set ZOOlingual right after zlfw
+		$order++;
+		$db->setQuery("UPDATE `#__extensions` SET `ordering` = {$order} WHERE `type` = 'plugin' AND `element` = 'zoolingual'")->query();
 
-		if ($fw->ordering >= $p->ordering)
-		{
-			$db = JFactory::getDBO();
-			$query = 'UPDATE #__extensions SET ordering = ' . ((int)($fw->ordering) + 1) . ' WHERE extension_id = ' . (int)$p->extension_id;
-			if($paks){
-				$queryaks = 'UPDATE #__extensions SET ordering = ' . ((int)($p->ordering) + 100) . ' WHERE extension_id = ' . (int)$paks->extension_id;
-			}
-			
-			if($paks){
-				$db->setQuery($queryaks);
-				$db->query();
-			}
-			
-			$db->setQuery($query);
-			return $db->query();
-		}
+		// set ZOOtools and ZL Elements right after ZOOlingual
+		$order++;
+		$db->setQuery("UPDATE `#__extensions` SET `ordering` = {$order} WHERE `type` = 'plugin' AND `element` in 
+			('zootools', 'zoo_zlelements')
+		")->query();
 
-		return true;
+		// set the rest of the extension right after
+		$order++;
+		$db->setQuery("UPDATE `#__extensions` SET `ordering` = {$order} WHERE `type` = 'plugin' AND `element` in 
+			('zooaccess', 'zooaksubs', 'zoocart', 'zoocompare', 'zoofilter', 'zooorder', 'zooseo', 'zootrack')
+		")->query();
 	}
 
 	/*
