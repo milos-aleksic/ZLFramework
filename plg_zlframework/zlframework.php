@@ -180,7 +180,7 @@ class plgSystemZlframework extends JPlugin {
 			}
 
 			// set plugins order
-			$this->app->zlfw->checkPluginOrder(null);
+			$this->app->zlfw->checkPluginOrder();
 		}
 		
 		return true;
