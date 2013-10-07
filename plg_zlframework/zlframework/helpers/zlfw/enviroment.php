@@ -71,7 +71,9 @@ class zlfwHelperEnviroment extends AppHelper {
 				$this->params->set('item_id', $this->app->request->getCmd('item_id'));
 			} else if ($view == 'item') { // if joomla item menu route
 				$enviroment[] = 'item';
-				$this->params->set('item_id', $this->app->menu->getActive()->params->get('item_id'));
+
+				if ($menu = $this->app->menu->getActive())
+					$this->params->set('item_id', $menu->params->get('item_id'));
 			}
 
 			// if zoo cat
@@ -80,7 +82,9 @@ class zlfwHelperEnviroment extends AppHelper {
 				$this->params->set('category_id', $this->app->request->getCmd('category_id'));
 			} else if ($view == 'category') { // if joomla item menu route
 				$enviroment[] = 'category';
-				$this->params->set('category_id', $this->app->menu->getActive()->params->get('category'));
+
+				if ($menu = $this->app->menu->getActive())
+					$this->params->set('category_id', $menu->params->get('category'));
 			}
 		}
 
