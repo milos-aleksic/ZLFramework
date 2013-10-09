@@ -9,6 +9,7 @@ Changelog
    [usergroupid], [authorid], [authorname], [authorgroup], [authorgroupid]
  - Removed FilesPro source patch [usertype] var
  ^ Item Model features and perfomance improved
+ + Enviroment helper
 
 3.0.14
  # Fixed Item Model query issue
