@@ -90,8 +90,8 @@
 					"sEmptyTable": $this._('EMPTY_FOLDER'),
 					"sInfoEmpty": ""
 				},
-				"sAjaxUrl": $this.AjaxURL(),
-				"sAjaxSource": $this.AjaxURL() + '&task=getFilesManagerData',
+				"sAjaxUrl": $this.getAjaxURL('zlux'),
+				"sAjaxSource": $this.getAjaxURL('zlux', 'getFilesManagerData'),
 				"sServerMethod": "POST",
 				"bPaginate": false,
 				"aoColumns": [
@@ -542,7 +542,7 @@
 			return $.Deferred(function( defer )
 			{
 				$.ajax({
-					"url": $this.AjaxURL() + "&task=deleteObject",
+					"url": $this.getAjaxURL('zlux', 'deleteObject'),
 					"data": aoData,
 					"dataType": "json",
 					"type": "post"
@@ -595,7 +595,7 @@
 			return $.Deferred(function( defer )
 			{
 				$.ajax({
-					"url": $this.AjaxURL() + "&task=newFolder",
+					"url": $this.getAjaxURL('zlux', 'newFolder'),
 					"data": aoData,
 					"dataType": "json",
 					"type": "post"
@@ -725,7 +725,7 @@
 			return $.Deferred(function( defer )
 			{
 				$.ajax({
-					"url": $this.AjaxURL() + "&task=moveObject",
+					"url": $this.getAjaxURL('zlux', 'moveObject'),
 					"data": aoData,
 					"dataType": "json",
 					"type": "post"
@@ -1300,7 +1300,7 @@
 
 					// validate file name
 					$.ajax({
-						"url": $this.AjaxURL() + '&task=validateObjectName',
+						"url": $this.getAjaxURL('zlux', 'validateObjectName'),
 						"type": 'post',
 						"data":{
 							name: file.name
@@ -1637,7 +1637,7 @@
 				browse_button: $this.options.browse_button[0],
 				drop_element: $this.dropzone[0], 
 				max_file_size: undefined, // controlled by ZLUX Upload
-				url: $this.AjaxURL() + '&task=upload',
+				url: $this.getAjaxURL('zlux', 'upload'),
 				filters: [ // Specify what files to browse for
 					{title: "Files", extensions: $this.options.extensions}
 				],
