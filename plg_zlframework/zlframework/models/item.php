@@ -182,15 +182,30 @@ class ZLModelItem extends ZLModel
 		
 		// published state
 		$state = $this->getState('state');
-		if (isset($state[0]) && !empty($state[0])) {
-			$query->where('a.state = 1');
-		}
+		if (isset($state[0])) $query->where('a.state = ' . (int)$state[0]->get('value', 1));
 
 		// accessible
-		if ($user = $this->_db->escape( $this->getState('user') )){
-			$query->where( 'a.' . $this->app->user->getDBAccessString($this->app->user->get($user)));
-		} else {
-			$query->where( 'a.' . $this->app->user->getDBAccessString());
+		$user = $this->getState('user');
+		$user = isset($user[0]) ? $this->app->user->get($this->_db->escape( $user[0] )) : null;
+
+		$query->where('a.' . $this->app->user->getDBAccessString($user));
+
+		// created_by
+		if ($authors = $this->getState('created_by', array())) {
+			$ids = array();
+			foreach ($authors as $author) $ids[] = $author->get('value');
+			
+			// set query
+			$query->where("a.created_by IN (" . implode(',', $ids) . ")");
+		}
+
+		// modified_by
+		if ($editors = $this->getState('modified_by', array())) {
+			$ids = array();
+			foreach ($editors as $editor) $ids[] = $editor->get('value');
+			
+			// set query
+			$query->where("a.modified_by IN (" . implode(',', $ids) . ")");
 		}
 
 		// created
@@ -244,6 +259,23 @@ class ZLModelItem extends ZLModel
 			$query->where($this->getDateSearch(compact('sql_value', 'value', 'value_from', 'value_to', 'search_type', 'period_mode', 'interval', 'interval_unit')));
 		}
 
+		// published down
+		if ($date = $this->getState('published_down', array()))
+		{
+			$date = array_shift($date);
+
+			$sql_value 		= "a.publish_down";
+			$value 			= $date->get('value', '');
+			$value_from		= !empty($value) ? $value : '';
+			$value_to 		= $date->get('value_to', '');
+			$search_type 	= $date->get('type', false);
+			$period_mode 	= $date->get('period_mode', 'static');
+			$interval 		= $date->get('interval', 0);
+			$interval_unit 	= $date->get('interval_unit', '');
+
+			$query->where($this->getDateSearch(compact('sql_value', 'value', 'value_from', 'value_to', 'search_type', 'period_mode', 'interval', 'interval_unit')));
+		}
+
 		// default publication up
 		if (!$this->getState('created') && !$this->getState('modified')) {
 			$where = array();
@@ -253,10 +285,12 @@ class ZLModelItem extends ZLModel
 		}
 
 		// default publication down
-		$where = array();
-		$where[] = 'a.publish_down = '.$null;
-		$where[] = 'a.publish_down >= '.$now;
-		$query->where('('.implode(' OR ', $where).')');
+		if (!$this->getState('published_down')) {
+			$where = array();
+			$where[] = 'a.publish_down = '.$null;
+			$where[] = 'a.publish_down >= '.$now;
+			$query->where('('.implode(' OR ', $where).')');
+		}
 	}
 
 	/**
@@ -512,7 +546,7 @@ class ZLModelItem extends ZLModel
 			if ($is_range && !$is_date){
 
 				// proceede only if values provided
-				if ($from && $to) {
+				if ($from || $to) {
 
 					// Handle everything in a special method
 					$wheres[$logic][] = $this->getElementRangeSearch($id, $from, $to, $type, $convert, $k);
@@ -544,11 +578,11 @@ class ZLModelItem extends ZLModel
 	/**
 	 * Get the range search sql
 	 */
-	protected function getElementRangeSearch($identifier, $from, $to, $type, $convert, $k) {
+	protected function getElementRangeSearch($identifier, $from, $to, $type, $convert, $k)
+	{	
+		// Evaluate if is equal
 		$is_equal = false;
-		
-		// Add equal sign
-		if (stripos($type, "equal") != -1) {
+		if (stripos($type, "equal") !== false) {
 			$is_equal = true;
 			$type = str_ireplace("equal", "", $type);
 		}
@@ -618,6 +652,35 @@ class ZLModelItem extends ZLModel
 			}
 		}
 
+		// replace vars
+		$tzoffset = $this->app->date->getOffset();
+		$yesterday = $this->app->date->create('yesterday', $tzoffset);
+		$today = $this->app->date->create('today', $tzoffset);
+		$tomorrow = $this->app->date->create('tomorrow', $tzoffset);
+
+		if (is_string($value)) $value = preg_replace(
+			array('/\[yesterday\]/', '/\[today\]/', '/\[tomorrow\]/'),
+			array($yesterday, $today, $tomorrow),
+			$value
+		);
+		if (is_string($value_from)) $value_from = preg_replace(
+			array('/\[yesterday\]/', '/\[today\]/', '/\[tomorrow\]/'),
+			array($yesterday, $today, $tomorrow),
+			$value_from
+		);
+		if (is_string($value_to)) {
+			$yesterday = substr($yesterday, 0, 10).' 23:59:59';
+			$today = substr($today, 0, 10).' 23:59:59';
+			$tomorrow = substr($tomorrow, 0, 10).' 23:59:59';
+
+			$value_to = preg_replace(
+				array('/\[yesterday\]/', '/\[today\]/', '/\[tomorrow\]/'),
+				array($yesterday, $today, $tomorrow),
+				$value_to
+			);
+		}
+
+		// set values
 		$wrapper = isset($wrapper) ? $wrapper : false;
 		$period_mode = isset($period_mode) ? $period_mode : 'static';
 		$search_type = $search_type == 'range' ? 'period' : $search_type; // workaround
@@ -762,9 +825,10 @@ class ZLModelItem extends ZLModel
 			unset($order[$index]);
 		}
 
-		// item priority
+		// save item priority state
+		$priority = false;
 		if (($index = array_search('_priority', $order)) !== false) {
-			$result[1] = "a.priority DESC, ";
+			$priority = true;
 			unset($order[$index]);
 		}
 
@@ -799,6 +863,9 @@ class ZLModelItem extends ZLModel
 				$result[1] = $reversed == 'ASC' ? "s.value" : "s.value DESC";
 			}
 		}
+
+		// set priority at the end
+		if ($priority) $result[1] = "a.priority DESC, " . $result[1];
 
 		return $result;
 	}

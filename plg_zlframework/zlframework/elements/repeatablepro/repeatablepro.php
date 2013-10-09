@@ -29,7 +29,11 @@ abstract class ElementRepeatablePro extends ElementRepeatable {
 
 		// set callbacks
 		$this->registerCallback('returndata');
-		$this->registerCallback('loadeditlayout');
+		$this->registerCallback('getemptylayout');
+
+		// load default and current language 
+		$this->app->system->language->load('plg_system_zoo_zlelements_'.$this->getElementType(), JPATH_ADMINISTRATOR, 'en-GB', true);
+		$this->app->system->language->load('plg_system_zoo_zlelements_'.$this->getElementType(), JPATH_ADMINISTRATOR, null, true);
 	}
 	
 	/*
@@ -79,16 +83,16 @@ abstract class ElementRepeatablePro extends ElementRepeatable {
 	}
 
 	/*
-		Function: loadEditLayout
+		Function: getEmptyLayout
 			Load Element specified Edit Layout
 	*/
-	public function loadEditLayout()
+	public function getEmptyLayout($layout = null)
 	{
-		// get request vars
-		$layout = $this->app->request->getString('layout', '');
+		// get layout from var or request
+		$layout = $layout ? $layout : $this->app->request->getString('layout', '');
 
-		if($layout = $this->getLayout($layout)){
-			echo preg_replace('/(elements\[\S+])\[(\d+)\]/', '$1[-1]', $this->renderLayout($layout));
+		if ($layout = $this->getLayout($layout)) {
+			echo preg_replace('/(elements\[\S+])\[(\d+)\]/', '$1[-1]', $this->renderLayout($layout, array('loadinglayout' => true)));
 		}
 	}
 	

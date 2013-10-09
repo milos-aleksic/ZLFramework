@@ -80,11 +80,7 @@ class plgSystemZlframework extends JPlugin {
 			$this->app->path->register($path, 'helpers');
 			$this->app->loader->register('zlfwHelper', 'helpers:zlfwhelper.php');
 			$this->app->loader->register('ZLDependencyHelper', 'helpers:zldependency.php');
-			$this->app->loader->register('ZlStringHelper', 'helpers:zlstring.php');
-			$this->app->loader->register('ZlFilesystemHelper', 'helpers:zlfilesystem.php');
-			$this->app->loader->register('ZlPathHelper', 'helpers:zlpath.php');
 			$this->app->loader->register('ZlModelHelper', 'helpers:model.php');
-			$this->app->loader->register('ZLXmlHelper', 'helpers:zlxmlhelper.php');
 			$this->app->loader->register('ZLFieldHTMLHelper', 'helpers:zlfieldhtml.php');
 		}
 		
@@ -107,6 +103,12 @@ class plgSystemZlframework extends JPlugin {
 			$this->app->path->register( $path, 'models' );
 			$this->app->loader->register('ZLModel', 'models:zl.php');
 			$this->app->loader->register('ZLModelItem', 'models:item.php');
+		}
+
+		// register classes
+		if ( $path = $this->app->path->path( 'zlfw:classes' ) ) {
+			$this->app->path->register($path, 'classes');
+			$this->app->loader->register('ZLStorage', 'classes:zlstorage/ZLStorage.php');
 		}
 		
 		// register events
@@ -160,8 +162,6 @@ class plgSystemZlframework extends JPlugin {
 	 */
 	public function coreConfig( $event, $arguments = array() ){
 		$config = $event->getReturnValue();
-		// keep static content linek in case ZOOtools is not installed
-		$config['_staticcontent'] = array('name' => 'Static Content', 'type' => 'staticcontent');
 		$config['_itemlinkpro'] = array('name' => 'Item Link Pro', 'type' => 'itemlinkpro');
 		$event->setReturnValue($config);
 	}
@@ -171,15 +171,16 @@ class plgSystemZlframework extends JPlugin {
 	 */
 	public function checkInstallation()
 	{
-		if($this->joomla->isAdmin())
+		// if in ZOO or Plugin manager views
+		if($this->app->zlfw->enviroment->is('admin.com_zoo.manager') || $this->app->zlfw->enviroment->is('admin.com_plugins'))
 		{
-			// checks if ZOO and ZL Extensions are up to date only on ZOO and Plugin views
-			$option = $this->app->request->getVar('option');
-			if($option == 'com_zoo' || $option == 'com_plugins'){
-				if(!$this->app->zldependency->check("zlfw:dependencies.config")){
-					return;
-				}
+			// checks if ZOO and ZL Extensions are up to date
+			if(!$this->app->zldependency->check("zlfw:dependencies.config")){
+				return;
 			}
+
+			// set plugins order
+			$this->app->zlfw->checkPluginOrder();
 		}
 		
 		return true;

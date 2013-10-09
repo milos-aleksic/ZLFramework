@@ -1,0 +1,27 @@
+/* Copyright (C) JOOlanders SL http://www.gnu.org/licenses/gpl-2.0.html GNU/GPLv2 only */
+
+// import main file
+@import "../zlux.less";
+
+/* ZLUX Items Manager
+----------------------------------------------------------------------------------------------------*/
+.zlux-itemsmanager {
+
+	&.zlux-dialog {
+		.zlux-manager-dialog-tmpl();
+
+		// items
+		[data-zlux-status="true"] .zlux-object {
+
+			.zlux-x-name a.zlux-x-name-link {
+				color: #444;
+				cursor: default;
+
+				&:hover,
+				&:focus {
+					text-decoration: none;
+				}
+			}
+		}
+	}
+}

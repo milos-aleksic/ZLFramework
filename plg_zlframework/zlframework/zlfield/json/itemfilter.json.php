@@ -31,6 +31,11 @@ defined('_JEXEC') or die('Restricted access');
 	$childs[] = isset($params['itemfilter']) ? '"_filter_fieldset":{
 		"type":"wrapper",
 		"fields": {
+			"_created_by":{
+				"type":"text",
+				"label":"PLG_ZLFRAMEWORK_AUTHOR",
+				"help":"PLG_ZLFRAMEWORK_IFT_AUTHOR_DESC"
+			},
 			"_state":{
 				"type":"select",
 				"label":"PLG_ZLFRAMEWORK_IFT_PUBLISHED_STATE",
@@ -39,7 +44,19 @@ defined('_JEXEC') or die('Restricted access');
 				"specific":{
 					"options":{
 						"PLG_ZLFRAMEWORK_ENABLED":"1",
-						"PLG_ZLFRAMEWORK_DISABLED":"0"
+						"PLG_ZLFRAMEWORK_DISABLED":"0",
+						"PLG_ZLFRAMEWORK_ANY":""
+					}
+				}
+			},
+			"_frontpage":{
+				"type":"select",
+				"label":"PLG_ZLFRAMEWORK_IFT_FRONTPAGE_STATE",
+				"help":"PLG_ZLFRAMEWORK_IFT_FRONTPAGE_STATE_DESC",
+				"specific":{
+					"options":{
+						"PLG_ZLFRAMEWORK_ANY":"",
+						"PLG_ZLFRAMEWORK_ENABLED":"1"
 					}
 				}
 			},

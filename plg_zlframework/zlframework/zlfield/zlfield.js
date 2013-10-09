@@ -524,6 +524,46 @@
 					});
 				}); // Load Field
 
+				/* 
+				 * Items selector
+				 */
+				$('[data-type=items] .zl-field', $dom).each(function(){
+					var $field = $(this),
+						info = $('input.zlux-x-dummy', $field),
+						cname = info.val(),
+						params = info.data('params');
+
+					// remove dummy input
+					info.remove();
+
+					// load the field JS
+					$field.zlux("FieldsLoader", $.extend({}, params, {
+						field: 'items',
+						controlName: cname
+					}));
+
+				}); // Items selector END
+
+				/* 
+				 * Options field
+				 */
+				$('[data-type=options] .zl-field', $dom).each(function(){
+					var $field = $(this),
+						info = $('input.zlux-x-dummy', $field),
+						cname = info.val(),
+						params = info.data('params');
+
+					// remove dummy input
+					info.remove();
+
+					// load the field JS
+					$field.zlux("FieldsLoader", $.extend({}, params, {
+						field: 'options',
+						controlName: cname
+					}));
+
+				}); // Options field END
+
 			$dom.data('zlfield-actions-init', !0)}
 		},
 

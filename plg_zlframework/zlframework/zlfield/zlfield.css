@@ -66,6 +66,16 @@ div.zlfield div.zl-row[data-type="date"] .zl-field img {
 	margin-left: 2px;
 }
 
+/* radio */
+div.zlfield div.zl-row[data-type="radio"] .zl-field input,
+div.zlfield div.zl-row[data-type="radio"] .zl-field label {
+	clear: none;
+	float: left;
+	min-width: inherit;
+	margin-right: 10px;
+}
+
+
 /*
  --- Parameters fields ----------------------------------------------------------------------------------- */
 

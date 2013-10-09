@@ -32,6 +32,17 @@ class plgSystemZlframeworkInstallerScript
 			'plugins/system/zlframework/zlframework/models/query.php',
 			'plugins/system/zoo_zlelements/zoo_zlelements/fields/specific.php',
 
+			// files pro old assets
+			'plugins/system/zlframework/zlframework/elements/filespro/assets/filespro.css',
+
+			// moved to ZLFW helpers
+			'plugins/system/zlframework/zlframework/helpers/zlfilesystem.php',
+			'plugins/system/zlframework/zlframework/helpers/zlpath.php',
+			'plugins/system/zlframework/zlframework/helpers/zlstring.php',
+			'plugins/system/zlframework/zlframework/helpers/zlxmlhelper.php',
+			// 'plugins/system/zlframework/zlframework/assets/js/zldialog.js', // to be checked
+			'plugins/system/zlframework/zlframework/assets/js/zldialog_moved.txt',
+
 			// until complete cleanup of this folder, proceede individually
 			'plugins/system/zlframework/zlframework/fields/example.php',
 			'plugins/system/zlframework/zlframework/fields/fields.php',
@@ -42,11 +53,33 @@ class plgSystemZlframeworkInstallerScript
 			'plugins/system/zlframework/zlframework/fields/zlapplication.php',
 			'plugins/system/zlframework/zlframework/fields/zlinfo.php',
 			'plugins/system/zlframework/zlframework/fields/zllayout.php',
-			'plugins/system/zlframework/zlframework/fields/zlspacer.php'
+			'plugins/system/zlframework/zlframework/fields/zlspacer.php',
+
+			// deprecated assets
+			'plugins/system/zlframework/zlframework/assets/js/yepnope.min.js',
+			'plugins/system/zlframework/zlframework/zlux/zlux.css'
 		),
 		'folders' => array(
 			'plugins/system/zlframework/zlframework/assets/libraries/zlparams',
-			'plugins/system/zoo_zlelements/zoo_zlelements/elements_core'
+			'plugins/system/zoo_zlelements/zoo_zlelements/elements_core',
+			'plugins/system/zlframework/zlframework/zlfwhelpers',
+
+			// moved to zlux/assets
+			'plugins/system/zlframework/zlframework/zlux/zlbootstrap',
+
+			// moved to helpers folder
+			'plugins/system/zlframework/zlframework/helpers_zlfw',
+
+			// filespro old assets
+			'plugins/system/zlframework/zlframework/elements/filespro/assets/js',
+			'plugins/system/zlframework/zlframework/elements/filespro/assets/images',
+			'plugins/system/zlframework/zlframework/elements/filespro/assets/plupload',
+			'plugins/system/zlframework/zlframework/elements/filespro/assets/s3',
+
+			// moved to ZLUX
+			'plugins/system/zlframework/zlframework/assets/libraries/bootstrap'
+			// 'plugins/system/zlframework/zlframework/assets/libraries/zlux', // the old zlux
+			// 'plugins/system/zlframework/zlframework/assets/images' // to be checked
 		)
 	);
 
@@ -62,6 +95,7 @@ class plgSystemZlframeworkInstallerScript
 	{
 		// init vars
 		$db = JFactory::getDBO();
+		$type = strtolower($type);
 		$this->_src = $parent->getParent()->getPath('source'); // tmp folder
 		$this->_target = JPATH_ROOT.'/plugins/system/zlframework'; // install folder
 		$this->_ext_version = $parent->get( "manifest" )->version;
@@ -129,6 +163,13 @@ class plgSystemZlframeworkInstallerScript
     }
 
     /**
+	 * method to update the component
+	 *
+	 * @return void
+	 */
+	function update($parent) {}
+
+    /**
 	 * Called on uninstallation
 	 *
 	 * @param   object  $parent  The object responsible for running this script
@@ -152,13 +193,14 @@ class plgSystemZlframeworkInstallerScript
 	public function postflight($type, $parent)
 	{
 		// init vars
+		$type = strtolower($type);
 		$release = $parent->get( "manifest" )->version;
 
-		if(strtolower($type) == 'install'){
+		if($type == 'install'){
 			echo JText::sprintf('PLG_ZLFRAMEWORK_SYS_INSTALL', $this->_ext_name, $release);
 		}
 
-		if(strtolower($type) == 'update'){
+		if($type == 'update'){
 			echo JText::sprintf('PLG_ZLFRAMEWORK_SYS_UPDATE', $this->_ext_name, $release);
 		}
 
@@ -202,11 +244,11 @@ class plgSystemZlframeworkInstallerScript
 	}
 
 	/**
-	 * check extensions requirements
+	 * check requirements EXAMPLE
 	 *
 	 * @return  boolean  True on success
 	 */
-	protected function checkRequirementsEXAMPLE($parent)
+	protected function checkRequirements($parent)
 	{
 		/*
 		 * make sure Akeeba Subscription exist, is enabled
@@ -225,6 +267,19 @@ class plgSystemZlframeworkInstallerScript
 			$this->_error = "Akeeba Subscription v{$min_release} or higher required, please update it and retry the installation.";
 
 			return false;
+		}
+
+		/*
+		 * make sure ZLFW is up to date
+		 */
+		if($min_zlfw_release = $parent->get( "manifest" )->attributes()->zlfw)
+		{
+			$zlfw_manifest = simplexml_load_file(JPATH_ROOT.'/plugins/system/zlframework/zlframework.xml');
+
+			if( version_compare((string)$zlfw_manifest->version, (string)$min_zlfw_release, '<') ) {
+				$this->_error = "<a href=\"https://www.zoolanders.com/extensions/zl-framework\" target=\"_blank\">ZL Framework</a> v{$min_zlfw_release} or higher required, please update it and retry the installation.";
+				return false;
+			}
 		}
 
 		return true;

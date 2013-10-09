@@ -24,8 +24,10 @@ abstract class ElementFilesPro extends ElementRepeatablePro {
 	protected $_extensions = '';
 	protected $_s3;
 	protected $_jfile_path;
-
-	/* this file INDEX - render, edit, file manager, submissions */
+	protected $_storage;
+	protected $_resources;
+	protected $_uniqid;
+	protected $_directory;
 
 	/*
 	   Function: Constructor
@@ -41,13 +43,92 @@ abstract class ElementFilesPro extends ElementRepeatablePro {
 		
 		// set joomla file path
 		$this->_joomla_file_path = $params->get('file_path') ? $params->get('file_path') : 'images';
+
+		// set the events
+		$this->app->event->dispatcher->connect('item:saved', array($this, 'itemSaved'));
+	}
+
+	/*
+		Function: itemSaved
+			Performs actions after item was saved
+	*/
+	public function itemSaved($event)
+	{
+		$item = $event->getSubject();
+		$elem = $item->getElement($this->identifier);
+
+		// if the Item is new
+		if ($event['new']) {
+
+			/* when using dynamic var such as [zooitemid] we need to store the files in a temporal
+			   folder as we ignore that var until the item is saved. Then we can move them */
+			$old_path = 'tmp/zl_' . $this->identifier . '_' . $item->elements->find("{$this->identifier}.0.uniqid");
+			$new_path = $elem->getDirectory(false, $item);
+
+			// move uploaded files to new path, if succesfull...
+			if ($elem->storage()->move($old_path, $new_path)) {
+				// update item data
+				$data = $elem->data();
+				foreach ($data as &$instance) {
+					$instance['file'] = str_replace($old_path, $new_path, $instance['file']);
+				}
+				$item->elements->set($this->identifier, $data);
+				$this->app->table->item->save($item);
+			}
+		}
+	}
+
+	/*
+		Function: getUniqueid
+			Returns an unique id used for temporal storage folder
+
+		Returns:
+			String - The ID
+	*/
+	public function getUniqid()
+	{
+		if (!$this->_uniqid && $this->_item->id == 0) {
+			$this->_uniqid = $this->get('uniqid') ? $this->get('uniqid') : uniqid();
+		}
 		
-		// set callbacks
-		$this->registerCallback('uploadFiles');
-		$this->registerCallback('getfiledetails');
-		$this->registerCallback('files');
-		$this->registerCallback('delete');
-		$this->registerCallback('newfolder');
+		return $this->_uniqid;
+	}
+
+	/*
+		Function: storage
+			Init the Storage
+
+		Returns:
+			Class - Storage php class
+	*/
+	public function storage()
+	{
+		// init storage
+		if ($this->_storage == null)
+		{
+			// if source is an URI
+			if (strpos($this->get('file'), 'http') === 0) 
+			{
+				$this->_storage = new ZLStorage('URI');
+			}
+
+			// s3
+			else if ($this->config->find('files._s3', 0))
+			{
+				$bucket	   = trim($this->config->find('files._s3bucket'));
+				$accesskey = trim($this->app->zlfw->decryptPassword($this->config->find('files._awsaccesskey')));
+				$secretkey = trim($this->app->zlfw->decryptPassword($this->config->find('files._awssecretkey')));
+
+				$this->_storage = new ZLStorage('AmazonS3', array('secretkey' => $secretkey, 'accesskey' => $accesskey, 'bucket' => $bucket));
+			} 
+
+			// local
+			else
+			{
+				$this->_storage = new ZLStorage('Local');
+			}
+		}
+		return $this->_storage;
 	}
 
 	/*
@@ -67,44 +148,43 @@ abstract class ElementFilesPro extends ElementRepeatablePro {
 	}
 	
 	/*
-	   Function: initS3
-		   Init the S3 class
-
-	   Returns:
-		   Class - S3 php class
+		DEPICATED since 3.0.15, still needed for old FilesPro elements
 	*/
 	public function _S3()
 	{
 		if ($this->_s3 == null)
 		{
-			//include the S3 class
-			if (!class_exists('S3')) require_once($this->app->path->path('elements:filespro/assets/s3/S3.php'));
+			$bucket	   = $this->config->find('files._s3bucket');
+			$accesskey = trim($this->app->zlfw->decryptPassword($this->config->find('files._awsaccesskey')));
+			$secretkey = trim($this->app->zlfw->decryptPassword($this->config->find('files._awssecretkey')));			
 
-			$awsaccesskey = trim($this->app->zlfw->decryptPassword($this->config->find('files._awsaccesskey')));
-			$awssecretkey = trim($this->app->zlfw->decryptPassword($this->config->find('files._awssecretkey')));
-			$s3 = new S3($awsaccesskey, $awssecretkey); // instantiate the class
+			// register s3 class
+			$this->app->loader->register('AEUtilAmazons3', 'classes:amazons3.php');
 
-			if(@$s3->listBuckets() && (@$constraint = $s3->getBucketLocation(trim($this->config->find('files._s3bucket')))) !== false)
-			{
-				$location = array('US' => 's3.amazonaws.com', 'us-west-1' => 's3-us-west-1.amazonaws.com', 'us-west-2' => 's3-us-west-2.amazonaws.com', 'eu-west-1' => 's3-eu-west-1.amazonaws.com', 'EU' => 's3-eu-west-1.amazonaws.com', 'ap-southeast-1' => 's3-ap-southeast-1.amazonaws.com', 'ap-northeast-1' => 's3-ap-northeast-1.amazonaws.com', 'sa-east-1' => 's3-sa-east-1.amazonaws.com');
-				$this->_s3 = new S3($awsaccesskey, $awssecretkey, false, $location[$constraint]);
-			}
+			// init S3 Utility
+			$this->_s3 = AEUtilAmazons3::getInstance($accesskey, $secretkey, false);
 		}
 		return $this->_s3;
 	}
 
 	/*
 		Function: isDownloadLimitReached
-			Gets the download file size.
+			Checks if the file has reached it's download limit
 
 		Returns:
-			String - Download file with KB/MB suffix
+			Boolean
 	*/
 	function isDownloadLimitReached() {
 		return ($limit = $this->get('download_limit')) && $this->get('hits', 0) >= $limit;
 	}
 
-/* -------------------------------------------------------------------------------------------------------------------------------------------------------- RENDER */
+	/* DEPRICATED since 3.0.15 */
+	public function getExtension($file = null, $checkMime = true) {
+		$file = empty($file) ? $this->get('file') : $file;
+		return strtolower($this->app->zlfw->filesystem->getExtension($file, $checkMime));
+	}
+
+/* RENDER --------------------------------------------------------------------------------------------------------------------------- */
 
 	/*
 		Function: _hasValue
@@ -118,7 +198,7 @@ abstract class ElementFilesPro extends ElementRepeatablePro {
 	*/
 	protected function _hasValue($params = array())
 	{
-		$files = $this->getFiles($this->get('file'));
+		$files = $this->getValidResources($this->get('file'));
 		return !empty($files);
 	}
 
@@ -135,100 +215,33 @@ abstract class ElementFilesPro extends ElementRepeatablePro {
 		return parent::getRenderedValues($params, $wk, $opts);
 	}
 
+	/* DEPRICATED */
+	public function getFiles($path = null)
+	{
+		return $this->_resources = $this->getValidResources($path);
+	}
+
 	/*
-		Function: getFileObject
-			Create and return the individual File object
+		Function: getValidResources
+			Retrieve all valid resources from a path
 
 		Returns:
-			Array
+			Array or resources
 	*/
-	protected function getFileObject($file, $params)
+	protected $_valid_resources = array();
+	public function getValidResources($path = null)
 	{
-		$fileObj = array();
-		$fileObj['path']				= $file;
-		//$fileObj['file']				= 'root:'.$this->app->path->relative($file);
-		$fileObj['ext'] 				= $this->getExtension($file);
-		$fileObj['url']					= $this->getURL($file);
-		$fileObj['name'] 				= basename($file, '.'.$fileObj['ext']);
-		$fileObj['title'] 				= $this->get('title') ? $this->get('title') : $fileObj['name'];
+		// get final path
+		$path = $path ? $path : $this->getDefaultSource();
+
+		// use resouce cache if exist
+		if (!array_key_exists($path, $this->_valid_resources))
+		{
+			// get the valid resources from the path
+			$this->_valid_resources[$path] = $this->storage()->getValidResources($path, $this->getLegalExtensions());
+		}
 		
-		return $fileObj;
-	}
-
-	/*
-		Function: getURL
-			Get external files url
-
-		Returns:
-			Array
-	*/
-	protected function getURL($file)
-	{
-		if($this->config->find('files._s3', 0) || strpos($file, 'http') === 0) // S3 or external source
-		{
-			$bucket = $this->config->find('files._s3bucket');
-			return $this->_S3()->getAuthenticatedURL($bucket, $file, 3600);
-		}
-		else
-		{
-			return JURI::base().$this->app->path->relative($file); // using base is important
-		}
-	}
-
-	/*
-		Function: getFiles
-			Retrieve files from folders and individuals
-
-		Returns:
-			Array
-	*/
-	public function getFiles($source = null)
-	{
-		// get source or use default
-		$source = $source ? $source : $this->getDefaultSource();
-
-		$files = array();
-		if(!empty($source))
-		{
-			// S3 integration
-			if($this->config->find('files._s3', 0) && $this->_S3())
-			{
-				// TODO check if is readable
-				$files[] = $source;
-			}
-
-			// external source
-			else if (strpos($source, 'http') === 0)
-			{
-				// TODO check if is readable
-				$files[] = $source;
-			}
-
-			// local source
-			else 
-			{
-				// get full path
-				$sourcepath = $this->app->path->path("root:$source");
-
-				// if directory
-				if($sourcepath && is_dir($sourcepath)){
-
-					// retrieve all valid files
-					foreach ($this->app->path->files("root:$source", false, '/^.*('.$this->getLegalExtensions().')$/i') as $filename) {
-						$file = "$sourcepath/$filename";
-						if ($file && is_file($file) && is_readable($file)) {
-							$files[] = "$source/$filename";
-						}
-					}
-
-				// if file
-				} else if($sourcepath && is_file($sourcepath) && is_readable($sourcepath)) {
-					$files[] = $source;
-				}
-			}
-		}
-
-		return $files;
+		return $this->_valid_resources[$path];
 	}
 
 	/*
@@ -257,8 +270,6 @@ abstract class ElementFilesPro extends ElementRepeatablePro {
 		return preg_replace($pattern, $replace, $default_source); 
 	}
 
-/* -------------------------------------------------------------------------------------------------------------------------------------------------------- EDIT */
-
 	/*
 		Function: loadAssets
 			Load elements css/js assets.
@@ -269,57 +280,16 @@ abstract class ElementFilesPro extends ElementRepeatablePro {
 	public function loadAssets()
 	{
 		parent::loadAssets();
-		
-		// ui must be loaded first
-		$this->app->document->addStylesheet('libraries:jquery/jquery-ui.custom.css');
-		$this->app->document->addScript('libraries:jquery/jquery-ui.custom.min.js');
 
-		// workaround for jQuery 1.9 transition
-		$this->app->document->addScript('zlfw:assets/js/jquery.plugins/jquery.migrate.min.js');
+		// load ZLUX assets
+		$this->app->zlfw->zlux->loadMainAssets();
 
-		// then plupload
-		$this->app->document->addStylesheet('elements:filespro/assets/plupload/css/jquery.ui.plupload.custom.css');
-		$this->app->document->addScript('elements:filespro/assets/plupload/plupload.full.js');
-		$this->app->document->addScript('elements:filespro/assets/plupload/jquery.ui.plupload.js');
-		$this->app->zlfw->pluploadTranslation();
-		$this->app->zlfw->filesproTranslation();
-
-		// and others
-		$this->app->zlfw->loadLibrary('qtip');
-		$this->app->document->addScript('elements:filespro/assets/js/plupload.js');
-		$this->app->document->addStylesheet('elements:filespro/assets/filespro.css');
-		$this->app->document->addScript('elements:filespro/assets/js/filespro.js');
-		$this->app->document->addScript('elements:filespro/assets/js/finder.js');
+		// load the FilesPro js
+		$this->app->document->addScript('elements:filespro/assets/filespro.min.js');
 	}
 
-/* -------------------------------------------------------------------------------------------------------------------------------------------------------- FILE MANAGER */
+/* FILE MANAGER ----------------------------------------------------------------------------------------------------------------------  */
 
-	/*
-		Function: getPreview
-			Return file preview
-			
-		Parameters:
-			$source
-			
-		Returns:
-			string
-	*/
-	public function getPreview($source = null) 
-	{
-		$sourcepath = $this->app->path->path('root:'.$source);
-		
-		if (is_dir($sourcepath))
-		{
-			return '<img src="'.$this->app->path->url('elements:filespro/assets/images/folder_horiz.png').'">';
-		}
-		else if (is_file($sourcepath) || strpos($source, 'http') === 0 || $this->config->find('files._s3', 0))
-		{
-			$url = parse_url($source);
-			$ext = strtolower($this->app->zlfilesystem->getExtension($url['path']));
-			return '<span class="file-type">'.$ext.'</span>';
-		}
-	}
-	
 	/*
 		Function: getFileDetails
 			Return file info
@@ -333,80 +303,14 @@ abstract class ElementFilesPro extends ElementRepeatablePro {
 	*/
 	public function getFileDetails($file = null, $json = true)
 	{
-		$file = $file === null ? $this->get('file') : $file;
-	
-		$data = null;
-		if(strlen($file) && $this->config->find('files._s3', 0) && $this->_S3()){
-			$data = $this->_s3FileDetails($file, $json);
-		} else if (strlen($file)){
-			$data = $this->_fileDetails($file, $json); // local or external source
-		}
-		
-		$data = $this->app->data->create($data);
-		$data['all'] = ($data->get('size') ? $data->get('size') : '')
-					  .($data->get('res') ? ' - '.$data->get('res') : '')
-					  .($data->get('dur') ? ' - '.$data->get('dur') : '')
-					  .($data->get('files') ? ' - '.$data->get('files').' '.JText::_('PLG_ZLFRAMEWORK_FILES') : '');
-						
-		
-		return $json ? json_encode($data) : $data;
-	}
-	
-	private function _fileDetails($source = null)
-	{
-		$data = null;
-		if (strpos($source, 'http') === 0) // external source
-		{
-			$data = array(
-				'source'	=> 'file',
-				'name'		=> JFile::stripExt(basename($source)),
-				'preview'	=> $this->getPreview($source),
-				'ext'		=> strtolower($this->app->zlfilesystem->getExtension($source)),
-				'size'		=> $this->getSourceSize($source)
-			);
-		} 
-		else // local source
-		{
-			$sourcepath = $this->app->path->path('root:'.$source);
-			if (is_readable($sourcepath) && is_file($sourcepath)){
-				$imageinfo = getimagesize($sourcepath);
-				$data = array(
-					'source'	=> 'file',
-					'name'		=> JFile::stripExt(basename($source)),
-					'preview'	=> $this->getPreview($source),
-					'ext'		=> strtolower($this->app->zlfilesystem->getExtension($source)),
-					'size'		=> $this->getSourceSize($source),
-					'res'		=> $imageinfo ? $imageinfo[0].'x'.$imageinfo[1].'px' : ''
-				);
-			} else if (is_readable($sourcepath) && is_dir($sourcepath)){
-				$tSize = $this->getSourceSize($source);
-				$data = array(
-					'source'	=> 'folder',
-					'name'		=> ($tSize ? basename($source) : JText::_('PLG_ZLFRAMEWORK_FLP_NO_VALID_FILES')),
-					'preview'	=> $this->getPreview($source),
-					'size'		=> $tSize,
-					'files'		=> count($this->app->path->files('root:'.$source, false, '/^.*('.$this->getLegalExtensions().')$/i'))
-				);
-			}
-		}
-		
-		return $data;
-	}
-	
-	private function _s3FileDetails($file = null)
-	{		
-		$bucket = $this->config->find('files._s3bucket');
-		$object = $this->_S3()->getObjectInfo($bucket, $file);
+		// get the object path
+		$path = $file === null ? $this->get('file') : $file;
 
-		$data = array(
-			'type'		=> $this->getElementType(),
-			'name'		=> JFile::stripExt(basename($file)),
-			'preview'	=> $this->getPreview($this->_S3()->getAuthenticatedURL($bucket, $file, 3600)),
-			'ext'		=> strtolower($this->app->zlfilesystem->getExtension($file)),
-			'size'		=> $this->app->zlfilesystem->formatFilesize($this->app->zlfilesystem->returnBytes($object['size']))
-		);	
-		
-		return $data;
+		// get the object info
+		$data = $this->storage()->getObjectInfo($path);
+
+		// return in json or param object
+		return $json ? json_encode($data) : $this->app->data->create($data);
 	}
 	
 	/*
@@ -422,70 +326,45 @@ abstract class ElementFilesPro extends ElementRepeatablePro {
 	public function getFileDetailsDom($file=null)
 	{
 		$file = $file === null ? $this->get('file') : $file;
-		$fd = $this->app->data->create($this->getFileDetails($file, false));
-		
-		return '<div class="file-details">'
-					.'<div class="fp-found" style="display: '.($fd->get('name') ? 'block' : 'none').'">'
-						.'<div class="file-preview">'.$fd->get('preview').'</div>'
-						.'<div class="file-info">'
-							.'<div class="file-name"><span>'.$fd->get('name').'</span></div>'
-							.'<div class="file-properties">'.$fd->get('all').'</div>'
-						.'</div>'
-					.'</div>'
-					.'<div class="fp-missing" style="display: '.(!strlen($file) || $fd->get('name') ? 'none' : 'block').'">'.JText::_('PLG_ZLFRAMEWORK_FLP_MISSING_FILE').'</div>'
-				.'</div>';
-	}
-	
-	/*
-		Function: delete
-			Delete Folder or File
-			
-		Parameters:
-			$path: file or folder relative path
-	*/
-	public function delete()
-	{
-		$path = $this->app->request->get('path', 'string', ''); // selected path to delete
-		$fullpath = JPATH_ROOT . '/' . $this->getDirectory() . '/' . ($path ? $path : '');
-	
-		if (is_readable($fullpath) && is_file($fullpath))
-			JFile::delete($fullpath);
-		else if (is_readable($fullpath) && is_dir($fullpath))
-			JFolder::delete($fullpath);
 
-		echo json_encode(array('result' => true));
-	}
-	
-	/*
-		Function: newfolder
-			Create new Folder
-			
-		Parameters:
-			$path: parent folder path
-	*/
-	public function newfolder()
-	{
-		$path	   = $this->app->request->get('path', 'string', ''); // selected path
-		$newfolder = $this->app->request->get('newfolder', 'string', ''); // new folder name
-		$fullpath  = JPATH_ROOT . '/' . $this->getDirectory() . '/' . ($path ? $path : '').'/'.$newfolder;		
-		
-		// if does not exist, create
-		if (!JFolder::exists($fullpath))
-			JFolder::create($fullpath);
+		// set storage params
+		$storage = array();
+		if ($this->config->find('files._s3', 0))
+		{
+			$bucket = trim($this->config->find('files._s3bucket'));
 
-		echo json_encode(array('result' => true));
-	}
+			// decrypt the ZLField password 
+			$accesskey = $this->app->zlfw->decryptPassword(trim($this->config->find('files._awsaccesskey')));
+			$secretkey = $this->app->zlfw->decryptPassword(trim($this->config->find('files._awssecretkey')));
 
-	/*
-	   Function: getExtension
-		   Get the file extension string.
+			// get signed policy
+			$policy = $this->app->zlfw->zlux->getAmazonS3signedPolicy($bucket, $secretkey);
 
-	   Returns:
-		   String - file extension
-	*/
-	public function getExtension($file = null, $checkMime = true) {
-		$file = empty($file) ? $this->get('file') : $file;
-		return strtolower($this->app->zlfilesystem->getExtension($file, $checkMime));
+			// encrypt back for JS
+			$secretkey = $this->app->zlfw->crypt($secretkey, 'encrypt');
+
+			$storage['engine'] = 's3';
+			$storage['bucket'] = $bucket;
+			$storage['accesskey'] = urlencode($accesskey);
+			$storage['secretkey'] = urlencode($secretkey);
+			$storage['policy']	  = $policy['policy'];
+			$storage['signature'] = $policy['signature'];
+
+		} else {
+			$storage['engine'] = 'local';
+		}
+
+		// set the storage root
+		$storage['root'] = $this->getDirectory();
+
+		$html = "<span class=\"zlux-x-filedata\" data-zlux-data='" . json_encode($this->getFileDetails($file, false)) 
+			. "' data-zlux-storage='" . json_encode($storage) . "'></span>";
+
+		if ($uniqid = $this->getUniqid()) {
+			$html .= '<input type="hidden" value="' . $uniqid . '" name="' . $this->getControlName('uniqid') . '">';
+		}
+
+		return $html;
 	}
 	
 	/*
@@ -499,298 +378,116 @@ abstract class ElementFilesPro extends ElementRepeatablePro {
 		$extensions = $this->config->find('files._extensions', $this->_extensions);
 		return str_replace('|', $separator, $extensions);
 	}
-	
-	/*
-		Function: getSourceSize
-			get the file or folder files size with extension filter
 
-		Returns:
-			Array
-	*/
-	protected function getSourceSize($source = null)
-	{
-		// init vars
-		$sourcepath = $this->app->path->path('root:'.$source);
-		$size = '';
-		
-		if (strpos($source, 'http') === 0) // external source
-		{
-			$ch = curl_init(); 
-			curl_setopt($ch, CURLOPT_HEADER, true); 
-			curl_setopt($ch, CURLOPT_NOBODY, true);
-			curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true); 
-			curl_setopt($ch, CURLOPT_URL, $source); //specify the url
-			curl_setopt($ch, CURLOPT_RETURNTRANSFER, TRUE); 
-			$head = curl_exec($ch);
-			
-			$size = curl_getinfo($ch, CURLINFO_CONTENT_LENGTH_DOWNLOAD);
-		} 
-		if (is_file($sourcepath))
-		{
-			$size = filesize($sourcepath);
-		}
-		else if(is_dir($sourcepath)) foreach ($this->app->path->files('root:'.$source, false, '/^.*('.$this->getLegalExtensions().')$/i') as $file){
-			$size += filesize($this->app->path->path("root:{$source}/{$file}"));
-		}
-		
-		return ($size ? $this->app->zlfilesystem->formatFilesize($size) : 0);
-	}
-
-	/*
-		Function: files
-			Get directory/file list JSON formatted
-
-		Returns:
-			Void
-	*/
-	public function files()
-	{
-		if ($this->config->find('files._s3', 0)) return $this->filesFromS3();
-		else return $this->filesFromDirectory();
-	}
-	
-	protected function filesFromDirectory() {
-		$tree = array();
-		$path = trim($this->app->request->get('path', 'string'), '/');
-		$path = empty($path) ? '' : '/'.$path;
-		foreach ($this->app->path->dirs('root:'.$this->getDirectory().$path) as $dir) {
-			$name = basename($dir); $name = (strlen($name) > 30) ? substr($name, 0,30).'...' : $name; // limit name length
-			$tree[] = array('name' => $name, 'path' => $path.'/'.$dir, 'type' => 'folder', 'val' => $this->getDirectory().$path.'/'.$dir);
-		}
-		foreach ($this->app->path->files('root:'.$this->getDirectory().$path, false, '/^.*('.$this->getLegalExtensions().')$/i') as $file) {
-			$name = basename($file); $name = (strlen($name) > 30) ? substr($name, 0,30).'...' : $name; // limit name length
-			$tree[] = array('name' => $name, 'path' => $path.'/'.$file, 'type' => 'file', 'val' => $this->getDirectory().$path.'/'.$file);
-		}
-		
-		return json_encode($tree);
-	}
-
-	protected function filesFromS3() {
-	
-		$s3 = $this->_S3();
-	
-		if ($s3){
-		
-			$awsbucket = trim($this->config->find('files._s3bucket'));
-			$req_type  = $this->app->request->get('req_type', 'string', 0);
-			$folders = $files = array();
-
-			$path   = $req_type == 'init' ? $this->getDirectory(true) : $this->app->request->get('path', 'string', '');
-			$prefix = trim($path, '/');
-			
-			// get all objects and filter by folder/file
-			$objects = $s3->getBucket($awsbucket, $prefix);
-			if (count($objects) && $req_type != 'file') foreach ($objects as $obj) {
-				$name		  = $obj['name'];
-				$last_car 	  = substr($name, -1);
-				$child		  = substr($name, strlen($prefix)+1);
-				$count_folder = substr_count($child, '/');
-				
-				// filter current folder and subfolders objects
-				if ($name == $prefix.'/' || $count_folder >= 2 || ($count_folder >= 1 && $last_car != '/')) continue;
-			
-				if ($obj['size'] == 0 && $last_car == '/') {
-					$folders[] = array('name' => basename($name), 'path' => $name, 'type' => 'folder', 'val' => $name);
-				} else {
-					// continue if no regex filter match
-					if (!preg_match('/^.*('.$this->getLegalExtensions().')$/i', $name)) continue;
-					$files[]   = array('name' => basename($name), 'path' => $name, 'type' => 'file', 'val' => $name);
-				}
-			}
-			else if ($req_type == 'init')
-			{
-				return json_encode(array('msg' => JText::_('PLG_ZLFRAMEWORK_FLS_S3_NO_DATA')));
-			}
-			
-			return json_encode(array_merge($folders, $files));
-			
-
-		} else {
-			return json_encode(array('msg' => JText::_('PLG_ZLFRAMEWORK_FLS_S3_ACCES_FAIL')));
-		}
-	}
-	
-	
 	/*
 	 * Return the full directory path
-	 *
-	 * Original Credits:
-	 * @package   	JCE
-	 * @copyright 	Copyright ¬© 2009-2011 Ryan Demmer. All rights reserved.
-	 * @license   	GNU/GPL 2 or later - http://www.gnu.org/licenses/old-licenses/gpl-2.0.html
-	 * 
-	 * Adapted to ZOO (ZOOlanders.com)
-	 * Copyright 2011, ZOOlanders.com
 	 */
-	public function getDirectory($allowroot = false)
+	public function getDirectory($allowroot = false, $item = false)
 	{
-		$user = JFactory::getUser();
-		$item = $this->getItem();
-
-		// Get base directory as shared parameter
-		$root = $this->config->find('files._source_dir', $this->_joomla_file_path);
-		
-		// Restricted Joomla! folders
-		$restricted = explode(',', 'administrator,cache,components,includes,language,libraries,logs,media,modules,plugins,templates,xmlrpc');
-		
-
-		// Remove whitespace
-		$root = trim($root);
-		// Convert slashes / Strip double slashes
-		$root = preg_replace('/[\\\\]+/', '/', $root);
-		// Remove first leading slash
-		$root = ltrim($root, '/');
-		
-		// Split in parts to better manage
-		$parts = explode('/', $root);
-		// Force default directory if path starts with a variable, a . or is empty
-		if (preg_match('/[\.\[]/', $parts[0]) || (empty($root) && !$allowroot)) {
-			$parts[0] = $this->_joomla_file_path;
-		}
-		// Force default if directory is a joomla directory conserving the variables
-		if (!$allowroot && in_array(strtolower($parts[0]), $restricted)) {
-			$parts[0] = $this->_joomla_file_path;
-		}
-		// join back
-		$root = implode('/', $parts);
-		
-		jimport('joomla.user.helper');
-		// Joomla! 1.6+
-		if (method_exists('JUserHelper', 'getUserGroups')) {
-			$groups 	= JUserHelper::getUserGroups($user->id);
-			$groups		= array_keys($groups);
-			$usertype 	= array_shift($groups);												
-		} else {
-			$usertype 	= $user->usertype;
-		}
-
-		// Replace any path variables
-		$pattern = array(
-			'/\[userid\]/', '/\[username\]/', '/\[usertype\]/',
-			'/\[zooapp\]/', '/\[zooprimarycat\]/', '/\[zooprimarycatid\]/',
-			'/\[day\]/', '/\[month\]/', '/\[year\]/'
-		);
-		$replace = array(
-			$user->id, $user->username, $usertype,
-			strtolower($item->getApplication()->name), ($item->getPrimaryCategory() ? $item->getPrimaryCategory()->alias : 'none'), $item->getPrimaryCategoryId(),
-			date('d'), date('m'), date('Y')
-		);
-		
-		$root = preg_replace($pattern, $replace, $root);
-
-		// split into path parts to preserve /
-		$parts = explode('/', $root);
-		// clean path parts
-		$parts = $this->app->zlfilesystem->makeSafe($parts, 'ascii');
-		// join path parts
-		$root = implode('/', $parts);
-		
-		// Create the folder
-		$full = $this->app->zlfilesystem->makePath(JPATH_SITE, $root);
-		if (!$this->config->find('files._s3', 0) && !JFolder::exists($full))
+		if (!$this->_directory)
 		{
-			$this->app->zlfilesystem->folderCreate($full);
-			return JFolder::exists($full) ? $root : $this->_joomla_file_path;
+			$user = JFactory::getUser();
+			$item = $item ? $item : $this->getItem();
+
+			// Get base directory as shared parameter
+			$root = $this->config->find('files._source_dir', $this->_joomla_file_path);
+
+			// if item is new and the path is using dynamic yet unknown vars, return temporal path
+			if (!$item->id && strpos($root, '[zooitemid]') !== false) {
+				return 'tmp/zl_' . $this->identifier . '_' . $this->getUniqid();
+			} 
+
+			// Restricted Joomla! folders
+			$restricted = explode(',', 'administrator,cache,components,includes,language,libraries,logs,media,modules,plugins,templates,xmlrpc');
+			
+			// Remove whitespace
+			$root = trim($root);
+			// Convert slashes / Strip double slashes
+			$root = preg_replace('/[\\\\]+/', '/', $root);
+			// Remove first leading slash
+			$root = ltrim($root, '/');
+			
+			// Split in parts to better manage
+			$parts = explode('/', $root);
+
+			// abort if path starts with a variable, a . or is empty
+			if (preg_match('/[\.\[]/', $parts[0]) || (empty($root) && !$allowroot)) {
+				return false;
+			}
+
+			// abort if path not allowed
+			if (!$allowroot && in_array(strtolower($parts[0]), $restricted)) {
+				return false;
+			}
+			
+			// join back
+			$root = implode('/', $parts);
+			
+
+			// set path variables
+			jimport('joomla.user.helper');
+
+			// user
+			$groups = JUserHelper::getUserGroups($user->id);
+			$groups = array_keys($groups);
+			// get the first group
+			$usergroupid = array_shift($groups);
+			// usergroup table				
+			$group = JTable::getInstance('Usergroup', 'JTable');
+			$group->load($usergroupid);
+			// usertype	
+			$usergroup = $group->title;
+			
+			// author
+			$author = $this->app->user->get($item->created_by);
+			$groups = JUserHelper::getUserGroups($author->id);
+			$groups = array_keys($groups);
+			// get the first group
+			$authorgroupid = array_shift($groups);
+			// usergroup table				
+			$group = JTable::getInstance('Usergroup', 'JTable');
+			$group->load($authorgroupid);
+			// usertype	
+			$authorgroup = $group->title;
+
+			// zoo
+			$zooapp 	= strtolower($item->getApplication()->name);
+			$zooprimarycat = $item->getPrimaryCategory() ? $item->getPrimaryCategory()->alias : 'none';
+			$zooprimarycatid = $item->getPrimaryCategoryId();
+
+
+			// Replace variables
+			$pattern = array(
+				'/\[userid\]/', '/\[username\]/', '/\[usergroup\]/', '/\[usergroupid\]/',
+				'/\[authorid\]/', '/\[authorname\]/', '/\[authorgroup\]/', '/\[authorgroupid\]/',
+				'/\[zooapp\]/', '/\[zooprimarycat\]/', '/\[zooprimarycatid\]/',
+				'/\[zooitemtype\]/', '/\[zooitemid\]/',
+				'/\[day\]/', '/\[month\]/', '/\[year\]/'
+			);
+			$replace = array(
+				$user->id, $user->username, $usergroup, $usergroupid,
+				$author->id, $author->username, $authorgroup, $authorgroupid,
+				$zooapp, $zooprimarycat, $zooprimarycatid,
+				$item->type, $item->id,
+				date('d'), date('m'), date('Y')
+			);
+			$root = preg_replace($pattern, $replace, $root);
+
+			// split into path parts to preserve /
+			$parts = explode('/', $root);
+			// clean path parts
+			$parts = $this->app->zlfw->filesystem->makeSafe($parts, 'ascii');
+			// join path parts
+			$root = implode('/', $parts);
+			
+			// return the result
+			$this->_directory = $root;
 		}
-		
-		return $root;
+
+		return $this->_directory;
 	}
 	
-	/**
-	 * Original Credits:
-	 * upload.php
-	 *
-	 * Copyright 2009, Moxiecode Systems AB
-	 * Released under GPL License.
-	 *
-	 * License: http://www.plupload.com/license
-	 * Contributing: http://www.plupload.com/contributing
-	 * 
-	 * Adapted to ZOO (ZOOlanders.com)
-	 * Copyright 2011, ZOOlanders.com
-	 */
-	public function uploadFiles()
-	{	
-		// get filename and make itwebsafe
-		$fileName = $this->app->zlfilesystem->makeSafe(JRequest::getVar("name", ''), 'ascii');
-
-		// init vars
-		$path 		= $this->app->request->get('path', 'string', ''); // selected subfolder
-		$chunk 		= JRequest::getVar("chunk", 0);
-		$chunks 	= JRequest::getVar("chunks", 0);
-		$ext 		= strtolower(JFile::getExt($fileName));
-		$basename 	= substr($fileName, 0, strrpos($fileName, '.'));
-		$targetDir 	= JPATH_ROOT.'/'.$this->getDirectory().(isset($path) ? '/'.$path : '');
-
-		// construct filename
-		$fileName = "{$basename}.{$ext}";
-
-		// Make sure the fileName is unique but only if chunking is disabled
-		if ($chunks < 2 && JFile::exists("$targetDir/$fileName")) {
-			$count = 1;
-			while (JFile::exists("{$targetDir}/{$basename}_{$count}.{$ext}"))
-				$count++;
-		
-			$fileName = "{$basename}_{$count}.{$ext}";
-		}
-
-		// Create target dir
-		if (!JFolder::exists($targetDir))
-			JFolder::create($targetDir);
-		
-		// Look for the content type header
-		if (isset($_SERVER["HTTP_CONTENT_TYPE"]))
-			$contentType = $_SERVER["HTTP_CONTENT_TYPE"];
-		
-		if (isset($_SERVER["CONTENT_TYPE"]))
-			$contentType = $_SERVER["CONTENT_TYPE"];
-		
-		// Handle non multipart uploads older WebKit versions didn't support multipart in HTML5
-		if (strpos($contentType, "multipart") !== false) {
-			if (isset($_FILES['file']['tmp_name']) && is_uploaded_file($_FILES['file']['tmp_name'])) {
-				// Open temp file
-				$out = fopen($targetDir . DIRECTORY_SEPARATOR . $fileName, $chunk == 0 ? "wb" : "ab");
-				if ($out) {
-					// Read binary input stream and append it to temp file
-					$in = fopen($_FILES['file']['tmp_name'], "rb");
-		
-					if ($in) {
-						while ($buff = fread($in, 4096))
-							fwrite($out, $buff);
-					} else
-						die('{"jsonrpc" : "2.0", "error" : {"code": 101, "message": "Failed to open input stream."}, "id" : "id"}');
-					fclose($in);
-					fclose($out);
-					@unlink($_FILES['file']['tmp_name']);
-				} else
-					die('{"jsonrpc" : "2.0", "error" : {"code": 102, "message": "Failed to open output stream."}, "id" : "id"}');
-			} else
-				die('{"jsonrpc" : "2.0", "error" : {"code": 103, "message": "Failed to move uploaded file."}, "id" : "id"}');
-		} else {
-			// Open temp file
-			$out = fopen($targetDir . DIRECTORY_SEPARATOR . $fileName, $chunk == 0 ? "wb" : "ab");
-			if ($out) {
-				// Read binary input stream and append it to temp file
-				$in = fopen("php://input", "rb");
-		
-				if ($in) {
-					while ($buff = fread($in, 4096))
-						fwrite($out, $buff);
-				} else
-					die('{"jsonrpc" : "2.0", "error" : {"code": 101, "message": "Failed to open input stream."}, "id" : "id"}');
-		
-				fclose($in);
-				fclose($out);
-			} else
-				die('{"jsonrpc" : "2.0", "error" : {"code": 102, "message": "Failed to open output stream."}, "id" : "id"}');
-		}
-		
-		// Return JSON-RPC response
-		die('{"jsonrpc" : "2.0", "result" : null, "id" : "id"}');
-		
-	}
-	
-/* -------------------------------------------------------------------------------------------------------------------------------------------------------- SUBMISSIONS */
+/* SUBMISSIONS ------------------------------------------------------------------------------------------------------------------------  */
 	
 	/*
 		Function: _renderSubmission
@@ -921,7 +618,7 @@ abstract class ElementFilesPro extends ElementRepeatablePro {
 			if ($userfile && $userfile['error'] == 0 && is_array($userfile)) {
 
 				// get filename and make it websafe
-				$fileName = $this->app->zlfilesystem->makeSafe($userfile['name'], 'ascii');
+				$fileName = $this->app->zlfw->filesystem->makeSafe($userfile['name'], 'ascii');
 
 				// init vars
 				$ext 		= strtolower(JFile::getExt($fileName));
@@ -999,7 +696,7 @@ class AppValidatorFilepro extends AppValidatorFile {
 		$parts = explode('/', $value['name']);
 
 		// clean path parts
-		$parts = $this->app->zlfilesystem->makeSafe($parts, 'ascii');
+		$parts = $this->app->zlfw->filesystem->makeSafe($parts, 'ascii');
 
 		// join path parts
 		$value['name'] = implode('/', $parts);
@@ -1158,5 +855,4 @@ class FilesProSplFileInfo extends SplFileInfo
 		// return without _ carachter
 		return str_replace('_', ' ', $title);
 	}
-
 }

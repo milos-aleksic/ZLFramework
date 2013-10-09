@@ -1,0 +1,155 @@
+/* Copyright (C) JOOlanders SL http://www.gnu.org/licenses/gpl-2.0.html GNU/GPLv2 only */
+
+// import main file
+@import "../zlux.less";
+
+/* ZLUX Fields
+----------------------------------------------------------------------------------------------------*/
+
+[data-type="options"] .zl-label,
+[data-type="options"] .zl-field {
+	float: none !important;
+}
+
+div.zlfield [data-type="options"] .zl-label + .zl-field * {
+    float: none;
+}
+
+// Option field
+div.zlfield div.zl-row[data-type="options"] {
+
+	// list
+	ul {
+		margin: 0 0 10px;
+		padding: 0;
+		overflow: hidden;
+	}
+
+	// option
+	.zlux-x-option {
+		overflow: hidden;
+		padding: 10px 5px;
+		position: relative;
+		width: 100%;
+
+		.zlux-x-name,
+		.zlux-x-value {
+			float: left;
+			margin: 0px 5px;
+		}
+
+		.zlux-x-value {
+			margin-left: 10px;
+
+			label {
+				float: none !important;
+			}
+			.trigger {
+				display: block;
+				float: none !important;
+				margin-top: 6px;
+			}
+		}
+
+
+		// label
+		label[for="name"] {
+			display: block;
+			color: #666666;
+			float: none !important;
+			margin-bottom: 0px;
+		}
+		
+		// panel
+		div.panel {
+			margin-left: 5px;
+			display: none;
+			float: none !important;
+
+			&.active { 
+				display: block;
+			}
+
+			.btns {
+				display: block;
+				float: none !important;
+			}
+
+			input.accept {
+				margin: 5px 0px 0px 5px;
+			}
+
+			a.cancel {
+				margin: 5px 0px 0px 5px;
+				color: #BC0B0B;
+				cursor: pointer;
+			}
+		}
+
+		// tools
+		.zlux-x-tools {
+			position: absolute;
+			right: 9px;
+			visibility: hidden;
+
+			i {
+				margin: 0 5px;
+				cursor: pointer;
+			}
+		}
+
+		&:hover {
+			.zlux-x-tools { visibility: visible; }
+		}
+	}
+}
+
+// Items field
+div.zlfield div.zl-row[data-type="items"] {
+
+	.zl-label,
+	.zl-field {
+		float: none;
+	}
+
+	ul.zlux-field-items {
+		position: relative;
+		margin: 0;
+
+		li.zlux-x-item {
+			position: relative;
+			padding: 5px 0;
+			left: 0;
+
+			&:hover .zlux-x-tools {
+				visibility: visible;
+			}
+
+			.zlux-x-tools {
+				visibility: hidden;
+				position: absolute;
+				right: 0;
+				top: 12px;
+
+				.zlux-x-sort,
+				.zlux-x-delete {
+					cursor: pointer;
+					margin: 0 4px;
+				}
+			}
+
+			.zlux-x-info {
+				margin-left: 5px;
+			}
+		}
+
+		li.dragging {
+			padding: 4px 0;
+		}
+	}
+
+	.btn {
+		display: block;
+		margin-top: 10px;
+	}
+}

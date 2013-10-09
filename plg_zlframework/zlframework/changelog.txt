@@ -1,6 +1,16 @@
 Changelog
 ------------
 
+3.1
+ + ZLUX, ZL User Experience library
+ + ZL Storage Classes
+ + FilesPro Amazon S3 Upload
+ + Added FilesPro source patch vars [zooitemtype], [zooitemid], [usergroup], 
+   [usergroupid], [authorid], [authorname], [authorgroup], [authorgroupid]
+ - Removed FilesPro source patch [usertype] var
+ ^ Item Model features and perfomance improved
+ + Enviroment helper
+
 3.0.14
  # Fixed Item Model query issue
  # Recoevered Item Published date filtering

@@ -30,7 +30,7 @@ class JFormFieldZlfield extends JFormField {
 		$class	  = $node->attributes()->class;
 
 		// parse fields
-		$fields = $this->app->zlfield->parseArray($this->app->zlfield->XMLtoArray($node));
+		$fields = $this->app->zlfield->parseArray($this->app->zlfw->xml->XMLtoArray($node));
 
 		// set json
 		$json = '{"fields": {'.implode(",", $fields).'}}';

@@ -38,6 +38,11 @@ defined('_JEXEC') or die('Restricted access');
 	if(isset($lbsettings['lightbox_overide'])) foreach($lbsettings as $name => $value){
 		$lightbox_options .= "$name:$value;";
 	};
+
+	// random order
+	if (count($images) && isset($settings['order']) && $settings['order'] =="random") {
+		shuffle($images);
+	}
 ?>
 
 <?php if (count($images)) : ?>

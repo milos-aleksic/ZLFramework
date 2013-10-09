@@ -64,9 +64,13 @@ class ZlfieldHelper extends AppHelper {
 			$this->type = $this->joomla->getUserState('plg_zlfw_zlfieldtype', '');
 		}
 
-		// create application object
-		$this->application = $this->app->object->create('Application');
-		$this->application->setGroup($this->group);
+		// retrieve application object
+		if ($this->group) {
+			$this->application = $this->app->object->create('Application');
+			$this->application->setGroup($this->group);
+		} else {
+			$this->application = $this->app->zoo->getApplication();
+		}
 
 		// get url params
 		$this->controller = $this->req->getString('controller');
@@ -134,13 +138,32 @@ class ZlfieldHelper extends AppHelper {
 	protected function initConfigMode()
 	{
 		$this->config = array();
-		if(!empty($this->type) && $type = $this->application->getType($this->type))
+		if($this->controller == 'manager' && !empty($this->type) && $type = $this->application->getType($this->type))
 		{
 			// get params from type.config file
 			$config = json_decode(file_get_contents($type->getConfigFile()), true);
 			$this->config = isset($config['elements']) ? $config['elements'] : $this->config;
-		} 
+		}
+
+		// custom handle for ZOOcart Address type:
+		else if($this->controller == 'addresses' && $this->type == 'address')
+		{
+			$zoocart = JPluginHelper::getPlugin('system','zoocart');
+			if(!empty($zoocart) && JPluginHelper::isEnabled('system','zoocart') 
+				&& $this->application->getParams()->get('global.zoocart.enable_cart'))
+			{
+				// register and load the Address Type
+				$this->app->loader->register('AddressType', 'plugins:system/zoocart/zoocart/classes/addresstype.php');
+				$address = $this->app->object->create('AddressType', array('address', $this->application));
+
+				if (($file = $address->getConfigFile()) && JFile::exists($file)) {
+					$config = json_decode(file_get_contents($file), true);
+					$this->config = isset($config['elements']) ? $config['elements'] : $this->config;
+				}
+			}
+		}
 		
+		// wrap the data with data object
 		$this->config = $this->data->create($this->config);
 
 		// use as params in config mode
@@ -159,9 +182,22 @@ class ZlfieldHelper extends AppHelper {
 		$this->path = $this->task == 'assignelements' ? JPATH_ROOT.'/'.urldecode($this->req->getVar('path')) : '';
 		$this->path = $this->task == 'assignsubmission' ? $this->application->getPath().'/templates/'.$this->req->getString('template') : $this->path;
 
-		// get params from position.config file
-		$renderer = $this->app->renderer->create('item')->addPath($this->path);
-		$this->params = $this->data->create($renderer->getConfig('item')->get($this->group.'.'.$this->application->getType($this->type)->id.'.'.$this->layout));
+		// custom handle for ZOOcart Address type:
+		if($this->controller == 'addresses' && $this->type == 'address')
+		{
+			$this->path = JPATH_ROOT.'/'.urldecode($this->req->getVar('path'));
+
+			// get params from position.config file
+			$renderer = $this->app->renderer->create('address')->addPath($this->path);
+			$this->params = $this->data->create($renderer->getConfig('address')->get($this->application->getGroup().'.'.$this->application->id.'.'.$this->type.'.'.$this->layout));
+
+		// default
+		} else {
+
+			// get params from position.config file
+			$renderer = $this->app->renderer->create('item')->addPath($this->path);
+			$this->params = $this->data->create($renderer->getConfig('item')->get($this->group.'.'.$this->type.'.'.$this->layout));
+		}
 
 		// submissions workaround
 		if($this->task == 'assignsubmission')
@@ -297,6 +333,7 @@ class ZlfieldHelper extends AppHelper {
 				if(is_file($path)){
 					/* IMPORTANT - this vars are necesary for include function */
 					$subloaded = true; // important to let know it's subloaded
+					$psv = $this->data->create($psv);
 					$json = json_decode(include($path), true);
 					break;
 				}
@@ -389,7 +426,9 @@ class ZlfieldHelper extends AppHelper {
 					}
 
 					// render layout
-					if ($layout = $this->getLayout("wrapper/{$layout}.php")) {
+					if ($this->renderIf($fld->get('renderif')) // render check
+							&& $layout = $this->getLayout("wrapper/{$layout}.php")) {
+
 						$result[] = $this->app->zlfw->renderLayout($layout, compact('id', 'content', 'fld'));
 					}
 					
@@ -403,7 +442,7 @@ class ZlfieldHelper extends AppHelper {
 
 					// replace parent values in paths
 					foreach ((array)$psv as $key => $pvalue) {
-						$paths = str_replace('{'.$key.'}', basename((string)$pvalue, '.php'), $paths);
+						$paths = str_replace('{'.$key.'}', basename(@(string)$pvalue, '.php'), $paths);
 					}
 
 					// build json paths
@@ -628,36 +667,6 @@ class ZlfieldHelper extends AppHelper {
 		return $fields;
 	}
 
-	// convert an xml ready for parseArray()
-	public function XMLtoArray($node, $isOption=false)
-	{ 
-		$fields = array(); $i = 0;
-		if(count($node->children())) foreach($node->children() as $child)
-		{
-			// get field atributes
-			$attrs = (array)$child->attributes();
-			$attrs = !empty($attrs) ? array_shift($attrs) : $attrs;
-
-			if($child->getName() == 'options')
-			{
-				$fields[$i]['name'] =  $child->getName();
-				$fields[$i]['attributes'] = $this->XMLtoArray($child, true);
-			}
-			else if($isOption)
-			{
-				$fields[(string)$child] = (string)$child->attributes()->value;
-			}
-			else {
-				$fields[$i]['name'] = $child->getName();
-				$fields[$i]['attributes'] = $attrs;
-				$fields[$i]['childs'] = $this->XMLtoArray($child);
-			}
-
-			$i++;
-		}
-		return $fields;
-	}
-
 	/*
 		Function: renderIf 
 			Render or not depending if specified extension is instaled and enabled
@@ -688,7 +697,7 @@ class ZlfieldHelper extends AppHelper {
 		$pattern = $replace = array(); $i=1;
 		foreach((array)$vars as $var){
 			$pattern[] = "/%s$i/"; $i++;
-			$replace[] = preg_match('/{ZL_/', $var) ? $this->app->zlfw->shortCode($var) : JText::_($var);
+			$replace[] = preg_match('/^{/', $var) ? $this->app->zlfw->shortCode($var) : JText::_($var);
 		}
 
 		return preg_replace($pattern, $replace, $string);
@@ -765,12 +774,12 @@ class ZlfieldHelper extends AppHelper {
 			$this->app->document->addScript('zlfw:assets/js/jquery.plugins/jquery.migrate.min.js');
 
 			// load libraries
+			$this->app->zlfw->zlux->loadMainAssets();
 			$this->app->zlfw->loadLibrary('qtip');
-			// $this->app->zlfw->loadLibrary('zlux'); // in progress
 			$this->app->document->addStylesheet('zlfw:assets/libraries/zlux/zlux.css');
 
 			// init scripts
-			$javascript = "jQuery(function($){ $('body').ZLfield({ url: '{$url}', type: '{$this->type}', enviroment: '{$this->enviroment}', enviroment_args: '{$enviroment_args}' }) });";
+			$javascript = "jQuery(function($){ $('body').ZLfield({ url: '{$url}', type: '{$this->type}', enviroment: '{$this->enviroment}', enviroment_args: '{$enviroment_args}' }); });";
 			$this->app->document->addScriptDeclaration($javascript);
 
 			// don't load them twice
@@ -806,7 +815,7 @@ class ZlfieldHelper extends AppHelper {
 			$attrs		= '';
 
 			// render field
-			$field = $this->app->zlfieldhtml->_('zlf.'.$type, $id, $name, $value, $specific, $attrs, $getCurrentValue);
+			$field = $this->app->zlfieldhtml->_('zlf.'.$type.'Field', $id, $name, $value, $specific, $attrs, $getCurrentValue);
 
 			if (!empty($field)) return $field;
 		}

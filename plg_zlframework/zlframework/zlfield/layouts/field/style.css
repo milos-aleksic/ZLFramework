@@ -130,11 +130,6 @@ div.zlfield div.zl-row[data-layout="default"] .zl-state + .zl-label {
 div.zlfield div.zl-row[data-layout="default"] .zl-label + .zl-field {
 	margin-left: 24px;
 }
-div.zlfield div.zl-row[data-layout="default"] .zl-label + .zl-field * {
-	clear: none;
-	float: left;
-	min-width: 0;
-}
 
 /* label fix for j3 */
 div.zlfield div.zl-row[data-layout="default"] .controls > .radio:first-child,
