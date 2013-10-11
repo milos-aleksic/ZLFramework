@@ -69,8 +69,7 @@ class zlfwHelperZLUX extends AppHelper {
 			// save Joomla! URLs
 			$javascript .= 'jQuery.fn.zluxMain.prototype.JRoot = "' . JURI::root() . '";';
 			$javascript .= 'jQuery.fn.zluxMain.prototype.JBase = "' . JURI::base() . '";';
-			$javascript .= 'jQuery.fn.zluxMain.prototype.ajax = "' . JURI::base() 
-				. 'index.php?option=com_zoo&controller=zlux&format=raw&app_id=' . $app_id  . '";';
+			$javascript .= 'jQuery.fn.zluxMain.prototype.app_id = "' . $app_id . '";';
 
 			// set translations strings
 			$translations = array

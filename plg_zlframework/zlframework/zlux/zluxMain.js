@@ -136,8 +136,22 @@
 		/**
 		 * Returns the ZLUX Ajax URL
 		 */
-		AjaxURL: function() {
-			return Plugin.prototype.ajax;
+		getAjaxURL: function(controller, task, params) {
+			var params = params == undefined ? {} : params,
+				app_id = params.app_id ? params.app_id : Plugin.prototype.app_id;
+
+			// avoid repeating the app id param
+			delete params.app_id;
+
+			// prepare the url
+			var url = Plugin.prototype.JBase + 'index.php?option=com_zoo'
+			+ '&controller=' + controller
+			+ '&task=' + task
+			+ '&app_id=' + app_id
+			+ '&format=raw'
+			+ ($.isEmptyObject(params) ? '' : '&' + $.param(params));
+
+			return url;
 		},
 		/**
 		 * Returns the ZLFW root url

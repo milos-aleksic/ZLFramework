@@ -208,6 +208,11 @@ defined('_JEXEC') or die('Restricted access');
 			}
 		},
 
+		'./* options - html form for name/value options creation */'
+		"_id":{
+			"type":"options"
+		},
+
 		'./* elements - html select input renders ZOO elements as options */'
 		"_id":{
 			"type":"elements",
@@ -240,8 +245,7 @@ defined('_JEXEC') or die('Restricted access');
 		'./* modulelist - html select input renders Joomla! Modules as options */'
 		"_id":{
 			"type":"modulelist"
-		}
-
+		},
 
 		'./* Combination Example - Sublayout */'
 		"_sublayout":{

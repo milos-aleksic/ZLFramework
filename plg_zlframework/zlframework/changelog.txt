@@ -1,6 +1,9 @@
 Changelog
 ------------
 
+3.1.1
+ ^ ZLUX improvements with AJAX URLs creation
+
 3.1
  + ZLUX, ZL User Experience library
  + ZL Storage Classes
