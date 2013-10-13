@@ -440,6 +440,7 @@ abstract class ElementFilesPro extends ElementRepeatablePro {
 			
 			// author
 			$author = $this->app->user->get($item->created_by);
+			$author = $author ? $author : $user; // if no author set use current user
 			$groups = JUserHelper::getUserGroups($author->id);
 			$groups = array_keys($groups);
 			// get the first group
