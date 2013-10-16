@@ -38,7 +38,8 @@ class zlfwHelperEnviroment extends AppHelper {
 			returns the current enviroment
 
 		Example enviroments:
-			Item Full View - site.com_zoo.item
+			Item View - site.com_zoo.item
+			Category View - site.com_zoo.category
 			ZOO manager - admin.com_zoo.manager
 
 		Returns:
