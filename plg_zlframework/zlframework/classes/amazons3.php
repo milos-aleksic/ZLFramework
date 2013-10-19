@@ -1072,7 +1072,7 @@ class AEUtilAmazons3 extends MainAEUtilAmazons3
 		{
 			$o = self::getInstance();
 			$o->setWarning(sprintf(__CLASS__."::getObjectInfo({$bucket}, {$uri}): [%s] %s",
-			$rest->response->error['code'], $rest->response->error['message']));
+			$rest->error['code'], $rest->error['message']));
 			return false;
 		}
 		return $rest->code == 200 ? $returnInfo ? $rest->headers : true : false;

@@ -393,7 +393,8 @@ abstract class ElementFilesPro extends ElementRepeatablePro {
 			$root = $this->config->find('files._source_dir', $this->_joomla_file_path);
 
 			// if item is new and the path is using dynamic yet unknown vars, return temporal path
-			if (!$item->id && strpos($root, '[zooitemid]') !== false) {
+			$pattern = '/\[zooprimarycat\]|\[zooprimarycatid\]|\[zooitemid\]/';
+			if (!$item->id && preg_match($pattern, $root)) {
 				return 'tmp/zl_' . $this->identifier . '_' . $this->getUniqid();
 			} 
 
@@ -440,6 +441,7 @@ abstract class ElementFilesPro extends ElementRepeatablePro {
 			
 			// author
 			$author = $this->app->user->get($item->created_by);
+			$author = $author ? $author : $user; // if no author set use current user
 			$groups = JUserHelper::getUserGroups($author->id);
 			$groups = array_keys($groups);
 			// get the first group
@@ -586,6 +588,9 @@ abstract class ElementFilesPro extends ElementRepeatablePro {
 		// connect to submission beforesave event
 		$this->params = $params;
 		$this->app->event->dispatcher->connect('submission:beforesave', array($this, 'submissionBeforeSave'));
+
+		// validate the uniqid
+		if (isset($value[0]['values']['uniqid'])) $result[0]['uniqid'] = $value[0]['values']['uniqid'];
 
 		return $result;
 	}
