@@ -1,6 +1,10 @@
 Changelog
 ------------
 
+3.1.2
+ # Fixed issue if Submiting as guest while using Author path var
+ # ZLStorage minor issues fixed
+
 3.1.1
  ^ ZLUX improvements with AJAX URLs creation
 
