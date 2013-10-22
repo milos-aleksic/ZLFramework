@@ -553,12 +553,18 @@ class ZLFieldHTMLHelper extends AppHelper {
 		$options['List Item'] 						= 'tag=[<li>%s</li>]';
 		$options['Unordered List'] 					= 'tag=[<li>%s</li>] enclosing_tag=[<ul>%s</ul>]';
 		$options['Ordered List'] 					= 'tag=[<li><div>%s</div></li>] enclosing_tag=[<ol>%s</ol>]';
+		$options['Warp Item'] 						= 'tag=[<article class="item">%s</article>]';
+		$options['Blank'] 							= 'tag=[%s]';
+		$options['UIkit Block'] 					= 'tag=[<div class="uk-margin">%s</div>]';
+		$options['UIkit Article'] 					= 'tag=[<article class="uk-article">%s</article>]';
+		$options['UIkit List'] 						= 'tag=[<li>%s</li>] enclosing_tag=[<ul class="uk-list">%s</ul>]';
+		$options['UIkit List Line'] 				= 'tag=[<li>%s</li>] enclosing_tag=[<ul class="uk-list uk-list-line">%s</ul>]';
 		$options['PLG_ZLFRAMEWORK_CUSTOM'] 			= 'custom';
 
 		// merge with current options
 		$options = $spec->get('options', array()) + $options;
 
-		$spec->set('options', $options);		
+		$spec->set('options', $options);
 		return $this->selectField($id, $name, $value, $spec, $attrs, $returnRawValue);
 	}
 
