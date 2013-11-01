@@ -133,9 +133,6 @@ class ZLModelItem extends ZLModel
 		// Apply basic filters
 		$this->basicFilters($query);
 		
-		// Apply general item filters (type, app, etc)
-		$this->itemFilters($query);
-		
 		// Element filters
 		$this->elementFilters($query);
 	}
@@ -173,6 +170,15 @@ class ZLModelItem extends ZLModel
 		$date = JFactory::getDate();
 		$now  = $this->_db->Quote($date->toSql());
 		$null = $this->_db->Quote($this->_db->getNullDate());
+
+		// items id
+		if ($ids = $this->getState('id', false)) {
+			$where = array();
+			foreach($ids as $id) {
+				$where[] = 'a.id IN ('.implode(',', $id->toArray()).')';
+			}
+			$query->where('(' . implode(' OR ', $where) . ')');
+		}
 
 		// searchable state
 		$searchable = $this->getState('searchable');
@@ -290,25 +296,6 @@ class ZLModelItem extends ZLModel
 			$where[] = 'a.publish_down = '.$null;
 			$where[] = 'a.publish_down >= '.$now;
 			$query->where('('.implode(' OR ', $where).')');
-		}
-	}
-
-	/**
-	 * Apply general item filters (type, app, etc)
-	 */
-	protected function itemFilters(&$query)
-	{
-		// init vars
-		$ids  = $this->getState('id', false);
-		$tags = $this->getState('tag', false);
-
-		// set filtering by items id
-		if ($ids){
-			$where = array();
-			foreach($ids as $id) {
-				$where[] = 'a.id IN ('.implode(',', $id->toArray()).')';
-			}
-			$query->where('(' . implode(' OR ', $where) . ')');
 		}
 	}
 
