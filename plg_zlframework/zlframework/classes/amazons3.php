@@ -691,7 +691,7 @@ class MainAEUtilAmazons3 extends ZLErrorHandlerAbstractObject
 	public static function listBuckets($detailed = false) {
 		$rest = new AEUtilsS3Request('GET', '', '', AEUtilAmazons3::getInstance()->defaultHost);
 		$rest = $rest->getResponse();
-		dump($rest);
+
 		if ($rest->error === false && $rest->code !== 200)
 			$rest->error = array('code' => $rest->code, 'message' => 'Unexpected HTTP status');
 		if ($rest->error !== false) {

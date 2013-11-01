@@ -111,9 +111,6 @@ class ZlfieldHelper extends AppHelper {
 		// set cache var
 		$this->cache = $this->data->create(array());
 		
-		// dump($this->params, 'params');
-		// dump($this->config, 'config');
-
 		// load assets
 		$this->loadAssets();
 	}
@@ -577,7 +574,6 @@ class ZlfieldHelper extends AppHelper {
 		array('', '.'),
 		$ctrl);
 
-		// dump($path, $id);
 		$value = null;
 		if ($this->enviroment == 'app-config') // if App Config Params
 		{
@@ -612,7 +608,6 @@ class ZlfieldHelper extends AppHelper {
 		}
 
 		// return result
-		// dump($value, $id);
 		return $value; 
 	}
 
