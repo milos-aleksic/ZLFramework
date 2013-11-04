@@ -1,6 +1,12 @@
 Changelog
 ------------
 
+3.1.4
+ + Rating filter
+ # Fixed Widgetkit Gallery lightbox issue when random order
+ # Fixed minor issue with file path affecting FilesPro elements
+ # Fixed issue introduced with v3.1.3
+
 3.1.3
  + Updated elements Separator list
  # Fixed issue on router classes
