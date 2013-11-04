@@ -151,7 +151,7 @@ class ZLStorage {
 	public function delete($path)
 	{
 		// workaround if object passed instead
-		if (is_object($path)) $path = $path->getRealPath();
+		if (is_object($path)) $path = $path->getPathname();
 
 		return $this->adapter->delete($path);
 	}
@@ -178,7 +178,7 @@ class ZLStorage {
 	public function getObjectInfo($path)
 	{
 		// workaround if object passed instead
-		if (is_object($path)) $path = $path->getRealPath();
+		if (is_object($path)) $path = $path->getPathname();
 
 		return $this->adapter->getObjectInfo($path);
 	}
@@ -194,7 +194,7 @@ class ZLStorage {
 	public function getValidResources($path, $legalExt = '')
 	{
 		// workaround if object passed instead
-		if (is_object($path)) $path = $path->getRealPath();
+		if (is_object($path)) $path = $path->getPathname();
 
 		return $this->adapter->getValidResources($path, $legalExt);
 	}
@@ -209,7 +209,7 @@ class ZLStorage {
 	public function getAbsoluteURL($path)
 	{
 		// workaround if object passed instead
-		if (is_object($path)) $path = $path->getRealPath();
+		if (is_object($path)) $path = $path->getPathname();
 
 		return $this->adapter->getAbsoluteURL($path);
 	}

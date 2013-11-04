@@ -30,6 +30,11 @@ defined('_JEXEC') or die('Restricted access');
 	$images = $this->getRenderedValues($params, $widget->mode);
 	$images = $images['result'];
 
+	// add the big image into image, important if reordering
+	foreach ($images as $key => &$img) {
+		$img['bigimg'] = $bigimg[$key];
+	}
+
 	// workaround for the main dimensions
 	$width = $params->find('specific._width');
 	$settings->set('width', empty($width) ? 'auto' : $width);
@@ -82,7 +87,7 @@ defined('_JEXEC') or die('Restricted access');
 
 					/* Prepare Link */
 					$rel  = $this->config->find('specific._custom_link') ? '' : 'rel="nofollow" ';
-					$link = $this->config->find('specific._custom_link') && $image['link'] ? $image['link'] : $bigimg[$key]['fileurl'];
+					$link = $this->config->find('specific._custom_link') && $image['link'] ? $image['link'] : $image['bigimg']['fileurl'];
 					if (strlen($image['link']))
 					{
 						$content = '<a '.$rel.'href="'.$link.'"'.($image['target'] ? ' target="_blank"' : '').'>'.$content.'</a>';

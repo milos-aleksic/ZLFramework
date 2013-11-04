@@ -30,6 +30,11 @@ defined('_JEXEC') or die('Restricted access');
 	$images = $this->getRenderedValues($params, $widget->mode); // get size from element specific
 	$images = $images['result'];
 
+	// add the big image into image, important if reordering
+	foreach ($images as $key => &$img) {
+		$img['bigimg'] = $bigimg[$key];
+	}
+
 	$css_classes  = ($settings['corners'] == 'round') ? 'round ' : '';
 	$css_classes .= ($settings['effect'] == 'zoom') ? 'zoom ' : '';
 	$css_classes .= ($settings['effect'] == 'polaroid') ? 'polaroid ' : '';
@@ -116,7 +121,7 @@ defined('_JEXEC') or die('Restricted access');
 
 			/* Prepare Link */
 			$rel  = $this->config->find('specific._custom_link') ? '' : 'rel="nofollow" ';
-			$link = $this->config->find('specific._custom_link') && $image['link'] ? $image['link'] : $bigimg[$key]['fileurl'];
+			$link = $this->config->find('specific._custom_link') && $image['link'] ? $image['link'] : $image['bigimg']['fileurl'];
 			$link = 'href="'.$link.'"'.($image['target'] ? ' target="_blank"' : '');
 			
 			/* Prepare Image */

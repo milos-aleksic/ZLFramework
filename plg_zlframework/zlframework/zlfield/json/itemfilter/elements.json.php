@@ -109,6 +109,12 @@ defined('_JEXEC') or die('Restricted access');
 							$element_json[] = include($this->app->path->path($json_path));
 							break;
 
+						case 'rating':
+							$json_path = 'zlfield:json/itemfilter/_elements.rating.json.php';
+							$element_json[] = include($this->app->path->path($json_path));
+							break;
+
+
 						// Elements without group or not supported, ignore
 						case 'staticcontent':
 						default:

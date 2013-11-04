@@ -41,7 +41,7 @@ defined('_JEXEC') or die('Restricted access');
 		"value":{
 			"type":"date",
 			"label":"PLG_ZLFRAMEWORK_IFT_VALUE",
-			"help":"PLG_ZLFRAMEWORK_IFT_VALUE_DESC",
+			"help":"PLG_ZLFRAMEWORK_IFT_DATE_VALUE_DESC",
 			"dependent":"type != period OR period_mode == static"
 		},
 		"value_to":{
