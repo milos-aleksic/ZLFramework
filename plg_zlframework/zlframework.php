@@ -188,16 +188,18 @@ class plgSystemZlframework extends JPlugin {
 
 	public function sefParseRoute($event)
 	{
-		$groups = $this->app->application->groups();
-		
-		foreach($groups as $group => $app) {
-			if($router = $this->app->path->path("applications:$group/router.php")){
-				require_once $router;
-				$class = 'ZLRouter'.ucfirst($group);
-				$routerClass = new $class;
-				$routerClass->parseRoute($event);
-			}
-		}
+		$app_id = $this->app->request->getInt('app_id', null);
+		$app = $this->app->table->application->get($app_id);
 
+		// check if was loaded
+		if (!$app) return;
+		
+		$group = $app->getGroup();
+		if($router = $this->app->path->path("applications:$group/router.php")){
+			require_once $router;
+			$class = 'ZLRouter'.ucfirst($group);
+			$routerClass = new $class;
+			$routerClass->parseRoute($event);
+		}
 	}
 }
