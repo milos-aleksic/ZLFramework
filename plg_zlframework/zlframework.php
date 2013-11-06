@@ -171,21 +171,52 @@ class plgSystemZlframework extends JPlugin {
 	 */
 	public function checkInstallation()
 	{
-		// if in ZOO or Plugin manager views
-		if($this->app->zlfw->enviroment->is('admin.com_zoo.manager') || $this->app->zlfw->enviroment->is('admin.com_plugins'))
-		{
-			// checks if ZOO and ZL Extensions are up to date
-			if(!$this->app->zldependency->check("zlfw:dependencies.config")){
-				return;
-			}
+		// prepare cache
+		$cache = $this->app->cache->create($this->app->path->path('cache:') . '/plg_zlframework_dependencies', true, '86400', 'apc');
 
-			// set plugins order
-			$this->app->zlfw->checkPluginOrder();
+		// if in admin views
+		if ($this->app->zlfw->enviroment->is('admin.com_zoo admin.com_installer admin.com_plugins'))
+		{
+			$this->_checkDependencies($cache);
+		}
+		else if ($this->joomla->isSite())
+		{
+			// get the state from cache
+			if ($cache && $cache->check() && $cache->get('updated')) return true;
+
+			// otherwise check
+			else $this->_checkDependencies($cache);
 		}
 		
 		return true;
 	}
 
+	/**
+	 *  _checkDependencies
+	 */
+	protected function _checkDependencies(&$cache)
+	{
+		// set plugins order
+		$this->app->zlfw->checkPluginOrder();
+
+		// checks if dependencies are up to date
+		$status = false;
+		if ($this->app->zldependency->check("zlfw:dependencies.config")){
+			$status = true;
+		}
+
+		// save state to cache
+		if ($cache && $cache->check()) {
+			$cache->set('updated', $status);
+			$cache->save();
+		}
+		
+		return $status;
+	}
+
+	/**
+	 *  sefParseRoute
+	 */
 	public function sefParseRoute($event)
 	{
 		$app_id = $this->app->request->getInt('app_id', null);
