@@ -41,6 +41,7 @@ class plgSystemZlframeworkInstallerScript
 			'plugins/system/zlframework/zlframework/helpers/zlpath.php',
 			'plugins/system/zlframework/zlframework/helpers/zlstring.php',
 			'plugins/system/zlframework/zlframework/helpers/zlxmlhelper.php',
+			'plugins/system/zlframework/zlframework/helpers/zldependency.php',
 			// 'plugins/system/zlframework/zlframework/assets/js/zldialog.js', // to be checked
 			'plugins/system/zlframework/zlframework/assets/js/zldialog_moved.txt',
 
@@ -326,7 +327,7 @@ class plgSystemZlframeworkInstallerScript
 
 	/*
 		Function: _dependencyCheck
-			Copy of the zldependency::check function
+			Copy of the zlfw->dependencies::check function
 
 		Returns:
 			bool - true if all requirements are met

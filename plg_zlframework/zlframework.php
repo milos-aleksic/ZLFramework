@@ -79,7 +79,6 @@ class plgSystemZlframework extends JPlugin {
 		if ( $path = $this->app->path->path( 'zlfw:helpers' ) ) {
 			$this->app->path->register($path, 'helpers');
 			$this->app->loader->register('zlfwHelper', 'helpers:zlfwhelper.php');
-			$this->app->loader->register('ZLDependencyHelper', 'helpers:zldependency.php');
 			$this->app->loader->register('ZlModelHelper', 'helpers:model.php');
 			$this->app->loader->register('ZLFieldHTMLHelper', 'helpers:zlfieldhtml.php');
 		}
@@ -200,12 +199,12 @@ class plgSystemZlframework extends JPlugin {
 		$this->app->zlfw->checkPluginOrder();
 
 		// checks if dependencies are up to date
-		$status = $this->app->zldependency->check("zlfw:dependencies.config");
+		$status = $this->app->zlfw->dependencies->check("zlfw:dependencies.config");
 		if (!$status['state']){
 
 			// warn but not if in installer to avoid install confusions
 			if (!$this->app->zlfw->enviroment->is('admin.com_installer'))
-				$this->app->zldependency->warn($status['extensions']);
+				$this->app->zlfw->dependencies->warn($status['extensions']);
 		}
 
 		// save state to cache
