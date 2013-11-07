@@ -202,7 +202,10 @@ class plgSystemZlframework extends JPlugin {
 		// checks if dependencies are up to date
 		$status = $this->app->zldependency->check("zlfw:dependencies.config");
 		if (!$status['state']){
-			$this->app->zldependency->warn($status['extensions']);
+
+			// warn but not if in installer to avoid install confusions
+			if (!$this->app->zlfw->enviroment->is('admin.com_installer'))
+				$this->app->zldependency->warn($status['extensions']);
 		}
 
 		// save state to cache
