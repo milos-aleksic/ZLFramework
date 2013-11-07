@@ -200,18 +200,18 @@ class plgSystemZlframework extends JPlugin {
 		$this->app->zlfw->checkPluginOrder();
 
 		// checks if dependencies are up to date
-		$status = false;
-		if ($this->app->zldependency->check("zlfw:dependencies.config")){
-			$status = true;
+		$status = $this->app->zldependency->check("zlfw:dependencies.config");
+		if (!$status['state']){
+			$this->app->zldependency->warn($status['extensions']);
 		}
 
 		// save state to cache
 		if ($cache && $cache->check()) {
-			$cache->set('updated', $status);
+			$cache->set('updated', $status['state']);
 			$cache->save();
 		}
 		
-		return $status;
+		return $status['state'];
 	}
 
 	/**

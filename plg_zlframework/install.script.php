@@ -20,7 +20,8 @@ class plgSystemZlframeworkInstallerScript
 	protected $_ext = 'zlframework';
 	protected $_ext_name = 'ZL Framework';
 	protected $_ext_version = '';
-	protected $_lng_prefix = 'PLG_ZLFRAMEWORK_SYS';	
+	protected $_lng_prefix = 'PLG_ZLFRAMEWORK_SYS';
+	public $app;
 
 	/* List of obsolete files and folders */
 	protected $_obsolete = array(
@@ -293,38 +294,78 @@ class plgSystemZlframeworkInstallerScript
 	 */
 	protected function checkCompatibility($file)
 	{
-		$zoo = App::getInstance('zoo');
+		// set zoo app instance
+		$this->app = App::getInstance('zoo');
 
-		$pass = true;
-		if (JFile::exists($file) && $dependencies = json_decode(JFile::read($file)))
-		{
+		// check dependencies
+		$status = $this->_dependencyCheck('root:'.$this->app->path->relative($file));
+		if (!$status['state']){
+
+			// list the outdated extensions
 			$outdated_ext = array();
-			foreach ($dependencies as $key => $dependency) {
+			foreach ($status['extensions'] as $ext) {
+
+				$dep_req = $ext['dependency']; // required
+				$dep_inst = $ext['installed']; // installed
+
+				// set name
+				$name = isset($dep_req->url) ? "<a href=\"{$dep_req->url}\" target=\"_blank\">{$dep_inst->name}</a>" : (string)$dep_inst->name;
+				$outdated_ext[] = $name;
+			}
+
+			// set the proceede link with it's behaviour
+			$path = JPATH_ROOT . '/tmp/' . basename($this->_src.'_copy');
+			$path = str_replace('\\', '\\/', $path);
+			$javascript = "document.getElementById('install_directory').value = '{$path}';document.querySelectorAll('form .uploadform .button, form .uploadform .btn')[1].click();return false;";
+			$this->_error = JText::sprintf('PLG_ZLFRAMEWORK_SYS_OUTDATED_EXTENSIONS', $this->_ext_version, implode(', ', $outdated_ext), $javascript);
+		}
+		
+		return $status['state'];
+	}
+
+
+	/*
+		Function: _dependencyCheck
+			Copy of the zldependency::check function
+
+		Returns:
+			bool - true if all requirements are met
+	*/
+	protected function _dependencyCheck($file, $extension = 'ZL Framework')
+	{
+		// init vars
+		$status = array('state' => true, 'extensions' => array());
+		$groups = $this->app->path->path($file);
+
+		// get the content from file
+		if ($groups && $groups = json_decode(JFile::read($groups)))
+		{
+			// iterate over the groups
+			foreach ($groups as $group => $dependencies) foreach ($dependencies as $name => $dependency)
+			{
+				if ($group == 'plugins') {
+					// get plugin
+					$folder = isset($dependency->folder) ? $dependency->folder : 'system';
+					$plugin = JPluginHelper::getPlugin($folder, strtolower($name));
+
+					// if plugin disable, skip it
+					if (empty($plugin)) continue;
+				}
+				
 				$version  = $dependency->version;
-				$manifest = $zoo->path->path('root:'.$dependency->manifest);
-				if ($version && is_file($manifest) && is_readable($manifest)) {
-					if ($xml = simplexml_load_file($manifest)) {
-						if (version_compare($version, (string) $xml->version, 'g')) 
-						{
-							$outdated_ext[] = isset($dependency->url) ? "<a href=\"{$dependency->url}\" target=\"_blank\">{$key} v{$xml->version}</a>" : (string) $xml->name;
-							
-							// set the pass state
-							$pass = false;
-						}
+				$manifest = $this->app->path->path('root:'.$dependency->manifest);
+				if ($version && is_file($manifest) && is_readable($manifest) && $xml = simplexml_load_file($manifest)) {
+						
+					// check if the extension is outdated
+					if (version_compare($version, (string) $xml->version, 'g')) {
+						$status['state'] = false;
+						$status['extensions'][] = array('dependency' => $dependency, 'installed' => $xml);
 					}
+					
 				}
 			}
-
-			if (!$pass) {
-
-				// set the proceede link with it's behaviour
-				$path = JPATH_ROOT . '/tmp/' . basename($this->_src.'_copy');
-				$path = str_replace('\\', '\\/', $path);
-				$javascript = "document.getElementById('install_directory').value = '{$path}';document.querySelectorAll('form .uploadform .button, form .uploadform .btn')[1].click();return false;";
-				$this->_error = JText::sprintf('PLG_ZLFRAMEWORK_SYS_OUTDATED_EXTENSIONS', $this->_ext_version, implode(', ', $outdated_ext), $javascript);				
-			}
 		}
-
-		return $pass;
+		
+		return $status;
 	}
 }
