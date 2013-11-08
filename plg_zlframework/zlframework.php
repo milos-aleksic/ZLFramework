@@ -170,16 +170,16 @@ class plgSystemZlframework extends JPlugin {
 	 */
 	public function checkInstallation()
 	{
-		// prepare cache
-		$cache = $this->app->cache->create($this->app->path->path('cache:') . '/plg_zlframework_dependencies', true, '86400', 'apc');
-
 		// if in admin views
 		if ($this->app->zlfw->enviroment->is('admin.com_zoo admin.com_installer admin.com_plugins'))
 		{
-			$this->_checkDependencies($cache);
+			$this->_checkDependencies();
 		}
 		else if ($this->joomla->isSite())
 		{
+			// prepare cache
+			$cache = $this->app->cache->create($this->app->path->path('cache:') . '/plg_zlframework_dependencies', true, '86400', 'apc');
+
 			// get the state from cache
 			if ($cache && $cache->check() && $cache->get('updated')) return true;
 
@@ -193,8 +193,11 @@ class plgSystemZlframework extends JPlugin {
 	/**
 	 *  _checkDependencies
 	 */
-	protected function _checkDependencies(&$cache)
+	protected function _checkDependencies()
 	{
+		// prepare cache
+		$cache = $this->app->cache->create($this->app->path->path('cache:') . '/plg_zlframework_dependencies', true, '86400', 'apc');
+
 		// set plugins order
 		$this->app->zlfw->checkPluginOrder();
 
