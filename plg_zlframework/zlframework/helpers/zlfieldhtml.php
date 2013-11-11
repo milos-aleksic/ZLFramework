@@ -446,7 +446,10 @@ class ZLFieldHTMLHelper extends AppHelper {
 		// init vars
 		$pv	  = $this->app->data->create( $this->trslValues($spec->get('parents_val'), $spec->get('value_map')) );
 		$apps = (array)$spec->get('apps', $pv->get('apps', array())); // get static or relied app value
-		$apps = $this->app->zlfw->getApplications($apps, true);
+
+		// load all apps only if is not child (processing all apps can exhaust the memory, should be avoided)
+		$all_apps = $spec->get('parents_val') ? false : true; // avoid
+		$apps = $this->app->zlfw->getApplications($apps, $all_apps);
 
 		$options = array();
  		if (!empty($apps)) foreach($apps as $app)

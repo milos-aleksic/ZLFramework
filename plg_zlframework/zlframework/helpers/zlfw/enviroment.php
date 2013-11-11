@@ -100,11 +100,25 @@ class zlfwHelperEnviroment extends AppHelper {
 		Function: is
 			checks if the passed enviroment is the current enviroment
 
+		Params:
+			@enviroments	string of enviroments to check separated by space
+
 		Returns:
 			boolean
 	*/
-	public function is($enviroment)
+	public function is($enviroments)
 	{
-		return strpos($this->get(), $enviroment) === 0;
+		// multiple enviroments posible
+		$enviroments = explode(' ', $enviroments);
+
+		foreach ($enviroments as $env) {
+			// if in any enviroment, return true
+			if (strpos($this->get(), trim($env)) === 0) {
+				return true;
+				break;
+			}
+		}
+		
+		return false;
 	}
 }

@@ -139,8 +139,9 @@ abstract class ElementFilesPro extends ElementRepeatablePro {
 			Mixed - the elements data
 	*/
 	public function get($key, $default = null) {
-		if ($value = $this->_item->elements->find("{$this->identifier}.{$key}", $default)) {
-			// workaround for the repeatable element transition
+		// workaround for the repeatable element transition
+		if ($value = $this->_item->elements->find("{$this->identifier}.{$key}", null)) {
+			// IMPORTANT, ignore the default value
 			return $value;
 		} else {
 			return parent::get($key, $default);

@@ -79,7 +79,6 @@ class plgSystemZlframework extends JPlugin {
 		if ( $path = $this->app->path->path( 'zlfw:helpers' ) ) {
 			$this->app->path->register($path, 'helpers');
 			$this->app->loader->register('zlfwHelper', 'helpers:zlfwhelper.php');
-			$this->app->loader->register('ZLDependencyHelper', 'helpers:zldependency.php');
 			$this->app->loader->register('ZlModelHelper', 'helpers:model.php');
 			$this->app->loader->register('ZLFieldHTMLHelper', 'helpers:zlfieldhtml.php');
 		}
@@ -171,21 +170,58 @@ class plgSystemZlframework extends JPlugin {
 	 */
 	public function checkInstallation()
 	{
-		// if in ZOO or Plugin manager views
-		if($this->app->zlfw->enviroment->is('admin.com_zoo.manager') || $this->app->zlfw->enviroment->is('admin.com_plugins'))
+		// if in admin views
+		if ($this->app->zlfw->enviroment->is('admin.com_zoo admin.com_installer admin.com_plugins'))
 		{
-			// checks if ZOO and ZL Extensions are up to date
-			if(!$this->app->zldependency->check("zlfw:dependencies.config")){
-				return;
-			}
+			$this->_checkDependencies();
+		}
+		else if ($this->joomla->isSite())
+		{
+			// prepare cache
+			$cache = $this->app->cache->create($this->app->path->path('cache:') . '/plg_zlframework_dependencies', true, '86400', 'apc');
 
-			// set plugins order
-			$this->app->zlfw->checkPluginOrder();
+			// get the state from cache
+			if ($cache && $cache->check() && $cache->get('updated')) return true;
+
+			// otherwise check
+			else $this->_checkDependencies($cache);
 		}
 		
 		return true;
 	}
 
+	/**
+	 *  _checkDependencies
+	 */
+	protected function _checkDependencies()
+	{
+		// prepare cache
+		$cache = $this->app->cache->create($this->app->path->path('cache:') . '/plg_zlframework_dependencies', true, '86400', 'apc');
+
+		// set plugins order
+		$this->app->zlfw->checkPluginOrder();
+
+		// checks if dependencies are up to date
+		$status = $this->app->zlfw->dependencies->check("zlfw:dependencies.config");
+		if (!$status['state']){
+
+			// warn but not if in installer to avoid install confusions
+			if (!$this->app->zlfw->enviroment->is('admin.com_installer'))
+				$this->app->zlfw->dependencies->warn($status['extensions']);
+		}
+
+		// save state to cache
+		if ($cache && $cache->check()) {
+			$cache->set('updated', $status['state']);
+			$cache->save();
+		}
+		
+		return $status['state'];
+	}
+
+	/**
+	 *  sefParseRoute
+	 */
 	public function sefParseRoute($event)
 	{
 		$app_id = $this->app->request->getInt('app_id', null);

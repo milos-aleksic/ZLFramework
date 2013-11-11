@@ -109,6 +109,14 @@
 				d.reject(url);
 			};
 
+			// IE 8 fix
+			script.onreadystatechange = function() {
+				if (this.readyState == 'loaded' || this.readyState == 'complete') {
+					d.resolve();
+					if(callback) { callback(script); }
+				}
+			}
+
 			script.src = url;
 
 			document.getElementsByTagName('head')[0].appendChild(script);
