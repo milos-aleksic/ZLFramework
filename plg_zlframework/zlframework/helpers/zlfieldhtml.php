@@ -208,60 +208,69 @@ class ZLFieldHTMLHelper extends AppHelper {
 		Function: layout - Returns select html string
 			It list the files or folder of specified path as options
 	*/
+	protected $_layout_options = array();
 	public function layoutField($id, $name, $value, $spec, $attrs, $returnRawValue)
 	{
 		// if no path supplied abort
 		if(!$spec->get('path')) return JText::_('PLG_ZLFRAMEWORK_ZLFD_NO_OPTIONS');
 
-		$psv	 = $spec->get('parents_val');
-		$mode	 = $spec->get('mode', 'files'); // OR folders
-		$regex	 = $spec->get('regex', '^([_A-Za-z0-9]*)');
-		$options = (array)$spec->get('options', array());
-		$path 	 = $spec->get('path');
+		// return;
+		$hash = md5(serialize( $spec ));
+		if (!array_key_exists($hash, $this->_layout_options))
+		{
+			$psv	 = $spec->get('parents_val');
+			$mode	 = $spec->get('mode', 'files'); // OR folders
+			$regex	 = $spec->get('regex', '^([_A-Za-z0-9]*)');
+			$options = (array)$spec->get('options', array());
+			$path 	 = $spec->get('path');
 
-		// dynamic values {}
-		if (!is_array($value)) {
-			$path = str_replace('{value}', (string)$value, $path);
-		}
-
-		// replace parent values in path
-		foreach ((array)$psv as $key => $pvalue) {
-			if (!is_array($pvalue)) {
-				$path = str_replace('{'.$key.'}', basename($pvalue, '.php'), $path);
+			// dynamic values {}
+			if (!is_array($value)) {
+				$path = str_replace('{value}', (string)$value, $path);
 			}
-		}
 
-		// get all resources
-		$resources = array();
-		$paths = array_map('trim', explode(',',$path)); // multiple paths allowed with comma separator
-		foreach($paths as $path) {
-			if(preg_match('/(.*){subfolders}(.*)/', $path, $result)) { // process subfolders
-				$path = trim(@$result[1], '/');
-				$postpath = trim(@$result[2], '/');
-				foreach ($this->app->path->dirs($path) as $dir) {
-					$resources = array_merge($resources, $this->app->zlfw->path->resources("$path/$dir/$postpath"));
+			// replace parent values in path
+			foreach ((array)$psv as $key => $pvalue) {
+				if (!is_array($pvalue)) {
+					$path = str_replace('{'.$key.'}', basename($pvalue, '.php'), $path);
 				}
-			} else {
-				$resources = array_merge($resources, $this->app->zlfw->path->resources($path));
 			}
+
+			// get all resources
+			$resources = array();
+			$paths = array_map('trim', explode(',',$path)); // multiple paths allowed with comma separator
+			foreach($paths as $path) {
+				if(preg_match('/(.*){subfolders}(.*)/', $path, $result)) { // process subfolders
+					$path = trim(@$result[1], '/');
+					$postpath = trim(@$result[2], '/');
+					foreach ($this->app->path->dirs($path) as $dir) {
+						$resources = array_merge($resources, $this->app->zlfw->path->resources("$path/$dir/$postpath"));
+					}
+				} else {
+					$resources = array_merge($resources, $this->app->zlfw->path->resources($path));
+				}
+			}
+
+			// get layout options from resources
+			foreach($resources as $resource) {
+				if(is_dir($resource)) foreach(JFolder::$mode($resource, $regex) as $tmpl) {
+					$basename = basename($tmpl, '.php');
+					$options[ucwords($basename)] = $tmpl;
+				}
+			}
+			
+			// sort letting default.php the first
+			uasort($options, array($this, 'cmp'));
+
+			// merge with current options
+			$options = $spec->get('options', array()) + $options;
+			
+			// get and save the field
+			$spec->set('options', $options);
+			$this->_layout_options[$hash] = $this->selectField($id, $name, $value, $spec, $attrs, $returnRawValue);
 		}
 
-		// get layout options from resources
-		foreach($resources as $resource) {
-			if(is_dir($resource)) foreach(JFolder::$mode($resource, $regex) as $tmpl) {
-				$basename = basename($tmpl, '.php');
-				$options[ucwords($basename)] = $tmpl;
-			}
-		}
-		
-		// sort letting default.php the first
-		uasort($options, array($this, 'cmp'));
-
-		// merge with current options
-		$options = $spec->get('options', array()) + $options;
-		
-		$spec->set('options', $options);
-		return $this->selectField($id, $name, $value, $spec, $attrs, $returnRawValue);
+		return $this->_layout_options[$hash];
 	}
 
 	/*
