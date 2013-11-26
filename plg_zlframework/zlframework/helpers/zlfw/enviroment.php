@@ -70,24 +70,32 @@ class zlfwHelperEnviroment extends AppHelper {
 			if ($task == 'item') {
 				$enviroment[] = 'item';
 				$this->params->set('item_id', $this->app->request->getCmd('item_id'));
+				unset($task);
 			} else if ($view == 'item') { // if joomla item menu route
 				$enviroment[] = 'item';
 
 				if ($menu = $this->app->menu->getActive())
 					$this->params->set('item_id', $menu->params->get('item_id'));
+				unset($view);
 			}
 
 			// if zoo cat
-			if ($task == 'category') {
+			else if ($task == 'category') {
 				$enviroment[] = 'category';
 				$this->params->set('category_id', $this->app->request->getCmd('category_id'));
+				unset($task);
 			} else if ($view == 'category') { // if joomla item menu route
 				$enviroment[] = 'category';
 
 				if ($menu = $this->app->menu->getActive())
 					$this->params->set('category_id', $menu->params->get('category'));
+				unset($view);
 			}
 		}
+
+		// add task/view to the enviroment
+		if (isset($task) && !empty($task)) $enviroment[] = $task;
+		else if (isset($view) && !empty($view)) $enviroment[] = $view;
 
 		// clean values
 		$enviroment = array_filter($enviroment);
