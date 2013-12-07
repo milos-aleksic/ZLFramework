@@ -154,35 +154,35 @@ class plgSystemZlframeworkInstallerScript
 	 *
 	 * @return  boolean  True on success
 	 */
-	function install($parent)
+	public function install($parent)
 	{
 		// init vars
 		$db = JFactory::getDBO();
 
-        // enable plugin
-        $db->setQuery("UPDATE `#__extensions` SET `enabled` = 1 WHERE `type` = 'plugin' AND `element` = '{$this->_ext}'");
-        $db->query();
-    }
+		// enable plugin
+		$db->setQuery("UPDATE `#__extensions` SET `enabled` = 1 WHERE `type` = 'plugin' AND `element` = '{$this->_ext}'");
+		$db->query();
+	}
 
-    /**
+	/**
 	 * method to update the component
 	 *
 	 * @return void
 	 */
-	function update($parent) {}
+	public function update($parent) {}
 
-    /**
+	/**
 	 * Called on uninstallation
 	 *
 	 * @param   object  $parent  The object responsible for running this script
 	 *
 	 * @return  boolean  True on success
 	 */
-	function uninstall($parent)
+	public function uninstall($parent)
 	{
 		// show uninstall message
 		echo JText::_($this->langString('_UNINSTALL'));
-    }
+	}
 
 	/**
 	 * Called after install
@@ -323,7 +323,6 @@ class plgSystemZlframeworkInstallerScript
 		
 		return $status['state'];
 	}
-
 
 	/*
 		Function: _dependencyCheck
