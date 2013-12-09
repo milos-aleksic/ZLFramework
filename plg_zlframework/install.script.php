@@ -105,11 +105,11 @@ class plgSystemZlframeworkInstallerScript
 		// load ZLFW sys language file EXAMPLE
 		// JFactory::getLanguage()->load('plg_system_zlframework.sys', JPATH_ADMINISTRATOR, 'en-GB', true);
 
-		// check dependencies if not uninstalling EXAMPLE
-		// if($type != 'uninstall' && !$this->checkRequirements($parent)){
-		// 	Jerror::raiseWarning(null, $this->_error);
-		// 	return false;
-		// }
+		// check dependencies if not uninstalling
+		if($type != 'uninstall' && !$this->checkDependencies($parent)){
+			Jerror::raiseWarning(null, $this->_error);
+			return false;
+		}
 
 		// don't overide layouts EXAMPLE
 		/* 
@@ -246,40 +246,61 @@ class plgSystemZlframeworkInstallerScript
 	}
 
 	/**
-	 * check requirements EXAMPLE
+	 * Check dependencies
+	 * @version 1.0
 	 *
 	 * @return  boolean  True on success
 	 */
-	protected function checkRequirements($parent)
+	protected function checkDependencies($parent)
 	{
-		/*
-		 * make sure Akeeba Subscription exist, is enabled
-		 */
-		if (!JFile::exists(JPATH_ADMINISTRATOR.'/components/com_akeebasubs/aaa_akeebasubs.xml')
-			|| !JComponentHelper::getComponent('com_akeebasubs', true)->enabled) {
-			$this->_error = "ZOOaksubs relies on <a href=\"https://www.akeebabackup.com\" target=\"_blank\">Akeeba Subscriptions</a>, be sure is installed and enabled before retrying the installation.";
-			return false;
-		}
+		// init vars
+		$dependencies = $parent->get( "manifest" )->dependencies->attributes();
 
-		// and up to date
-		$akeeba_manifest = simplexml_load_file(JPATH_ADMINISTRATOR.'/components/com_akeebasubs/aaa_akeebasubs.xml');
-		$min_release = 2;
-
-		if( version_compare((string)$akeeba_manifest->version, (string)$min_release, '<') ) {
-			$this->_error = "Akeeba Subscription v{$min_release} or higher required, please update it and retry the installation.";
-
-			return false;
-		}
-
-		/*
-		 * make sure ZLFW is up to date
-		 */
-		if($min_zlfw_release = $parent->get( "manifest" )->attributes()->zlfw)
+		// check Joomla
+		if ($min_v = (string)$dependencies->joomla) 
 		{
+			// if up to date
+			$joomla_release = new JVersion();
+			$joomla_release = $joomla_release->getShortVersion();
+			if( version_compare( (string)$joomla_release, $min_v, '<' ) ) {
+				$this->_error = JText::sprintf($this->langString('_DEPENDENCY_OUTDATED'), $this->_ext_name, 'http://www.joomla.org', 'Joomla!', $min_v);
+				return false;
+			}
+		}
+
+		// check ZOO
+		if ($min_v = (string)$dependencies->zoo) 
+		{
+			// if installed and enabled
+			if (!JFile::exists(JPATH_ADMINISTRATOR.'/components/com_zoo/config.php')
+				|| !JComponentHelper::getComponent('com_zoo', true)->enabled) {
+				$this->_error = JText::sprintf($this->langString('_DEPENDENCY_MISSING'), $this->_ext_name, 'http://www.yootheme.com/zoo', 'ZOO');
+				return false;
+			}
+
+			// if up to date
+			$zoo_manifest = simplexml_load_file(JPATH_ADMINISTRATOR.'/components/com_zoo/zoo.xml');
+
+			if( version_compare((string)$zoo_manifest->version, $min_v, '<') ) {
+				$this->_error = JText::sprintf($this->langString('_DEPENDENCY_OUTDATED'), $this->_ext_name, 'http://www.yootheme.com/zoo', 'ZOO', $min_v);
+				return false;
+			}
+		}
+
+		// check ZLFW
+		if ($min_v = (string)$dependencies->zlfw) 
+		{
+			// if installed and enabled
+			if (!JPluginHelper::getPlugin('system', 'zlframework')) {
+				$this->_error = JText::sprintf($this->langString('_DEPENDENCY_MISSING'), $this->_ext_name, 'https://www.zoolanders.com/extensions/zl-framework', 'ZL Framework');
+				return false;
+			}
+
+			// if up to date
 			$zlfw_manifest = simplexml_load_file(JPATH_ROOT.'/plugins/system/zlframework/zlframework.xml');
 
-			if( version_compare((string)$zlfw_manifest->version, (string)$min_zlfw_release, '<') ) {
-				$this->_error = "<a href=\"https://www.zoolanders.com/extensions/zl-framework\" target=\"_blank\">ZL Framework</a> v{$min_zlfw_release} or higher required, please update it and retry the installation.";
+			if( version_compare((string)$zlfw_manifest->version, $min_v, '<') ) {
+				$this->_error = JText::sprintf($this->langString('_DEPENDENCY_OUTDATED'), $this->_ext_name, 'https://www.zoolanders.com/extensions/zl-framework', 'ZL Framework', $min_v);
 				return false;
 			}
 		}
