@@ -47,8 +47,8 @@ class plgSystemZlframework extends JPlugin {
 		$this->app = App::getInstance('zoo');
 		
 		// load default and current language
-		$this->app->system->language->load('plg_system_zlframework', JPATH_ADMINISTRATOR, 'en-GB', true);
-		$this->app->system->language->load('plg_system_zlframework', JPATH_ADMINISTRATOR, null, true);
+		$this->app->system->language->load('plg_system_zlframework', JPATH_ADMINISTRATOR, 'en-GB');
+		$this->app->system->language->load('plg_system_zlframework', JPATH_ADMINISTRATOR);
 		
 		// register plugin path
 		if ( $path = $this->app->path->path( 'root:plugins/system/zlframework/zlframework' ) ) {
