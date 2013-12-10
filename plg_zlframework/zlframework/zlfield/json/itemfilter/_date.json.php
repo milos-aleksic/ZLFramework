@@ -19,10 +19,10 @@ defined('_JEXEC') or die('Restricted access');
 			"help":"PLG_ZLFRAMEWORK_IFT_FILTER_TYPE_DESC",
 			"specific":{
 				"options":{
-					"PLG_ZLFRAMEWORK_IFT_EXACT":"exact",
-					"PLG_ZLFRAMEWORK_IFT_FROM":"from",
-					"PLG_ZLFRAMEWORK_IFT_TO":"to",
-					"PLG_ZLFRAMEWORK_IFT_PERIOD":"period"
+					"PLG_ZLFRAMEWORK_EXACT":"exact",
+					"PLG_ZLFRAMEWORK_FROM":"from",
+					"PLG_ZLFRAMEWORK_TO":"to",
+					"PLG_ZLFRAMEWORK_PERIOD":"period"
 				}
 			},
 			"dependents":"period_mode > period"
@@ -41,7 +41,7 @@ defined('_JEXEC') or die('Restricted access');
 		"value":{
 			"type":"date",
 			"label":"PLG_ZLFRAMEWORK_IFT_VALUE",
-			"help":"PLG_ZLFRAMEWORK_IFT_DATE_VALUE_DESC",
+			"help":"PLG_ZLFRAMEWORK_IFT_VALUE_DESC",
 			"dependent":"type != period OR period_mode == static"
 		},
 		"value_to":{
