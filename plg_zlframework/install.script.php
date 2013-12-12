@@ -165,7 +165,7 @@ class plgSystemZlframeworkInstallerScript
 	}
 
 	/**
-	 * method to update the component
+	 * Called on update
 	 *
 	 * @return void
 	 */
