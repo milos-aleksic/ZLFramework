@@ -144,6 +144,21 @@ class plgSystemZlframeworkInstallerScript
 				if (JFile::exists($this->_src.'/warned.txt')) JFile::delete($this->_src.'/warned.txt');
 			}
 
+			// EXAMPLE make sure the DB schema is set, necesary for SQL updates
+			// // get extension id
+			// $db->setQuery("SELECT `extension_id` FROM `#__extensions` WHERE `type` = 'plugin' AND `element` = '{$this->_ext}' AND `folder` = 'system'");
+			// if ($plg = $db->loadObject()) $this->_ext_id = (int)$plg->extension_id;
+
+			// // set schema
+			// $db->setQuery("SELECT * FROM `#__schemas` WHERE `extension_id` = '{$this->_ext_id}'");
+			// if (!$db->loadObject()) {
+			// 	$query = $db->getQuery(true);
+			// 	$query->clear()
+			// 		->insert($db->quoteName('#__schemas'))
+			// 		->columns(array($db->quoteName('extension_id'), $db->quoteName('version_id')))
+			// 		->values($this->_ext_id . ', ' . $db->quote('2013-01-01'));
+			// 	$db->setQuery($query)->execute();
+			// }
 		}
 	}
 
