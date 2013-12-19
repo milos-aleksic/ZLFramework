@@ -36,7 +36,7 @@ class zlfwHelperPath extends PathHelper {
 		
 		$return = array();
 		foreach ($paths as $path) {
-			if (($fullpath = realpath("$path/$file")) && stripos($fullpath, JPATH_ROOT, 0) === 0) {
+			if (($fullpath = realpath("$path/$file")) && is_readable($fullpath)) {
 				$return[] = $fullpath;
 			}
 		}

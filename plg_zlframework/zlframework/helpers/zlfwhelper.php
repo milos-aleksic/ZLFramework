@@ -275,7 +275,7 @@ class zlfwHelper extends AppHelper {
 		else if (strpos($ext, 'plg_') === 0) // it's plugin
 		{
 			$name = str_replace('plg_', '', $ext);
-			$plugin = JPluginHelper::getPlugin('system', strtolower($ext));
+			$plugin = JPluginHelper::getPlugin('system', strtolower($name));
 			
 			return !empty($plugin);
 		}

@@ -532,11 +532,13 @@ class ZLModelItem extends ZLModel
 			// Search ranges!
 			if ($is_range && !$is_date){
 
-				// proceede only if values provided
-				if ($from || $to) {
+				// make sure the values are set
+				$from = !empty($from) ? $from : $value;
+				$to = !empty($to) ? $to : $value;
 
-					// Handle everything in a special method
-					$wheres[$logic][] = $this->getElementRangeSearch($id, $from, $to, $type, $convert, $k);
+				// get and add the query
+				if ($sql = $this->getElementRangeSearch($id, $from, $to, $type, $convert, $k)) {
+					$wheres[$logic][] = $sql;
 				}
 
 			} else  {
@@ -567,6 +569,9 @@ class ZLModelItem extends ZLModel
 	 */
 	protected function getElementRangeSearch($identifier, $from, $to, $type, $convert, $k)
 	{	
+		// basic check
+		if (!$from || !$to) return;
+
 		// Evaluate if is equal
 		$is_equal = false;
 		if (stripos($type, "equal") !== false) {
