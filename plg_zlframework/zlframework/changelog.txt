@@ -1,6 +1,12 @@
 Changelog
 ------------
 
+3.1.6
+ # Minor fix in checkExt function
+ # Fixed range filtering issue
+ ^ Work on perfomance
+ $ Lang strings added
+
 3.1.5
  ^ Improved Dependencies check
  # ZLUX minor IE8 fixes
