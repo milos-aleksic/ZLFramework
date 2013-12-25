@@ -10,10 +10,10 @@
 defined('_JEXEC') or die('Restricted access');
 
 /*
- Class: ZOOlanders Helper
- The ZOOlanders helper Class for zoo
+ Class: zlfwHelperComponent
+ The ZL Component helper Class for zoo
  */
-class zoolandersHelper extends AppHelper
+class zlfwHelperComponent extends AppHelper
 {
 	/**
 	 * Save wrapped params in the #__extensions com_zoolanders params field
@@ -46,5 +46,18 @@ class zoolandersHelper extends AppHelper
 	{
 		// retrieve and return
 		return $this->app->data->create($this->app->component->com_zoolanders->get($wrapper));
+	}
+
+	/**
+	 * Get link to component related resources
+	 *
+	 * @param array $query HTTP query options
+	 * @param boolean $xhtml Replace & by &amp; for xml compilance
+	 * @param boolean $ssl Secure state for the resolved URI. [1 => Make URI secure using global secure site URI, 0 => Leave URI in the same secure state as it was passed to the function, -1 => Make URI unsecure using the global unsecure site URI]
+	 *
+	 * @return string The link to the resource
+	 */
+	public function link($query = array(), $xhtml = true, $ssl = null) {
+		return $this->app->component->com_zoolanders->link($query, $xhtml, $ssl);
 	}
 }
