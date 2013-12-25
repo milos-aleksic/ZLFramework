@@ -16,6 +16,17 @@ defined('_JEXEC') or die('Restricted access');
 class zlfwHelperComponent extends AppHelper
 {
 	/**
+	 * Call the passed function or property on the component
+	 * 
+	 * @param string $name The name to be called
+	 * 
+	 * @return mixed The component call result
+	 */
+	public function __get($name) {
+		return $this->app->component->com_zoolanders->$name;
+	}
+
+	/**
 	 * Save wrapped params in the #__extensions com_zoolanders params field
 	 *
 	 * @param string $wrapper The params wrapper name
