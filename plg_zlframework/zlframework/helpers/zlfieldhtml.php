@@ -265,12 +265,15 @@ class ZLFieldHTMLHelper extends AppHelper {
 			// merge with current options
 			$options = $spec->get('options', array()) + $options;
 			
-			// get and save the field
-			$spec->set('options', $options);
-			$this->_layout_options[$hash] = $this->selectField($id, $name, $value, $spec, $attrs, $returnRawValue);
+			// save the options
+			$this->_layout_options[$hash] = $options;
 		}
 
-		return $this->_layout_options[$hash];
+		// set options
+		$spec->set('options', $this->_layout_options[$hash]);
+
+		// process select field
+		return $this->selectField($id, $name, $value, $spec, $attrs, $returnRawValue);
 	}
 
 	/*
