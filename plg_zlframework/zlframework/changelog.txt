@@ -1,6 +1,9 @@
 Changelog
 ------------
 
+3.1.7
+ # Fixed issue with ZLField params saving
+
 3.1.6
  # Minor fix in checkExt function
  # Fixed range filtering issue
