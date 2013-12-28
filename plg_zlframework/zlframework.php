@@ -81,6 +81,7 @@ class plgSystemZlframework extends JPlugin {
 			$this->app->loader->register('zlfwHelper', 'helpers:zlfwhelper.php');
 			$this->app->loader->register('ZlModelHelper', 'helpers:model.php');
 			$this->app->loader->register('ZLFieldHTMLHelper', 'helpers:zlfieldhtml.php');
+			$this->app->loader->register('zlHelper', 'helpers:zl.php');
 		}
 		
 		// check and perform installation tasks
