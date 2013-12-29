@@ -16,6 +16,57 @@ defined('_JEXEC') or die('Restricted access');
 class zlfwHelperZLUX extends AppHelper {
 
 	/**
+	 * The list of loaded zlux classes
+	 * 
+	 * @var array
+	 */
+	protected $_classes = array();
+
+	/**
+	 * Class Constructor
+	 * 
+	 * @param App $app A reference to the global App object
+	 */
+	public function __construct($app) {
+		parent::__construct($app);
+
+		// load class
+		$this->app->loader->register('zlux', 'classes:zlux.php');
+	}
+
+	/**
+	 * Get a zlux class
+	 * 
+	 * @param string $name The name of the table to retrieve
+	 * 
+	 * @return object The zlux class
+	 */
+	public function get($name)
+	{	
+		// load zlux class
+		$class = 'zlux'.ucfirst($name).'Manager';
+		$this->app->loader->register($class, 'zlfw:zlux/'.strtolower($name).'Manager/class.php');
+		
+		// add class, if not exists
+		if (!isset($this->_classes[$name])) {
+			$this->_classes[$name] = new $class($this->app);
+		}
+
+		return $this->_classes[$name];
+	}
+	
+	/**
+	 * Magic method to get a zlux class
+	 * 
+	 * @param string $name The name of the table
+	 * 
+	 * @return AppTable The table object
+	 */
+	public function __get($name) {
+		return $this->get($name);
+	}
+
+	/**
 	 * Load ZLUX Main assets
 	 */
 	public function loadMainAssets()
