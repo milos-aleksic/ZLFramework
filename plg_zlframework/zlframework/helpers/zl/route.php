@@ -21,6 +21,18 @@ class zlHelperRoute extends AppHelper {
 	protected $_routers = array();
 
 	/**
+	 * Class Constructor
+	 * 
+	 * @param App $app A reference to the global App object
+	 */
+	public function __construct($app) {
+		parent::__construct($app);
+
+		// load class
+		$this->app->loader->register('zlRouter', 'classes:router.php');
+	}
+
+	/**
 	 * Retrieve a router
 	 *
 	 * @param string $name Router name
@@ -68,7 +80,7 @@ class zlHelperRoute extends AppHelper {
 
 		// add router, if not exists
 		if (!isset($this->_routers[$name])) {
-			$this->_routers[$name] = new $class();
+			$this->_routers[$name] = new $class($this->app);
 		}
 	}
 }
