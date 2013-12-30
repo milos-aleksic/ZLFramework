@@ -789,17 +789,14 @@ class zlfwHelper extends AppHelper {
 		}
 	}
 
-	/*
-		Function: renderLayout
-			Renders the element using template layout file.
-
-	   Parameters:
-            $__layout - layouts template file
-	        $__args - layouts template file args
-
-		Returns:
-			String - html
-	*/
+	/**
+	 * General layout render function
+	 *
+	 * @param string $__layout The layout file path
+	 * @param array $__args The arguments to pass when rendering
+	 *
+	 * @return string The html output
+	 */
 	function renderLayout($__layout, $__args = array())
 	{
 		// init vars
