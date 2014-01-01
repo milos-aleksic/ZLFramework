@@ -10,10 +10,10 @@
 defined('_JEXEC') or die('Restricted access');
 
 /*
-	Class: zlfwHelperZLUX
+	Class: zlfwHelperZlux
 		A class that contains ZLUX functions
 */
-class zlfwHelperZLUX extends AppHelper {
+class zlfwHelperZlux extends AppHelper {
 
 	/**
 	 * The list of loaded zlux classes
@@ -37,14 +37,14 @@ class zlfwHelperZLUX extends AppHelper {
 	/**
 	 * Get a zlux class
 	 * 
-	 * @param string $name The name of the table to retrieve
+	 * @param string $name The name of the class to retrieve
 	 * 
 	 * @return object The zlux class
 	 */
 	public function get($name)
 	{	
 		// load zlux class
-		$class = 'zlux'.ucfirst($name).'Manager';
+		$class = 'zlux'.ucfirst($name);
 		$this->app->loader->register($class, 'zlfw:zlux/'.strtolower($name).'Manager/class.php');
 		
 		// add class, if not exists
@@ -58,9 +58,9 @@ class zlfwHelperZLUX extends AppHelper {
 	/**
 	 * Magic method to get a zlux class
 	 * 
-	 * @param string $name The name of the table
+	 * @param string $name The name of the class
 	 * 
-	 * @return AppTable The table object
+	 * @return object The class object
 	 */
 	public function __get($name) {
 		return $this->get($name);
