@@ -15,45 +15,6 @@ defined('_JEXEC') or die('Restricted access');
 class zluxFields extends zlux
 {
 	/**
-	 * The list of loaded fields renderers
-	 * 
-	 * @var array
-	 */
-	protected $_engines = array();
-
-	/**
-	 * Get a fields engine
-	 * 
-	 * @param string $name The name of the engine to retrieve
-	 * 
-	 * @return object The zlux class
-	 */
-	public function get($name)
-	{	
-		// load zlux class
-		$class = 'zluxFieldsEngine'.ucfirst($name);
-		$this->app->loader->register($class, 'zlfw:zlux/FieldsManager/engine/'.strtolower($name).'.php');
-		
-		// add class, if not exists
-		if (!isset($this->_engines[$name])) {
-			$this->_engines[$name] = new $class($this->app);
-		}
-
-		return $this->_engines[$name];
-	}
-	
-	/**
-	 * Magic method to get a fields engine
-	 * 
-	 * @param string $name The name of the engine
-	 * 
-	 * @return zluxFieldsEngine The engine object
-	 */
-	public function __get($name) {
-		return $this->get($name);
-	}
-
-	/**
 	 * Class constructor
 	 *
 	 * @param string $app App instance.
@@ -63,6 +24,27 @@ class zluxFields extends zlux
 
 		// register paths
 		$this->app->path->register(dirname(__FILE__), 'zlux.fields');
+	}
+
+	/**
+	 * Creates a ZLUX Fields engine instance
+	 *
+	 * @param string $type ZLUX Fields type
+	 * @param array $args Additional arguments for the constructor
+	 * @return zluxFields
+	 */
+	public function create($type = '', $args = array()) {
+
+		// load renderer class
+		$class = $type ? 'zluxFieldsEngine'.ucfirst($type) : 'zluxFieldsEngine';
+		if ($type) {
+			$this->app->loader->register($class, 'zlux.fields:engine/'.strtolower($type).'.php');
+		}
+
+		// prepend app
+		array_unshift($args, $this->app);
+
+		return $this->app->object->create($class, $args);
 	}
 }
 
@@ -93,6 +75,13 @@ abstract class zluxFieldsEngine
 	public $values;
 
 	/**
+	 * Reference to the field control
+	 *
+	 * @var string
+	 */
+	public $control;
+
+	/**
 	 * Class constructor
 	 *
 	 * @param string $app App instance.
@@ -104,11 +93,8 @@ abstract class zluxFieldsEngine
 		$this->request	= $app->request;
 	}
 
-	/*
-		Function: setValues
-	*/
 	/**
-	 * setValues
+	 * Set the fields values
 	 *
 	 * @param array $values Field values
 	 */
@@ -117,99 +103,81 @@ abstract class zluxFieldsEngine
 		$this->values = $this->app->data->create($values);
 	}
 
-	/*
-		Function: render - Returns the result from _parseJSON wrapped with main html dom
-	*/
-	public function render($parseJSONargs, $ajaxargs=array(), $class='', $ajaxLoading=false)
+	/**
+	 * Set the fields control
+	 *
+	 * @param array $ctrl Field control
+	 */
+	public function setControl($ctrl)
+	{
+		$this->control = $ctrl;
+	}
+
+	/**
+	 * Renders the fields
+	 *
+	 * @param mixed $fields The fields in XML, JSON, path to JSON file or Array format
+	 *
+	 * @return string The HTML fields string
+	 */
+	public function render($fields)
 	{
 		// load assets
 		$this->loadAssets();
 
-		// init vars
-		$html = array();
-		$ajaxargs = !empty($ajaxargs) ? json_encode($ajaxargs) : false;
-		$class = $class ? ' '.$class : '';
-
-		return $parseJSONargs ? call_user_func_array(array($this, "parseJSON"), $parseJSONargs) : '';
+		// render
+		return implode("\n", $this->renderFields($fields));
 	}
 	
-	/*
-		Function: parseJSON - Returns result html string from fields declared in json string/arrat format
-		Params: 
-			$json String		- path to json file or a json formated string
-			$ctrl String 		- control
-			$psv Array			- All Parent Fields Values
-			$pid String			- Parent Field ID
-			$arguments Array	- additional arguments the fields could need -> $ajaxargs var will be passed trough ajax call
-	*/
-	public function parseJSON($json, $ctrl, $psv=array(), $pid='', $returnArray=false, $arguments=array())
+	/**
+	 * Evaluates the fields and returns them in HTML
+	 *
+	 * @param array $fields The fields to process
+	 *
+	 * @return string The HTML fields string
+	 */
+	function renderFields($fields)
 	{
-		// extract the arguments
-		extract($arguments, EXTR_OVERWRITE);
+		// process XML
+		if (is_object($fields)) {
+			$fields = $this->parseXML($fields);
 
-		/* update params if provided */
-		// if(isset($addparams)){
-		// 	$this->params = $this->app->data->create( $addparams );
-		// }
+		// process json string
+		} else if ($result = $this->decodeJSON($fields)) {
+			$fields = $result;
 
-		// convert to array
-		settype($json, 'array');
+		// process file
+		} else if ($path = $this->app->path->path($fields)) {
 
-		// if paths provided retrieve json and convert to array
-		if (isset($json['paths'])){
-			foreach (array_map('trim', explode(',', $json['paths'])) as $pt) if ($path = $this->app->path->path($pt)) // php files only
-			{
-				if(is_file($path)){
-					/* IMPORTANT - this vars are necesary for include function */
-					$subloaded = true; // important to let know it's subloaded
-					$psv = $this->app->data->create($psv);
-					$json = json_decode(include($path), true);
-					break;
-				}
-			}
-		}
-		else if (!isset($json['fields'])) // is raw json string then
-		{
-			$json = json_decode($json[0], true);
+			$ext = pathinfo($path, PATHINFO_EXTENSION);
+			if ($ext == 'json')
+				$fields = file_get_contents($path);			
+			else // php
+				$fields = include($path);
+
+			$fields = $this->decodeJSON($fields);
 		}
 
-		// let's be sure is well formated
-		$json = isset($json['fields']) ? $json : array('fields' => $json);
-
-		// process fields if any
-		if (isset($json['fields']))
-		{			
-			$ctrl = $ctrl.(isset($json['control']) ? "[".$json['control']."]" : ''); // ctrl could grow on each iterate
-			
-			// iterate fields
-			$result = $this->_parseFields($json['fields'], $ctrl, $psv, $pid, false, $arguments);
-
-			return $returnArray ? $result : implode("\n", $result);
-		} 
-		else if($json && false)
-		{
-			JFactory::getApplication()->enqueueMessage( JText::_('JSON string with bad format or file not found - ') . implode(' | ', $json) );
+		// check if it's array, if not cancel and raise notice
+		if (!is_array($fields)) {
+			$this->app->error->raiseError(500, JText::_('Something went wrong. Could be a bad fields format or file not found.'));
+			return;
 		}
 
-		return null;
-	}
-	
-	// $fields, $control, $parentsValue, $parentID
-	private function _parseFields($fields, $ctrl, $psv, $pid, $returnArray, $arguments)
-	{
 		$result = array();
-		foreach ($fields as $id => $fld) {
+		foreach ($fields as $id => $fld)
+		{
 			$fld = $this->app->data->create($fld);
 
 			// adjust ctrl
-			if($adjust = $fld->get('adjust_ctrl')){
-				$final_ctrl = preg_replace($adjust['pattern'], $adjust['replacement'], $ctrl);
-			} else {
-				$final_ctrl = $ctrl;
-			}
+			// if($adjust = $fld->get('adjust_ctrl')){
+			// 	$final_ctrl = preg_replace($adjust['pattern'], $adjust['replacement'], $ctrl);
+			// } else {
+			// 	$final_ctrl = $ctrl;
+			// }
 
 			// wrapper control if any
-			$final_ctrl = $fld->get('control') ? $final_ctrl.'['.$fld->get('control', '').']' : $final_ctrl;
+			// $final_ctrl = $fld->get('control') ? $final_ctrl.'['.$fld->get('control', '').']' : $final_ctrl;
 
 			$field_type = $fld->get('type', '');
 			switch ($field_type)
@@ -235,7 +203,7 @@ abstract class zluxFieldsEngine
 				case 'control_wrapper': case 'toggle': case 'fieldset': // backward compatibility
 
 					// get content
-					$content = array_filter($this->parseJSON(json_encode(array('fields' => $fld->get('fields'))), $final_ctrl, $psv, $pid, true, $arguments));
+					$content = array_filter($this->renderFields($fld->get('fields')));
 					
 					// abort if no minimum fields reached
 					if (count($content) == 0 || count($content) < $fld->get('min_count', 0)) continue;
@@ -283,7 +251,7 @@ abstract class zluxFieldsEngine
 					}
 
 					// parse fields
-					if($res = $this->parseJSON($json, $final_ctrl, $psv, $pid, false, $arguments)){
+					if($res = $this->renderFields($json)) {
 						$result[] = $res;
 					}
 
@@ -293,43 +261,27 @@ abstract class zluxFieldsEngine
 					$value = null;
 
 					// check old values
-					if($fld->get('check_old_value'))
-					{
-						// adjust ctrl for old value
-						$old_value_ctrl = $final_ctrl;
-						if($adjust = $fld->find('check_old_value.adjust_ctrl')) $old_value_ctrl = preg_replace($adjust['pattern'], $adjust['replacement'], $old_value_ctrl);
-						// get old value
-						// $value = $this->getFieldValue($fld->find('check_old_value.id'), null, $old_value_ctrl);
-						// translate old value
-						if($translations = $fld->find('check_old_value.translate_value')){
-							foreach($translations as $key => $trans) if($value == $key){
-								if($trans == '_SKIPIT_'){
-									$value = null;
-									break;
-								} else {
-									$value = $trans;
-									break;
-								}
-							}
-						}
-					}
+					// if($fld->get('check_old_value'))
+					// {
+					// 	// adjust ctrl for old value
+					// 	$old_value_ctrl = $this->control;
+					// 	if($adjust = $fld->find('check_old_value.adjust_ctrl')) $old_value_ctrl = preg_replace($adjust['pattern'], $adjust['replacement'], $old_value_ctrl);
+					// 	// get old value
+					// 	// $value = $this->getFieldValue($fld->find('check_old_value.id'), null, $old_value_ctrl);
+					// 	// translate old value
+					// 	if($translations = $fld->find('check_old_value.translate_value')){
+					// 		foreach($translations as $key => $trans) if($value == $key){
+					// 			if($trans == '_SKIPIT_'){
+					// 				$value = null;
+					// 				break;
+					// 			} else {
+					// 				$value = $trans;
+					// 				break;
+					// 			}
+					// 		}
+					// 	}
+					// }
 
-					// get value from config instead
-					if($fld->get('data_from_config'))
-					{
-						$path = preg_replace( // create equivalent path to the config values
-							array('/^('.$this->element->identifier.')/', '/(positions\[\S+\])\[(\d+)\]|elements\[[^\]]+\]|\]$/', '/(\]\[|\[|\])/', '/^\./'),
-							array('', '', '.', ''),
-							$final_ctrl
-						);
-						$path = "{$this->element->identifier}.{$path}";
-						$value = $this->config->find($path.".$id", $value);
-					}
-					else
-					{
-						// get value
-						// $value = strlen($value) ? $value : $this->getFieldValue($id, $fld->get('default'), $final_ctrl, $fld->get('old_id', false));
-					}
 
 					// get inital value dinamicly
 					if (empty($value) && $fld->get('request_value')) {
@@ -340,13 +292,12 @@ abstract class zluxFieldsEngine
 						}
 					}
 					
-					// set specific
-					$specific = $fld->get('specific', array()); 
-
 					 // if ($psv) $specific['parents_val'] = $psv;
+
+					$args = $this->app->data->create($fld->get('settings'));
 									
 					// render field
-					$result[] = $this->renderField($field_type, $id, $final_ctrl.'['.$id.']', $value, $specific);
+					$result[] = $this->renderField($fld, $id, $value, $args);
 
 					// load childs
 					if($childs = $fld->find('childs.loadfields'))
@@ -367,8 +318,8 @@ abstract class zluxFieldsEngine
 						$pr_opts = json_encode(array('id' => $id, 'url' => $url, 'psv' => $psv, 'json' => json_encode($json)));
 						
 						// all options are stored as data on DOM so can be used from JS
-						$loaded_fields = $this->parseJSON(array('fields' => $childs), $final_ctrl, $psv, $pid, false, $arguments);
-						$result[] = '<div class="placeholder" data-relieson-type="'.$field_type.'"'.($pr_opts ? " data-relieson='{$pr_opts}'" : '').' data-control="'.$final_ctrl.'" >';
+						$loaded_fields = $this->renderFields($childs);
+						$result[] = '<div class="placeholder" data-relieson-type="'.$field_type.'"'.($pr_opts ? " data-relieson='{$pr_opts}'" : '').' data-control="'.$this->control.'" >';
 						$result[] = $loaded_fields ? '<div class="loaded-fields">'.$loaded_fields.'</div>' : '';
 						$result[] = '</div>';
 					}
@@ -377,11 +328,28 @@ abstract class zluxFieldsEngine
 		return $result;
 	}
 
-	/*
-		Function: parseArray - returns an json formated string from an array
-			The array is the XML data standarized by the type inits
-	*/
-	function parseArray($master, $isChild=false, $arguments=array())
+	/**
+	 * Returns an json formated string from an array
+	 *
+	 * @param array $master The main array object
+	 *
+	 * @return mixed The decoded json or false if string bad formated
+	 */
+	function parseXML($xml)
+	{
+		// convert the XML to array for easier managing 
+		return $this->_parseXML($this->app->zlfw->xml->XMLtoArray($xml));
+	}
+
+	/**
+	 * Evaluates the XML converted to array and applies the expected format
+	 *
+	 * @param array $master The main array
+	 * @param boolean $isChild Stablish if iterating over a master or a child
+	 *
+	 * @return array The well formated array for further processing
+	 */
+	protected function _parseXML($master, $isChild=false)
 	{
 		$fields = array();
 		if(count($master)) foreach($master as $val)
@@ -395,22 +363,14 @@ abstract class zluxFieldsEngine
 			{
 				// get field from json
 				if($json = $this->app->path->path("zlfield:json/{$attrs['type']}.json.php")){
-					// extract the arguments
-					extract($arguments, EXTR_OVERWRITE);
-
-					// parse all subfiels and set as params
-					$result = $this->parseArray($childs, true, $arguments);
-					$params = $this->app->data->create($result);
-					
-					// remove the {} from json string and proceede
-					$fields[] = preg_replace('(^{|}$)', '', include($json));
+					$fields[] = decode_json(include($json), true);
 				} else {
-					$fields[] = '"notice":{"type":"info","specific":{"text":"'.JText::_('PLG_ZLFRAMEWORK_ZLFD_FIELD_NOT_FOUND').'"}}';
+					$fields[] = array('notice' => array("type" => "info", "specific" => array("text" => JText::_('PLG_ZLFRAMEWORK_ZLFD_FIELD_NOT_FOUND'))));
 				}
 			}
 			else if($isChild)
 			{
-				$fields = array_merge($fields, array($name => array_merge($attrs, $this->parseArray($childs, true, $arguments))));
+				$fields = array_merge($fields, array($name => array_merge($attrs, $this->_parseXML($childs, true))));
 			}
 			else // setfield
 			{
@@ -419,10 +379,10 @@ abstract class zluxFieldsEngine
 				unset($attrs['id']);
 
 				// merge val attributes
-				$field = array($id => array_merge($attrs, $this->parseArray($childs, true, $arguments)));
+				$field = array($id => array_merge($attrs, $this->_parseXML($childs, true)));
 
-				// remove the {} created by the encode and proceede
-				$fields[] = preg_replace('(^{|}$)', '', json_encode($field));
+				// merge result
+				$fields = array_merge($fields, $field);
 			}
 		}
 		return $fields;
@@ -447,7 +407,22 @@ abstract class zluxFieldsEngine
 		}
 		return $render; // if nothing to check, render as usual
 	}
-	
+
+	/**
+	 * decodeJSON
+	 *
+	 * @param string $string The json string
+	 *
+	 * @return mixed The decoded json or false if string bad formated
+	 */
+	function decodeJSON($string) {
+		$json = json_decode($string, true);
+		if (json_last_error() == JSON_ERROR_NONE)
+			return $json;
+		else
+			return false;
+	}
+
 	/*
 		Function: replaceVars - Returns html string with all variables replaced
 	*/
@@ -495,59 +470,18 @@ abstract class zluxFieldsEngine
 	}
 
 	/*
-		Function: getLayout
-			Get element layout path and use override if exists.
-
-		Returns:
-			String - Layout path
-	*/
-	public function getLayout($layout = null)
-	{
-		// find layout
-		return $this->app->path->path("zlfield:layouts/{$layout}");
-	}
-
-	/*
-		Function: field - Returns field html string
-	*/
-	public function field($params, $value, $getCurrentValue=false)
-	{
-		$type	= $params->get('type');
-
-		if ($type && $params->get('render') && $this->renderIf($params->get('renderif')))
-		{
-			$id 		= $params->get('id');
-			$name 		= $params->get('final_ctrl').'['.$id.']';
-			$specific 	= $this->app->data->create((array)$params->get('specific'));
-			$attrs		= '';
-
-			// render field
-			$field = $this->app->zlfieldhtml->_('zlf.'.$type.'Field', $id, $name, $value, $specific, $attrs, $getCurrentValue);
-
-			if (!empty($field)) return $field;
-		}
-
-		return null;
-	}
-
-	/*
 		Function: row - Returns row html string
 	*/
-	public function renderField($type, $id, $name, $value, $args = array())
+	public function renderField($fld, $id, $value, $args = array())
 	{
-		if (empty($type)) return;
+		if (empty($fld['type'])) return;
 
-		// set vars
-		// $args['id']		= $id;
-		// $args['name']	= $name;
-		// $args['value']	= $value;
-		$field = $this->app->data->create($args);
+		$name = $this->control.'['.$id.']';
 
-		$__file = $this->app->path->path("zlux.fields:fields/$type.php");
+		$__file = $this->app->path->path("zlux.fields:fields/{$fld['type']}.php");
 
 		if ($__file != false) {
 			// render the field
-			// extract($args);
 			ob_start();
 			include($__file);
 			$output = ob_get_contents();

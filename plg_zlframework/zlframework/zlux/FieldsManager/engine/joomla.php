@@ -23,4 +23,29 @@ class zluxFieldsEngineJoomla extends zluxFieldsEngine
 	{
 		parent::__construct($app);
 	}
+
+	/*
+		Function: row - Returns row html string
+	*/
+	public function renderField($fld, $id, $value, $args = array())
+	{
+		$field = parent::renderField($fld, $id, $value, $args);
+
+		if ($fld->get('layout')) {
+
+			$html = array();
+			$html[] = '<div class="control-group">';
+				$html[] = '<div class="control-label">';
+					$html[] = $fld->get('label');
+				$html[] = '</div>';
+				$html[] = '<div class="controls">';
+					$html[] = $field;
+				$html[] = '</div>';
+			$html[] = '</div>';
+
+			return implode("\n", $html);
+		}
+
+		return $field;
+	}
 }

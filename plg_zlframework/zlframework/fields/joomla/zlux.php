@@ -29,27 +29,22 @@ class JFormFieldZlux extends JFormField {
 		$node_atr = $node_atr['@attributes'];
 		$class	  = $node->attributes()->class;
 
-		// set values
-		$app->zlfw->zlux->fields->joomla->setValues($this->value);
+		// init fields engine
+		$engine = $app->zlfw->zlux->fields->create('joomla');
 
-		// parse fields
-		$fields = $app->zlfw->zlux->fields->joomla->parseArray($app->zlfw->xml->XMLtoArray($node));
+		// set field values
+		$engine->setValues($this->value);
 
-		// set json
-		$json = '{"fields": {'.implode(",", $fields).'}}';
-
-		// set ctrl
+		// prepare control
 		$ctrl = count($node->children()) > 1 ? $this->name : $this->formControl.'['.$this->group.']';
-		
-		// add aditional control if set
+
+		// allow additional control
 		if ($node->attributes()->addctrl) $ctrl .= "[".$node->attributes()->addctrl.']'; 
 
-		// set arguments
-		$ajaxargs  = array('node' => $node_atr);
-		$arguments = array('node' => $node_atr);
+		// set control
+		$engine->setControl($ctrl);
 
 		// render
-		return $app->zlfw->zlux->fields->joomla->render(array($json, $ctrl, array(), '', false, $arguments), $ajaxargs, $class);
+		return $engine->render($node);
 	}
-
 }
