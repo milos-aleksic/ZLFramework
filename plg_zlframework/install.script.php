@@ -32,7 +32,6 @@ class plgSystemZlframeworkInstallerScript
 			'plugins/system/zlframework/zlframework/assets/css/repeatablepro.css',
 			'plugins/system/zlframework/zlframework/models/query.php',
 			'plugins/system/zoo_zlelements/zoo_zlelements/fields/specific.php',
-			'plugins/system/zlframework/zlframework/helpers/zlfwhelper.php',
 			'plugins/system/zlframework/zlframework/helpers/model.php',
 
 			// files pro old assets
