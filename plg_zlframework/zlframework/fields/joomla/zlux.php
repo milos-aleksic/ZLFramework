@@ -18,7 +18,14 @@ class JFormFieldZlux extends JFormField {
 
 	protected $type = 'Zlux';
 
-	public function getInput()
+	/**
+	 * Method to get the field label markup.
+	 *
+	 * @return  string  The field label markup.
+	 *
+	 * @since   11.1
+	 */
+	protected function getLabel()
 	{
 		// get zoo app
 		$app = App::getInstance('zoo');
@@ -39,12 +46,31 @@ class JFormFieldZlux extends JFormField {
 		$ctrl = count($node->children()) > 1 ? $this->name : $this->formControl.'['.$this->group.']';
 
 		// allow additional control
-		if ($node->attributes()->addctrl) $ctrl .= "[".$node->attributes()->addctrl.']'; 
+		if ($node->attributes()->addcontrol) $ctrl .= "[".$node->attributes()->addcontrol.']'; 
 
 		// set control
 		$engine->setControl($ctrl);
 
 		// render
-		return $engine->render($node);
+
+		return $app->joomla->isVersion('2.5') ? $engine->render($node) : '</div><div>' . $engine->render($node);
 	}
+
+	/**
+	 * Method to get the field input markup.
+	 *
+	 * @return  string  The field input markup.
+	 *
+	 * @since   11.1
+	 */
+	protected function getInput()
+	{
+		return '';
+	}
+
+	// when j3.2 wide supported this method should be used to totally remove the control layout
+	// public function getControlGroup()
+	// {
+	// 	return $this->getInput();
+	// }
 }

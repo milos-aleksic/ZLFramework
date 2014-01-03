@@ -23,7 +23,10 @@ class zluxFields extends zlux
 		parent::__construct($app);
 
 		// register paths
-		$this->app->path->register(dirname(__FILE__), 'zlux.fields');
+		$this->app->path->register(dirname(__FILE__), 'zluxFields');
+		if ($path = $this->app->path->path('zluxFields:fields')) {
+			$this->app->path->register($path, 'zluxFields.fields');
+		}
 	}
 
 	/**
@@ -38,7 +41,7 @@ class zluxFields extends zlux
 		// load renderer class
 		$class = $type ? 'zluxFieldsEngine'.ucfirst($type) : 'zluxFieldsEngine';
 		if ($type) {
-			$this->app->loader->register($class, 'zlux.fields:engine/'.strtolower($type).'.php');
+			$this->app->loader->register($class, 'zluxFields:engine/'.strtolower($type).'.php');
 		}
 
 		// prepend app
@@ -474,11 +477,12 @@ abstract class zluxFieldsEngine
 	*/
 	public function renderField($fld, $id, $value, $args = array())
 	{
-		if (empty($fld['type'])) return;
-
+		$type = $fld['type'];
 		$name = $this->control.'['.$id.']';
 
-		$__file = $this->app->path->path("zlux.fields:fields/{$fld['type']}.php");
+		$fld->set('id', preg_replace(array('/\W+/', '/_$/'), array('_', ''), $name));
+
+		$__file = $this->app->path->path("zluxFields.fields:/$type.php");
 
 		if ($__file != false) {
 			// render the field
