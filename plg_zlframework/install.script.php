@@ -353,7 +353,7 @@ class plgSystemZlframeworkInstallerScript
 			// set the proceede link with it's behaviour
 			$path = JPATH_ROOT . '/tmp/' . basename($this->_src.'_copy');
 			$path = str_replace('\\', '\\/', $path);
-			$javascript = "document.getElementById('install_directory').value = '{$path}';document.querySelectorAll('form .uploadform .button, form .uploadform .btn')[1].click();return false;";
+			$javascript = "document.getElementById('install_directory').value = '{$path}';Joomla.submitbutton3();return false;";
 			$this->_error = JText::sprintf('PLG_ZLFRAMEWORK_SYS_OUTDATED_EXTENSIONS', $this->_ext_version, implode(', ', $outdated_ext), $javascript);
 		}
 		
