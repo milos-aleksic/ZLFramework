@@ -1,4 +1,40 @@
 /* ===================================================
+ * ZLUX
+ * https://zoolanders.com/extensions/zl-framework
+ * ===================================================
+ * Copyright (C) JOOlanders SL 
+ * http://www.gnu.org/licenses/gpl-2.0.html GNU/GPLv2 only
+ * ========================================================== */
+ ;(function ($, window, document, undefined) {
+	"use strict";
+	var Plugin = function(){};
+	Plugin.prototype = $.extend(Plugin.prototype, {
+		name: 'zlux',
+		langstrings: {},
+		/**
+		 * Add the language strings to the array
+		 *
+		 * @param {Object} strings Translated string in JSON format.
+		 */
+		addLangStrings: function(strings) {
+			$.extend(this.langstrings, strings);
+		},
+		/**
+		 * Retrieves the specified language string
+		 *
+		 * @param {String} string String to look for.
+		 * @return {String} Translated string or the input string if it wasn't found.
+		 */
+		getLangString: function(string) {
+			return this.langstrings[string] || string;
+		}
+	});
+	// init ZLUX
+	$.zlux = new Plugin;
+})(jQuery, window, document);
+
+
+/* ===================================================
  * ZLUX Main
  * https://zoolanders.com/extensions/zl-framework
  * ===================================================
@@ -155,7 +191,7 @@
 			var url = Plugin.prototype.JBase + 'index.php?option=com_zoo'
 			+ '&controller=' + controller
 			+ '&task=' + task
-			+ '&app_id=' + app_id
+			+ (app_id ? '&app_id=' + app_id : '')
 			+ '&format=raw'
 			+ ($.isEmptyObject(params) ? '' : '&' + $.param(params));
 
@@ -549,7 +585,7 @@
 			"param": ''
 		},
 		events: {},
-		initialize: function(input, options) {
+		initialize: function(element, options) {
 			this.options = $.extend({}, $.fn.zluxMain.prototype.options, this.options, options);
 			var $this = this;
 
