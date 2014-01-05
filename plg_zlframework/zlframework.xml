@@ -14,7 +14,6 @@
 	<files>
 		<filename plugin="zlframework">zlframework.php</filename>
 		<filename>install.script.php</filename>
-		<filename>index.html</filename>
 		<folder>zlframework</folder>		
 	</files>
 	<languages folder="language">
