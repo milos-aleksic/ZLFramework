@@ -7,30 +7,232 @@
  * ========================================================== */
  ;(function ($, window, document, undefined) {
 	"use strict";
-	var Plugin = function(){};
-	Plugin.prototype = $.extend(Plugin.prototype, {
-		name: 'zlux',
-		langstrings: {},
-		/**
-		 * Add the language strings to the array
-		 *
-		 * @param {Object} strings Translated string in JSON format.
-		 */
-		addLangStrings: function(strings) {
-			$.extend(this.langstrings, strings);
-		},
-		/**
-		 * Retrieves the specified language string
-		 *
-		 * @param {String} string String to look for.
-		 * @return {String} Translated string or the input string if it wasn't found.
-		 */
-		getLangString: function(string) {
-			return this.langstrings[string] || string;
+
+	var zlux = $.zlux || {};
+
+	if (zlux.fn) {
+		return;
+	}
+
+	zlux.version = '1.0';
+	zlux.zoo = {};
+
+
+	/** URL **/
+	zlux.url = {};
+	zlux.url._root = ''; // populated by zlux helper
+	zlux.url.root = function(url) {
+		// make sure the url has no the root_path on it
+		var patt = new RegExp('^'+zlux.url._root_path);
+		url = zlux.utils.toType(url) == 'string' ? url.replace(patt, '') : ''; 
+		// rturn the root + the cleaned url
+		return zlux.url._root + url;
+	};
+	zlux.url._base = ''; // populated by zlux helper
+	zlux.url.base = function(url) {
+		return zlux.url._base + (url ? url : '');
+	};
+	zlux.url._zlfw = 'plugins/system/zlframework/zlframework/';
+	zlux.url.zlfw = function(url) {
+		return zlux.url._zlfw + (url ? url : '');
+	};
+	zlux.url.ajax = function(controller, task, params) {
+		var params = params == undefined ? {} : params,
+			app_id = params.app_id ? params.app_id : zlux.zoo.app_id;
+
+		// avoid repeating the app id param
+		delete params.app_id;
+
+		// prepare the url
+		var url = zlux.url._base + 'index.php?option=com_zoo'
+		+ '&controller=' + controller
+		+ '&task=' + task
+		+ (app_id ? '&app_id=' + app_id : '')
+		+ '&format=raw'
+		+ ($.isEmptyObject(params) ? '' : '&' + $.param(params));
+
+		return url;
+	};
+	
+
+	/** FN **/
+	zlux.fn = function(command, options) {
+		var args = arguments, 
+			cmd = command.match(/^([a-z\-]+)(?:\.([a-z]+))?/i), 
+			plugin = cmd[1], 
+			method = cmd[2];
+
+		if (!zlux[plugin]) {
+			$.error("ZLUX plugin [" + plugin + "] does not exist.");
+			return this;
 		}
-	});
-	// init ZLUX
-	$.zlux = new Plugin;
+
+		return this.each(function() {
+			var $this = $(this), data = $this.data(plugin);
+			if (!data) $this.data(plugin, (data = new zlux[plugin](this, method ? undefined : options)));
+			if (method) data[method].apply(data, Array.prototype.slice.call(args, 1));
+		});
+	};
+
+
+	/** LANGUAGE **/
+	zlux.lang = {};
+	zlux.lang.strings = {};
+	/**
+	 * Add the language strings to the array
+	 * @param {Object} strings Translated string in JSON format.
+	 */
+	zlux.lang.set = function(strings) {
+		$.extend(zlux.lang.strings, strings);
+	};
+	/**
+	 * Retrieves the specified language string
+	 * @param {String} string String to look for.
+	 * @return {String} Translated string or the input string if it wasn't found.
+	 */
+	zlux.lang.get = function(string) {
+		return zlux.lang.strings[string] || string;
+	};
+
+
+	/** UI **/
+	zlux.ui = {};
+	/**
+	 * Adds or removes the spinner from the elements i child and spinners it
+	 * @param {DOM} element Reference to the element where to look for the icon
+	 * @return {Bool} Should the spin be added or removed. By default is added
+	 */
+	zlux.ui.spin = function(element, action) {
+		var action = action == undefined ? 1 : 0;
+		$('i', $(element)).toggleClass('uk-icon-spinner uk-icon-spin', action);
+	};
+
+
+	/** ASSETS **/
+	zlux.assets = {};
+	zlux.assets._ress = {}; // requested assets
+	// store known assets for fast loading
+	zlux.assets.known = {
+		"dates":{
+			"css":"plugins/system/zlframework/zlframework/zlux/DatesManager/style.css",
+			"js":"plugins/system/zlframework/zlframework/zlux/DatesManager/plugin.js"
+		},
+		"dialog":{
+			"css":"plugins/system/zlframework/zlframework/zlux/DialogManager/style.css",
+			"js":"plugins/system/zlframework/zlframework/zlux/DialogManager/plugin.js"
+		},
+		"fields":{
+			"css":"plugins/system/zlframework/zlframework/zlux/FieldsManager/style.css",
+			"js":"plugins/system/zlframework/zlframework/zlux/FieldsManager/plugin.js"
+		},
+		"files":{
+			"css":"plugins/system/zlframework/zlframework/zlux/FilesManager/style.css",
+			"js":"plugins/system/zlframework/zlframework/zlux/FilesManager/plugin.js"
+		},
+		"items":{
+			"css":"plugins/system/zlframework/zlframework/zlux/ItemsManager/style.css",
+			"js":"plugins/system/zlframework/zlframework/zlux/ItemsManager/plugin.js"
+		}
+	};
+
+	/**
+	 * Load requested assets and execute callback
+	 * @ress String or Array
+	 */
+	zlux.assets.load = function(ress, callback, failcallback) {
+		var req  = [];
+
+		// if is string check for related known ressources
+		if(zlux.utils.toType(ress) == 'string' && $.zlux.assets.known[ress] != undefined){
+			ress = $.map(zlux.assets.known[ress], function(value, index) {
+				return [value];
+			});
+		}
+		
+		// clean vars
+		ress = $.isArray(ress) ? ress:[ress];
+
+		// load assets
+		for (var i=0, len=ress.length; i<len; i++) {
+
+			if(!ress[i]) continue;
+
+			if (!zlux.assets._ress[ress[i]]) {
+				if (ress[i].match(/\.js$/)) {
+					zlux.assets._ress[ress[i]] = zlux.assets.getScript(zlux.url.root(ress[i]));
+				} else {
+					zlux.assets._ress[ress[i]] = zlux.assets.getCss(zlux.url.root(ress[i]));
+				}
+			}
+			req.push(zlux.assets._ress[ress[i]]);
+		}
+
+		return $.when.apply($, req).done(callback).fail(function(){
+			if (failcallback) {
+				failcallback();
+			} else {
+				$.error("Require failed: \n" + ress.join(",\n"));
+			}
+		});
+	};
+	zlux.assets.getScript = function(url, callback) {
+		var d = $.Deferred(), script = document.createElement('script');
+
+		script.async = true;
+
+		script.onload = function() {
+			d.resolve();
+			if(callback) { callback(script); }
+		};
+
+		script.onerror = function() {
+			d.reject(url);
+		};
+
+		// IE 8 fix
+		script.onreadystatechange = function() {
+			if (this.readyState == 'loaded' || this.readyState == 'complete') {
+				d.resolve();
+				if(callback) { callback(script); }
+			}
+		}
+
+		script.src = url;
+
+		document.getElementsByTagName('head')[0].appendChild(script);
+
+		return d.promise();
+	};
+	zlux.assets.getCss = function(url, callback){
+		var d         = $.Deferred(),
+			link      = document.createElement('link');
+			link.type = 'text/css';
+			link.rel  = 'stylesheet';
+			link.href = url;
+
+		document.getElementsByTagName('head')[0].appendChild(link);
+
+		var img = document.createElement('img');
+			img.onerror = function(){
+				d.resolve();
+				if(callback) callback(link);
+			};
+			img.src = url;
+
+		return d.promise();
+	};
+
+
+	/** UTILS **/
+	zlux.utils = {};
+	// returns the object type
+	zlux.utils.toType = function(obj) {
+		return ({}).toString.call(obj).match(/\s([a-z|A-Z]+)/)[1].toLowerCase();
+	};
+
+	// set zlux
+	$.zlux = zlux;
+	$.fn.zlux = zlux.fn;
 })(jQuery, window, document);
 
 
@@ -41,168 +243,14 @@
  * Copyright (C) JOOlanders SL 
  * http://www.gnu.org/licenses/gpl-2.0.html GNU/GPLv2 only
  * ========================================================== */
-(function ($) {
+;(function ($, window, document, undefined) {
 	"use strict";
-	var Plugin = function(options){
-		this.options = $.extend({}, this.options, options);
-		this.events = {};
-	};
-	Plugin.prototype = $.extend(Plugin.prototype, {
-		name: 'zluxMain',
+	var Plugin = function(){};
+	$.extend(Plugin.prototype, {
+		name: 'Main',
 		options: {},
-		// var for internal events, must be reseted when expanding
+		// var for internal events, must be reseted when expanding?
 		events: {},
-		translations: {}, // translated strings
-		_ress: {}, // requested assets
-		/* JRoot: Joomla root URL, for assets urls. Its set within zlux helper */
-		/* JBase: Joomla base URL, for ajax urls. Its set within zlux helper */
-		/**
-		 * Initialize the called plugin
-		 */
-		initialize: function(target, zluxPlugin, options) {
-
-			// prepare plugin name
-			var pluginName = zluxPlugin.match(/^[A-Z][a-z]+/g).shift(), // get the asset name from the plugin name first word
-				callName = 'zlux' + zluxPlugin;
-
-			// load related assets and init plugin
-			return $.Deferred(function( defer ) {
-
-				var css = Plugin.prototype.zlfwURL() + 'zlux/' + pluginName + 'Manager/style.css',
-					js  = Plugin.prototype.zlfwURL() + 'zlux/' + pluginName + 'Manager/plugin.js';
-
-				Plugin.prototype.requireAsset([css, js], function(){
-
-					// check if function exists
-					if ($.fn[callName]) {
-
-						// if target provided init plugin on it
-						if (target[0]) {
-							target[callName](options);
-							defer.resolve();
-
-						// else init the plugin and return it
-						} else {
-
-							defer.resolve( new $.fn[callName](options) );						
-						}
-
-					} else {
-						// reject the deffer, something went wrong
-						defer.reject();
-					}
-				});
-				
-			})
-
-			// send a promise
-			.promise();
-		},
-		/**
-		 * Load requested assets and execute callback
-		 *
-		 * @ress String or Array
-		 */
-		requireAsset: function(ress, callback, failcallback) {
-			var req  = [];
-			
-			// clean vars
-			ress = $.isArray(ress) ? ress:[ress];
-
-			for (var i=0, len=ress.length; i<len; i++) {
-
-				if(!ress[i]) continue;
-
-				if (!this._ress[ress[i]]) {
-					if (ress[i].match(/\.js$/)) {
-						this._ress[ress[i]] = this.getScript(ress[i]);
-					} else {
-						this._ress[ress[i]] = this.getCss(ress[i]);
-					}
-				}
-				req.push(this._ress[ress[i]]);
-			}
-
-			return $.when.apply($, req).done(callback).fail(function(){
-				if (failcallback) {
-					failcallback();
-				} else {
-					$.error("Require failed: \n" + ress.join(",\n"));
-				}
-			});
-		},
-		getScript: function(url, callback) {
-			var d = $.Deferred(), script = document.createElement('script');
-
-			script.async = true;
-
-			script.onload = function() {
-				d.resolve();
-				if(callback) { callback(script); }
-			};
-
-			script.onerror = function() {
-				d.reject(url);
-			};
-
-			// IE 8 fix
-			script.onreadystatechange = function() {
-				if (this.readyState == 'loaded' || this.readyState == 'complete') {
-					d.resolve();
-					if(callback) { callback(script); }
-				}
-			}
-
-			script.src = url;
-
-			document.getElementsByTagName('head')[0].appendChild(script);
-
-			return d.promise();
-		},
-		getCss: function(url, callback){
-			var d         = $.Deferred(),
-				link      = document.createElement('link');
-				link.type = 'text/css';
-				link.rel  = 'stylesheet';
-				link.href = url;
-
-			document.getElementsByTagName('head')[0].appendChild(link);
-
-			var img = document.createElement('img');
-				img.onerror = function(){
-					d.resolve();
-					if(callback) callback(link);
-				};
-				img.src = url;
-
-			return d.promise();
-		},
-		/**
-		 * Returns the ZLUX Ajax URL
-		 */
-		getAjaxURL: function(controller, task, params) {
-			var params = params == undefined ? {} : params,
-				app_id = params.app_id ? params.app_id : Plugin.prototype.app_id;
-
-			// avoid repeating the app id param
-			delete params.app_id;
-
-			// prepare the url
-			var url = Plugin.prototype.JBase + 'index.php?option=com_zoo'
-			+ '&controller=' + controller
-			+ '&task=' + task
-			+ (app_id ? '&app_id=' + app_id : '')
-			+ '&format=raw'
-			+ ($.isEmptyObject(params) ? '' : '&' + $.param(params));
-
-			return url;
-		},
-		/**
-		 * Returns the ZLFW root url
-		 */
-		zlfwURL: function() {
-			return Plugin.prototype.JRoot + 'plugins/system/zlframework/zlframework/';
-		},
 		/**
 		 * Dispatches the specified event name and it's arguments to all listeners.
 		 *
@@ -230,7 +278,7 @@
 			}
 
 			// always trigger target for external binds with zlux. namespace
-			if (this.target) this.target.trigger('zlux.' + name, args);
+			if (this.element) this.element.trigger('zlux.' + name, args);
 
 			return true;
 		},
@@ -330,33 +378,13 @@
 			}
 		},
 		/**
-		 * Add translated strings to the translation object
-		 *
-		 * @param {Object} translations Translated string in JSON object.
-		 */
-		addTranslations: function(translations) {
-			$.fn[Plugin.prototype.name].translations = $.extend(
-				$.fn[Plugin.prototype.name].translations,
-				translations
-			);
-		},
-		/**
-		 * Translates the specified string by checking for the english string in the language pack lookup.
-		 *
-		 * @param {String} str String to look for.
-		 * @return {String} Translated string or the input string if it wasn't found.
-		 */
-		translate: function(str) {
-			return $.fn[Plugin.prototype.name].translations[str] || str;
-		},
-		/**
 		 * Shortcut for translate function
 		 *
 		 * @param {String} str String to look for.
 		 * @return {String} Translated string or the input string if it wasn't found.
 		 */
 		_: function(str) {
-			return this.translate(str);
+			return $.zlux.lang.get(str);
 		},
 		/**
 		 * Pseudo sprintf implementation - simple way to replace tokens with specified values.
@@ -405,22 +433,8 @@
 		}
 	});
 	// Save the Main Plugin as prototype
-	$.fn[Plugin.prototype.name] = Plugin;
-
-	// Set an special ZLUX Init function for zluxPlugins Ex: $('selector').zlux("zluxFilesManager", {arguments}) or $.fn.zlux("zluxFilesPreview");
-	$.fn.zlux = function() {
-		var args = arguments;
-		// if target valid
-		if (this[0]) {
-			return this.each(function() {
-				var target = $(this);
-				Plugin.prototype.initialize.apply(Plugin, $.merge([target], args));
-			});
-		} else {
-			return Plugin.prototype.initialize.apply(Plugin, $.merge([this], args));
-		}
-	};
-})(jQuery);
+	$.zlux[Plugin.prototype.name] = Plugin;
+})(jQuery, window, document);
 
 
 /* ===================================================
@@ -430,16 +444,11 @@
  * Copyright (C) JOOlanders SL 
  * http://www.gnu.org/licenses/gpl-2.0.html GNU/GPLv2 only
  * ========================================================== */
-(function ($) {
+;(function ($, window, document, undefined) {
 	"use strict";
-	var Plugin = function(options){
-		this.options = $.extend({}, this.options, options);
-		this.events = {};
-	};
-	Plugin.prototype = $.extend(Plugin.prototype, $.fn.zluxMain.prototype, {
-		name: 'zluxManager',
-		options: {},
-		events: {},
+	var Plugin = function(){};
+	$.extend(Plugin.prototype, $.zlux.Main.prototype, {
+		name: 'Manager',
 		/**
 		 * Reloads the Table content
 		 */
@@ -502,8 +511,8 @@
 		}
 	});
 	// save the plugin for global use
-	$.fn[Plugin.prototype.name] = Plugin;
-})(jQuery);
+	$.zlux[Plugin.prototype.name] = Plugin;
+})(jQuery, window, document);
 
 
 /* ===================================================
@@ -513,10 +522,10 @@
  * Copyright (C) JOOlanders SL 
  * http://www.gnu.org/licenses/gpl-2.0.html GNU/GPLv2 only
  * ========================================================== */
-(function ($) {
+;(function ($, window, document, undefined) {
 	"use strict";
 	var Plugin = function(){};
-	Plugin.prototype = $.extend(Plugin.prototype, {
+	$.extend(Plugin.prototype, {
 		name: 'zluxSaveElement',
 		options: {
 			msgSaveElement: 'Save Element',
@@ -564,56 +573,68 @@
 			}
 		});
 	};
-})(jQuery);
+})(jQuery, window, document);
 
 /* ===================================================
- * ZLUX Example
+ * ZLUX Example element related plugin
  * https://zoolanders.com/extensions/zl-framework
  * ===================================================
  * Copyright (C) JOOlanders SL 
  * http://www.gnu.org/licenses/gpl-2.0.html GNU/GPLv2 only
  * ========================================================== */
-(function ($) {
+;(function ($, window, document, undefined) {
+	"use strict";
+	var Plugin = function(element, options) {
+		var $this    = this,
+			$element =  $(element);
+
+		if($element.data(Plugin.prototype.name)) return;
+
+		$this.element =  $(element);
+		$this.options = $.extend({}, Plugin.prototype.options, options);
+		this.events = {};
+
+		// init the script
+		$this.initialize();
+
+		$this.element.data(Plugin.prototype.name, $this);
+	};
+	$.extend(Plugin.prototype, $.zlux.Main.prototype, {
+		name: 'Example',
+		options: {},
+		initialize: function() {
+			var $this = this;
+		}
+	});
+	// Don't touch
+	$.zlux[Plugin.prototype.name] = Plugin;
+})(jQuery, window, document);
+
+
+/* ===================================================
+ * ZLUX Example global plugin
+ * https://zoolanders.com/extensions/zl-framework
+ * ===================================================
+ * Copyright (C) JOOlanders SL 
+ * http://www.gnu.org/licenses/gpl-2.0.html GNU/GPLv2 only
+ * ========================================================== */
+;(function ($, window, document, undefined) {
 	"use strict";
 	var Plugin = function(options){
 		this.options = $.extend({}, this.options, options);
 		this.events = {};
+		this.initialize();
 	};
-	Plugin.prototype = $.extend(Plugin.prototype, $.fn.zluxMain.prototype, {
-		name: 'zluxExample',
-		options: {
-			"param": ''
-		},
-		events: {},
-		initialize: function(element, options) {
-			this.options = $.extend({}, $.fn.zluxMain.prototype.options, this.options, options);
+	$.extend(Plugin.prototype, $.zlux.Main.prototype, {
+		name: 'Example',
+		options: {},
+		initialize: function() {
 			var $this = this;
-
-			// code
-		},
-		some_function: function() {
-			var $this = this;
-
-			// code
 		}
 	});
 	// Don't touch
-	$.fn[Plugin.prototype.name] = function() {
-		var args   = arguments;
-		var method = args[0] ? args[0] : null;
-		return this.each(function() {
-			var element = $(this);
-			if (Plugin.prototype[method] && element.data(Plugin.prototype.name) && method !== 'initialize') {
-				element.data(Plugin.prototype.name)[method].apply(element.data(Plugin.prototype.name), Array.prototype.slice.call(args, 1));
-			} else if (!method || $.isPlainObject(method)) {
-				var plugin = new Plugin();
-				if (Plugin.prototype.initialize) {
-					plugin.initialize.apply(plugin, $.merge([element], args));
-				}
-				element.data(Plugin.prototype.name, plugin);
-			} else {
-				$.error('Method ' +  method + ' does not exist on jQuery.' + Plugin.name);
-			}
-		});
+	$.zlux[Plugin.prototype.name] = function() {
+		var args = arguments;
+		return new Plugin(args[0] ? args[0] : {});
 	};
-})(jQuery);
+})(jQuery, window, document);

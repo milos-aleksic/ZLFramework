@@ -1,19 +1,18 @@
 /* ===================================================
- * ZLUX Dialog
+ * ZLUX dialog
  * https://zoolanders.com/extensions/zl-framework
- * Eg: new $.zluxDialog();
  * ===================================================
  * Copyright (C) JOOlanders SL 
  * http://www.gnu.org/licenses/gpl-2.0.html GNU/GPLv2 only
  * ========================================================== */
-(function ($) {
+;(function ($, window, document, undefined) {
 	"use strict";
 	var Plugin = function(options){
 		this.options = $.extend({}, this.options, options);
 		this.events = {};
 	};
-	Plugin.prototype = $.extend(Plugin.prototype, $.fn.zluxMain.prototype, {
-		name: 'zluxDialog',
+	$.extend(Plugin.prototype, $.zlux.Main.prototype, {
+		name: 'dialog',
 		options: {
 			width: '300',
 			height: '150',
@@ -21,7 +20,6 @@
 			scrollbar: true
 			// Any jQuery UI Widget Dialog option declared here will be passed on the Widget init
 		},
-		events: {},
 		initDialog: function() {
 			var $this = this;
 
@@ -70,7 +68,7 @@
 			// init scrollbar
 			var loadingScrollbar = $.Deferred().resolve(); // by default is resolved as could be not necesary to load it
 			if ($this.options.scrollbar) {
-				loadingScrollbar = $this.requireAsset($this.zlfwURL() + 'assets/js/jquery.plugins/nanoscroller/nanoscroller.min.js', function(){
+				loadingScrollbar = $.zlux.assets.load($.zlux.url.zlfw('assets/js/jquery.plugins/nanoscroller/nanoscroller.min.js'), function(){
 					$this.main.addClass('zlux-scroller').nanoScroller({
 						preventPageScrolling: true,
 						contentClass: 'zlux-dialog-content'
@@ -306,5 +304,8 @@
 		}
 	});
 	// Don't touch
-	$.fn[Plugin.prototype.name] = Plugin;
-})(jQuery);
+	$.zlux[Plugin.prototype.name] = function() {
+		var args = arguments;
+		return new Plugin(args[0] ? args[0] : {});
+	};
+})(jQuery, window, document);

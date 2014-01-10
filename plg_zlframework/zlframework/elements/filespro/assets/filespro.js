@@ -10,7 +10,7 @@
 		this.options = $.extend({}, this.options, options);
 		this.events = {};
 	};
-	Plugin.prototype = $.extend(Plugin.prototype, $.fn.zluxMain.prototype, {
+	Plugin.prototype = $.extend(Plugin.prototype, $.zlux.Main.prototype, {
 		name: 'ElementFilespro',
 		options: {
 			root: '',
@@ -22,7 +22,7 @@
 		},
 		events: {},
 		initialize: function(element, options) {
-			this.options = $.extend({}, $.fn.zluxMain.prototype.options, this.options, options);
+			this.options = $.extend({}, $.zlux.Main.prototype.options, this.options, options);
 			var $this = this;
 
 			// save the element reference
@@ -49,8 +49,10 @@
 		apply: function (inputs){
 			var $this = this;
 
-			// load preview engine
-			$.fn.zlux("FilesPreview").done(function(zluxpreview){
+			$.zlux.assets.load('files').done(function(){
+
+				// load preview engine
+				var filesPreview = $.zlux.filesPreview();
 				
 				inputs.each(function(index, input)
 				{
@@ -78,7 +80,7 @@
 						.appendTo($wrapper);
 
 						// init the file manager
-						$this.dialogTrigger.zlux("FilesDialogManager", {
+						$this.dialogTrigger.zlux("filesDialogManager", {
 							extensions: $this.options.extensions,
 							max_file_size: $this.options.max_file_size,
 							title: $this.options.title,
@@ -105,7 +107,7 @@
 
 							// update preview
 							$('.zlux-preview', $wrapper).remove();
-							$wrapper.append(zluxpreview.renderPreviewDOM($object, filePreview));
+							$wrapper.append(filesPreview.renderPreviewDOM($object, filePreview));
 						});
 
 						// set the initial preview
@@ -113,7 +115,7 @@
 						if (!$.isEmptyObject(oData) && $input.val()) {
 							// store the path for the preview
 							oData.path = $input.val();
-							$wrapper.append(zluxpreview.renderPreviewDOM(oData, filePreview));	
+							$wrapper.append(filesPreview.renderPreviewDOM(oData, filePreview));	
 						}
 
 						// create cancel button
@@ -124,7 +126,7 @@
 					
 					} $input.data('initialized', !0);
 				});
-			})
+			});
 		}
 	});
 	// Don't touch

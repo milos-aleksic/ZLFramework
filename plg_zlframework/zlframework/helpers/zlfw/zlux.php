@@ -118,9 +118,11 @@ class zlfwHelperZlux extends AppHelper {
 			$app_id = $this->app->zoo->getApplication() ? $this->app->zoo->getApplication()->id : '';
 
 			// save Joomla! URLs
-			$javascript .= 'jQuery.fn.zluxMain.prototype.JRoot = "' . JURI::root() . '";';
-			$javascript .= 'jQuery.fn.zluxMain.prototype.JBase = "' . JURI::base() . '";';
-			$javascript .= 'jQuery.fn.zluxMain.prototype.app_id = "' . $app_id . '";';
+			$javascript .= 'jQuery.zlux.url._root = "' . JURI::root() . '";';
+			$javascript .= 'jQuery.zlux.url._root_path = "' . JURI::root(true) . '";';
+			$javascript .= 'jQuery.zlux.url._base = "' . JURI::base() . '";';
+			$javascript .= 'jQuery.zlux.url._base_path = "' . JURI::base(true) . '";';
+			$javascript .= 'jQuery.zlux.zoo.app_id = "' . $app_id . '";';
 
 			// set translations strings
 			$translations = array
@@ -183,7 +185,7 @@ class zlfwHelperZlux extends AppHelper {
 			$translations = array_map(array('JText', '_'), $translations);
 
 			// add to script
-			$javascript .= "jQuery.fn.zluxMain.prototype.addTranslations(" . json_encode($translations) . ");";
+			$javascript .= "jQuery.zlux.lang.set(" . json_encode($translations) . ");";
 
 			// load the script
 			$this->app->document->addScriptDeclaration($javascript);

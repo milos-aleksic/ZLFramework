@@ -1,18 +1,15 @@
 /* ===================================================
- * ZLUX Files Manager
+ * ZLUX filesManager
  * https://zoolanders.com/extensions/zl-framework
  * ===================================================
  * Copyright (C) JOOlanders SL 
  * http://www.gnu.org/licenses/gpl-2.0.html GNU/GPLv2 only
  * ========================================================== */
-(function ($) {
+;(function ($, window, document, undefined) {
 	"use strict";
-	var Plugin = function(options){
-		this.options = $.extend({}, this.options, options);
-		this.events = {};
-	};
-	Plugin.prototype = $.extend(Plugin.prototype, $.fn.zluxManager.prototype, {
-		name: 'zluxFilesManager',
+	var Plugin = function(){};
+	$.extend(Plugin.prototype, $.zlux.Manager.prototype, {
+		name: 'filesManager',
 		options: {
 			root: 'images', // relative path to the root
 			extensions: '', // Array or comma separated values
@@ -20,7 +17,6 @@
 			storage_params: {},
 			max_file_size: ''
 		},
-		events: {},
 		initialize: function(target, options) {
 			this.options = $.extend({}, this.options, options);
 			var $this = this;
@@ -46,11 +42,11 @@
 			var $this = this;
 
 			// set ID
-			$.fn.zluxFilesManager.iNextUnique++;
-			$this.ID = $.fn.zluxFilesManager.iNextUnique;
+			$.zlux.filesManager.iNextUnique++;
+			$this.ID = $.zlux.filesManager.iNextUnique;
 
 			// save the instance reference
-			$.fn.zluxFilesManager.instances[$this.ID] = $this;
+			$.zlux.filesManager.instances[$this.ID] = $this;
 
 			// Convert settings
 			$this.options.max_file_size = $this.parseSize($this.options.max_file_size);
@@ -72,7 +68,7 @@
 			var $this = this;
 
 			// load asset
-			$this.requireAsset($this.zlfwURL() + 'zlux/assets/datatables/dataTables.with.plugins.min.js', function(){
+			$.zlux.assets.load($.zlux.url.zlfw('zlux/assets/datatables/dataTables.with.plugins.min.js'), function(){
 				$this._initDataTable(wrapper);
 			});
 		},
@@ -90,8 +86,8 @@
 					"sEmptyTable": $this._('EMPTY_FOLDER'),
 					"sInfoEmpty": ""
 				},
-				"sAjaxUrl": $this.getAjaxURL('zlux'),
-				"sAjaxSource": $this.getAjaxURL('zlux', 'getFilesManagerData'),
+				"sAjaxUrl": $.zlux.url.ajax('zlux'),
+				"sAjaxSource": $.zlux.url.ajax('zlux', 'getFilesManagerData'),
 				"sServerMethod": "POST",
 				"bPaginate": false,
 				"aoColumns": [
@@ -283,7 +279,7 @@
 					if (!$this.bReloading || $this.bRedrawing){
 
 						// check if already cached
-						var json = $.fn.zluxFilesManager.aAjaxDataCache[root];
+						var json = $.zlux.filesManager.aAjaxDataCache[root];
 						if (json) {
 
 							// if first time, save real root path, as it can be changed for security reasons by the server
@@ -347,10 +343,10 @@
 				$this.sCurrentPath = json.root;
 
 				// empty cache if reloading, so the content is retrieved again
-				if ($this.bReloading) $.fn.zluxFilesManager.aAjaxDataCache = {};
+				if ($this.bReloading) $.zlux.filesManager.aAjaxDataCache = {};
 
 				// cache the data
-				$.fn.zluxFilesManager.aAjaxDataCache[json.root] = json;
+				$.zlux.filesManager.aAjaxDataCache[json.root] = json;
 
 				// redraw the other instances
 				$this.redrawInstances();
@@ -385,7 +381,7 @@
 			var $this = this;
 
 			// redraw instances
-			$.each($.fn.zluxFilesManager.instances, function(index, instance){
+			$.each($.zlux.filesManager.instances, function(index, instance){
 
 				// skip current instance
 				if (parseInt(index) === $this.ID) return true;
@@ -542,7 +538,7 @@
 			return $.Deferred(function( defer )
 			{
 				$.ajax({
-					"url": $this.getAjaxURL('zlux', 'deleteObject'),
+					"url": $.zlux.url.ajax('zlux', 'deleteObject'),
 					"data": aoData,
 					"dataType": "json",
 					"type": "post"
@@ -595,7 +591,7 @@
 			return $.Deferred(function( defer )
 			{
 				$.ajax({
-					"url": $this.getAjaxURL('zlux', 'newFolder'),
+					"url": $.zlux.url.ajax('zlux', 'newFolder'),
 					"data": aoData,
 					"dataType": "json",
 					"type": "post"
@@ -661,7 +657,7 @@
 					$object.path = $object.path.replace(/(\w|[-.])+$/, new_name);
 
 					// update the cache
-					$.fn.zluxFilesManager.aAjaxDataCache[$this.sCurrentPath].aaData = $this.oTable.fnGetData();
+					$.zlux.filesManager.aAjaxDataCache[$this.sCurrentPath].aaData = $this.oTable.fnGetData();
 
 					// redraw the other instances
 					$this.redrawInstances();
@@ -725,7 +721,7 @@
 			return $.Deferred(function( defer )
 			{
 				$.ajax({
-					"url": $this.getAjaxURL('zlux', 'moveObject'),
+					"url": $.zlux.url.ajax('zlux', 'moveObject'),
 					"data": aoData,
 					"dataType": "json",
 					"type": "post"
@@ -808,49 +804,55 @@
 		}
 	});
 	// save the plugin for global use
-	$.fn[Plugin.prototype.name] = Plugin;
-	$.fn[Plugin.prototype.name].iNextUnique = 0;
-	$.fn[Plugin.prototype.name].aAjaxDataCache = {};
-	$.fn[Plugin.prototype.name].instances = {};
-})(jQuery);
+	$.zlux[Plugin.prototype.name] = Plugin;
+	$.zlux[Plugin.prototype.name].iNextUnique = 0;
+	$.zlux[Plugin.prototype.name].aAjaxDataCache = {};
+	$.zlux[Plugin.prototype.name].instances = {};
+})(jQuery, window, document);
 
 
 /* ===================================================
- * ZLUX Files Dialog Manager
+ * ZLUX filesDialogManager
  * https://zoolanders.com/extensions/zl-framework
  * ===================================================
  * Copyright (C) JOOlanders SL 
  * http://www.gnu.org/licenses/gpl-2.0.html GNU/GPLv2 only
  * ========================================================== */
-(function ($) {
+;(function ($, window, document, undefined) {
 	"use strict";
-	var Plugin = function(options){
-		this.options = $.extend({}, this.options, options);
+	var Plugin = function(element, options) {
+		var $this    = this,
+			$element =  $(element);
+
+		if($element.data(Plugin.prototype.name)) return;
+
+		$this.element =  $(element);
+		$this.options = $.extend({}, Plugin.prototype.options, $.zlux.filesManager.prototype.options, options);
 		this.events = {};
+
+		// init the script
+		$this.initialize();
+
+		$this.element.data(Plugin.prototype.name, $this);
 	};
-	Plugin.prototype = $.extend(Plugin.prototype, $.fn.zluxFilesManager.prototype, {
-		name: 'zluxFilesDialogManager',
+	$.extend(Plugin.prototype, $.zlux.filesManager.prototype, {
+		name: 'filesDialogManager',
 		options: {
 			title: 'Files Manager',
 			full_mode: 0,
 			dialogClass: ''
 		},
-		events: {},
-		initialize: function(dialogTrigger, options) {
-			this.options = $.extend({}, $.fn.zluxFilesManager.prototype.options, this.options, options);
+		initialize: function() {
 			var $this = this;
 
 			// run initial check
 			$this.initCheck();
 
-			// save target
-			$this.target = dialogTrigger;
-
-			// dialogTrigger example, it should be set by the caller script
+			// element example, it should be set by the caller script
 			// $('<a title="' + $this.options.title + '" class="btn btn-mini zlux-btn-edit" href="#"><i class="icon-edit"></i></a>');
 
 			// set the trigger button event
-			$this.dialogTrigger = dialogTrigger.on('click', function(){
+			$this.element.on('click', function(){
 				
 				// toggle the dialog
 				$this.zluxdialog.toggle();
@@ -872,28 +874,23 @@
 			$this.options.dialogClass = 'zl-bootstrap zlux-filesmanager' +
 				($this.options.full_mode ? ' zlux-dialog-full ' : '') +
 				($this.options.dialogClass ? ' ' + $this.options.dialogClass : '');
+
+			// load assets
+			$.zlux.assets.load('dialog').done(function(){
+
+				// init the dialog plugin
+				$this.zluxdialog = $.zlux.dialog({
+					title: $this.options.title,
+					width: $this.options.full_mode ? '75%' : 300,
+					dialogClass: $this.options.dialogClass,
+					position: ($this.options.full_mode === false ? {
+						of: $this.element,
+						my: 'left top',
+						at: 'right bottom'
+					} : null)
+				})
 			
-
-			// init the dialog plugin
-			$.fn.zlux("Dialog", {
-				title: $this.options.title,
-				width: $this.options.full_mode ? '75%' : 300,
-				dialogClass: $this.options.dialogClass,
-				position: ($this.options.full_mode === false ? {
-					of: $this.dialogTrigger,
-					my: 'left top',
-					at: 'right bottom'
-				} : null)
-			})
-
-			// when plugin ready, save reference
-			.done(function(plugin){
-
-				// save dialog reference
-				$this.zluxdialog = plugin;
-
-				// set events
-				$this.zluxdialog.bind("InitComplete", function() {
+				.bind("InitComplete", function() {
 
 					// set the dialog unique ID
 					$this.zluxdialog.widget.attr('id', 'zluxFilesManager_' + $this.ID);
@@ -961,8 +958,8 @@
 			// set global close event
 			$('html').on('mousedown', function(event) {
 				// close if target is not the trigger or the dialog it self
-				if ($this.zluxdialog.dialog('isOpen') && !$this.dialogTrigger.is(event.target) &&
-						!$this.dialogTrigger.find(event.target).length && !$this.zluxdialog.widget.find(event.target).length) {
+				if ($this.zluxdialog.dialog('isOpen') && !$this.element.is(event.target) &&
+						!$this.element.find(event.target).length && !$this.zluxdialog.widget.find(event.target).length) {
 
 					$this.zluxdialog.dialog('close');
 				}
@@ -1034,7 +1031,7 @@
 							$(this).remove();
 
 							// remove the object from cache
-							var aaData = $.fn.zluxFilesManager.aAjaxDataCache[$this.sCurrentPath].aaData;
+							var aaData = $.zlux.filesManager.aAjaxDataCache[$this.sCurrentPath].aaData;
 
 							$.each(aaData, function(i, value){
 								if ($object.dom.data('id') === value.name && $object.dom.data('type') === value.type) {
@@ -1219,7 +1216,7 @@
 			);
 
 			// set upload engine
-			$this.zluxupload = new $.fn.zluxUpload({
+			$this.zluxupload = $.zlux.filesUpload({
 				path: 'images',
 				wrapper: $this.zluxdialog.content,
 				storage: $this.options.storage,
@@ -1227,10 +1224,7 @@
 				max_file_size: $this.options.max_file_size,
 				extensions: $this.options.extensions,
 				browse_button: $('.zlux-dialog-toolbar .zlux-dialog-toolbar-2 i[data-id="add"]')
-			});
-
-			// set events
-			$this.zluxupload
+			})
 
 			// when queue files changes
 			.bind('QueueChanged', function(){
@@ -1300,7 +1294,7 @@
 
 					// validate file name
 					$.ajax({
-						"url": $this.getAjaxURL('zlux', 'validateObjectName'),
+						"url": $.zlux.url.ajax('zlux', 'validateObjectName'),
 						"type": 'post',
 						"data":{
 							name: file.name
@@ -1489,42 +1483,25 @@
 		}
 	});
 	// Don't touch
-	$.fn[Plugin.prototype.name] = function() {
-		var args   = arguments;
-		var method = args[0] ? args[0] : null;
-		return this.each(function() {
-			var element = $(this);
-			if (Plugin.prototype[method] && element.data(Plugin.prototype.name) && method !== 'initialize') {
-				element.data(Plugin.prototype.name)[method].apply(element.data(Plugin.prototype.name), Array.prototype.slice.call(args, 1));
-			} else if (!method || $.isPlainObject(method)) {
-				var plugin = new Plugin();
-				if (Plugin.prototype.initialize) {
-					plugin.initialize.apply(plugin, $.merge([element], args));
-				}
-				element.data(Plugin.prototype.name, plugin);
-			} else {
-				$.error('Method ' +  method + ' does not exist on jQuery.' + Plugin.name);
-			}
-		});
-	};
-})(jQuery);
+	$.zlux[Plugin.prototype.name] = Plugin;
+})(jQuery, window, document);
 
 
 /* ===================================================
- * ZLUX Upload
+ * ZLUX filesUpload
  * https://zoolanders.com/extensions/zl-framework
  * ===================================================
  * Copyright (C) JOOlanders SL 
  * http://www.gnu.org/licenses/gpl-2.0.html GNU/GPLv2 only
  * ========================================================== */
-(function ($) {
+;(function ($, window, document, undefined) {
 	"use strict";
 	var Plugin = function(options){
 		this.options = $.extend({}, this.options, options);
 		this.events = {};
 	};
-	Plugin.prototype = $.extend(Plugin.prototype, $.fn.zluxMain.prototype, {
-		name: 'zluxUpload',
+	$.extend(Plugin.prototype, $.zlux.Main.prototype, {
+		name: 'filesUpload',
 		options: {
 			extensions: '', // Array or comma separated values
 			path: null,
@@ -1567,7 +1544,7 @@
 
 
 			// load asset
-			$this.requireAsset($this.zlfwURL() + 'zlux/assets/plupload/plupload.full.min.js', function(){
+			$.zlux.assets.load($.zlux.url.zlfw('zlux/assets/plupload/plupload.full.min.js'), function(){
 
 				// init plupload
 				$this.initPlupload();
@@ -1637,13 +1614,13 @@
 				browse_button: $this.options.browse_button[0],
 				drop_element: $this.dropzone[0], 
 				max_file_size: undefined, // controlled by ZLUX Upload
-				url: $this.getAjaxURL('zlux', 'upload'),
+				url: $.zlux.url.ajax('zlux', 'upload'),
 				filters: [ // Specify what files to browse for
 					{title: "Files", extensions: $this.options.extensions}
 				],
 
 				// flash runtime settings
-				flash_swf_url: $this.JRoot + 'plugins/system/zlframework/zlframework/zlux/assets/plupload/Moxie.swf'
+				flash_swf_url: $.zlux.url.zlfw('zlux/assets/plupload/Moxie.swf')
 			};
 
 			// if S3 storage
@@ -2182,38 +2159,28 @@
 		}
 	});
 	// Don't touch
-	$.fn[Plugin.prototype.name] = Plugin;
-})(jQuery);
+	$.zlux[Plugin.prototype.name] = function() {
+		var args = arguments;
+		return new Plugin(args[0] ? args[0] : {});
+	};
+})(jQuery, window, document);
 
 
 /* ===================================================
- * ZLUX Files Preview
+ * ZLUX filesPreview
  * https://zoolanders.com/extensions/zl-framework
  * ===================================================
  * Copyright (C) JOOlanders SL 
  * http://www.gnu.org/licenses/gpl-2.0.html GNU/GPLv2 only
  * ========================================================== */
-(function ($) {
+;(function ($, window, document, undefined) {
 	"use strict";
 	var Plugin = function(options){
 		this.options = $.extend({}, this.options, options);
 		this.events = {};
 	};
-	Plugin.prototype = $.extend(Plugin.prototype, $.fn.zluxMain.prototype, {
-		name: 'zluxFilesPreview',
-		options: {},
-		events: {},
-		initialize: function(input, options) {
-			this.options = $.extend({}, this.options, options);
-			var $this = this;
-
-			// save the deferred
-			$this.creatingDialog = $.Deferred().resolve($this);
-
-			// return a promise events attached to current object
-			// in order to allow allready start adding events
-			return $this.creatingDialog.promise($this);
-		},
+	$.extend(Plugin.prototype, $.zlux.Main.prototype, {
+		name: 'filesPreview',
 		renderPreviewDOM: function(oData, preview) {
 			var $this = this,
 				sThumb,
@@ -2233,7 +2200,7 @@
 
 				// if preview enabled render a mini preview of the file
 				if (preview) {
-					sThumb = '<div class="zlux-x-image"><img src="' + $this.JRoot + oData.path + '" /></div>';
+					sThumb = '<div class="zlux-x-image"><img src="' + $.zlux.url.root(oData.path) + '" /></div>';
 				} else {
 					sThumb = '<span class="zlux-x-filetype">' + oData.ext + '</span>';
 				}
@@ -2262,5 +2229,8 @@
 		}
 	});
 	// Don't touch
-	$.fn[Plugin.prototype.name] = Plugin;
-})(jQuery);
+	$.zlux[Plugin.prototype.name] = function() {
+		var args = arguments;
+		return new Plugin(args[0] ? args[0] : {});
+	};
+})(jQuery, window, document);
