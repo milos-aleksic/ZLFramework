@@ -69,14 +69,28 @@ class zlfwHelperZlux extends AppHelper {
 	/**
 	 * Load ZLUX Main assets
 	 */
-	public function loadMainAssets()
+	public function loadMainAssets($uikit = false)
 	{
 		// ZLUX
 		$this->app->document->addStylesheet('zlfw:zlux/zluxMain.css');
 		$this->app->document->addScript('zlfw:zlux/zluxMain.js');
 
-		// ZL Bootstrap
-		$this->loadBootstrap(true);
+		// load uikit if indicated
+		if($uikit) {
+			$path = 'root:templates/'.JFactory::getApplication()->getTemplate().'/warp.php';
+
+			// if no file found its not warp 7, load uikit
+			if (!$this->app->path->path($path)) {
+				$this->app->document->addStylesheet('zlfw:zlux/assets/uikit/uikit_wrapped.css');
+				$this->app->document->addScript('zlfw:zlux/assets/uikit/uikit.js');
+			// is warp 7, only load extended uikit styles
+			} else
+				$this->app->document->addStylesheet('zlfw:zlux/assets/uikit/uikit_ext.css');
+
+		// else load ZL Bootstrap
+		} else {
+			$this->loadBootstrap(true);
+		}
 
 		// load Variables
 		$this->loadVariables();
