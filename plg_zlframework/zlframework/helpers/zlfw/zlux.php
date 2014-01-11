@@ -69,31 +69,39 @@ class zlfwHelperZlux extends AppHelper {
 	/**
 	 * Load ZLUX Main assets
 	 */
+	protected $_assets_loaded = false;
 	public function loadMainAssets($uikit = false)
 	{
-		// ZLUX
-		$this->app->document->addStylesheet('zlfw:zlux/zluxMain.css');
-		$this->app->document->addScript('zlfw:zlux/zluxMain.js');
+		if (!$this->_assets_loaded)
+		{
+			// zlux assets
+			$this->app->document->addStylesheet('zlfw:zlux/zluxMain.css');
+			$this->app->document->addScript('zlfw:zlux/zluxMain.js');
 
-		// load uikit if indicated
-		if($uikit) {
-			$path = 'root:templates/'.JFactory::getApplication()->getTemplate().'/warp.php';
+			// load uikit if indicated
+			if($uikit) {
+				$path = 'root:templates/'.JFactory::getApplication()->getTemplate().'/warp.php';
 
-			// if no file found its not warp 7, load uikit
-			if (!$this->app->path->path($path)) {
-				$this->app->document->addStylesheet('zlfw:zlux/assets/uikit/uikit_wrapped.css');
-				$this->app->document->addScript('zlfw:zlux/assets/uikit/uikit.js');
-			// is warp 7, only load extended uikit styles
-			} else
-				$this->app->document->addStylesheet('zlfw:zlux/assets/uikit/uikit_ext.css');
+				// if no file found its not warp 7, load uikit
+				if (!$this->app->path->path($path)) {
+					$this->app->document->addStylesheet('zlfw:zlux/assets/uikit/uikit_wrapped.css');
+					$this->app->document->addScript('zlfw:zlux/assets/uikit/uikit.js');
+				
+				} else
+					// is warp 7, only load extended uikit styles
+					$this->app->document->addStylesheet('zlfw:zlux/assets/uikit/uikit_ext.css');
 
-		// else load ZL Bootstrap
-		} else {
-			$this->loadBootstrap(true);
+			// else load ZL Bootstrap
+			} else {
+				$this->loadBootstrap(true);
+			}
+
+			// load Variables
+			$this->loadVariables();
+
+			// set loaded state
+			$this->_assets_loaded = true;
 		}
-
-		// load Variables
-		$this->loadVariables();
 	}
 
 	/**
@@ -123,87 +131,82 @@ class zlfwHelperZlux extends AppHelper {
 	 */
 	public function loadVariables()
 	{
-		if (!defined('PLG_ZLFRAMEWORK_ZLUX_SCRIPT_DECLARATION'))
-		{
-			define('PLG_ZLFRAMEWORK_ZLUX_SCRIPT_DECLARATION', true);
+		// init vars
+		$javascript = '';
+		$app_id = $this->app->zoo->getApplication() ? $this->app->zoo->getApplication()->id : '';
 
-			// init vars
-			$javascript = '';
-			$app_id = $this->app->zoo->getApplication() ? $this->app->zoo->getApplication()->id : '';
+		// save Joomla! URLs
+		$javascript .= 'jQuery.zlux.url._root = "' . JURI::root() . '";';
+		$javascript .= 'jQuery.zlux.url._root_path = "' . JURI::root(true) . '";';
+		$javascript .= 'jQuery.zlux.url._base = "' . JURI::base() . '";';
+		$javascript .= 'jQuery.zlux.url._base_path = "' . JURI::base(true) . '";';
+		$javascript .= 'jQuery.zlux.zoo.app_id = "' . $app_id . '";';
 
-			// save Joomla! URLs
-			$javascript .= 'jQuery.zlux.url._root = "' . JURI::root() . '";';
-			$javascript .= 'jQuery.zlux.url._root_path = "' . JURI::root(true) . '";';
-			$javascript .= 'jQuery.zlux.url._base = "' . JURI::base() . '";';
-			$javascript .= 'jQuery.zlux.url._base_path = "' . JURI::base(true) . '";';
-			$javascript .= 'jQuery.zlux.zoo.app_id = "' . $app_id . '";';
+		// set translations strings
+		$translations = array
+		(
+			// ZLUX Main
+			'APPLY_FILTERS' => 'PLG_ZLFRAMEWORK_ZLUX_APPLY_FILTERS',
+			'REFRESH' => 'PLG_ZLFRAMEWORK_REFRESH',
+			'DELETE' => 'PLG_ZLFRAMEWORK_DELETE',
+			'RENAME' => 'PLG_ZLFRAMEWORK_RENAME',
+			'NAME' => 'PLG_ZLFRAMEWORK_NAME',
+			'TYPE' => 'PLG_ZLFRAMEWORK_TYPE',
+			'SIZE' => 'PLG_ZLFRAMEWORK_SIZE',
+			'CONFIRM' => 'PLG_ZLFRAMEWORK_CONFIRM',
+			'AUTHOR' => 'PLG_ZLFRAMEWORK_AUTHOR',
+			'CREATED' => 'PLG_ZLFRAMEWORK_CREATED',
+			'ACCESS' => 'PLG_ZLFRAMEWORK_ACCESS',
+			'ROUTE' => 'PLG_ZLFRAMEWORK_ROUTE',
+			'ROOT' => 'PLG_ZLFRAMEWORK_ROOT',
+			'SOMETHING_WENT_WRONG' => 'PLG_ZLFRAMEWORK_ZLUX_SOMETHING_WENT_WRONG',
+			
+			// ZLUX FilesManager
+			'STORAGE_PARAM_MISSING' => 'PLG_ZLFRAMEWORK_ZLUX_FM_STORAGE_PARAM_MISSING',
+			'INPUT_THE_NEW_NAME' => 'PLG_ZLFRAMEWORK_ZLUX_FM_INPUT_THE_NEW_NAME',
+			'DELETE_THIS_FILE' => 'PLG_ZLFRAMEWORK_ZLUX_FM_DELETE_THIS_FILE',
+			'DELETE_THIS_FOLDER' => 'PLG_ZLFRAMEWORK_ZLUX_FM_DELETE_THIS_FOLDER',
+			'FOLDER_NAME' => 'PLG_ZLFRAMEWORK_ZLUX_FM_FOLDER_NAME',
+			'EMPTY_FOLDER' => 'PLG_ZLFRAMEWORK_ZLUX_FM_EMPTY_FOLDER',
 
-			// set translations strings
-			$translations = array
-			(
-				// ZLUX Main
-				'APPLY_FILTERS' => 'PLG_ZLFRAMEWORK_ZLUX_APPLY_FILTERS',
-				'REFRESH' => 'PLG_ZLFRAMEWORK_REFRESH',
-				'DELETE' => 'PLG_ZLFRAMEWORK_DELETE',
-				'RENAME' => 'PLG_ZLFRAMEWORK_RENAME',
-				'NAME' => 'PLG_ZLFRAMEWORK_NAME',
-				'TYPE' => 'PLG_ZLFRAMEWORK_TYPE',
-				'SIZE' => 'PLG_ZLFRAMEWORK_SIZE',
-				'CONFIRM' => 'PLG_ZLFRAMEWORK_CONFIRM',
-				'AUTHOR' => 'PLG_ZLFRAMEWORK_AUTHOR',
-				'CREATED' => 'PLG_ZLFRAMEWORK_CREATED',
-				'ACCESS' => 'PLG_ZLFRAMEWORK_ACCESS',
-				'ROUTE' => 'PLG_ZLFRAMEWORK_ROUTE',
-				'ROOT' => 'PLG_ZLFRAMEWORK_ROOT',
-				'SOMETHING_WENT_WRONG' => 'PLG_ZLFRAMEWORK_ZLUX_SOMETHING_WENT_WRONG',
+				// Upload
+				'ADD_NEW_FILES' => 'PLG_ZLFRAMEWORK_ZLUX_FM_ADD_NEW_FILES',
+				'START_UPLOADING' => 'PLG_ZLFRAMEWORK_ZLUX_FM_START_UPLOADING',
+				'CANCEL_CURRENT_UPLOAD' => 'PLG_ZLFRAMEWORK_ZLUX_FM_CANCEL_CURRENT_UPLOAD',
+				'NEW_FOLDER' => 'PLG_ZLFRAMEWORK_ZLUX_FM_NEW_FOLDER',
+				'UPLOAD_FILES' => 'PLG_ZLFRAMEWORK_ZLUX_FM_UPLOAD_FILES',
+				'DROP_FILES' => 'PLG_ZLFRAMEWORK_ZLUX_FM_DROP_FILES',
 				
-				// ZLUX FilesManager
-				'STORAGE_PARAM_MISSING' => 'PLG_ZLFRAMEWORK_ZLUX_FM_STORAGE_PARAM_MISSING',
-				'INPUT_THE_NEW_NAME' => 'PLG_ZLFRAMEWORK_ZLUX_FM_INPUT_THE_NEW_NAME',
-				'DELETE_THIS_FILE' => 'PLG_ZLFRAMEWORK_ZLUX_FM_DELETE_THIS_FILE',
-				'DELETE_THIS_FOLDER' => 'PLG_ZLFRAMEWORK_ZLUX_FM_DELETE_THIS_FOLDER',
-				'FOLDER_NAME' => 'PLG_ZLFRAMEWORK_ZLUX_FM_FOLDER_NAME',
-				'EMPTY_FOLDER' => 'PLG_ZLFRAMEWORK_ZLUX_FM_EMPTY_FOLDER',
+				// Errors
+				'FILE_EXT_ERROR' => 'PLG_ZLFRAMEWORK_ZLUX_FM_ERR_FILE_EXT', 
+				'FILE_SIZE_ERROR' => 'PLG_ZLFRAMEWORK_ZLUX_FM_ERR_FILE_SIZE',
+				'RUNTIME_MEMORY_ERROR' => 'PLG_ZLFRAMEWORK_ZLUX_FM_ERR_RUNTIME_MEMORY',
+				'S3_BUCKET_PERIOD_ERROR' => 'PLG_ZLFRAMEWORK_ZLUX_FM_ERR_S3_BUCKET_PERIOD',
+				'S3_BUCKET_MISSCONFIG_ERROR' => 'PLG_ZLFRAMEWORK_ZLUX_FM_ERR_S3_BUCKET_MISSCONFIG',
+				'UPLOAD_URL_ERROR' => 'PLG_ZLFRAMEWORK_ZLUX_FM_ERR_UPLOAD_URL',
 
-					// Upload
-					'ADD_NEW_FILES' => 'PLG_ZLFRAMEWORK_ZLUX_FM_ADD_NEW_FILES',
-					'START_UPLOADING' => 'PLG_ZLFRAMEWORK_ZLUX_FM_START_UPLOADING',
-					'CANCEL_CURRENT_UPLOAD' => 'PLG_ZLFRAMEWORK_ZLUX_FM_CANCEL_CURRENT_UPLOAD',
-					'NEW_FOLDER' => 'PLG_ZLFRAMEWORK_ZLUX_FM_NEW_FOLDER',
-					'UPLOAD_FILES' => 'PLG_ZLFRAMEWORK_ZLUX_FM_UPLOAD_FILES',
-					'DROP_FILES' => 'PLG_ZLFRAMEWORK_ZLUX_FM_DROP_FILES',
-					
-					// Errors
-					'FILE_EXT_ERROR' => 'PLG_ZLFRAMEWORK_ZLUX_FM_ERR_FILE_EXT', 
-					'FILE_SIZE_ERROR' => 'PLG_ZLFRAMEWORK_ZLUX_FM_ERR_FILE_SIZE',
-					'RUNTIME_MEMORY_ERROR' => 'PLG_ZLFRAMEWORK_ZLUX_FM_ERR_RUNTIME_MEMORY',
-					'S3_BUCKET_PERIOD_ERROR' => 'PLG_ZLFRAMEWORK_ZLUX_FM_ERR_S3_BUCKET_PERIOD',
-					'S3_BUCKET_MISSCONFIG_ERROR' => 'PLG_ZLFRAMEWORK_ZLUX_FM_ERR_S3_BUCKET_MISSCONFIG',
-					'UPLOAD_URL_ERROR' => 'PLG_ZLFRAMEWORK_ZLUX_FM_ERR_UPLOAD_URL',
+				// plupload core strings
+				'File extension error.' => 'PLG_ZLFRAMEWORK_FLP_FILE_EXTENSION_ERROR', 
+				'File size error.' => 'PLG_ZLFRAMEWORK_FLP_FILE_SIZE_ERROR',
+				'File count error.' => 'PLG_ZLFRAMEWORK_FLP_FILE_COUNT_ERROR',
 
-					// plupload core strings
-					'File extension error.' => 'PLG_ZLFRAMEWORK_FLP_FILE_EXTENSION_ERROR', 
-					'File size error.' => 'PLG_ZLFRAMEWORK_FLP_FILE_SIZE_ERROR',
-					'File count error.' => 'PLG_ZLFRAMEWORK_FLP_FILE_COUNT_ERROR',
+			// ZLUX ItemsManager
+			'IM_NO_ITEMS_FOUND' => 'PLG_ZLFRAMEWORK_ZLUX_IM_NO_ITEMS_FOUND',
+			'IM_PAGINATION_INFO' => 'PLG_ZLFRAMEWORK_ZLUX_IM_PAGINATION_INFO',
+			'IM_FILTER_BY_APP' => 'PLG_ZLFRAMEWORK_ZLUX_IM_FILTER_BY_APP',
+			'IM_FILTER_BY_TYPE' => 'PLG_ZLFRAMEWORK_ZLUX_IM_FILTER_BY_TYPE',
+			'IM_FILTER_BY_CATEGORY' => 'PLG_ZLFRAMEWORK_ZLUX_IM_FILTER_BY_CATEGORY',
+			'IM_FILTER_BY_TAG' => 'PLG_ZLFRAMEWORK_ZLUX_IM_FILTER_BY_TAG'
+		);
 
-				// ZLUX ItemsManager
-				'IM_NO_ITEMS_FOUND' => 'PLG_ZLFRAMEWORK_ZLUX_IM_NO_ITEMS_FOUND',
-				'IM_PAGINATION_INFO' => 'PLG_ZLFRAMEWORK_ZLUX_IM_PAGINATION_INFO',
-				'IM_FILTER_BY_APP' => 'PLG_ZLFRAMEWORK_ZLUX_IM_FILTER_BY_APP',
-				'IM_FILTER_BY_TYPE' => 'PLG_ZLFRAMEWORK_ZLUX_IM_FILTER_BY_TYPE',
-				'IM_FILTER_BY_CATEGORY' => 'PLG_ZLFRAMEWORK_ZLUX_IM_FILTER_BY_CATEGORY',
-				'IM_FILTER_BY_TAG' => 'PLG_ZLFRAMEWORK_ZLUX_IM_FILTER_BY_TAG'
-			);
+		// translate
+		$translations = array_map(array('JText', '_'), $translations);
 
-			// translate
-			$translations = array_map(array('JText', '_'), $translations);
+		// add to script
+		$javascript .= "jQuery.zlux.lang.set(" . json_encode($translations) . ");";
 
-			// add to script
-			$javascript .= "jQuery.zlux.lang.set(" . json_encode($translations) . ");";
-
-			// load the script
-			$this->app->document->addScriptDeclaration($javascript);
-		}
+		// load the script
+		$this->app->document->addScriptDeclaration($javascript);
 	}
 
 	/**
