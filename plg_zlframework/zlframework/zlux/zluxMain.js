@@ -95,19 +95,6 @@
 	};
 
 
-	/** UI **/
-	zlux.ui = {};
-	/**
-	 * Adds or removes the spinner from the elements i child and spinners it
-	 * @param {DOM} element Reference to the element where to look for the icon
-	 * @return {Bool} Should the spin be added or removed. By default is added
-	 */
-	zlux.ui.spin = function(element, action) {
-		var action = action == undefined ? 1 : 0;
-		$('i', $(element)).toggleClass('uk-icon-spinner uk-icon-spin', action);
-	};
-
-
 	/** ASSETS **/
 	zlux.assets = {};
 	zlux.assets._ress = {}; // requested assets
@@ -511,6 +498,60 @@
 		}
 	});
 	// save the plugin for global use
+	$.zlux[Plugin.prototype.name] = Plugin;
+})(jQuery, window, document);
+
+
+/* ===================================================
+ * ZLUX spin
+ * https://zoolanders.com/extensions/zl-framework
+ * ===================================================
+ * Copyright (C) JOOlanders SL 
+ * http://www.gnu.org/licenses/gpl-2.0.html GNU/GPLv2 only
+ * ========================================================== */
+;(function ($, window, document, undefined) {
+	"use strict";
+	var Plugin = function(element, options) {
+		var $this    = this,
+			$element =  $(element);
+
+		if($element.data(Plugin.prototype.name)) return;
+
+		$this.element =  $(element);
+		$this.options = $.extend({}, Plugin.prototype.options, options);
+		this.events = {};
+
+		$this.element.data(Plugin.prototype.name, $this);
+	};
+	$.extend(Plugin.prototype, $.zlux.Main.prototype, {
+		name: 'spin',
+		options: {
+			'class': '',
+			'affix': 'append' // or 'prepend'
+		},
+		on: function(options) {
+			var $this = this;
+
+			// the plugin can be used without initiation, let's be sure the options are considered
+			$.extend($this.options, options);
+
+			// check for icon, use it if found
+			if($('i', $this.element)[0]) {
+				$('i', $this.element).addClass('uk-icon-spinner uk-icon-spin');
+
+			// create and append the icon if not
+			} else {
+				$this.element[$this.options.affix]($('<i class="uk-icon-spinner uk-icon-spin"></i>').addClass($this.options.class));
+			}
+		},
+		off: function() {
+			var $this = this;
+
+			// remove the spin classes but not the icon
+			$('i', $this.element).removeClass('uk-icon-spinner uk-icon-spin');
+		}
+	});
+	// Don't touch
 	$.zlux[Plugin.prototype.name] = Plugin;
 })(jQuery, window, document);
 
