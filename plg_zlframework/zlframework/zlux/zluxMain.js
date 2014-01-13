@@ -527,7 +527,7 @@
 		name: 'spin',
 		options: {
 			'class': '',
-			'affix': 'append' // or 'prepend'
+			'affix': 'append' // append, prepend or replace
 		},
 		on: function(options) {
 			var $this = this;
@@ -539,7 +539,9 @@
 			if($('i', $this.element)[0]) {
 				$('i', $this.element).addClass('uk-icon-spinner uk-icon-spin');
 
-			// create and append the icon if not
+			// create the icon if not
+			} else if($this.options.affix == 'replace') {
+				$this.element.html($('<i class="uk-icon-spinner uk-icon-spin"></i>').addClass($this.options.class));
 			} else {
 				$this.element[$this.options.affix]($('<i class="uk-icon-spinner uk-icon-spin"></i>').addClass($this.options.class));
 			}
