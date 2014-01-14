@@ -38,13 +38,14 @@
 	};
 	zlux.url.ajax = function(controller, task, params) {
 		var params = params == undefined ? {} : params,
-			app_id = params.app_id ? params.app_id : zlux.zoo.app_id;
+			app_id = params.app_id ? params.app_id : zlux.zoo.app_id,
+			option = zlux.com_zl ? 'com_zoolanders' : 'com_zoo';
 
 		// avoid repeating the app id param
 		delete params.app_id;
 
 		// prepare the url
-		var url = zlux.url._base + 'index.php?option=com_zoo'
+		var url = zlux.url._base + 'index.php?option=' + option
 		+ '&controller=' + controller
 		+ '&task=' + task
 		+ (app_id ? '&app_id=' + app_id : '')

@@ -142,6 +142,10 @@ class zlfwHelperZlux extends AppHelper {
 		$javascript .= 'jQuery.zlux.url._base_path = "' . JURI::base(true) . '";';
 		$javascript .= 'jQuery.zlux.zoo.app_id = "' . $app_id . '";';
 
+		if(JFile::exists(JPATH_ADMINISTRATOR.'/components/com_zoolanders/zoolanders.php')
+			&& JComponentHelper::getComponent('com_zoolanders', true)->enabled)
+				$javascript .= 'jQuery.zlux.com_zl = true;';
+
 		// set translations strings
 		$translations = array
 		(
