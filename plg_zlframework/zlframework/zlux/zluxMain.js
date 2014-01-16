@@ -63,15 +63,21 @@
 			plugin = cmd[1], 
 			method = cmd[2];
 
-		if (!zlux[plugin]) {
+		if (!zlux[plugin] && !zlux.utils[plugin]) {
 			$.error("ZLUX plugin [" + plugin + "] does not exist.");
 			return this;
 		}
 
 		return this.each(function() {
-			var $this = $(this), data = $this.data(plugin);
-			if (!data) $this.data(plugin, (data = new zlux[plugin](this, method ? undefined : options)));
-			if (method) data[method].apply(data, Array.prototype.slice.call(args, 1));
+			if(zlux.utils[plugin]) {
+				// if the plugin is an utility don't init, just execute
+				zlux.utils[plugin](this, method, Array.prototype.slice.call(args, 1));
+			} else {
+				var $this = $(this), data = $this.data(plugin);
+				if (!data) $this.data(plugin, (data = new zlux[plugin](this, method ? undefined : options)));
+				if (method) data[method].apply(data, Array.prototype.slice.call(args, 1));
+			}
+			
 		});
 	};
 
@@ -420,7 +426,7 @@
 			.replace(/:\//g, ':\/\/');
 		}
 	});
-	// Save the Main Plugin as prototype
+	// Don't touch
 	$.zlux[Plugin.prototype.name] = Plugin;
 })(jQuery, window, document);
 
@@ -498,7 +504,7 @@
 			return msg;
 		}
 	});
-	// save the plugin for global use
+	// Don't touch
 	$.zlux[Plugin.prototype.name] = Plugin;
 })(jQuery, window, document);
 
@@ -512,50 +518,92 @@
  * ========================================================== */
 ;(function ($, window, document, undefined) {
 	"use strict";
-	var Plugin = function(element, options) {
-		var $this    = this,
-			$element =  $(element);
+	var Plugin = function(element, method, args) {
+		var $element = $(element);
 
-		if($element.data(Plugin.prototype.name)) return;
+		// set default method
+		method = method == null ? 'on' : method;
 
-		$this.element =  $(element);
-		$this.options = $.extend({}, Plugin.prototype.options, options);
-		this.events = {};
-
-		$this.element.data(Plugin.prototype.name, $this);
+		// call the method
+		Plugin.prototype[method]($element, args);
 	};
 	$.extend(Plugin.prototype, $.zlux.Main.prototype, {
 		name: 'spin',
-		options: {
-			'class': '',
-			'affix': 'append' // append, prepend or replace
-		},
-		on: function(options) {
-			var $this = this;
+		on: function($element, args) {
+			var $this = this;			
 
-			// the plugin can be used without initiation, let's be sure the options are considered
-			$.extend($this.options, options);
+			// set options
+			var $arg = args[0] ? args[0] : {},
+				$options = {
+					'class': $arg.class ? $arg.class : '',
+					'affix': $arg.affix ? $arg.affix : 'append' // append, prepend or replace
+				};
 
 			// check for icon, use it if found
-			if($('i', $this.element)[0]) {
-				$('i', $this.element).addClass('uk-icon-spinner uk-icon-spin');
+			if($('i', $element)[0]) {
+				$('i', $element).addClass('uk-icon-spinner uk-icon-spin');
 
 			// create the icon if not
-			} else if($this.options.affix == 'replace') {
-				$this.element.html($('<i class="uk-icon-spinner uk-icon-spin"></i>').addClass($this.options.class));
+			} else if($options.affix == 'replace') {
+				$element.html($('<i class="uk-icon-spinner uk-icon-spin"></i>').addClass($options.class));
 			} else {
-				$this.element[$this.options.affix]($('<i class="uk-icon-spinner uk-icon-spin"></i>').addClass($this.options.class));
+				$element[$options.affix]($('<i class="uk-icon-spinner uk-icon-spin"></i>').addClass($options.class));
 			}
 		},
-		off: function() {
+		off: function($element, args) {
 			var $this = this;
 
 			// remove the spin classes but not the icon
-			$('i', $this.element).removeClass('uk-icon-spinner uk-icon-spin');
+			$('i', $element).removeClass('uk-icon-spinner uk-icon-spin');
 		}
 	});
 	// Don't touch
-	$.zlux[Plugin.prototype.name] = Plugin;
+	$.zlux.utils[Plugin.prototype.name] = Plugin;
+})(jQuery, window, document);
+
+
+/* ===================================================
+ * ZLUX animate
+ * https://zoolanders.com/extensions/zl-framework
+ * ===================================================
+ * Copyright (C) JOOlanders SL 
+ * http://www.gnu.org/licenses/gpl-2.0.html GNU/GPLv2 only
+ * ========================================================== */
+;(function ($, window, document, undefined) {
+	"use strict";
+	var Plugin = function(element, method, args) {
+		var $element = $(element);
+
+		// set default method
+		method = method == null ? 'initialize' : method;
+
+		// call the method
+		Plugin.prototype[method]($element, args);
+	};
+	$.extend(Plugin.prototype, $.zlux.Main.prototype, {
+		name: 'animate',
+		initialize: function(element, args) {
+			var $this = this,
+				$element = element;
+
+			var animation = args[0].split(' '),
+				callback = args[1] ? args[1] : null;
+
+			// add the uikit prefix
+			animation = 'uk-animation-' + (animation.length == 1 ? animation : animation.join(' uk-animation-'));
+
+			// animate the element with CSS3
+			$element.addClass(animation).one('webkitAnimationEnd oanimationend msAnimationEnd animationend', function(e) {
+				// remove the class to allow further animation
+				$element.removeClass(animation);
+
+				// execute any callback passing the element as scope
+				if (callback) callback.apply($element);
+			});
+		}
+	});
+	// Don't touch
+	$.zlux.utils[Plugin.prototype.name] = Plugin;
 })(jQuery, window, document);
 
 
@@ -630,11 +678,11 @@
 	"use strict";
 	var Plugin = function(element, options) {
 		var $this    = this,
-			$element =  $(element);
+			$element = $(element);
 
 		if($element.data(Plugin.prototype.name)) return;
 
-		$this.element =  $(element);
+		$this.element = $(element);
 		$this.options = $.extend({}, Plugin.prototype.options, options);
 		this.events = {};
 
