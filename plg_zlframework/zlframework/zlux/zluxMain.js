@@ -535,7 +535,7 @@
 			// set options
 			var $arg = args[0] ? args[0] : {},
 				$options = {
-					'class': $arg.class ? $arg.class : '',
+					'class': $arg['class'] ? $arg['class'] : '',
 					'affix': $arg.affix ? $arg.affix : 'append' // append, prepend or replace
 				};
 
@@ -545,9 +545,9 @@
 
 			// create the icon if not
 			} else if($options.affix == 'replace') {
-				$element.html($('<i class="uk-icon-spinner uk-icon-spin"></i>').addClass($options.class));
+				$element.html($('<i class="uk-icon-spinner uk-icon-spin"></i>').addClass($options['class']));
 			} else {
-				$element[$options.affix]($('<i class="uk-icon-spinner uk-icon-spin"></i>').addClass($options.class));
+				$element[$options.affix]($('<i class="uk-icon-spinner uk-icon-spin"></i>').addClass($options['class']));
 			}
 		},
 		off: function($element, args) {
