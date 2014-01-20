@@ -50,9 +50,13 @@ class zlfwHelperUpdate extends AppHelper {
 	/**
 	 * Performs the next update.
 	 *
-	 * @return array response
+	 * @param string $ext_id The extension id
+	 * @param string $path The path where the updates are stored
+	 * @param string $src The path of the current install
+	 *
+	 * @return bool Result of the update
 	 */
-	public function run($ext_id, $path)
+	public function run($ext_id, $path, $src)
 	{
 		// vars
 		$this->ext_id = $ext_id;
@@ -65,6 +69,25 @@ class zlfwHelperUpdate extends AppHelper {
 
 		// get requires updates
 		$updates = $this->getRequiredUpdates($current_version, "root:$path");
+
+		// stop updates unless user already saw the warning about them
+		if(count($updates) && !$this->app->system->session->get('com_zoo.zoolanders.install_warned.'.$ext_id, false))
+		{
+			// save in session the warning was alredy displayed
+			$this->app->system->session->set('com_zoo.zoolanders.install_warned.'.$ext_id, true);
+
+			// copy the entire install to avoid it delition on cancel
+			JFolder::copy($src, JPath::clean(JPATH_ROOT . '/tmp/' . basename($src.'_copy')));
+
+			// set the proceede link with it's behaviour
+			$install_path = JPATH_ROOT . '/tmp/' . basename($src.'_copy');
+			$install_path = str_replace('\\', '\\/', $install_path);
+			$javascript = "document.getElementById('install_directory').value = '{$install_path}';Joomla.submitbutton3();return false;";
+			$msg = JText::sprintf('PLG_ZLFRAMEWORK_SYS_PREUPDATE_WARNING', $javascript);
+
+			Jerror::raiseWarning(null, $msg);
+			return false;
+		}
 
 		// run each of them
 		foreach ($updates as $version) {
@@ -91,6 +114,9 @@ class zlfwHelperUpdate extends AppHelper {
 				}
 			}
 		}
+
+		// remove from session the warning state
+		$this->app->system->session->set('com_zoo.zoolanders.install_warned.'.$ext_id, false);
 
 		return true;
 	}
