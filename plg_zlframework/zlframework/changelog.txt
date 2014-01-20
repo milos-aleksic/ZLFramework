@@ -1,6 +1,12 @@
 Changelog
 ------------
 
+3.1.9
+ + Update Helper
+ + Work on com_Zoolanders integration
+ ^ ZLUX core improvements
+ ^ ZLUX Fields new features
+
 3.1.8
  # Install issues solved
 
