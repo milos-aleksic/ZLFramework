@@ -1,19 +1,15 @@
 /* ===================================================
- * ZLUX Dates Manager
+ * ZLUX datesManager
  * https://zoolanders.com/extensions/zl-framework
  * ===================================================
  * Copyright (C) JOOlanders SL 
  * http://www.gnu.org/licenses/gpl-2.0.html GNU/GPLv2 only
  * ========================================================== */
-(function ($) {
+;(function ($, window, document, undefined) {
 	"use strict";
-	var Plugin = function(options){
-		this.options = $.extend({}, this.options, options);
-		this.events = {};
-	};
-	Plugin.prototype = $.extend(Plugin.prototype, $.fn.zluxManager.prototype, {
-		name: 'zluxDatesManager',
-		options: {},
+	var Plugin = function(){};
+	$.extend(Plugin.prototype, $.zlux.Manager.prototype, {
+		name: 'datesManager',
 		initialize: function(target, options) {
 			this.options = $.extend({}, this.options, options);
 			var $this = this;
@@ -34,31 +30,42 @@
 			var $this = this;
 
 			// set ID
-			$.fn.zluxDatesManager.iNextUnique++;
-			$this.ID = $.fn.zluxDatesManager.iNextUnique;
+			$.zlux.datesManager.iNextUnique++;
+			$this.ID = $.zlux.datesManager.iNextUnique;
 		}
 	});
 	// save the plugin for global use
-	$.fn[Plugin.prototype.name] = Plugin;
-	$.fn[Plugin.prototype.name].iNextUnique = 0;
-})(jQuery);
+	$.zlux[Plugin.prototype.name] = Plugin;
+	$.zlux[Plugin.prototype.name].iNextUnique = 0;
+})(jQuery, window, document);
 
 
 /* ===================================================
- * ZLUX Dates Dialog Manager
+ * ZLUX datesDialogManager
  * https://zoolanders.com/extensions/zl-framework
  * ===================================================
  * Copyright (C) JOOlanders SL 
  * http://www.gnu.org/licenses/gpl-2.0.html GNU/GPLv2 only
  * ========================================================== */
-(function ($) {
+;(function ($, window, document, undefined) {
 	"use strict";
-	var Plugin = function(options){
-		this.options = $.extend({}, $.fn.zluxDatesManager.prototype.options, this.options, options);
+	var Plugin = function(element, options) {
+		var $this    = this,
+			$element =  $(element);
+
+		if($element.data(Plugin.prototype.name)) return;
+
+		$this.element =  $(element);
+		$this.options = $.extend({}, Plugin.prototype.options, $.zlux.datesManager.prototype.options, options);
 		this.events = {};
+
+		// init the script
+		$this.initialize();
+
+		$this.element.data(Plugin.prototype.name, $this);
 	};
-	Plugin.prototype = $.extend(Plugin.prototype, $.fn.zluxDatesManager.prototype, {
-		name: 'zluxDatesDialogManager',
+	$.extend(Plugin.prototype, $.zlux.datesManager.prototype, {
+		name: 'datesDialogManager',
 		options: {
 			title: 'Dates Manager',
 			position: {}, // override the Dialog position
@@ -67,22 +74,17 @@
 			mode: 'date', // date, time or datetime
 			firstDay: 0 // week start day
 		},
-		events: {},
-		initialize: function(dialogTrigger, options) {
-			this.options = $.extend({}, this.options, options);
+		initialize: function() {
 			var $this = this;
 
 			// run initial check
 			$this.initCheck();
 
-			// save target
-			$this.target = dialogTrigger;
-
-			// dialogTrigger example, it should be set by the caller script
+			// element example, it should be set by the caller script
 			// $('<a title="' + $this.options.title + '" class="btn btn-mini zlux-btn-edit" href="#"><i class="icon-edit"></i></a>')
 
 			// set the trigger button event
-			$this.dialogTrigger = dialogTrigger.on('click', function(){
+			$this.element.on('click', function(){
 				
 				// toggle the dialog
 				$this.zluxdialog.toggle();
@@ -106,27 +108,23 @@
 				($this.options.full_mode ? ' zlux-dialog-full ' : '') +
 				($this.options.dialogClass ? ' ' + $this.options.dialogClass : '');
 
-			// set the dialog options
-			$.fn.zlux("Dialog", {
-				title: $this.options.title,
-				width: $this.options.full_mode ? '75%' : 300,
-				dialogClass: $this.options.dialogClass,
-				scrollbar: false,
-				position: $.extend({
-					of: $this.dialogTrigger,
-					my: 'left top',
-					at: 'right bottom'
-				}, $this.options.position)
-			})
+			// load assets
+			$.zlux.assets.load('dialog').done(function(){
 
-			// when plugin ready, save reference
-			.done(function(plugin){
+				// set the dialog options
+				$this.zluxdialog = $.zlux.dialog({
+					title: $this.options.title,
+					width: $this.options.full_mode ? '75%' : 300,
+					dialogClass: $this.options.dialogClass,
+					scrollbar: false,
+					position: $.extend({
+						of: $this.element,
+						my: 'left top',
+						at: 'right bottom'
+					}, $this.options.position)
+				})
 
-				// save dialog reference
-				$this.zluxdialog = plugin;
-
-				// set events
-				$this.zluxdialog.bind("InitComplete", function() {
+				.bind("InitComplete", function() {
 
 					// set the dialog unique ID
 					$this.zluxdialog.widget.attr('id', 'zluxDatesManager_' + $this.ID);
@@ -148,7 +146,7 @@
 			// set global close event
 			$('html').on('mousedown', function(event) {
 				// close if target is not the trigger or the dialog it self
-				if ($this.zluxdialog.dialog('isOpen') && !$this.dialogTrigger.is(event.target) && !$this.dialogTrigger.find(event.target).length &&
+				if ($this.zluxdialog.dialog('isOpen') && !$this.element.is(event.target) && !$this.element.find(event.target).length &&
 						!$this.zluxdialog.widget.find(event.target).length && !$this.zluxdialog.widget.is(event.target)) {
 
 					$this.zluxdialog.dialog('close');
@@ -208,22 +206,5 @@
 		}
 	});
 	// Don't touch
-	$.fn[Plugin.prototype.name] = function() {
-		var args   = arguments;
-		var method = args[0] ? args[0] : null;
-		return this.each(function() {
-			var element = $(this);
-			if (Plugin.prototype[method] && element.data(Plugin.prototype.name) && method !== 'initialize') {
-				element.data(Plugin.prototype.name)[method].apply(element.data(Plugin.prototype.name), Array.prototype.slice.call(args, 1));
-			} else if (!method || $.isPlainObject(method)) {
-				var plugin = new Plugin();
-				if (Plugin.prototype.initialize) {
-					plugin.initialize.apply(plugin, $.merge([element], args));
-				}
-				element.data(Plugin.prototype.name, plugin);
-			} else {
-				$.error('Method ' +  method + ' does not exist on jQuery.' + Plugin.name);
-			}
-		});
-	};
-})(jQuery);
+	$.zlux[Plugin.prototype.name] = Plugin;
+})(jQuery, window, document);

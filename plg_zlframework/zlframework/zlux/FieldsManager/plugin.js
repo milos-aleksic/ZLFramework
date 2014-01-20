@@ -1,86 +1,71 @@
 /* ===================================================
- * ZLUX Fields Loader
+ * ZLUX fields
  * https://zoolanders.com/extensions/zl-framework
  * ===================================================
  * Copyright (C) JOOlanders SL 
  * http://www.gnu.org/licenses/gpl-2.0.html GNU/GPLv2 only
  * ========================================================== */
-(function ($) {
+;(function ($, window, document, undefined) {
 	"use strict";
-	var Plugin = function(options){
-		this.options = $.extend({}, this.options, options);
-		this.events = {};
+		var Plugin = function(element, options) {
+		var $this    = this;
+
+		$this.options = $.extend({}, this.options, options);
+		$this.events = {};
+
+		// get the param name
+		var field = $this.options.field;
+		field = 'fields'+ field.charAt(0).toUpperCase() + field.slice(1) +'Field';
+
+		// remove the not any more necesary param
+		delete $this.options.field;
+
+		// init the Field plugin
+		$(element).zlux(field, $this.options);
 	};
-	Plugin.prototype = $.extend(Plugin.prototype, $.fn.zluxMain.prototype, {
-		name: 'zluxFieldsLoader',
-		options: {},
-		events: {},
-		initialize: function(target, options) {
-			this.options = $.extend({}, $.fn.zluxMain.prototype.options, this.options, options);
-			var $this = this;
-
-			// get the param name
-			var field = $this.options.field;
-			field = 'zluxFields'+ field.charAt(0).toUpperCase() + field.slice(1) +'Field';
-
-			// remove the not any more necesary param
-			delete $this.options.field;
-
-			// init the Field plugin
-			if ($.fn[field]) target[field]($this.options);
-		}
-	});
 	// Don't touch
-	$.fn[Plugin.prototype.name] = function() {
-		var args   = arguments;
-		var method = args[0] ? args[0] : null;
-		return this.each(function() {
-			var element = $(this);
-			if (Plugin.prototype[method] && element.data(Plugin.prototype.name) && method !== 'initialize') {
-				element.data(Plugin.prototype.name)[method].apply(element.data(Plugin.prototype.name), Array.prototype.slice.call(args, 1));
-			} else if (!method || $.isPlainObject(method)) {
-				var plugin = new Plugin();
-				if (Plugin.prototype.initialize) {
-					plugin.initialize.apply(plugin, $.merge([element], args));
-				}
-				element.data(Plugin.prototype.name, plugin);
-			} else {
-				$.error('Method ' +  method + ' does not exist on jQuery.' + Plugin.name);
-			}
-		});
-	};
-})(jQuery);
+	$.zlux['fields'] = Plugin;
+})(jQuery, window, document);
 
 
 /* ===================================================
- * ZLUX Fields Options Field
+ * ZLUX fieldsOptionsField
  * https://zoolanders.com/extensions/zl-framework
  * ===================================================
  * Copyright (C) JOOlanders SL 
  * http://www.gnu.org/licenses/gpl-2.0.html GNU/GPLv2 only
  * ========================================================== */
-(function ($) {
+;(function ($, window, document, undefined) {
 	"use strict";
-	var Plugin = function(options){
-		this.options = $.extend({}, this.options, options);
+	var Plugin = function(element, options) {
+		var $this    = this,
+			$element =  $(element);
+
+		if($element.data(Plugin.prototype.name)) return;
+
+		$this.element =  $(element);
+		$this.options = $.extend({}, Plugin.prototype.options, options);
 		this.events = {};
+
+		// init the script
+		$this.initialize();
+
+		$this.element.data(Plugin.prototype.name, $this);
 	};
-	Plugin.prototype = $.extend(Plugin.prototype, $.fn.zluxMain.prototype, {
-		name: 'zluxFieldsOptionsField',
+	$.extend(Plugin.prototype, $.zlux.Main.prototype, {
+		name: 'fieldsOptionsField',
 		options: {},
-		events: {},
-		initialize: function(target, options) {
-			this.options = $.extend({}, $.fn.zluxMain.prototype.options, this.options, options);
+		initialize: function() {
 			var $this = this;
 
 			// init vars
-			$this.list = $('ul', target);
+			$this.list = $('ul', $this.element);
 			$this.hidden = $('li.hidden', $this.list).detach();
 
 			// set the styling class
-			target.addClass('zl-bootstrap');
+			$this.element.addClass('zl-bootstrap');
 
-			target.on('click', '.zlux-x-delete', function() {
+			$this.element.on('click', '.zlux-x-delete', function() {
 				$(this).closest('li').slideUp(400, function() {
 					$(this).remove();
 					$this.orderOptions();
@@ -181,7 +166,7 @@
 			});
 		},
 		getAlias: function(name, callback) {
-			var url = $.fn.zluxMain.prototype.JBase + 'index.php?option=com_zoo&controller=manager&format=raw&task=getalias&force_safe=1';
+			var url = $.zlux.url.ajax('manager', 'getalias', {'force_safe':1});
 			
 			$.getJSON(url, { name: name }, 
 				function(data) {
@@ -195,55 +180,47 @@
 		}
 	});
 	// Don't touch
-	$.fn[Plugin.prototype.name] = function() {
-		var args   = arguments;
-		var method = args[0] ? args[0] : null;
-		return this.each(function() {
-			var element = $(this);
-			if (Plugin.prototype[method] && element.data(Plugin.prototype.name) && method !== 'initialize') {
-				element.data(Plugin.prototype.name)[method].apply(element.data(Plugin.prototype.name), Array.prototype.slice.call(args, 1));
-			} else if (!method || $.isPlainObject(method)) {
-				var plugin = new Plugin();
-				if (Plugin.prototype.initialize) {
-					plugin.initialize.apply(plugin, $.merge([element], args));
-				}
-				element.data(Plugin.prototype.name, plugin);
-			} else {
-				$.error('Method ' +  method + ' does not exist on jQuery.' + Plugin.name);
-			}
-		});
-	};
-})(jQuery);
+	$.zlux[Plugin.prototype.name] = Plugin;
+})(jQuery, window, document);
 
 
 /* ===================================================
- * ZLUX Fields Items Field
+ * ZLUX fieldsItemsField
  * https://zoolanders.com/extensions/zl-framework
  * ===================================================
  * Copyright (C) JOOlanders SL 
  * http://www.gnu.org/licenses/gpl-2.0.html GNU/GPLv2 only
  * ========================================================== */
-(function ($) {
+;(function ($, window, document, undefined) {
 	"use strict";
-	var Plugin = function(options){
-		this.options = $.extend({}, this.options, options);
+	var Plugin = function(element, options) {
+		var $this    = this,
+			$element =  $(element);
+
+		if($element.data(Plugin.prototype.name)) return;
+
+		$this.element =  $(element);
+		$this.options = $.extend({}, Plugin.prototype.options, options);
 		this.events = {};
+
+		// init the script
+		$this.initialize();
+
+		$this.element.data(Plugin.prototype.name, $this);
 	};
-	Plugin.prototype = $.extend(Plugin.prototype, $.fn.zluxMain.prototype, {
-		name: 'zluxFieldsItemsField',
+	$.extend(Plugin.prototype, $.zlux.Main.prototype, {
+		name: 'fieldsItemsField',
 		options: {
 			controlName: ''
 		},
-		events: {},
-		initialize: function(target, options) {
-			this.options = $.extend({}, $.fn.zluxMain.prototype.options, this.options, options);
+		initialize: function() {
 			var $this = this;
 
 			// init vars
 			$this.aRelated = [];
 
 			// save relations list
-			$this.list = $('<ul />').addClass('zlux-field-items').appendTo(target)
+			$this.list = $('<ul />').addClass('zlux-field-items').appendTo($this.element)
 
 			// init sortable feature
 			.sortable({
@@ -275,7 +252,7 @@
 			});
 
 			// get current values from dom
-			$('.zlux-x-item', target).each(function(i, item){
+			$('.zlux-x-item', $this.element).each(function(i, item){
 				var $object = $(item).data('info');
 
 				// append relation to list
@@ -286,55 +263,59 @@
 			});
 			
 			// set the styling class
-			target.addClass('zl-bootstrap');
+			$this.element.addClass('zl-bootstrap');
 
 			// set the trigger button
 			$this.dialogTrigger = $('<button type="button" class="btn btn-mini"><i class="icon-plus-sign"></i> Add item </button>')
 
 			// add it to dom
-			.appendTo(target);
+			.appendTo($this.element);
 
-			// init the dialog manager
-			$this.dialogTrigger.zlux("ItemsDialogManager", {
-				position: {
-					of: target,
-					my: 'left top',
-					at: 'right top'
-				},
-				apps: $this.options.apps,
-				types: $this.options.types
-			})
+			// load assets
+			$.zlux.assets.load('items').done(function(){
 
-			// on object select event
-			.on("zlux.ObjectSelected", function(e, manager, $object){
+				// init the dialog manager
+				$this.dialogTrigger.zlux("itemsDialogManager", {
+					position: {
+						of: $this.element,
+						my: 'left top',
+						at: 'right top'
+					},
+					apps: $this.options.apps,
+					types: $this.options.types
+				})
 
-				// check if already related
-				if($.inArray($object.id, $this.aRelated) != '-1') {
+				// on object select event
+				.on("zlux.ObjectSelected", function(e, manager, $object){
 
-					// if so, unrelate
-					$this.removeRelation($object);
+					// check if already related
+					if($.inArray($object.id, $this.aRelated) != '-1') {
 
-				} else { // relate
+						// if so, unrelate
+						$this.removeRelation($object);
 
-					// set the object checkbox
-					$('.column-icon i', $object.dom).removeClass('icon-file-alt').addClass('icon-check');
+					} else { // relate
 
-					// append the object to the relations list dom
-					$this.appendRelation($object);
-				}
-			})
+						// set the object checkbox
+						$('.column-icon i', $object.dom).removeClass('icon-file-alt').addClass('icon-check');
 
-			.on("zlux.TableDrawCallback", function(e, manager){
-				
-				$('tbody tr', manager.oTable).each(function(i, object_dom){
-					if($.inArray(object_dom.getAttribute('data-id'), $this.aRelated) != '-1') {
-						$('.column-icon i', object_dom).removeClass('icon-file-alt').addClass('icon-check');
+						// append the object to the relations list dom
+						$this.appendRelation($object);
 					}
 				})
 
-				// save the manager
-				$this.manager = manager;
-			})
+				.on("zlux.TableDrawCallback", function(e, manager){
+					
+					$('tbody tr', manager.oTable).each(function(i, object_dom){
+						if($.inArray(object_dom.getAttribute('data-id'), $this.aRelated) != '-1') {
+							$('.column-icon i', object_dom).removeClass('icon-file-alt').addClass('icon-check');
+						}
+					})
+
+					// save the manager
+					$this.manager = manager;
+				});
+			});
 		},
 		appendRelation: function ($object) {
 			var $this = this;
@@ -374,22 +355,5 @@
 		}
 	});
 	// Don't touch
-	$.fn[Plugin.prototype.name] = function() {
-		var args   = arguments;
-		var method = args[0] ? args[0] : null;
-		return this.each(function() {
-			var element = $(this);
-			if (Plugin.prototype[method] && element.data(Plugin.prototype.name) && method !== 'initialize') {
-				element.data(Plugin.prototype.name)[method].apply(element.data(Plugin.prototype.name), Array.prototype.slice.call(args, 1));
-			} else if (!method || $.isPlainObject(method)) {
-				var plugin = new Plugin();
-				if (Plugin.prototype.initialize) {
-					plugin.initialize.apply(plugin, $.merge([element], args));
-				}
-				element.data(Plugin.prototype.name, plugin);
-			} else {
-				$.error('Method ' +  method + ' does not exist on jQuery.' + Plugin.name);
-			}
-		});
-	};
-})(jQuery);
+	$.zlux[Plugin.prototype.name] = Plugin;
+})(jQuery, window, document);

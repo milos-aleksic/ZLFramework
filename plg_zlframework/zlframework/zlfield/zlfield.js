@@ -537,10 +537,14 @@
 					info.remove();
 
 					// load the field JS
-					$field.zlux("FieldsLoader", $.extend({}, params, {
-						field: 'items',
-						controlName: cname
-					}));
+					$.zlux.assets.load('fields').done(function(){
+
+						// init
+						$field.zlux('fields', $.extend({}, params, {
+							field: 'items',
+							controlName: cname
+						}));
+					});
 
 				}); // Items selector END
 
@@ -557,10 +561,14 @@
 					info.remove();
 
 					// load the field JS
-					$field.zlux("FieldsLoader", $.extend({}, params, {
-						field: 'options',
-						controlName: cname
-					}));
+					$.zlux.assets.load('fields').done(function(){
+
+						// init
+						$field.zlux('fields', $.extend({}, params, {
+							field: 'options',
+							controlName: cname
+						}));
+					});
 
 				}); // Options field END
 
