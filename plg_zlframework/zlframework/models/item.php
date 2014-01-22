@@ -227,8 +227,9 @@ class ZLModelItem extends ZLModel
 			$period_mode 	= $date->get('period_mode', 'static');
 			$interval 		= $date->get('interval', 0);
 			$interval_unit 	= $date->get('interval_unit', '');
+			$datetime		= $date->get('datetime', false);
 
-			$query->where($this->getDateSearch(compact('sql_value', 'value', 'value_from', 'value_to', 'search_type', 'period_mode', 'interval', 'interval_unit')));
+			$query->where($this->getDateSearch(compact('sql_value', 'value', 'value_from', 'value_to', 'search_type', 'period_mode', 'interval', 'interval_unit', 'datetime')));
 		}
 
 		// modified
@@ -244,8 +245,9 @@ class ZLModelItem extends ZLModel
 			$period_mode 	= $date->get('period_mode', 'static');
 			$interval 		= $date->get('interval', 0);
 			$interval_unit 	= $date->get('interval_unit', '');
+			$datetime		= $date->get('datetime', false);
 
-			$query->where($this->getDateSearch(compact('sql_value', 'value', 'value_from', 'value_to', 'search_type', 'period_mode', 'interval', 'interval_unit')));
+			$query->where($this->getDateSearch(compact('sql_value', 'value', 'value_from', 'value_to', 'search_type', 'period_mode', 'interval', 'interval_unit', 'datetime')));
 		}
 
 		// published
@@ -261,8 +263,9 @@ class ZLModelItem extends ZLModel
 			$period_mode 	= $date->get('period_mode', 'static');
 			$interval 		= $date->get('interval', 0);
 			$interval_unit 	= $date->get('interval_unit', '');
+			$datetime		= $date->get('datetime', false);
 
-			$query->where($this->getDateSearch(compact('sql_value', 'value', 'value_from', 'value_to', 'search_type', 'period_mode', 'interval', 'interval_unit')));
+			$query->where($this->getDateSearch(compact('sql_value', 'value', 'value_from', 'value_to', 'search_type', 'period_mode', 'interval', 'interval_unit', 'datetime')));
 		}
 
 		// published down
@@ -278,8 +281,9 @@ class ZLModelItem extends ZLModel
 			$period_mode 	= $date->get('period_mode', 'static');
 			$interval 		= $date->get('interval', 0);
 			$interval_unit 	= $date->get('interval_unit', '');
+			$datetime		= $date->get('datetime', false);
 
-			$query->where($this->getDateSearch(compact('sql_value', 'value', 'value_from', 'value_to', 'search_type', 'period_mode', 'interval', 'interval_unit')));
+			$query->where($this->getDateSearch(compact('sql_value', 'value', 'value_from', 'value_to', 'search_type', 'period_mode', 'interval', 'interval_unit', 'datetime')));
 		}
 
 		// default publication up
@@ -633,7 +637,7 @@ class ZLModelItem extends ZLModel
 
 	/**
 	 * Get the date search sql
-	 * $sql_value, $value, $value_from, $value_to, $type, $period_mode, $wrapper=false, $interval, $interval_unit
+	 * $sql_value, $value, $value_from, $value_to, $type, $period_mode, $wrapper=false, $interval, $interval_unit, $datetime
 	 */
 	protected function getDateSearch($__args = array())
 	{
@@ -643,6 +647,9 @@ class ZLModelItem extends ZLModel
 				$$__var = $__value;
 			}
 		}
+
+		// init vars
+		$datetime = isset($datetime) ? (bool)$datetime : false;
 
 		// replace vars
 		$tzoffset = $this->app->date->getOffset();
@@ -679,14 +686,25 @@ class ZLModelItem extends ZLModel
 
 		// search_type = to:from:default
 		if (!empty($value) && $search_type != 'period') { 
-			$date = substr($value, 0, 10);
-			$from = $date.' 00:00:00';
-			$to   = $date.' 23:59:59';
+
+			if($datetime) {
+				$from = $to = $value;
+			} else {
+				$date = substr($value, 0, 10);
+				$from = $date.' 00:00:00';
+				$to   = $date.' 23:59:59';
+			}
 
 		// search_type = period
 		} else {
-			$from = substr($value_from, 0, 10).' 00:00:00';
-			$to   = substr($value_to, 0, 10).' 23:59:59';
+
+			if($datetime) {
+				$from = $value_from;
+				$to   = $value_to;
+			} else {
+				$from = substr($value_from, 0, 10).' 00:00:00';
+				$to   = substr($value_to, 0, 10).' 23:59:59';
+			}
 		}
 		
 		$from = $this->_db->Quote($this->_db->escape($from));
@@ -694,7 +712,10 @@ class ZLModelItem extends ZLModel
 
 		switch ($search_type) {
 			case 'from':
-				$el_where = "( (SUBSTR($sql_value, -19) >= $from) OR ($from <= SUBSTR($sql_value, -19)) )";
+				if($datetime)
+					$el_where = "( ($sql_value >= $from) OR ($from <= $sql_value) )";
+				else
+					$el_where = "( (SUBSTR($sql_value, -19) >= $from) OR ($from <= SUBSTR($sql_value, -19)) )";
 				break;
 
 			case 'to':
@@ -704,6 +725,9 @@ class ZLModelItem extends ZLModel
 			case 'period':
 				if ($period_mode == 'static') 
 				{
+					if($datetime)
+					$el_where = "( ($from BETWEEN $sql_value AND $sql_value) OR ($to BETWEEN $sql_value AND $sql_value) OR ($sql_value BETWEEN $from AND $to) OR ($sql_value BETWEEN $from AND $to) )";
+					else 
 					$el_where = "( ($from BETWEEN SUBSTR($sql_value, 1, 19) AND SUBSTR($sql_value, -19)) OR ($to BETWEEN SUBSTR($sql_value, 1, 19) AND SUBSTR($sql_value, -19)) OR (SUBSTR($sql_value, 1, 19) BETWEEN $from AND $to) OR (SUBSTR($sql_value, -19) BETWEEN $from AND $to) )";
 				} 
 				else // dynamic
@@ -725,6 +749,9 @@ class ZLModelItem extends ZLModel
 
 			default:
 				$date = $this->_db->escape($date);
+				if($datetime)
+				$el_where = "( ($sql_value LIKE '%$date%') OR (('$date' BETWEEN $sql_value AND $sql_value) AND $sql_value NOT REGEXP '[[.LF.]]') )";
+				else
 				$el_where = "( ($sql_value LIKE '%$date%') OR (('$date' BETWEEN SUBSTR($sql_value, 1, 10) AND SUBSTR($sql_value, -19, 10)) AND $sql_value NOT REGEXP '[[.LF.]]') )";
 		}
 
