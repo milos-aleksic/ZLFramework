@@ -1,6 +1,10 @@
 Changelog
 ------------
 
+3.1.10
+ + ZL Installer
+ + Datetime option for Item Model
+
 3.1.9
  + Update Helper
  + Work on com_Zoolanders integration
