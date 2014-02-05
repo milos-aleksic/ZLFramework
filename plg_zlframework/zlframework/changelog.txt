@@ -1,6 +1,9 @@
 Changelog
 ------------
 
+3.1.11
+ + Added dedicated frontpage filter in the item model
+
 3.1.10
  + ZL Installer
  + Datetime option for Item Model
