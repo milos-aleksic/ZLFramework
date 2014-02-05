@@ -331,11 +331,6 @@ class ZluxController extends AppController {
 		// get any error / warning
 		$errors = array_merge($storage->getErrors(), $storage->getWarnings());
 
-		if (!$result) {
-			echo json_encode(compact('result', 'errors'));
-			return;
-		}
-
 		/* Array of database columns which should be read and sent back to DataTables. Use a space where
 		   you want to insert a non-database field (for example a counter or static image) */
 		$aColumns = array('type', 'name', 'size', 'path');
@@ -346,7 +341,8 @@ class ZluxController extends AppController {
 			'iTotalDisplayRecords' => 40,
 			'sColumns' => implode(', ', $aColumns),
 			'root' => $result['root'],
-			'aaData' => $result['rows']
+			'aaData' => $result['rows'],
+			'errors' => $errors
 		);
 
 		echo json_encode(compact('result', 'errors'));

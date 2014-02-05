@@ -303,6 +303,9 @@ class ZLStorageAdapterAmazonS3 extends ZLStorageAdapterBase implements ZLStorage
 
 			$rows[] = $row;
 		}
+
+		// propagate S3 object errors to storage object
+		$this->s3->propagateToObject($this);
 		
 		// return list
 		return compact('root', 'rows');
