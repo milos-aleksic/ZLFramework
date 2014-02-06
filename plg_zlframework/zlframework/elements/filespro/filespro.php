@@ -464,14 +464,14 @@ abstract class ElementFilesPro extends ElementRepeatablePro {
 				'/\[userid\]/', '/\[username\]/', '/\[usergroup\]/', '/\[usergroupid\]/',
 				'/\[authorid\]/', '/\[authorname\]/', '/\[authorgroup\]/', '/\[authorgroupid\]/',
 				'/\[zooapp\]/', '/\[zooprimarycat\]/', '/\[zooprimarycatid\]/',
-				'/\[zooitemtype\]/', '/\[zooitemid\]/',
+				'/\[zooitemtype\]/', '/\[zooitemid\]/', '/\[zooitemalias\]/',
 				'/\[day\]/', '/\[month\]/', '/\[year\]/'
 			);
 			$replace = array(
 				$user->id, $user->username, $usergroup, $usergroupid,
 				$author->id, $author->username, $authorgroup, $authorgroupid,
 				$zooapp, $zooprimarycat, $zooprimarycatid,
-				$item->type, $item->id,
+				$item->type, $item->id, $item->alias,
 				date('d'), date('m'), date('Y')
 			);
 			$root = preg_replace($pattern, $replace, $root);

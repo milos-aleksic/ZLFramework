@@ -1,6 +1,13 @@
 Changelog
 ------------
 
+3.1.11
+ + Added dedicated frontpage filter in the item model
+ + Added asset Parsley
+ + Added [zooitemalias] var for dynamic paths
+ # Fixed missing S3 error notifications
+ # Fixed range filtering with 0 values
+
 3.1.10
  + ZL Installer
  + Datetime option for Item Model

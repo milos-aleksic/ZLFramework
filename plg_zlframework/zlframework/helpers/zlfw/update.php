@@ -75,7 +75,7 @@ class zlfwHelperUpdate extends AppHelper {
 						try {
 
 							// run the update
-							$r->newInstance()->run();
+							$r->newInstance($this->app)->run();
 						} catch (Exception $e) {
 
 							Jerror::raiseWarning(null, "Error during update! ($e)");
@@ -88,39 +88,81 @@ class zlfwHelperUpdate extends AppHelper {
 
 		return true;
 	}
+}
 
+/**
+ * ZL Update class
+ */
+abstract class zlUpdate {
+
+	/*
+		Variable: app
+			App instance.
+	*/
+	public $app;
+
+	/*
+		Variable: db
+			Database instance.
+	*/
+	public $db;
+
+	/*
+		Function: __construct
+			Class Constructor.
+	*/
+	public function __construct($app) {
+
+		// set App instance
+		$this->app = $app;
+
+		// set DB instance
+		$this->db = $app->database;
+	}
+
+	/**
+	 * Check if column exists in specified table
+	 */
+	function column_exists($column, $table)
+	{
+		$exists = false;
+		$query = "SHOW columns FROM `{$table}`";
+		$columns = $this->db->queryAssocList($query);
+
+		while (list ($key, $val) = each ($columns)) {
+			if($val['Field'] == $column) {
+				$exists = true;
+				break;
+			}
+		}
+
+		return $exists;
+	}
 
 	/**
 	 * Removes obsolete files and folders
 	 */
-	public function removeObsolete($obsolete)
+	public function removeObsolete()
 	{
 		// Remove files
-		if(!empty($obsolete['files'])) foreach($obsolete['files'] as $file) {
+		if(!empty($this->_obsolete['files'])) foreach($this->_obsolete['files'] as $file) {
 			$f = JPATH_ROOT.'/'.$file;
 			if(!JFile::exists($f)) continue;
 			JFile::delete($f);
 		}
 
 		// Remove folders
-		if(!empty($obsolete['folders'])) foreach($obsolete['folders'] as $folder) {
+		if(!empty($this->_obsolete['folders'])) foreach($this->_obsolete['folders'] as $folder) {
 			$f = JPATH_ROOT.'/'.$folder;
 			if(!JFolder::exists($f)) continue;
 			JFolder::delete($f);
 		}
 	}
 
-}
-
-/**
- * Update interface
- */
-interface zlUpdate {
-
 	/**
 	 * Performs the update.
 	 *
 	 * @return boolean true if updated successful
 	 */
-	public function run();
+	abstract public function run();
 }

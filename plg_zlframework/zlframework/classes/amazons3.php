@@ -20,9 +20,9 @@ defined('_JEXEC') or die('Restricted access');
 App::getInstance('zoo')->loader->register('ZLErrorHandlerAbstractObject', 'classes:errorhandler.php');
 
 /**
- * Main Amazon S3 Utility class, untouched Nicholas version
+ * Amazon S3 Utility class, Nicholas version
  */
-class MainAEUtilAmazons3 extends ZLErrorHandlerAbstractObject
+class AEUtilAmazons3 extends ZLErrorHandlerAbstractObject
 {
 	// ACL flags
 	const ACL_PRIVATE = 'private';
@@ -746,9 +746,175 @@ class MainAEUtilAmazons3 extends ZLErrorHandlerAbstractObject
 		(str_repeat(chr(0x36), 64))) . $string)))));
 	}
 
+
+
+
+	/** END NICHOLAS CONTENT **/
+
+	const STORAGE_CLASS_STANDARD = 'STANDARD';
+	const STORAGE_CLASS_RRS = 'REDUCED_REDUNDANCY';
+
+	private static $__signingKeyPairId = null; // AWS Key Pair ID
+	private static $__signingKeyResource = false; // Key resource, freeSigningKey() must be called to clear it from memory
+
+	/**
+	* Copy an object
+	*
+	* @param string $bucket Source bucket name
+	* @param string $uri Source object URI
+	* @param string $bucket Destination bucket name
+	* @param string $uri Destination object URI
+	* @param constant $acl ACL constant
+	* @param array $metaHeaders Optional array of x-amz-meta-* headers
+	* @param array $requestHeaders Optional array of request headers (content type, disposition, etc.)
+	* @param constant $storageClass Storage class constant
+	* @return mixed | false
+	*/
+	public static function copyObject($srcBucket, $srcUri, $bucket, $uri, $acl = self::ACL_PRIVATE, $metaHeaders = array(), $requestHeaders = array(), $storageClass = self::STORAGE_CLASS_STANDARD)
+	{
+		$rest = new AEUtilsS3Request('PUT', $bucket, $uri, AEUtilAmazons3::getInstance()->defaultHost);
+		$rest->setHeader('Content-Length', 0);
+		foreach ($requestHeaders as $h => $v) $rest->setHeader($h, $v);
+		foreach ($metaHeaders as $h => $v) $rest->setAmzHeader('x-amz-meta-'.$h, $v);
+		if ($storageClass !== self::STORAGE_CLASS_STANDARD) // Storage class
+			$rest->setAmzHeader('x-amz-storage-class', $storageClass);
+		$rest->setAmzHeader('x-amz-acl', $acl);
+		$rest->setAmzHeader('x-amz-copy-source', sprintf('/%s/%s', $srcBucket, rawurlencode($srcUri)));
+		if (sizeof($requestHeaders) > 0 || sizeof($metaHeaders) > 0)
+			$rest->setAmzHeader('x-amz-metadata-directive', 'REPLACE');
+
+		$rest = $rest->getResponse();
+		if ($rest->error === false && $rest->code !== 200)
+			$rest->error = array('code' => $rest->code, 'message' => 'Unexpected HTTP status');
+		if ($rest->error !== false)
+		{
+			$o = self::getInstance();
+			$o->setWarning(sprintf(__CLASS__."::copyObject({$srcBucket}, {$srcUri}, {$bucket}, {$uri}): [%s] %s",
+			$rest->error['code'], $rest->error['message']));
+			return false;
+		}
+		return true;
+	}
+
+	/**
+	* Get object information
+	*
+	* @param string $bucket Bucket name
+	* @param string $uri Object URI
+	* @param boolean $returnInfo Return response information
+	* @return mixed | false
+	*/
+	public static function getObjectInfo($bucket, $uri, $returnInfo = true)
+	{
+		$rest = new AEUtilsS3Request('HEAD', $bucket, $uri, AEUtilAmazons3::getInstance()->defaultHost);
+		$rest = $rest->getResponse();
+		if ($rest->error === false && ($rest->code !== 200 && $rest->code !== 404))
+			$rest->error = array('code' => $rest->code, 'message' => 'Unexpected HTTP status');
+		if ($rest->error !== false)
+		{
+			$o = self::getInstance();
+			$o->setWarning(sprintf(__CLASS__."::getObjectInfo({$bucket}, {$uri}): [%s] %s",
+			$rest->error['code'], $rest->error['message']));
+			return false;
+		}
+		return $rest->code == 200 ? $returnInfo ? $rest->headers : true : false;
+	}
+
+	/**
+	* Set signing key
+	*
+	* @param string $keyPairId AWS Key Pair ID
+	* @param string $signingKey Private Key
+	* @param boolean $isFile Load private key from file, set to false to load string
+	* @return boolean
+	*/
+	public static function setSigningKey($keyPairId, $signingKey, $isFile = true)
+	{
+		self::$__signingKeyPairId = $keyPairId;
+		if ((self::$__signingKeyResource = openssl_pkey_get_private($isFile ?
+		file_get_contents($signingKey) : $signingKey)) !== false) return true;
+
+		$o = self::getInstance();
+		$o->setWarning(sprintf(__CLASS__."::ssetSigningKey(): Unable to open load private key: %s",
+		$signingKey));
+		return false;
+	}
+
+	/**
+	* Free signing key from memory, MUST be called if you are using setSigningKey()
+	*
+	* @return void
+	*/
+	public static function freeSigningKey()
+	{
+		if (self::$__signingKeyResource !== false)
+			openssl_free_key(self::$__signingKeyResource);
+	}
+
+	/**
+	* Get a CloudFront signed policy URL
+	*
+	* @param array $policy Policy
+	* @return string
+	*/
+	public static function getSignedPolicyURL($policy)
+	{
+		$data = json_encode($policy);
+		$signature = '';
+		if (!openssl_sign($data, $signature, self::$__signingKeyResource)) return false;
+
+		$encoded = str_replace(array('+', '='), array('-', '_', '~'), base64_encode($data));
+		$signature = str_replace(array('+', '='), array('-', '_', '~'), base64_encode($signature));
+
+		$url = $policy['Statement'][0]['Resource'] . '?';
+		foreach (array('Policy' => $encoded, 'Signature' => $signature, 'Key-Pair-Id' => self::$__signingKeyPairId) as $k => $v)
+			$url .= $k.'='.str_replace('%2F', '/', rawurlencode($v)).'&';
+		return substr($url, 0, -1);
+	}
+
+	/**
+	* Get a CloudFront canned policy URL
+	*
+	* @param string $string URL to sign
+	* @param integer $lifetime URL lifetime
+	* @return string
+	*/
+	public static function getSignedCannedURL($url, $lifetime)
+	{
+		return self::getSignedPolicyURL(array(
+			'Statement' => array(
+				array('Resource' => $url, 'Condition' => array(
+					'DateLessThan' => array('AWS:EpochTime' => time() + $lifetime)
+				))
+			)
+		));
+	}
+
+	/**
+	* Test Authentication
+	*/
+	public static function testAuth()
+	{
+		$rest = new AEUtilsS3Request('GET', '', '', AEUtilAmazons3::getInstance()->defaultHost);
+		$rest = $rest->getResponse();
+
+		if ($rest->error === false && $rest->code !== 200)
+			$rest->error = array('code' => $rest->code, 'message' => 'Unexpected HTTP status');
+		if ($rest->error !== false) {
+			$o = self::getInstance();
+			$o->setError(sprintf(__CLASS__.'::'.__METHOD__."(): [%s] %s", $rest->error['code'], $rest->error['message']));
+			return false;
+		}
+
+		return true;
+	}
 }
 
-final class AEUtilsS3Request {
+/**
+ * AEUtilsS3Request
+ */
+final class AEUtilsS3Request
+{
 	private $verb, $bucket, $uri, $resource = '', $parameters = array(),
 	$amzHeaders = array(), $headers = array(
 		'Host' => '', 'Date' => '', 'Content-MD5' => '', 'Content-Type' => ''
@@ -999,152 +1165,5 @@ final class AEUtilsS3Request {
 				$this->response->headers[$header] = is_numeric($value) ? (int)$value : $value;
 		}
 		return $strlen;
-	}
-
-}
-
-
-/**
- * Amazon S3 Utility class, extended Nicholas version
- */
-class AEUtilAmazons3 extends MainAEUtilAmazons3
-{
-	const STORAGE_CLASS_STANDARD = 'STANDARD';
-	const STORAGE_CLASS_RRS = 'REDUCED_REDUNDANCY';
-
-	private static $__signingKeyPairId = null; // AWS Key Pair ID
-	private static $__signingKeyResource = false; // Key resource, freeSigningKey() must be called to clear it from memory
-
-	/**
-	* Copy an object
-	*
-	* @param string $bucket Source bucket name
-	* @param string $uri Source object URI
-	* @param string $bucket Destination bucket name
-	* @param string $uri Destination object URI
-	* @param constant $acl ACL constant
-	* @param array $metaHeaders Optional array of x-amz-meta-* headers
-	* @param array $requestHeaders Optional array of request headers (content type, disposition, etc.)
-	* @param constant $storageClass Storage class constant
-	* @return mixed | false
-	*/
-	public static function copyObject($srcBucket, $srcUri, $bucket, $uri, $acl = self::ACL_PRIVATE, $metaHeaders = array(), $requestHeaders = array(), $storageClass = self::STORAGE_CLASS_STANDARD)
-	{
-		$rest = new AEUtilsS3Request('PUT', $bucket, $uri, AEUtilAmazons3::getInstance()->defaultHost);
-		$rest->setHeader('Content-Length', 0);
-		foreach ($requestHeaders as $h => $v) $rest->setHeader($h, $v);
-		foreach ($metaHeaders as $h => $v) $rest->setAmzHeader('x-amz-meta-'.$h, $v);
-		if ($storageClass !== self::STORAGE_CLASS_STANDARD) // Storage class
-			$rest->setAmzHeader('x-amz-storage-class', $storageClass);
-		$rest->setAmzHeader('x-amz-acl', $acl);
-		$rest->setAmzHeader('x-amz-copy-source', sprintf('/%s/%s', $srcBucket, rawurlencode($srcUri)));
-		if (sizeof($requestHeaders) > 0 || sizeof($metaHeaders) > 0)
-			$rest->setAmzHeader('x-amz-metadata-directive', 'REPLACE');
-
-		$rest = $rest->getResponse();
-		if ($rest->error === false && $rest->code !== 200)
-			$rest->error = array('code' => $rest->code, 'message' => 'Unexpected HTTP status');
-		if ($rest->error !== false)
-		{
-			$o = self::getInstance();
-			$o->setWarning(sprintf(__CLASS__."::copyObject({$srcBucket}, {$srcUri}, {$bucket}, {$uri}): [%s] %s",
-			$rest->error['code'], $rest->error['message']));
-			return false;
-		}
-		return true;
-	}
-
-	/**
-	* Get object information
-	*
-	* @param string $bucket Bucket name
-	* @param string $uri Object URI
-	* @param boolean $returnInfo Return response information
-	* @return mixed | false
-	*/
-	public static function getObjectInfo($bucket, $uri, $returnInfo = true)
-	{
-		$rest = new AEUtilsS3Request('HEAD', $bucket, $uri, AEUtilAmazons3::getInstance()->defaultHost);
-		$rest = $rest->getResponse();
-		if ($rest->error === false && ($rest->code !== 200 && $rest->code !== 404))
-			$rest->error = array('code' => $rest->code, 'message' => 'Unexpected HTTP status');
-		if ($rest->error !== false)
-		{
-			$o = self::getInstance();
-			$o->setWarning(sprintf(__CLASS__."::getObjectInfo({$bucket}, {$uri}): [%s] %s",
-			$rest->error['code'], $rest->error['message']));
-			return false;
-		}
-		return $rest->code == 200 ? $returnInfo ? $rest->headers : true : false;
-	}
-
-	/**
-	* Set signing key
-	*
-	* @param string $keyPairId AWS Key Pair ID
-	* @param string $signingKey Private Key
-	* @param boolean $isFile Load private key from file, set to false to load string
-	* @return boolean
-	*/
-	public static function setSigningKey($keyPairId, $signingKey, $isFile = true)
-	{
-		self::$__signingKeyPairId = $keyPairId;
-		if ((self::$__signingKeyResource = openssl_pkey_get_private($isFile ?
-		file_get_contents($signingKey) : $signingKey)) !== false) return true;
-
-		$o = self::getInstance();
-		$o->setWarning(sprintf(__CLASS__."::ssetSigningKey(): Unable to open load private key: %s",
-		$signingKey));
-		return false;
-	}
-
-	/**
-	* Free signing key from memory, MUST be called if you are using setSigningKey()
-	*
-	* @return void
-	*/
-	public static function freeSigningKey()
-	{
-		if (self::$__signingKeyResource !== false)
-			openssl_free_key(self::$__signingKeyResource);
-	}
-
-	/**
-	* Get a CloudFront signed policy URL
-	*
-	* @param array $policy Policy
-	* @return string
-	*/
-	public static function getSignedPolicyURL($policy)
-	{
-		$data = json_encode($policy);
-		$signature = '';
-		if (!openssl_sign($data, $signature, self::$__signingKeyResource)) return false;
-
-		$encoded = str_replace(array('+', '='), array('-', '_', '~'), base64_encode($data));
-		$signature = str_replace(array('+', '='), array('-', '_', '~'), base64_encode($signature));
-
-		$url = $policy['Statement'][0]['Resource'] . '?';
-		foreach (array('Policy' => $encoded, 'Signature' => $signature, 'Key-Pair-Id' => self::$__signingKeyPairId) as $k => $v)
-			$url .= $k.'='.str_replace('%2F', '/', rawurlencode($v)).'&';
-		return substr($url, 0, -1);
-	}
-
-	/**
-	* Get a CloudFront canned policy URL
-	*
-	* @param string $string URL to sign
-	* @param integer $lifetime URL lifetime
-	* @return string
-	*/
-	public static function getSignedCannedURL($url, $lifetime)
-	{
-		return self::getSignedPolicyURL(array(
-			'Statement' => array(
-				array('Resource' => $url, 'Condition' => array(
-					'DateLessThan' => array('AWS:EpochTime' => time() + $lifetime)
-				))
-			)
-		));
 	}
 }

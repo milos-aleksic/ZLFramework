@@ -39,9 +39,10 @@
 	zlux.url.ajax = function(controller, task, params) {
 		var params = params == undefined ? {} : params,
 			app_id = params.app_id ? params.app_id : zlux.zoo.app_id,
-			option = zlux.com_zl ? 'com_zoolanders' : 'com_zoo';
+			option = params.option ? params.option : ( zlux.com_zl ? 'com_zoolanders' : 'com_zoo' );
 
-		// avoid repeating the app id param
+		// avoid repeating main params
+		delete params.option;
 		delete params.app_id;
 
 		// prepare the url

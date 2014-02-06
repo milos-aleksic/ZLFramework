@@ -147,6 +147,10 @@ abstract class zlInstallerScript
 		// after update
 		if($this->type == 'update')
 		{
+			// set ext version
+			$this->setVersion();
+
+			// show
 			echo JText::sprintf('PLG_ZLFRAMEWORK_SYS_UPDATE', $this->ext_name, $new_version);
 		}
 

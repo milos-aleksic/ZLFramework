@@ -12,6 +12,7 @@ defined('_JEXEC') or die('Restricted access');
 class ZLModelItem extends ZLModel
 {
 	protected $join_cats = false;
+	protected $join_frontpage = false;
 	protected $join_tags = false;
 
 	/**
@@ -101,6 +102,11 @@ class ZLModelItem extends ZLModel
 		// categories
 		if ($this->join_cats) {
 			$query->join('LEFT', ZOO_TABLE_CATEGORY_ITEM." AS b ON a.id = b.item_id");
+		}
+
+		// frontpage
+		if ($this->join_frontpage) {
+			$query->join('LEFT', ZOO_TABLE_CATEGORY_ITEM." AS f ON a.id = f.item_id");
 		}
 
 		// tags
@@ -300,6 +306,15 @@ class ZLModelItem extends ZLModel
 			$where[] = 'a.publish_down = '.$null;
 			$where[] = 'a.publish_down >= '.$now;
 			$query->where('('.implode(' OR ', $where).')');
+		}
+
+		// Frontpage
+		$frontpage = $this->getState('frontpage', null);
+		if ($frontpage !== null) {
+			if ($frontpage) {
+				$this->join_frontpage = true;
+				$query->where('f.category_id  = 0');
+			}
 		}
 	}
 
@@ -537,8 +552,8 @@ class ZLModelItem extends ZLModel
 			if ($is_range && !$is_date){
 
 				// make sure the values are set
-				$from = !empty($from) ? $from : $value;
-				$to = !empty($to) ? $to : $value;
+				$from = isset($from) ? $from : $value;
+				$to = isset($to) ? $to : $value;
 
 				// get and add the query
 				if ($sql = $this->getElementRangeSearch($id, $from, $to, $type, $convert, $k)) {
@@ -574,7 +589,7 @@ class ZLModelItem extends ZLModel
 	protected function getElementRangeSearch($identifier, $from, $to, $type, $convert, $k)
 	{	
 		// basic check
-		if (!$from || !$to) return;
+		if (!isset($from) || !isset($to)) return;
 
 		// Evaluate if is equal
 		$is_equal = false;

@@ -331,7 +331,9 @@
 
 			.done(function ( json ) {
 				// manage possible errors
-				if (!json.result && json.errors) oSettings.oApi._fnLog( oSettings, 0, json.errors );
+				if (json.errors.length) {
+					oSettings.oApi._fnLog( oSettings, 0, json.errors );
+				}
 
 				// set json
 				json = json.result;
