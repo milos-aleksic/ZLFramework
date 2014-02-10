@@ -1551,19 +1551,23 @@
 				// init plupload
 				$this.initPlupload();
 
-				// add drop msg if html5
-				if ($this.uploader.runtime === 'html5') {
-					$('.zlux-upload-dropzone-msg', $this.dropzone).html($this.sprintf($this._('DROP_FILES'), 'zlux-upload-browse'))
+				// on Plupload init
+				$this.bind("Init", function() {
 
-					.on('click', 'a', function(){
-						// trigger the upload browse button
-						$this.options.browse_button.trigger('click');
-						return false;
-					});
-				}
+					// add drop msg if html5
+					if ($this.uploader.runtime === 'html5') {
+						$('.zlux-upload-dropzone-msg', $this.dropzone).html($this.sprintf($this._('DROP_FILES'), 'zlux-upload-browse'))
 
-				// set init state
-				$this.inited = true;
+						.on('click', 'a', function(){
+							// trigger the upload browse button
+							$this.options.browse_button.trigger('click');
+							return false;
+						});
+					}
+
+					// set init state
+					$this.inited = true;
+				});
 			});
 		},
 		/*
