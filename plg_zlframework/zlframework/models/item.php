@@ -664,10 +664,10 @@ class ZLModelItem extends ZLModel
 		}
 
 		// init vars
+		$tzoffset = $this->app->date->getOffset();
 		$datetime = isset($datetime) ? (bool)$datetime : false;
 
 		// replace vars
-		$tzoffset = $this->app->date->getOffset();
 		$yesterday = $this->app->date->create('yesterday', $tzoffset);
 		$today = $this->app->date->create('today', $tzoffset);
 		$tomorrow = $this->app->date->create('tomorrow', $tzoffset);
@@ -721,9 +721,14 @@ class ZLModelItem extends ZLModel
 				$to   = substr($value_to, 0, 10).' 23:59:59';
 			}
 		}
+
+		// set offset
+		$from = $this->app->date->create($from, $tzoffset);
+		$to = $this->app->date->create($to, $tzoffset);
 		
-		$from = $this->_db->Quote($this->_db->escape($from));
-		$to   = $this->_db->Quote($this->_db->escape($to));
+		// set quotes
+		$from = $this->_db->Quote($this->_db->escape($from->toSQL()));
+		$to   = $this->_db->Quote($this->_db->escape($to->toSQL()));
 
 		switch ($search_type) {
 			case 'from':
@@ -763,7 +768,8 @@ class ZLModelItem extends ZLModel
 				break;
 
 			default:
-				$date = $this->_db->escape($date);
+				// set offset and escape quotes
+				$date = $this->_db->escape($this->app->date->create($date, $tzoffset)->toSQL());
 				if($datetime)
 				$el_where = "( ($sql_value LIKE '%$date%') OR (('$date' BETWEEN $sql_value AND $sql_value) AND $sql_value NOT REGEXP '[[.LF.]]') )";
 				else
