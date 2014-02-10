@@ -308,10 +308,13 @@ abstract class ElementFilesPro extends ElementRepeatablePro {
 		$path = $file === null ? $this->get('file') : $file;
 
 		// get the object info
-		$data = $this->storage()->getObjectInfo($path);
+		if($data = $this->storage()->getObjectInfo($path)) {
 
-		// return in json or param object
-		return $json ? json_encode($data) : $this->app->data->create($data);
+			// return in json or param object
+			return $json ? json_encode($data) : $this->app->data->create($data);
+		}
+
+		return false;
 	}
 	
 	/*
@@ -358,8 +361,13 @@ abstract class ElementFilesPro extends ElementRepeatablePro {
 		// set the storage root
 		$storage['root'] = $this->getDirectory();
 
-		$html = "<span class=\"zlux-x-filedata\" data-zlux-data='" . json_encode($this->getFileDetails($file, false)) 
-			. "' data-zlux-storage='" . json_encode($storage) . "'></span>";
+		// file details
+		$fdetails = '';
+		if($file_obj = $this->getFileDetails($file, false)) {
+			$fdetails = $file ? " data-zlux-data='" . json_encode($file_obj) . "'" : '';
+		}
+
+		$html = "<span class=\"zlux-x-filedata\"" . $fdetails . " data-zlux-storage='" . json_encode($storage) . "'></span>";
 
 		if ($uniqid = $this->getUniqid()) {
 			$html .= '<input type="hidden" value="' . $uniqid . '" name="' . $this->getControlName('uniqid') . '">';
