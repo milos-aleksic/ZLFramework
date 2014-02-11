@@ -300,4 +300,22 @@ class zlfwHelperFileSystem extends FilesystemHelper {
 		// return size
 		return $format ? $this->formatFilesize($size) : $size;
 	}
+
+	/**
+	 * Get the mapping from extension to mime type
+	 *
+	 * @return array The associative array of extension => mime type mapping
+	 *
+	 * @since 1.0.0
+	 */
+	public static function getMimeMapping()
+	{
+		// get current mimes
+		$mimes = parent::getMimeMapping();
+
+		// add missing mimes
+		$mimes['mp3'][] = 'audio/mp3'; // necesary for Chrome unsolved bug
+
+		return $mimes;
+	}
 }
