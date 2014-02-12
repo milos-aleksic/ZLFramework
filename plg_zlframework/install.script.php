@@ -60,7 +60,8 @@ class plgSystemZlframeworkInstallerScript
 
 			// deprecated assets
 			'plugins/system/zlframework/zlframework/assets/js/yepnope.min.js',
-			'plugins/system/zlframework/zlframework/zlux/zlux.css'
+			'plugins/system/zlframework/zlframework/zlux/zlux.css',
+			'plugins/system/zlframework/zlframework/assets/js/jquery.plugins/jquery.tinymce.js'
 		),
 		'folders' => array(
 			'plugins/system/zlframework/zlframework/assets/libraries/zlparams',
