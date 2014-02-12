@@ -666,6 +666,7 @@ class ZLModelItem extends ZLModel
 		// init vars
 		$tzoffset = $this->app->date->getOffset();
 		$datetime = isset($datetime) ? (bool)$datetime : false;
+		$regex = '/^(19[0-9]{2}|2[0-9]{3})-(0[1-9]|1[012])-([123]0|[012][1-9]|31)/'; // date format yyyy-mm-dd
 
 		// replace vars
 		$yesterday = $this->app->date->create('yesterday', $tzoffset);
@@ -722,13 +723,13 @@ class ZLModelItem extends ZLModel
 			}
 		}
 
-		// set offset
-		$from = $this->app->date->create($from, $tzoffset);
-		$to = $this->app->date->create($to, $tzoffset);
+		// set offset if valid date format
+		$from = preg_match($regex, $from) ? $this->app->date->create($from, $tzoffset)->toSQL() : $from;
+		$to = preg_match($regex, $to) ? $this->app->date->create($to, $tzoffset)->toSQL() : $to;
 		
 		// set quotes
-		$from = $this->_db->Quote($this->_db->escape($from->toSQL()));
-		$to   = $this->_db->Quote($this->_db->escape($to->toSQL()));
+		$from = $this->_db->Quote($this->_db->escape($from));
+		$to   = $this->_db->Quote($this->_db->escape($to));
 
 		switch ($search_type) {
 			case 'from':
@@ -769,7 +770,9 @@ class ZLModelItem extends ZLModel
 
 			default:
 				// set offset and escape quotes
-				$date = $this->_db->escape($this->app->date->create($date, $tzoffset)->toSQL());
+				$date = preg_match($regex, $date) ? $this->app->date->create($date, $tzoffset)->toSQL() : $date;
+				$date = $this->_db->escape($date);
+
 				if($datetime)
 				$el_where = "( ($sql_value LIKE '%$date%') OR (('$date' BETWEEN $sql_value AND $sql_value) AND $sql_value NOT REGEXP '[[.LF.]]') )";
 				else
