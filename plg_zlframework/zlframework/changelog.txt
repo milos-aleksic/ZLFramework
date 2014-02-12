@@ -1,6 +1,13 @@
 Changelog
 ------------
 
+3.1.12
+
+ ^ Plupload asset updated to v2.1.1
+ # ZLUX ItemsManager and FilesManager minor bugs fixed
+ # Applied tzoffset to ItemModel date filtering
+ # ItemModel Published date filtering bug fixed
+
 3.1.11
  + Added dedicated frontpage filter in the item model
  + Added asset Parsley

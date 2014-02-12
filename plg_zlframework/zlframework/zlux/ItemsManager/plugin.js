@@ -538,7 +538,7 @@
 			options = $.parseJSON($this.oTable.fnSettings().jqXHR.responseText)[ dataName ];
 
 			// if 0 or 1 option, abort rendering
-			if (options.length <= 1) return;
+			if (options.length <= 1) return '';
 
 			// set the toggle btn
 			var toggle = $('<a class="btn dropdown-toggle" data-toggle="dropdown" href="#">' + text + '<span class="caret" /></a>'),
@@ -575,7 +575,7 @@
 			// set tooggle event
 			toggle.on('click', function() {
 				// if disabled, do nothing
-				if (toggle.hasClass('disabled')) return false;
+				if (toggle.hasClass('disabled')) return '';
 			});
 
 			// set options event

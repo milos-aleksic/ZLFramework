@@ -139,6 +139,9 @@ class ZLStorageAdapterURI extends ZLStorageAdapterBase implements ZLStorageAdapt
 	 */
 	public function getObjectInfo($path)
 	{
+		// make sure is file url
+		if(!preg_match('/(\.[a-zA-Z0-9]{3,4}$)/', $path)) return false;
+
 		$obj = array('type' => 'file');
 		$obj['name'] = basename($path);
 		$obj['path'] = $path;

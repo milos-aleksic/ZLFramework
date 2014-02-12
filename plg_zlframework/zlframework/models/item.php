@@ -177,7 +177,7 @@ class ZLModelItem extends ZLModel
 		$now  = $this->_db->Quote($date->toSql());
 		$null = $this->_db->Quote($this->_db->getNullDate());
 
-		// items id
+		// Items id
 		if ($ids = $this->getState('id', false)) {
 			$where = array();
 			foreach($ids as $id) {
@@ -186,23 +186,23 @@ class ZLModelItem extends ZLModel
 			$query->where('(' . implode(' OR ', $where) . ')');
 		}
 
-		// searchable state
+		// Searchable state
 		$searchable = $this->getState('searchable');
 		if (isset($searchable[0]) && !empty($searchable[0])) {
 			$query->where('a.searchable = 1');
 		}
 		
-		// published state
+		// Published state
 		$state = $this->getState('state');
 		if (isset($state[0])) $query->where('a.state = ' . (int)$state[0]->get('value', 1));
 
-		// accessible
+		// Accessible
 		$user = $this->getState('user');
 		$user = isset($user[0]) ? $this->app->user->get($this->_db->escape( $user[0] )) : null;
 
 		$query->where('a.' . $this->app->user->getDBAccessString($user));
 
-		// created_by
+		// Created_by
 		if ($authors = $this->getState('created_by', array())) {
 			$ids = array();
 			foreach ($authors as $author) $ids[] = $author->get('value');
@@ -211,7 +211,7 @@ class ZLModelItem extends ZLModel
 			$query->where("a.created_by IN (" . implode(',', $ids) . ")");
 		}
 
-		// modified_by
+		// Modified_by
 		if ($editors = $this->getState('modified_by', array())) {
 			$ids = array();
 			foreach ($editors as $editor) $ids[] = $editor->get('value');
@@ -220,7 +220,7 @@ class ZLModelItem extends ZLModel
 			$query->where("a.modified_by IN (" . implode(',', $ids) . ")");
 		}
 
-		// created
+		// Created
 		if ($date = $this->getState('created', array()))
 		{
 			$date = array_shift($date);
@@ -238,7 +238,7 @@ class ZLModelItem extends ZLModel
 			$query->where($this->getDateSearch(compact('sql_value', 'value', 'value_from', 'value_to', 'search_type', 'period_mode', 'interval', 'interval_unit', 'datetime')));
 		}
 
-		// modified
+		// Modified
 		if ($date = $this->getState('modified', array()))
 		{
 			$date = array_shift($date);
@@ -256,7 +256,7 @@ class ZLModelItem extends ZLModel
 			$query->where($this->getDateSearch(compact('sql_value', 'value', 'value_from', 'value_to', 'search_type', 'period_mode', 'interval', 'interval_unit', 'datetime')));
 		}
 
-		// published
+		// Published up
 		if ($date = $this->getState('published', array()))
 		{
 			$date = array_shift($date);
@@ -272,9 +272,16 @@ class ZLModelItem extends ZLModel
 			$datetime		= $date->get('datetime', false);
 
 			$query->where($this->getDateSearch(compact('sql_value', 'value', 'value_from', 'value_to', 'search_type', 'period_mode', 'interval', 'interval_unit', 'datetime')));
+
+		// default
+		} elseif (!$this->getState('created') && !$this->getState('modified')) {
+			$where = array();
+			$where[] = 'a.publish_up = '.$null;
+			$where[] = 'a.publish_up <= '.$now;
+			$query->where('('.implode(' OR ', $where).')');
 		}
 
-		// published down
+		// Published down
 		if ($date = $this->getState('published_down', array()))
 		{
 			$date = array_shift($date);
@@ -290,18 +297,9 @@ class ZLModelItem extends ZLModel
 			$datetime		= $date->get('datetime', false);
 
 			$query->where($this->getDateSearch(compact('sql_value', 'value', 'value_from', 'value_to', 'search_type', 'period_mode', 'interval', 'interval_unit', 'datetime')));
-		}
 
-		// default publication up
-		if (!$this->getState('created') && !$this->getState('modified')) {
-			$where = array();
-			$where[] = 'a.publish_up = '.$null;
-			$where[] = 'a.publish_up <= '.$now;
-			$query->where('('.implode(' OR ', $where).')');
-		}
-
-		// default publication down
-		if (!$this->getState('published_down')) {
+		// default
+		} else if (!$this->getState('published_down')) {
 			$where = array();
 			$where[] = 'a.publish_down = '.$null;
 			$where[] = 'a.publish_down >= '.$now;
@@ -664,10 +662,11 @@ class ZLModelItem extends ZLModel
 		}
 
 		// init vars
+		$tzoffset = $this->app->date->getOffset();
 		$datetime = isset($datetime) ? (bool)$datetime : false;
+		$regex = '/^(19[0-9]{2}|2[0-9]{3})-(0[1-9]|1[012])-([123]0|[012][1-9]|31)/'; // date format yyyy-mm-dd
 
 		// replace vars
-		$tzoffset = $this->app->date->getOffset();
 		$yesterday = $this->app->date->create('yesterday', $tzoffset);
 		$today = $this->app->date->create('today', $tzoffset);
 		$tomorrow = $this->app->date->create('tomorrow', $tzoffset);
@@ -721,7 +720,12 @@ class ZLModelItem extends ZLModel
 				$to   = substr($value_to, 0, 10).' 23:59:59';
 			}
 		}
+
+		// set offset if valid date format
+		$from = preg_match($regex, $from) ? $this->app->date->create($from, $tzoffset)->toSQL() : $from;
+		$to = preg_match($regex, $to) ? $this->app->date->create($to, $tzoffset)->toSQL() : $to;
 		
+		// set quotes
 		$from = $this->_db->Quote($this->_db->escape($from));
 		$to   = $this->_db->Quote($this->_db->escape($to));
 
@@ -763,7 +767,10 @@ class ZLModelItem extends ZLModel
 				break;
 
 			default:
+				// set offset and escape quotes
+				$date = preg_match($regex, $date) ? $this->app->date->create($date, $tzoffset)->toSQL() : $date;
 				$date = $this->_db->escape($date);
+
 				if($datetime)
 				$el_where = "( ($sql_value LIKE '%$date%') OR (('$date' BETWEEN $sql_value AND $sql_value) AND $sql_value NOT REGEXP '[[.LF.]]') )";
 				else
