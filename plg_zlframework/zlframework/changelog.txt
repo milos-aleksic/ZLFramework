@@ -1,8 +1,10 @@
 Changelog
 ------------
 
-3.1.12
+3.1.13
+ ^ ZLStorage: limit resolution check to image files
 
+3.1.12
  ^ Plupload asset updated to v2.1.1
  # ZLUX ItemsManager and FilesManager minor bugs fixed
  # Applied tzoffset to ItemModel date filtering
