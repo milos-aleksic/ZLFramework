@@ -1225,7 +1225,7 @@
 				storage_params: $this.options.storage_params,
 				max_file_size: $this.options.max_file_size,
 				extensions: $this.options.extensions,
-				browse_button: $('.zlux-dialog-toolbar .zlux-dialog-toolbar-2 i[data-id="add"]')
+				browse_button: $('.zlux-dialog-toolbar-2 i[data-id="add"]', $this.zluxdialog.toolbar.wrapper)
 			})
 
 			// when queue files changes
