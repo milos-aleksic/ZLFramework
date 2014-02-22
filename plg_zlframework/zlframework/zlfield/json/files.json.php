@@ -48,6 +48,42 @@ defined('_JEXEC') or die('Restricted access');
 			"label": "PLG_ZLFRAMEWORK_FLS_MAX_UPLOAD_SIZE",
 			"help": "PLG_ZLFRAMEWORK_FLS_MAX_UPLOAD_SIZE_DESC||{PHP-MAX_UPLOAD}"
 		}
+
+		'/* Image Resizing client side */.'
+		'.(isset($params['resize']) ? ',
+		
+		"_resize":{
+			"type": "checkbox",
+			"label": "PLG_ZLFRAMEWORK_FLS_IMG_RESIZE",
+			"help": "PLG_ZLFRAMEWORK_FLS_IMG_RESIZE_DESC",
+			"default": "0",
+			"specific":{
+				"label":"PLG_ZLFRAMEWORK_ENABLE"
+			},
+			"dependents": "resize_content > 1"
+		},
+		"resize_content":{
+			"type": "wrapper",
+			"control":"resize",
+			"fields": {
+				"width":{
+					"type": "text",
+					"label": "PLG_ZLFRAMEWORK_WIDTH",
+					"help": "PLG_ZLFRAMEWORK_FLS_IMG_RESIZE_WIDTH_DESC"
+				},
+				"height":{
+					"type": "text",
+					"label": "PLG_ZLFRAMEWORK_HEIGHT",
+					"help": "PLG_ZLFRAMEWORK_FLS_IMG_RESIZE_HEIGHT_DESC"
+				},
+				"crop":{
+					"type": "radio",
+					"label": "Crop",
+					"help": "PLG_ZLFRAMEWORK_FLS_IMG_RESIZE_CROP_DESC",
+					"default": "0"
+				}
+			}
+		}' : '').'
 		
 		'/* Amazon Integration */.'
 		'.(isset($params['s3']) ? ',
