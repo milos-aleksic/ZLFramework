@@ -54,7 +54,8 @@ defined('_JEXEC') or die('Restricted access');
 		
 		"_resize":{
 			"type": "checkbox",
-			"label": "Image Resize",
+			"label": "PLG_ZLFRAMEWORK_FLS_IMG_RESIZE",
+			"help": "PLG_ZLFRAMEWORK_FLS_IMG_RESIZE_DESC",
 			"default": "0",
 			"specific":{
 				"label":"PLG_ZLFRAMEWORK_ENABLE"
@@ -68,17 +69,17 @@ defined('_JEXEC') or die('Restricted access');
 				"width":{
 					"type": "text",
 					"label": "PLG_ZLFRAMEWORK_WIDTH",
-					"help": "if image is wider, it will be resized (if not specified, original image width will be used"
+					"help": "PLG_ZLFRAMEWORK_FLS_IMG_RESIZE_WIDTH_DESC"
 				},
 				"height":{
 					"type": "text",
 					"label": "PLG_ZLFRAMEWORK_HEIGHT",
-					"help": "if image is higher, it will be resized (if not specified original image height will be used"
+					"help": "PLG_ZLFRAMEWORK_FLS_IMG_RESIZE_HEIGHT_DESC"
 				},
 				"crop":{
 					"type": "radio",
 					"label": "Crop",
-					"help": "whether to crop the image to the exact dimensions, rather than resize proportionally (default false)",
+					"help": "PLG_ZLFRAMEWORK_FLS_IMG_RESIZE_CROP_DESC",
 					"default": "0"
 				}
 			}
