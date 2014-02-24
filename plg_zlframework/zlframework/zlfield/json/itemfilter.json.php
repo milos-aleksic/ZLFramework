@@ -138,7 +138,20 @@ defined('_JEXEC') or die('Restricted access');
 					}' : '').'
 
 					'./* Set a comma if necesary */ '
-					'.(isset($params['categories']) && isset($params['types']) ? ',' : '').'
+					'.(isset($params['categories']) && isset($params['tags']) ? ',' : '').'
+
+					'./* Tags */ '
+					'.(isset($params['tags']) ? '"_chosentags":{
+						"type": "tags",
+						"label": "'.$params->find('tags.label').'",
+						"help": "'.$params->find('tags.help').'",
+						"specific": {
+							'.($params->find('tags.multi') ? '"multi":"1"' : '').'
+						}
+					}' : '').'
+
+					'./* Set a comma if necesary */ '
+					'.(isset($params['tags']) && isset($params['types']) ? ',' : '').'
 
 					'./* Types */ '
 					'.(isset($params['types']) ? '"_chosentypes":{
