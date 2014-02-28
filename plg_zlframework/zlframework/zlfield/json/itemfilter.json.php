@@ -108,6 +108,51 @@ defined('_JEXEC') or die('Restricted access');
 
 	// remove empty values
 	$childs = array_filter($childs);
+
+
+	// set main fields
+	$main = array();
+
+	/* Categories */
+	if(isset($params['categories'])) $main[] = '"_chosencats":{
+		"type": "cats",
+		"label": "'.$params->find('categories.label').'",
+		"help": "'.$params->find('categories.help').'",
+		"specific": {
+			'.($params->find('categories.multi') ? '"multi":"1",' : '').'
+			"value_map":{
+				"apps":"_chosenapps"
+			}
+		},
+		"old_id":"_chosencat"
+	}';
+
+	/* Tags */
+	if(isset($params['tags'])) $main[] = '"_chosentags":{
+		"type": "tags",
+		"label": "'.$params->find('tags.label').'",
+		"help": "'.$params->find('tags.help').'",
+		"specific": {
+			'.($params->find('tags.multi') ? '"multi":"1"' : '').'
+		}
+	}';
+
+	/* Types */
+	if(isset($params['types'])) $main[] = '"_chosentypes":{
+		"type":"types",
+		"label":"'.$params->find('types.label').'",
+		"help":"'.$params->find('types.help').'",
+		"help":"PLG_ZLFRAMEWORK_APP_TYPES_DESC",
+		"specific":{
+			'.($params->find('types.multi') ? '"multi":"1",' : '').'
+			"value_map":{
+				"apps":"_chosenapps"
+			}
+		},
+		"childs":{
+			"loadfields": {'.implode(",", $childs).'}
+		}
+	}';
 	
 
 	// return json string
@@ -123,52 +168,8 @@ defined('_JEXEC') or die('Restricted access');
 			"childs":{
 				"loadfields":{
 
-					'./* Categories */ '
-					'.(isset($params['categories']) ? '"_chosencats":{
-						"type": "cats",
-						"label": "'.$params->find('categories.label').'",
-						"help": "'.$params->find('categories.help').'",
-						"specific": {
-							'.($params->find('categories.multi') ? '"multi":"1",' : '').'
-							"value_map":{
-								"apps":"_chosenapps"
-							}
-						},
-						"old_id":"_chosencat"
-					}' : '').'
-
-					'./* Set a comma if necesary */ '
-					'.(isset($params['categories']) && isset($params['tags']) ? ',' : '').'
-
-					'./* Tags */ '
-					'.(isset($params['tags']) ? '"_chosentags":{
-						"type": "tags",
-						"label": "'.$params->find('tags.label').'",
-						"help": "'.$params->find('tags.help').'",
-						"specific": {
-							'.($params->find('tags.multi') ? '"multi":"1"' : '').'
-						}
-					}' : '').'
-
-					'./* Set a comma if necesary */ '
-					'.(isset($params['tags']) && isset($params['types']) ? ',' : '').'
-
-					'./* Types */ '
-					'.(isset($params['types']) ? '"_chosentypes":{
-						"type":"types",
-						"label":"'.$params->find('types.label').'",
-						"help":"'.$params->find('types.help').'",
-						"help":"PLG_ZLFRAMEWORK_APP_TYPES_DESC",
-						"specific":{
-							'.($params->find('types.multi') ? '"multi":"1",' : '').'
-							"value_map":{
-								"apps":"_chosenapps"
-							}
-						},
-						"childs":{
-							"loadfields": {'.implode(",", $childs).'}
-						}
-					}' : '').'
+					'./* main fields */'
+					'.implode(",", $main).'
 
 					'./* If no type, render Childs as App ones */'
 					'.(!isset($params['types']) ? implode(",", $childs) : "").'
