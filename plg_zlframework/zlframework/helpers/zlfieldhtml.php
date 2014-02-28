@@ -484,6 +484,25 @@ class ZLFieldHTMLHelper extends AppHelper {
 	}
 
 	/*
+		Function: tags - Returns zoo tags html string
+	*/
+	public function tagsField($id, $name, $value, $spec, $attrs, $returnRawValue)
+	{
+		// init vars
+		$tags = $this->app->table->tag->getAll();
+
+		// get options
+		$options = array();
+ 		if (!empty($tags)) foreach($tags as $tag)
+		{
+			$options[] = $this->app->html->_('select.option', $tag->name, $tag->name);
+		}
+
+		$spec->set('options', $options);		
+		return $this->selectField($id, $name, $value, $spec, $attrs, $returnRawValue);
+	}
+
+	/*
 		Function: items - Returns zoo items html string field
 	*/
 	public function itemsField($id, $name, $value, $spec, $attrs, $returnRawValue)

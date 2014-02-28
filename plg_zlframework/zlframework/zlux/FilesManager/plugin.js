@@ -15,7 +15,8 @@
 			extensions: '', // Array or comma separated values
 			storage: 'local',
 			storage_params: {},
-			max_file_size: ''
+			max_file_size: '',
+			resize: {}
 		},
 		initialize: function(target, options) {
 			this.options = $.extend({}, this.options, options);
@@ -1225,7 +1226,8 @@
 				storage_params: $this.options.storage_params,
 				max_file_size: $this.options.max_file_size,
 				extensions: $this.options.extensions,
-				browse_button: $('.zlux-dialog-toolbar .zlux-dialog-toolbar-2 i[data-id="add"]')
+				browse_button: $('.zlux-dialog-toolbar-2 i[data-id="add"]', $this.zluxdialog.toolbar.wrapper),
+				resize: $this.options.resize
 			})
 
 			// when queue files changes
@@ -1512,7 +1514,8 @@
 			wrapper: null,
 			storage: 'local', // local, s3
 			storage_params: {},
-			browse_button: null
+			browse_button: null,
+			resize: {}
 		},
 		init: function() {
 			var $this = this;
@@ -1611,11 +1614,10 @@
 		 * Init the Plupload plugin
 		 */
 		initPlupload: function() {
-			var $this = this,
-				params;
+			var $this = this;
 
 			// set basics params
-			params = {
+			var params = {
 				runtimes: 'html5, flash',
 				browse_button: $this.options.browse_button[0],
 				drop_element: $this.dropzone[0], 
@@ -1631,7 +1633,7 @@
 
 			// if S3 storage
 			if($this.options.storage === 's3') {
-				params = $.extend(params, {
+				$.extend(params, {
 					url: 'http://' + $this.options.storage_params.bucket + '.s3.amazonaws.com',
 					multipart: true,
 					multipart_params: {
@@ -1647,8 +1649,19 @@
 				});
 			}
 
+			// if Image Resize
+			if(!$.isEmptyObject($this.options.resize)) {
+				$.extend(params, {
+					resize: {
+						width: $this.options.resize.width,
+						height: $this.options.resize.height,
+						crop: $this.options.resize.crop == '1' ? true : false
+					}
+				});
+			}
+
 			// Post init events, bound after the internal events
-			params = $.extend(params, {
+			$.extend(params, {
 				init : {
 					BeforeUpload: function(up, file) {
 						$this.eventBeforeUpload(file);

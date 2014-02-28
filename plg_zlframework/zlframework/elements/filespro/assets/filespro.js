@@ -18,7 +18,8 @@
 			storage: '',
 			fileMode: '',
 			max_file_size: '',
-			title: ''
+			title: '',
+			resize: {}
 		},
 		events: {},
 		initialize: function(element, options) {
@@ -86,7 +87,8 @@
 							title: $this.options.title,
 							storage: storage.engine,
 							storage_params: storage,
-							root: storage.root
+							root: storage.root,
+							resize: $this.options.resize
 						})
 
 						// on object select event
