@@ -86,7 +86,7 @@ class zlfwHelperZlux extends AppHelper {
 				// if no file found its not warp 7, load uikit
 				if (!$this->app->path->path($path)) {
 					$this->app->document->addStylesheet('zlfw:zlux/assets/uikit/uikit_wrapped.css');
-					$this->app->document->addScript('zlfw:zlux/assets/uikit/uikit.js');
+					$this->app->document->addScript('zlfw:zlux/assets/uikit/uikit.min.js');
 				
 				} else
 					// is warp 7, only load extended uikit styles

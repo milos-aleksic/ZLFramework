@@ -286,7 +286,7 @@ abstract class ElementFilesPro extends ElementRepeatablePro {
 		$this->app->zlfw->zlux->loadMainAssets();
 
 		// load the FilesPro js
-		$this->app->document->addScript('elements:filespro/assets/filespro.min.js');
+		$this->app->document->addScript('elements:filespro/filespro.js');
 	}
 
 /* FILE MANAGER ----------------------------------------------------------------------------------------------------------------------  */
