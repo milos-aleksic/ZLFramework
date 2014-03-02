@@ -22,7 +22,7 @@
 			var $this = this,
 				list = $('ul.repeatable-list', element),
 				hidden = $('li.hidden', list).remove(),
-				count = $('li.repeatable-element', list).length;
+				count = list.children('li.repeatable-element').length;
 
 			// save some references
 			$this.element = element;
@@ -33,7 +33,7 @@
 			$this.options.msgAddInstance = $('p.add a', element).html();
 
 			// set buttons
-			$('li.repeatable-element', list).each(function () {
+			list.children('li.repeatable-element').each(function () {
 				// wrap content
 				$(this).children().wrapAll($('<div>').addClass('repeatable-content'));
 
@@ -90,14 +90,9 @@
 					$('.more-options', ui.item).show();
 					$('.file-details', ui.item).show();
 					list.height(''); // reset height to default
-					
-					// reset the instances fields name index
-					$('.repeatable-element', $(event.target)).each(function(instance_index){
-						$('[name^="elements"]', $(this)).each(function(){
-							var name = $(this).attr('name').replace(/(elements\[\S+])\[(-?\d+)\]/g, '$1[' + instance_index + ']');
-							$(this).attr('name', name);	
-						})
-					})
+
+					// update field indexes
+					$this.updateIndexes($(event.target));
 				}
 			});
 
@@ -143,8 +138,25 @@
 		addElementInstance: function(instance) {
 			var $this = this;
 
-			// increase index
-			instance = instance.replace(/(elements\[\S+])\[(-?\d+)\]/g, '$1[' + $this.count++ + ']');
+			// if level2 instances
+			if($this.list.hasClass('repeatable-list-level2')) {
+
+				// set level1 index taking the level1 index from first instance
+				var patt = new RegExp(/(?:elements\[\w{8}-\w{4}-\w{4}-\w{4}-\w{12}\])\[(-?\d+)\]/),
+					index = patt.exec($('[name^="elements"]', $this.list).first().attr('name')).pop();
+
+				instance = instance.replace(/(elements\[\w{8}-\w{4}-\w{4}-\w{4}-\w{12}\])(\[-?\d+\])/g, '$1[' + index + ']');
+				
+				// increase level2 index
+				instance = instance.replace(/(elements\[\S+])\[(-?\d+)\]/g, '$1[' + $this.count++ + ']');
+
+			// if level1, increase index
+			} else {
+				instance = instance.replace(/(elements\[\w{8}-\w{4}-\w{4}-\w{4}-\w{12}\])(\[-?\d+\])/g, '$1[' + $this.count++ + ']');
+			}
+
+			// increase the [zluxvar-1] var
+			instance = instance.replace(/\[zluxvar-1\]/g, $this.count);
 
 			// set wrappers
 			instance = $('<li class="repeatable-element"><div class="repeatable-content">' + instance + '</div></li>')
@@ -170,6 +182,30 @@
 			// otherwise add default buttons
 			$('<span>').addClass('zlux-x-sort sort').attr('title', this.options.msgSortElement).appendTo(instance);
 			$('<span>').addClass('zlux-x-delete delete').attr('title', this.options.msgDeleteElement).appendTo(instance)
+		},
+		/**
+			Update fields indexes
+		*/
+		updateIndexes: function($element) {
+			var $this = this;
+
+			// get regex for name attribute
+			if($this.list.hasClass('repeatable-list-level2')) {
+				// if sub list, seek the final element reference
+				var name_regex = new RegExp(/(elements\[\S+])\[(-?\d+)\]/);
+			} else {
+				// by default seek the first element reference
+				var name_regex = new RegExp(/(elements\[\w{8}-\w{4}-\w{4}-\w{4}-\w{12}\])(\[-?\d+\])/);
+			}
+
+			// iterate over first level instances
+			$this.list.children('li.repeatable-element').each(function(index){
+				
+				$('[name^="elements"]', $(this)).each(function(){
+					var name = $(this).attr('name').replace(name_regex, '$1[' + index + ']');
+					$(this).attr('name', name);
+				})
+			})
 		}
 	});
 	// Don't touch
