@@ -1,6 +1,11 @@
 Changelog
 ------------
 
+3.1.14
+ # Fixed issue introduced in previous release
+ ^ ZLUX Dialog CSS cleanup
+ ^ Dependencies check limited to backend
+
 3.1.13
  + Resize on Upload
  ^ ZLStorage: limit resolution check to image files
