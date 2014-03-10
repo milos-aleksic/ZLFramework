@@ -756,7 +756,7 @@ class ZlfieldHelper extends AppHelper {
 			$this->app->document->addStylesheet('zlfield:layouts/field/style.css');
 			$this->app->document->addStylesheet('zlfield:layouts/separator/style.css');
 			$this->app->document->addStylesheet('zlfield:layouts/wrapper/style.css');
-			$this->app->document->addScript('zlfield:zlfield.min.js');
+			$this->app->document->addScript('zlfield:zlfield.js');
 
 			if ($this->enviroment == 'module') {
 				$this->app->document->addScript('libraries:jquery/jquery-ui.custom.min.js');

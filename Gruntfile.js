@@ -64,9 +64,8 @@ module.exports = function(grunt) {
 						expand: true, 
 						cwd: '<%= meta.buildPath %>', 
 						src: [
-							'**/zlframework/zlux/**/*.js', // all ZLUX plugins
-							'!**/*zlux/assets/**/*.js', // discart assets
-							'!**/*.dev.js' // discart dev versions
+							'**/zlframework/**/*.js', // all js
+							'!**/*.min.js' // discart min versions
 						],
 						dest: '<%= meta.buildPath %>'
 					}

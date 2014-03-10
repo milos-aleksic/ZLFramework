@@ -34,9 +34,6 @@ class plgSystemZlframeworkInstallerScript
 			'plugins/system/zoo_zlelements/zoo_zlelements/fields/specific.php',
 			'plugins/system/zlframework/zlframework/helpers/model.php',
 
-			// files pro old assets
-			'plugins/system/zlframework/zlframework/elements/filespro/assets/filespro.css',
-
 			// moved to ZLFW helpers
 			'plugins/system/zlframework/zlframework/helpers/zlfilesystem.php',
 			'plugins/system/zlframework/zlframework/helpers/zlpath.php',
@@ -61,7 +58,9 @@ class plgSystemZlframeworkInstallerScript
 			// deprecated assets
 			'plugins/system/zlframework/zlframework/assets/js/yepnope.min.js',
 			'plugins/system/zlframework/zlframework/zlux/zlux.css',
-			'plugins/system/zlframework/zlframework/assets/js/jquery.plugins/jquery.tinymce.js'
+			'plugins/system/zlframework/zlframework/assets/js/jquery.plugins/jquery.tinymce.js',
+			'plugins/system/zlframework/zlframework/elements/repeatablepro/repeatablepro.min.js',
+			'plugins/system/zlframework/zlframework/zlfield/zlfield.min.js'
 		),
 		'folders' => array(
 			'plugins/system/zlframework/zlframework/assets/libraries/zlparams',
@@ -75,10 +74,7 @@ class plgSystemZlframeworkInstallerScript
 			'plugins/system/zlframework/zlframework/helpers_zlfw',
 
 			// filespro old assets
-			'plugins/system/zlframework/zlframework/elements/filespro/assets/js',
-			'plugins/system/zlframework/zlframework/elements/filespro/assets/images',
-			'plugins/system/zlframework/zlframework/elements/filespro/assets/plupload',
-			'plugins/system/zlframework/zlframework/elements/filespro/assets/s3',
+			'plugins/system/zlframework/zlframework/elements/filespro/assets',
 
 			// moved to ZLUX
 			'plugins/system/zlframework/zlframework/assets/libraries/bootstrap'
