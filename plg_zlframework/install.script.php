@@ -60,7 +60,13 @@ class plgSystemZlframeworkInstallerScript
 			'plugins/system/zlframework/zlframework/zlux/zlux.css',
 			'plugins/system/zlframework/zlframework/assets/js/jquery.plugins/jquery.tinymce.js',
 			'plugins/system/zlframework/zlframework/elements/repeatablepro/repeatablepro.min.js',
-			'plugins/system/zlframework/zlframework/zlfield/zlfield.min.js'
+			'plugins/system/zlframework/zlframework/zlfield/zlfield.min.js',
+			'plugins/system/zlframework/zlframework/zlux/DatesManager/plugin.dev.js',
+			'plugins/system/zlframework/zlframework/zlux/DialogManager/plugin.dev.js',
+			'plugins/system/zlframework/zlframework/zlux/FieldsManager/plugin.dev.js',
+			'plugins/system/zlframework/zlframework/zlux/FilesManager/plugin.dev.js',
+			'plugins/system/zlframework/zlframework/zlux/ItemsManager/plugin.dev.js',
+			'plugins/system/zlframework/zlframework/zlux/zluxMain.dev.js'
 		),
 		'folders' => array(
 			'plugins/system/zlframework/zlframework/assets/libraries/zlparams',
