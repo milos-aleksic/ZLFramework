@@ -224,6 +224,29 @@
 	zlux.utils.toType = function(obj) {
 		return ({}).toString.call(obj).match(/\s([a-z|A-Z]+)/)[1].toLowerCase();
 	};
+	zlux.utils.options = function(string) {
+		if ($.isPlainObject(string)) return string;
+
+		var start = (string ? string.indexOf("{") : -1), options = {};
+		if (start != -1) {
+			try {
+				options = (new Function("", "var json = " + string.substr(start) + "; return JSON.parse(JSON.stringify(json));"))();
+			} catch (e) {}
+		}
+
+		return options;
+	};
+
+
+	/** SUPPORT **/
+	zlux.support = {};
+	zlux.support.touch = (
+		('ontouchstart' in window && navigator.userAgent.toLowerCase().match(/mobile|tablet/)) ||
+		(window.DocumentTouch && document instanceof window.DocumentTouch)  ||
+		(window.navigator['msPointerEnabled'] && window.navigator['msMaxTouchPoints'] > 0) || //IE 10
+		(window.navigator['pointerEnabled'] && window.navigator['maxTouchPoints'] > 0) || //IE >=11
+		false
+	);
 
 	// set zlux
 	$.zlux = zlux;
@@ -730,4 +753,48 @@
 		var args = arguments;
 		return new Plugin(args[0] ? args[0] : {});
 	};
+})(jQuery, window, document);
+
+
+/* ===================================================
+ * ZLUX Example global init on hover dom
+ * https://zoolanders.com/extensions/zl-framework
+ * ===================================================
+ * Copyright (C) JOOlanders SL 
+ * http://www.gnu.org/licenses/gpl-2.0.html GNU/GPLv2 only
+ * ========================================================== */
+;(function ($, window, document, undefined) {
+	"use strict";
+	var Plugin = function(element, options) {
+		var $this    = this,
+			$element = $(element);
+
+		if($element.data(Plugin.prototype.name)) return;
+
+		$this.element = $(element);
+		$this.options = $.extend({}, Plugin.prototype.options, options);
+		this.events = {};
+
+		// init the script
+		$this.initialize();
+
+		$this.element.data(Plugin.prototype.name, $this);
+	};
+	$.extend(Plugin.prototype, $.zlux.Main.prototype, {
+		name: 'Example',
+		options: {},
+		initialize: function() {
+			var $this = this;
+		}
+	});
+	// init code
+	var triggerevent = $.zlux.support.touch ? 'click':'mouseenter';
+	$(document).on(triggerevent+'.namespace.othernamespace', '[data-example-dom]', function(e) {
+		var ele = $(this);
+
+		if (!ele.data('Example')) {
+			var dropdown = new Plugin(ele, $.zlux.utils.options(ele.data('example-dom')));
+			e.preventDefault();
+		}
+	});
 })(jQuery, window, document);
