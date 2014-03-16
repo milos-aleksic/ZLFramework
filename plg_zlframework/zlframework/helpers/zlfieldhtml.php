@@ -618,8 +618,8 @@ class ZLFieldHTMLHelper extends AppHelper {
 	
 				// render current options
 				foreach ($value as $opt) {
-					$num++;
 					$html[] = '<li class="zlux-x-option">' . $this->_optionsFieldOption($name, $num, $opt) . '</li>';
+					$num++;
 				}
 	
 				$html[] = '<li class="zlux-x-option hidden">';
