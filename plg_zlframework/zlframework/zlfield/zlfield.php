@@ -377,7 +377,8 @@ class ZlfieldHelper extends AppHelper {
 			}
 
 			// wrapper control if any
-			$final_ctrl = $fld->get('control') ? $final_ctrl.'['.$fld->get('control', '').']' : $final_ctrl;
+			$control = $fld->get('control');
+			$final_ctrl = isset($control) && strlen($control) ? $final_ctrl.'['.$control.']' : $final_ctrl;
 
 			$field_type = $fld->get('type', '');
 			switch ($field_type)
