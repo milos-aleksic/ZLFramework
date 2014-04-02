@@ -55,13 +55,14 @@
 					.find('.file-details').show()
 
 			}).on('click', '.zlux-x-delete', function () {
-				$(this).closest('li.repeatable-element').fadeOut(200, function () {
+				var instance = $(this).closest('li.repeatable-element');
+				instance.fadeOut(200, function () {
 
 					// remove from DOM
 					$(this).remove();
 
 					// trigger event
-					element.trigger('instance.deleted');
+					element.trigger('instance.deleted', [instance]);
 
 					// show back new instance button if limit on
 					if($this.options.instanceLimit)
