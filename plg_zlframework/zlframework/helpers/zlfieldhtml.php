@@ -664,6 +664,105 @@ class ZLFieldHTMLHelper extends AppHelper {
 		return implode('', $html);
 	}
 
+	/*
+		Function: attributes - Returns attributes field html string
+	*/
+	public function attributesField($id, $name, $value, $spec, $attrs, $returnRawValue)
+	{
+		// set value as data
+		$value = is_array($value) ? $value : array();
+
+		// init vars
+		$html = array();
+		$html[] = '<ul class="zlux-field-attributes">';
+			$html[] = $this->_attributesFieldLevel($name, $value);
+		$html[] = '</ul>';
+
+		// hidden
+		$html[] = '<ul class="hidden">';
+			$html[] = $this->_attributesFieldLevel($name, array(
+				array('name' => '', 'value' => '', 'options' => array(array('name' => '', 'value' => ''))))
+			);
+		$html[] = '</ul>';
+
+		// Add attr
+		$html[] = '<button type="button" class="btn btn-mini zlux-x-add-attr"><i class="icon-plus-sign"></i>Add Attribute</button>';
+
+		return implode('', $html);
+	}
+
+	protected function _attributesFieldLevel($name, $value) {
+		$html = array();
+
+		// process attributes
+		foreach ($value as $key => $val) {
+			$num = 0;
+			$html[] = '<li class="zlux-x-attr">';
+
+				$html[] = '<div class="zlux-x-tools">';
+					$html[] = '<i class="zlux-x-delete icon-remove-circle" title="' .JText::_('Delete option'). '"></i>';
+					$html[] = '<i class="zlux-x-sort icon-move" title="' .JText::_('Sort option'). '"></i>';
+				$html[] = '</div>';
+
+				$html[] = '<div>Name <input type="text" name="' . $name.'['.$key.'][name]' . '" value="' . @$val['name'] . '" /></div>';
+				$html[] = '<div>Value <input type="text" name="' . $name.'['.$key.'][value]' . '" value="' . @$val['value'] . '" /></div>';
+					
+
+				$html[] = '<div>Options<ul>';
+
+				// process options
+				if (isset($val['options'])) foreach ($val['options'] as $option) {
+					$html[] = '<li class="zlux-x-option">';
+
+						$html[] = $this->_optionsFieldOption($name.'['.$key.'][options]', $num, $option);
+						$num++;
+
+					$html[] = '</li>';
+				}
+
+				$html[] = '</ul>';
+
+				// add option button
+				$html[] = '<button type="button" class="btn btn-mini zlux-x-add"><i class="icon-plus-sign"></i>Option</button>';
+				$html[] = '</div>';
+
+
+			$html[] = '</li>';
+		}
+
+		return implode('', $html);
+	}
+
+	protected function _attributesFieldOptionlayout($name, $opt) {
+		// init vars
+		$html = array();
+
+		$html[] = '<div class="zlux-x-name">';
+			$html[] = '<label for="name">Name</label>';
+			$html[] = '<input type="text" name="' .$name.'[name]'. '" value="' . @$opt['name'] .'" />';
+		$html[] = '</div>';
+
+		$html[] = '<div class="zlux-x-value">';
+			$html[] = '<label for="value">Value</label>';
+			$html[] = '<a class="trigger" href="#" title="' . JText::_('Edit Option Value') . '">' . @$opt['value'] . '</a>';
+
+			$html[] = '<div class="panel">';
+				$html[] = '<input type="text" name="' . $name.'[value]' . '" value="' . @$opt['value'] . '" />';
+				$html[] = '<div class="btns">';
+					$html[] = '<input type="button" class="accept" value="' . JText::_('Accept') . '">';
+					$html[] = '<a href="#" class="cancel">' . JText::_('Cancel') . '</a>';
+				$html[] = '</div>';
+			$html[] = '</div>';
+		$html[] = '</div>';
+	
+		$html[] = '<div class="zlux-x-tools">';
+			$html[] = '<i class="zlux-x-delete icon-remove-circle" title="' .JText::_('Delete option'). '"></i>';
+			$html[] = '<i class="zlux-x-sort icon-move" title="' .JText::_('Sort option'). '"></i>';
+		$html[] = '</div>';
+
+		return implode('', $html);
+	}
+
 
 	/* HTML Fields Helpers
 	--------------------------------------------------------------------------------------------------------------------------------------------*/
