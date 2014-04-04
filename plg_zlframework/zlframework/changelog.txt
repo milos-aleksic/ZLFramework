@@ -1,6 +1,10 @@
 Changelog
 ------------
 
+3.1.15
+ # ZLField WK compatibility fix
+ + ZLUX Attributes field
+
 3.1.14
  # Fixed issue introduced in previous release
  ^ ZLUX Dialog CSS cleanup
