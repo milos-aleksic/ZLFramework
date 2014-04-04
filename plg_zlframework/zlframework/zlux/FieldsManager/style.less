@@ -7,16 +7,20 @@
 ----------------------------------------------------------------------------------------------------*/
 
 [data-type="options"] .zl-label,
-[data-type="options"] .zl-field {
+[data-type="options"] .zl-field,
+[data-type="attributes"] .zl-label,
+[data-type="attributes"] .zl-field {
 	float: none !important;
 }
 
-div.zlfield [data-type="options"] .zl-label + .zl-field * {
+div.zlfield [data-type="options"] .zl-label + .zl-field *,
+div.zlfield [data-type="attributes"] .zl-label + .zl-field * {
     float: none;
 }
 
 // Option field
-div.zlfield div.zl-row[data-type="options"] {
+div.zlfield div.zl-row[data-type="options"],
+div.zlfield div.zl-row[data-type="attributes"] {
 
 	// list
 	ul {
@@ -98,8 +102,44 @@ div.zlfield div.zl-row[data-type="options"] {
 			}
 		}
 
-		&:hover {
-			.zlux-x-tools { visibility: visible; }
+		&:hover > .zlux-x-tools { visibility: visible; }
+	}
+}
+
+// attributes field
+div.zlfield div.zl-row[data-type="attributes"] {
+
+	// list
+	ul.zlux-field-attributes {
+		
+		// visual separation
+		& > li {
+			border: 1px solid transparent;
+			&:hover {
+				border-top: 1px solid #E9E9E9;
+				border-bottom: 1px solid #E9E9E9;
+			}
+			padding: 10px 0;
+			overflow: hidden;
+		}
+
+		// margins
+		ul {
+			margin: 0 0 10px;
+			padding: 0;
+			overflow: hidden;
+		}
+		& li > ul,
+		& li > button {
+			margin-left: 10px;
+		}
+
+		// tools
+		.zlux-x-tools {
+			i {
+				margin: 0 5px;
+				cursor: pointer;
+			}
 		}
 	}
 }

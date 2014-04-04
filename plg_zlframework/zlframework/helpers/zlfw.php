@@ -250,7 +250,7 @@ class zlfwHelper extends AppHelper {
 		// set the rest of the extension right after
 		$order++;
 		$db->setQuery("UPDATE `#__extensions` SET `ordering` = {$order} WHERE `type` = 'plugin' AND `element` in 
-			('zooaccess', 'zooaksubs', 'zoocart', 'zoocompare', 'zoofilter', 'zooorder', 'zooseo', 'zootrack')
+			('zooaccess', 'zooaksubs', 'zoocart', 'zoocompare', 'zoofilter', 'zooorder', 'zooseo', 'zootrack', 'zlwidgets')
 		")->query();
 	}
 

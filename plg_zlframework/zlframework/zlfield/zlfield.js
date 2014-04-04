@@ -572,6 +572,30 @@
 
 				}); // Options field END
 
+				/* 
+				 * Attributes field
+				 */
+				$('[data-type=attributes] .zl-field', $dom).each(function(){
+					var $field = $(this),
+						info = $('input.zlux-x-dummy', $field),
+						cname = info.val(),
+						params = info.data('params');
+
+					// remove dummy input
+					info.remove();
+
+					// load the field JS
+					$.zlux.assets.load('fields').done(function(){
+
+						// init
+						$field.zlux('fields', $.extend({}, params, {
+							field: 'attributes',
+							controlName: cname
+						}));
+					});
+
+				}); // Options field END
+
 			$dom.data('zlfield-actions-init', !0)}
 		},
 

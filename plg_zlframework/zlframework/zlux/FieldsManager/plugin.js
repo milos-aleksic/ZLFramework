@@ -185,6 +185,207 @@
 
 
 /* ===================================================
+ * ZLUX fieldsAttributesField
+ * https://zoolanders.com/extensions/zl-framework
+ * ===================================================
+ * Copyright (C) JOOlanders SL 
+ * http://www.gnu.org/licenses/gpl-2.0.html GNU/GPLv2 only
+ * ========================================================== */
+;(function ($, window, document, undefined) {
+	"use strict";
+	var Plugin = function(element, options) {
+		var $this    = this,
+			$element =  $(element);
+
+		if($element.data(Plugin.prototype.name)) return;
+
+		$this.element =  $(element);
+		$this.options = $.extend({}, Plugin.prototype.options, options);
+		this.events = {};
+
+		// init the script
+		$this.initialize();
+
+		$this.element.data(Plugin.prototype.name, $this);
+	};
+	$.extend(Plugin.prototype, $.zlux.Main.prototype, {
+		name: 'fieldsAttributesField',
+		options: {},
+		initialize: function() {
+			var $this = this;
+
+			// init vars
+			$this.hidden = $('.hidden', $this.element).detach();
+			$this.list = $('ul.zlux-field-attributes', $this.element);
+
+			// set the styling class
+			$this.element.addClass('zl-bootstrap');
+
+			// set events
+			$this.element
+
+			// when deleting option
+			.on('click', '.zlux-x-delete', function() {
+				$(this).closest('li').slideUp(400, function() {
+					$(this).remove();
+					$this.updateIndexes($(this).closest('ul'));
+				});
+
+				return false;
+			})
+
+			// when adding attribute
+			.on('click', '.zlux-x-add-attr', function() {
+				var $list = $(this).siblings('ul');
+				var $attribute = $this.hidden.find('li.zlux-x-attr').clone().removeClass('hidden');
+
+				$attribute.appendTo($list).slideDown(200).effect('highlight', {}, 1000).find('input:first').focus();
+				$this.updateIndexes();
+			})
+
+			// when adding option
+			.on('click', '.zlux-x-add', function() {
+				var $list = $(this).siblings('ul');
+				var $option = $this.hidden.find('li.zlux-x-option').clone().removeClass('hidden');
+
+				$option.appendTo($list).slideDown(200).effect('highlight', {}, 1000).find('input:first').focus();
+				$this.updateIndexes();
+			})
+
+			// when editing option name
+			.on('blur', '.zlux-x-name input', function() {
+				var option = $(this).closest('li');
+				var text = option.find('.panel input:text');
+
+				if ($(this).val() !== '' && text.val() === '') {
+					var alias = '';
+					$this.getAlias($(this).val(), function(data){
+						alias = data ? data : '42';
+						text.val(alias);
+						option.find('a.trigger').text(alias);
+					});
+				}
+			})
+
+			.on('keydown', '.panel input:text', function(event) {
+				event.stopPropagation();
+				if (event.which === 13) { $this.setOptionValue($(this).closest('li')); }
+				if (event.which === 27) { $this.removeOptionPanel($(this).closest('li')); }
+			})
+
+			.on('click', 'input.accept', function () { 
+				$this.setOptionValue($(this).closest('li'));
+
+				return false;
+			})
+
+			.on('click', 'a.cancel', function () {
+				$this.removeOptionPanel($(this).closest('li'));
+
+				return false;
+			})
+
+			.on('click', 'a.trigger', function() {
+				$(this).hide().closest('li').find('div.panel').addClass('active').find('input:text').focus();
+
+				return false;
+			});
+
+			// init options for each list
+			$('ul', $this.element).each(function(){
+				$this.initList($(this));
+			})
+			
+		},
+		initList: function($list) {
+			var $this = this;
+			$list.sortable({
+				handle: '.zlux-x-sort',
+				containment: $list.parent().parent(),
+				placeholder: 'dragging',
+				axis: 'y',
+				opacity: 1,
+				revert: 75,
+				delay: 100,
+				tolerance: 'pointer',
+				zIndex: 99,
+				start: function(event, ui) {
+					ui.placeholder.height(40);
+					$list.sortable('refreshPositions');
+
+					// hide options
+					$list.children('li').find('ul').addClass('hidden');
+					// update height
+					$(ui.item).height('');
+				},
+				stop: function() {
+					$this.updateIndexes();
+
+					// unhide options
+					$list.children('li').find('ul').removeClass('hidden');
+				}
+			});
+		},
+		setOptionValue: function(option) {
+			var $this = this;
+			var text  = option.find('div.panel input:text');
+
+			var alias = text.val();
+			if (alias === '') {
+				alias = option.find('div.zlux-x-name input').val();
+			}
+
+			this.getAlias(alias, function(data) {
+				alias = data ? data : '42';
+				text.val(alias);
+				option.find('a.trigger').text(alias);
+				$this.removeOptionPanel(option);
+			});
+		},
+		updateIndexes: function() {
+			var $this = this;
+
+			var pattern1 = /(elements\[\w{8}-\w{4}-\w{4}-\w{4}-\w{12}\]\[\S+?\])\[(\d+)\]/g; // lazy match
+			var pattern2 = /(elements\[\w{8}-\w{4}-\w{4}-\w{4}-\w{12}\]\[\S+\])\[(\d+)\]/g; // greedy match
+			$this.list.children('li').each(function(index) {
+
+				// first level index
+				$('input', $(this)).each(function() {
+					if ($(this).attr('name')) {
+						$(this).attr('name', $(this).attr('name').replace(pattern1, "$1["+index+"]"));
+					}
+				});
+
+				// options sublevel index
+				$('ul', $(this)).children('li').each(function(subindex) {
+					$('input', $(this)).each(function() {
+						if ($(this).attr('name')) {
+							$(this).attr('name', $(this).attr('name').replace(pattern2, "$1["+subindex+"]"));
+						}
+					});
+				});
+			});
+		},
+		getAlias: function(name, callback) {
+			var url = $.zlux.url.ajax('manager', 'getalias', {'force_safe':1});
+			
+			$.getJSON(url, { name: name }, 
+				function(data) {
+					callback(data);
+				}
+			);
+		},
+		removeOptionPanel: function(option){
+			option.find('div.panel input:text').val(option.find('a.trigger').show().text());
+			option.find('div.panel').removeClass('active');
+		}
+	});
+	// Don't touch
+	$.zlux[Plugin.prototype.name] = Plugin;
+})(jQuery, window, document);
+
+
+/* ===================================================
  * ZLUX fieldsItemsField
  * https://zoolanders.com/extensions/zl-framework
  * ===================================================

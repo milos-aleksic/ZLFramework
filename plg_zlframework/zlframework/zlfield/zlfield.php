@@ -94,7 +94,9 @@ class ZlfieldHelper extends AppHelper {
 		}
 		
 		// get params
-		if($this->mode == 'edit')
+		if($this->app->zlfw->enviroment->is('admin.com_widgetkit'))
+			$this->initWidgetkitMode();
+		else if($this->mode == 'edit')
 			$this->initEditMode();
 		else if($this->mode == 'positions')
 			$this->initPositionsMode();
@@ -229,6 +231,34 @@ class ZlfieldHelper extends AppHelper {
 
 		// create the necesay array path
 		$this->params = $this->data->create( array('jform' => array('params' => json_decode($result, true))) );
+
+		// save enviroment arguments
+		$this->enviroment_args = array('id' => $this->req->getVar('id'));
+	}
+
+	protected function initWidgetkitMode()
+	{
+		$this->enviroment = 'widgetkit';
+
+		// init vars
+		$widget_id = $this->enviroment_args->get('id', $this->req->getVar('id'));
+		$result = '';
+
+		if ($widget_id) {
+			// get module params
+			$db = JFactory::getDbo();
+			$query = $db->getQuery(true);
+
+			$query->select('widget.content');
+			$query->from('#__widgetkit_widget AS widget');
+			$query->where('widget.id = '.$widget_id);
+
+			$db->setQuery($query);
+			$result = $db->loadResult();
+		}
+
+		// create the necesay array path
+		$this->params = $this->data->create($result);
 
 		// save enviroment arguments
 		$this->enviroment_args = array('id' => $this->req->getVar('id'));
@@ -377,7 +407,8 @@ class ZlfieldHelper extends AppHelper {
 			}
 
 			// wrapper control if any
-			$final_ctrl = $fld->get('control') ? $final_ctrl.'['.$fld->get('control', '').']' : $final_ctrl;
+			$control = $fld->get('control');
+			$final_ctrl = isset($control) && strlen($control) ? $final_ctrl.'['.$control.']' : $final_ctrl;
 
 			$field_type = $fld->get('type', '');
 			switch ($field_type)
