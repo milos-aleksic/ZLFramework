@@ -19,25 +19,19 @@ jimport('joomla.filesystem.folder');
 abstract class zlInstallerScript
 {
 	/*
-		Variable: app
-			App instance.
-	*/
-	public $app;
-
-	/*
-		Variable: app
+		Variable: db
 			The DB object reference.
 	*/
 	public $db;
 
 	/*
-		Variable: ext name
+		Variable: source
 			The install source folder.
 	*/
 	public $source;
 
 	/*
-		Variable: app
+		Variable: target
 			The install target folder.
 	*/
 	public $target;
@@ -77,7 +71,6 @@ abstract class zlInstallerScript
 	 */
 	public function initVars($type, $parent)
 	{
-		$this->app = App::getInstance('zoo');
 		$this->db = JFactory::getDBO();
 		$this->type = strtolower($type);
 		$this->parent = $parent;
@@ -325,4 +318,131 @@ abstract class zlInstallerScript
 		$this->db->setQuery("DELETE FROM `#__schemas` WHERE `extension_id` = '{$this->getExtID()}'")->query();
 	}
 
+	/**
+	 * Return required update versions.
+	 *
+	 * @param string $version The version for which to get required updates
+	 * @param string $path The path where the updates are stored
+	 *
+	 * @return array versions of required updates
+	 */
+	public function getRequiredUpdates($version, $path)
+	{
+		if ($files = JFolder::files($path, '^\d+.*\.php$')) {
+			$files = array_map(create_function('$file', 'return basename($file, ".php");'), array_filter($files, create_function('$file', 'return version_compare("'.$version.'", basename($file, ".php")) < 0;')));
+			usort($files, create_function('$a, $b', 'return version_compare($a, $b);'));
+		}
+
+		return $files;
+	}
+
+	/**
+	 * Performs the next update.
+	 *
+	 * @param string $current_v The current version of the installed extension
+	 * @param string $path The path where the updates are stored
+	 *
+	 * @return bool Result of the update
+	 */
+	public function runUpdates($current_v, $path)
+	{
+		// get required updates
+		$updates = $this->getRequiredUpdates($current_v, $path);
+
+		// run each of them
+		foreach ($updates as $version) {
+			if ((version_compare($version, $current_v) > 0)) {
+				$class = 'Update'.str_replace('.', '', $version);
+				if (!class_exists($class)) {
+					JLoader::register($class, $path.'/'.$version.'.php');
+				}
+
+				if (class_exists($class)) {
+					
+					// make sure class implemnts zlUpdate interface
+					$r = new ReflectionClass($class);
+					if ($r->isSubclassOf('zlUpdate') && !$r->isAbstract()) {
+
+						try {
+
+							// run the update
+							$r->newInstance()->run();
+						} catch (Exception $e) {
+
+							Jerror::raiseWarning(null, "Error during update! ($e)");
+							return false;
+						}
+					}
+				}
+			}
+		}
+
+		return true;
+	}
+}
+
+/**
+ * ZL Update class
+ */
+abstract class zlUpdate {
+
+	/*
+		Variable: db
+			Database instance.
+	*/
+	public $db;
+
+	/*
+		Function: __construct
+			Class Constructor.
+	*/
+	public function __construct() {
+
+		// set DB instance
+		$this->db = JFactory::getDBO();
+	}
+
+	/**
+	 * Check if column exists in specified table
+	 */
+	function column_exists($column, $table)
+	{
+		$exists = false;
+		$this->db->setQuery("SHOW columns FROM `{$table}`");
+		$columns = $this->db->loadAssocList();
+
+		if (is_array($columns)) while (list ($key, $val) = each ($columns)) {
+			if($val['Field'] == $column) {
+				$exists = true;
+				break;
+			}
+		}
+
+		return $exists;
+	}
+
+	/**
+	 * Removes obsolete files and folders
+	 */
+	public function removeObsolete()
+	{
+		// Remove files
+		if(!empty($this->_obsolete['files'])) foreach($this->_obsolete['files'] as $file) {
+			$f = JPATH_ROOT.'/'.$file;
+			if(!JFile::exists($f)) continue;
+			JFile::delete($f);
+		}
+
+		// Remove folders
+		if(!empty($this->_obsolete['folders'])) foreach($this->_obsolete['folders'] as $folder) {
+			$f = JPATH_ROOT.'/'.$folder;
+			if(!JFolder::exists($f)) continue;
+			JFolder::delete($f);
+		}
+	}
+
+	/**
+	 * Performs the update
+	 */
+	abstract public function run();
 }
