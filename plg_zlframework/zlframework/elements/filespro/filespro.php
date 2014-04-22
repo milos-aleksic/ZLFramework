@@ -58,7 +58,7 @@ abstract class ElementFilesPro extends ElementRepeatablePro {
 		$elem = $item->getElement($this->identifier);
 
 		// if the Item is new
-		if ($event['new']) {
+		if ($event['new'] && $elem) {
 
 			/* when using dynamic var such as [zooitemid] we need to store the files in a temporal
 			   folder as we ignore that var until the item is saved. Then we can move them */

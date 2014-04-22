@@ -1,6 +1,13 @@
 Changelog
 ------------
 
+3.1.16
+ + jQuery Transit plugin
+ + Lang strings
+ # Fixed Item Model minor issue
+ # Fixed issues with Filespro event when no present in Type
+ ^ Removed ZL Installer ZOO dependency
+
 3.1.15
  # ZLField WK compatibility fix
  + ZLUX Attributes field

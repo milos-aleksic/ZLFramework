@@ -33,6 +33,7 @@ class plgSystemZlframeworkInstallerScript
 			'plugins/system/zlframework/zlframework/models/query.php',
 			'plugins/system/zoo_zlelements/zoo_zlelements/fields/specific.php',
 			'plugins/system/zlframework/zlframework/helpers/model.php',
+			'plugins/system/zlframework/zlframework/helpers/zlfw/update.php',			
 
 			// moved to ZLFW helpers
 			'plugins/system/zlframework/zlframework/helpers/zlfilesystem.php',
