@@ -315,7 +315,7 @@ abstract class zlInstallerScript
 	 * Removes the version from schema table
 	 */
 	protected function cleanVersion(){
-		$this->db->setQuery("DELETE FROM `#__schemas` WHERE `extension_id` = '{$this->getExtID()}'")->query();
+		$this->db->setQuery("DELETE FROM `#__schemas` WHERE `extension_id` = '{$this->getExtID()}'")->execute();
 	}
 
 	/**
