@@ -554,7 +554,9 @@
 	$.extend(Plugin.prototype, $.zlux.Main.prototype, {
 		name: 'spin',
 		on: function($element, args) {
-			var $this = this;			
+			var $this = this;
+
+			$this.icon_class = false;
 
 			// set options
 			var $arg = args[0] ? args[0] : {},
@@ -565,7 +567,8 @@
 
 			// check for icon, use it if found
 			if($('i', $element)[0]) {
-				$('i', $element).addClass('uk-icon-spinner uk-icon-spin');
+				$this.icon_class = $('i', $element).attr('class');
+				$('i', $element).attr('class', 'uk-icon-spinner uk-icon-spin');
 
 			// create the icon if not
 			} else if($options.affix == 'replace') {
@@ -579,6 +582,9 @@
 
 			// remove the spin classes but not the icon
 			$('i', $element).removeClass('uk-icon-spinner uk-icon-spin');
+
+			// recover class, if any
+			if($this.icon_class) $('i', $element).attr('class', $this.icon_class);
 		}
 	});
 	// Don't touch
