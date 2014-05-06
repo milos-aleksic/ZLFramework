@@ -65,7 +65,8 @@ module.exports = function(grunt) {
 						cwd: '<%= meta.buildPath %>', 
 						src: [
 							'**/zlframework/**/*.js', // all js
-							'!**/*.min.js' // discart min versions
+							'!**/*.min.js', // discart min versions
+							'!**/vendor/**/*.js' // discart vendor folder
 						],
 						dest: '<%= meta.buildPath %>'
 					}
