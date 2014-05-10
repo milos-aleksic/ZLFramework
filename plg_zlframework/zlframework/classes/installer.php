@@ -427,17 +427,19 @@ abstract class zlUpdate {
 	public function removeObsolete()
 	{
 		// Remove files
-		if(!empty($this->_obsolete['files'])) foreach($this->_obsolete['files'] as $file) {
-			$f = JPATH_ROOT.'/'.$file;
-			if(!JFile::exists($f)) continue;
-			JFile::delete($f);
+		if(isset($this->_obsolete['files']) && !empty($this->_obsolete['files'])) 
+			foreach($this->_obsolete['files'] as $file) {
+				$f = JPATH_ROOT.'/'.$file;
+				if(!JFile::exists($f)) continue;
+				JFile::delete($f);
 		}
 
 		// Remove folders
-		if(!empty($this->_obsolete['folders'])) foreach($this->_obsolete['folders'] as $folder) {
-			$f = JPATH_ROOT.'/'.$folder;
-			if(!JFolder::exists($f)) continue;
-			JFolder::delete($f);
+		if(isset($this->_obsolete['folders']) && !empty($this->_obsolete['folders']))
+			foreach($this->_obsolete['folders'] as $folder) {
+				$f = JPATH_ROOT.'/'.$folder;
+				if(!JFolder::exists($f)) continue;
+				JFolder::delete($f);
 		}
 	}
 
