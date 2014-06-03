@@ -21,7 +21,7 @@ class zlHelper extends AppHelper {
 
 	/* models */
 	protected $_helpers = array();
-    
+	
 	/**
 	 * Class Constructor
 	 */
@@ -49,8 +49,7 @@ class zlHelper extends AppHelper {
 		
 		// load class
 		$class = $prefix . $name;
-		
-		$this->app->loader->register($class, 'zlfw:helpers/zl/'.strtolower($name).'.php');
+		$this->app->loader->register($class, 'helpers:zl/'.strtolower($name).'.php');
 		
 		// add helper, if not exists
 		if (!isset($this->_helpers[$name])) {

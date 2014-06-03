@@ -248,6 +248,69 @@
 		false
 	);
 
+
+	/** AJAX **/
+	zlux.ajax = {};
+	zlux.ajax.request = function(settings)
+	{
+		return $.Deferred(function( defer )
+		{
+			// set response object
+			var response = {success:false, errors:[]};
+
+			// request
+			$.ajax(settings)
+
+			// response recieved
+			.done(function(json)
+			{
+				try {
+					// json response is assumed
+					var json = $.parseJSON(json);
+
+					if (json.success)
+						defer.resolve(json);
+					else
+						defer.reject(json);
+
+				// handle exception
+				} catch(e) {
+					response.errors.push(String(json));
+					response.errors.push('An server-side error occurred. ' + String(e));
+					defer.reject(response);
+				}
+			})
+			
+			// something went wrong
+			.fail(function(jqxhr, status, error)
+			{
+				// handle errors
+				switch (jqxhr.status) {
+					case 403:
+						response.errors.push('The session has expired.');
+						break;
+					case 404:
+						response.errors.push('The requested URL is not accesible.');
+						break;
+					case 500:
+						response.errors.push('A server-side error has occurred.');
+						break;
+
+					default:
+						response.errors.push('An error occurred: ' + status + 'nError: ' + error);
+						break;
+				}
+
+				// set response status
+				response.status = jqxhr.status;
+
+				// reject
+				defer.reject(response);
+			});
+
+		}).promise();
+	}
+
 	// set zlux
 	$.zlux = zlux;
 	$.fn.zlux = zlux.fn;
@@ -554,7 +617,9 @@
 	$.extend(Plugin.prototype, $.zlux.Main.prototype, {
 		name: 'spin',
 		on: function($element, args) {
-			var $this = this;			
+			var $this = this;
+
+			$this.icon_class = false;
 
 			// set options
 			var $arg = args[0] ? args[0] : {},
@@ -565,7 +630,8 @@
 
 			// check for icon, use it if found
 			if($('i', $element)[0]) {
-				$('i', $element).addClass('uk-icon-spinner uk-icon-spin');
+				$this.icon_class = $('i', $element).attr('class');
+				$('i', $element).attr('class', 'uk-icon-spinner uk-icon-spin');
 
 			// create the icon if not
 			} else if($options.affix == 'replace') {
@@ -579,6 +645,9 @@
 
 			// remove the spin classes but not the icon
 			$('i', $element).removeClass('uk-icon-spinner uk-icon-spin');
+
+			// recover class, if any
+			if($this.icon_class) $('i', $element).attr('class', $this.icon_class);
 		}
 	});
 	// Don't touch

@@ -122,6 +122,7 @@ class ZLFieldHTMLHelper extends AppHelper {
 	public function checkboxField($id, $name, $value, $spec, $attrs, $returnRawValue){
 		$extra_label = $spec->get('label');
 		$input_value = $spec->get('value', 1);
+		$attrs = !empty($attrs) ? implode(' ', $attrs) : '';
 		return '<input type="checkbox" '.$attrs.' name="'.$name.'" '.($value ? 'checked="checked"' : '').' value="'.$input_value.'" />'.($extra_label ? '<span>'.JText::_($extra_label).'</span>' : '');
 	}
 	

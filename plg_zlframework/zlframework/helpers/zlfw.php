@@ -239,19 +239,19 @@ class zlfwHelper extends AppHelper {
 		
 		// set ZOOlingual right after zlfw
 		$order++;
-		$db->setQuery("UPDATE `#__extensions` SET `ordering` = {$order} WHERE `type` = 'plugin' AND `element` = 'zoolingual'")->query();
+		$db->setQuery("UPDATE `#__extensions` SET `ordering` = {$order} WHERE `type` = 'plugin' AND `element` = 'zoolingual'")->execute();
 
 		// set ZOOtools and ZL Elements right after ZOOlingual
 		$order++;
 		$db->setQuery("UPDATE `#__extensions` SET `ordering` = {$order} WHERE `type` = 'plugin' AND `element` in 
 			('zootools', 'zoo_zlelements')
-		")->query();
+		")->execute();
 
 		// set the rest of the extension right after
 		$order++;
 		$db->setQuery("UPDATE `#__extensions` SET `ordering` = {$order} WHERE `type` = 'plugin' AND `element` in 
 			('zooaccess', 'zooaksubs', 'zoocart', 'zoocompare', 'zoofilter', 'zooorder', 'zooseo', 'zootrack', 'zlwidgets')
-		")->query();
+		")->execute();
 	}
 
 	/*
